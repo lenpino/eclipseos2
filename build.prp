@@ -1,0 +1,23 @@
+# build.prp: EclipseOS2 build options
+
+# path to the original Eclipse source distribution
+eclipsedir.orig=F:/eclipse
+
+# default part and step number for test (run) target
+# currently the value for part can be 'swt' only
+test.part.default=swt
+test.step.default=001
+# does test target depend on compile
+test.dependoncompile=false
+# the JVM to use for launching testcases.
+# if commented the current JVM will be used.
+# this property is intended to make it possible to compile
+# Eclipse under one JVM and run it under another
+# test.jvm=D:/Java131/jre/bin/java.exe
+
+# path where to find Java runtime library.
+# if the project is being built under OS/2, this can be left
+# commented to be picked up from the current JVM environment
+#bootclasspath=C:/Java131/jre/lib/rt.jar
+
+        

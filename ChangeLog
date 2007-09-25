@@ -1,0 +1,1008 @@
+2004-12-09 14:02  dmik
+
+	* src/plugins/: org.eclipse.swt/Eclipse SWT PI/pm/library/swt.c,
+	  org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/OS.java,
+	  org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/MessageBox.java,
+	  org.eclipse.swt.pm/classes.inc:
+	  - Added o.e.swt.MessageBox implementation (contributed by Daniel Lee
+	  Kruse).
+
+2004-12-09 13:58  dmik
+
+	* doc/: swt.html, swt008.html, swt009.html:
+	  - Started two new steps: SWT008 and SWT009.
+
+2004-12-09 13:53  dmik
+
+	* misc/xxe/template/eclipseos2.html:
+	  - Updated to contain correct links to css files.
+
+2004-11-12 11:57  dmik
+
+	* ChangeLog: no message
+
+2004-11-12 11:56  dmik
+
+	* doc/index.html:
+	  - Updated dmik's e-mail.
+
+2004-11-12 11:56  dmik
+
+	* doc/whatsnew.html:
+	  - Fixed Daniel's e-mail reference.
+
+2004-11-11 17:26  dmik
+
+	* ChangeLog, doc/whatsnew.html: no message
+
+2004-11-11 17:11  dmik
+
+	* build.xml, tests/SWT/build.xml:
+	  - Added new properties recognized in build.prp to enable JNI-API
+	  call profiling (it requires the special version of the SWT DLL and
+	  the reporter tool contributed by Daniel Lee Kruse, they are not
+	  currently on CVS).
+
+2004-11-11 16:40  dmik
+
+	* src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Button.java:
+	  - Fixed a system resource (bitmap) leak.
+
+2004-11-11 16:36  dmik
+
+	* doc/: eclipseos2-xxe.css, eclipseos2.css:
+	  - Changed the color of the <kbd> tag to get a better contrast.
+
+2004-11-11 16:27  dmik
+
+	* doc/diff.html, doc/index.html, doc/other.html, doc/swt.html,
+	  doc/swt001.html, doc/swt002.html, doc/swt003.html,
+	  doc/swt004.html, doc/swt005.html, doc/swt006.html,
+	  doc/swt007.html, doc/eclipseos2-xxe.css, doc/whatsnew.html,
+	  misc/xxe/css/eclipseos2-xxe.css:
+	  - Fixed paths to eclipseos2-xxe.css and xhtml1-strict.dtd in page
+	  headers. New XXE V2.5p2 understands relative paths.
+	  - eclipseos2-xxe.css is moved from /misc/xxe/css to /doc.
+
+2004-10-31 20:07  dmik
+
+	* doc/swt.html, doc/swt003.html, doc/swt007.html,
+	  doc/whatsnew.html, ChangeLog: no message
+
+2004-10-31 20:04  dmik
+
+	* src/plugins/org.eclipse.swt/Eclipse SWT PI/pm/library/.cvsignore:
+	  - Added *.dll, *.lib, *.ics excentions.
+
+2004-10-31 19:58  dmik
+
+	* doc/diff.html:
+	  - Added new difference #010 (related to sending the SWT.Selection
+	  events to Button's listeners).
+
+2004-10-31 19:48  dmik
+
+	* doc/index.html:
+	  - Updated commit policy.
+
+2004-10-31 19:47  dmik
+
+	* build.xml:
+	  - Added new 'changelog' target to automatically generate the
+	  ChangeLog.
+	  - Added new targets: 'swt007_01' and 'swt007_02'.
+
+2004-10-31 19:43  dmik
+
+	* tests/SWT/java/: SWT007_01.java, SWT007_02.java:
+	  - Two new testcases to test o.e.swt.widgets.Button functionality,
+	  focus traversal and keyboard handling.
+
+2004-10-31 19:42  dmik
+
+	* src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Button.java:
+	  - Fixed Button() to properly handle the background color of
+	  pushbuttons.
+	  - Added computeWindowTextSize().
+	  - Changed computeSize() to take button icons into account.
+	  - getBorderWidth() is overriden (from Control).
+	  - Implemented getImage(), setImage() (plus relevant changes in
+	  wmDrawChild()).
+	  - Implemented selectRadio().
+	  - Implemented isTabItem(), mnemonicHit(), mnemonicMatch().
+	  - Implemented setDefault().
+	  - Uncommented setFocus(), setRadioFocus().
+	  - Fixed setSelection() to properly handle radiobuttons.
+	  - Implemented WM_QUERYDLGCODE(), WM_SETFOCUS().
+	  - Remplemented setTabItemFocus(), windowProc() (from Control) to
+	  handle radiobutton autoselection.
+	  - Fixed wmCommandChild(), wmControlChild().
+	  - Changed callWindowProc(), wmDrawChild() and added drawFocusRect()
+	  to provide manual focus drawing for toggle buttons.
+
+2004-10-31 19:29  dmik
+
+	* src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/ClientArea.java:
+	  - Removed since no more necessary (see SWT Step 007 notes).
+
+2004-10-31 19:28  dmik
+
+	* src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Shell.java:
+	  - Some methods are moved to Decorations and some are changed
+	  according to the new WC_FRAME and client window aggregation scheme,
+	  see SWT Step 007 notes.
+	  - Changed open() to restore the focus widget.
+	  - Uncommented traverseEscape().
+
+2004-10-31 19:22  dmik
+
+	* src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Decorations.java:
+	  - Lots of changes related to the new implementation of aggregation
+	  of WC_FRAME and the client window inside Decorations (see SWT Step
+	  007 notes). Many methods are completely removed because no more need
+	  to delegate them to ClientArea, Some functionality is moved here
+	  from Shell.
+	  - Added FRAME_WM_ACTIVATE(), FRAME_WM_ADJUSTWINDOWPOS(),
+	  FRAME_WM_CHAR(), FRAME_WM_REALIZEPALETTE(),
+	  FRAME_WM_WINDOWPOSCHANGED().
+	  - Implemented setVisible().
+	  - Implemented WM_SETFOCUS(),
+	  - Uncommented computeTabGroup(), computeTabRoot(), isTabGroup(),
+	  isTabItem(), menuShell().
+	  - Implemented restoreFocus(), saveFocus().
+	  - Uncommented setDefaultButton(), setSavedFocus().
+	  - Partially implemented translateAccelerator().
+	  - Uncommented traverseItem(), traverseReturn().
+
+2004-10-31 19:09  dmik
+
+	* src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Composite.java:
+	  - Uncommented _getTabList(), getTabList(), computeTabList(),
+	  setTabList(),
+	  - Uncommented setFocus(), setTabGroupFocus(), setTabItemFocus(),
+	  translateMnemonic().
+	  - Implemented WM_QUERYDLGCODE().
+
+2004-10-31 19:08  dmik
+
+	* src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Control.java:
+	  - Little changes in getBorderWidth().
+	  - Removed getParentHeight() and changed getBounds().
+	  - Fixed setBackgroundPixel(), setForegroundPixel(),
+	  setPresBackground(), setPresForeground().
+	  - Simplified createHandle() (according to the new client area
+	  implementation in Decorations).
+	  - Implemented forceFocus(), setFocus(), setRadioFocus().
+	  - Implemented isTabGroup(), isTabItem().
+	  - Uncommented computeTabGroup(), computeTabRoot(), computeTabList(),
+	  setTabGroupFocus(), setTabItemFocus().
+	  - Uncommented isActive(), menuShell(), mnemonicHit(),
+	  mnemonicMatch().
+	  - Added patchMnemonics() to convert Eclipse mnemonic prefix to OS/2
+	  one.
+	  - Implemented translateAccelerator(), translateMnemonic(),
+	  translateTraversal().
+	  - Uncommented traverse(), traverseEscape(), traverseGroup(),
+	  traverseItem(), traverseMnemonic(), traversePage(),
+	  traverseReturn().
+	  - Implemented WM_CHAR(), sendKeyEvent(), setInputState (used by
+	  WM_CHAR()).
+	  - Implemented WM_SETFOCUS(), WM_QUERYDLGCODE().
+	  - WM_ADJUSTWINDOWPOS, OS.WM_REALIZEPALETTE is no more handled
+	  (suppressed by Decorations.FRAME_WM_ADJUSTWINDOWPOS,
+	  FRAME_WM_REALIZEPALETTE).
+	  - Implemented wmDrawChild() (currenly called only by
+	  Button.wmControlChild() on BN_PAINT).
+
+2004-10-31 18:39  dmik
+
+	* src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Scrollable.java:
+	  - Uncommented widgetStyle().
+
+2004-10-31 18:36  dmik
+
+	* src/plugins/org.eclipse.swt/: Eclipse SWT
+	  PI/pm/library/structs.c, Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Widget.java:
+	  - A small cosmetic fix.
+
+2004-10-31 18:35  dmik
+
+	* src/plugins/org.eclipse.swt/Eclipse SWT PI/pm/: library/swt.c,
+	  org/eclipse/swt/internal/pm/OS.java:
+	  - Added OS.objcpy(int, int[]) and OS.objcpy(int[], int), useful for
+	  processing some WM_* messages.
+	  - Added OS.WinQueryMsgPos().
+	  - Added OS.WinQueryWindowPtr().
+	  - Changed OS.WinMapWindowPoints() to use an int array instead of
+	  RECTL (to allow to map individual points as well as rectangles
+	  etc.).
+	  - Added OS.WinSetFocus().
+	  - Added OS.WinDrawText() and OS.DT_* constants (to draw mnemonics in
+	  toggle buttons).
+	  - Added OS.WinGetKeyState().
+	  - Added OS.DLGC_* constants (to process the WM_QUERYDLGCODE msg).
+	  - Added OS.GpiSetPel().
+	  - Added OS.GpiQueryAttrs(), OS.GpiSetAttrs(), OS.PRIM_* and LBB_*
+	  constants.
+
+2004-10-31 18:14  dmik
+
+	* src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/graphics/Image.java:
+	  - maskHandle is made public, as needed by o.e.swt.widgets.Button.
+
+2004-10-31 18:11  dmik
+
+	* src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/graphics/GC.java:
+	  - Added Mnemonic field (a copy of Widget::Mnemonic).
+	  - drawPolyline(): fixed a resource non-deallocatio issue.
+	  - _setFont() is replaced with internal_set_font() (to let it be used
+	  outside the GC class).
+
+2004-10-31 18:06  dmik
+
+	* src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Display.java:
+	  - translateAccelerator(), translateMnemonic() and
+	  translateTraversal() now do their job.
+	  - Uncommented getModalShell().
+	  - Addede windowFrameCallback() and windowFrameProc() (to separate
+	  WC_FRAME message processing from regular windows' message
+	  processing).
+
+2004-10-31 17:57  dmik
+
+	* src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/WidgetTable.java:
+	  - shells(): removed unnecessary code.
+
+2004-10-31 17:54  dmik
+
+	* tests/SWT/java/: SWT005_01.java, SWT005_02.java, SWT006_01.java:
+	  - Fixed resource deallocation.
+
+2004-10-31 17:50  dmik
+
+	* misc/cvs2cl.pl.cmd:
+	  - A script to automatically generate the ChangeLog file based on CVS
+	  commit messages.
+
+2004-10-31 17:48  dmik
+
+	* src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/graphics/Device.java:
+	  - has32bitDepth is made public.
+
+2004-03-04 01:24  dmik
+
+	* doc/: swt.html, swt007.html, whatsnew.html: See whatsnew on
+	  04-03-04
+
+2004-03-02 04:20  dmik
+
+	* doc/whatsnew.html, src/plugins/org.eclipse.swt/Eclipse
+	  SWT/common/library/callback.h,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/graphics/Color.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/graphics/Device.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/graphics/DeviceData.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/graphics/Font.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/graphics/FontData.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/graphics/FontMetrics.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/graphics/GC.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/graphics/GCData.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/graphics/Image.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/graphics/Region.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Button.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Canvas.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/ClientArea.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Composite.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Control.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Decorations.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Display.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Scrollable.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Shell.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Widget.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/WidgetTable.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/common_j2se/org/eclipse/swt/internal/Library.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT PI/pm/library/build.cmd,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/library/make_os2.icc, src/plugins/org.eclipse.swt/Eclipse
+	  SWT PI/pm/library/make_os2.mak,
+	  src/plugins/org.eclipse.swt/Eclipse SWT PI/pm/library/structs.c,
+	  src/plugins/org.eclipse.swt/Eclipse SWT PI/pm/library/structs.h,
+	  src/plugins/org.eclipse.swt/Eclipse SWT PI/pm/library/swt.c,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/BITMAPINFOHEADER2.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/CLASSINFO.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/FACENAMEDESC.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/FATTRS.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/FONTMETRICS.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/FRAMECDATA.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/MPARAM.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/MRESULT.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/OS.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/PIB.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/POINTERINFO.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/POINTL.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/PSZ.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/QMSG.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/RECTL.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/RGNRECT.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/SWP.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/TIB.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/TIB2.java,
+	  tests/SWT/java/SWT001.java, tests/SWT/java/SWT002.java,
+	  tests/SWT/java/SWT003_01.java, tests/SWT/java/SWT003_02.java,
+	  tests/SWT/java/SWT003_03.java, tests/SWT/java/SWT004_01.java,
+	  tests/SWT/java/SWT004_02.java, tests/SWT/java/SWT005_01.java,
+	  tests/SWT/java/SWT005_02.java, tests/SWT/java/SWT006_01.java,
+	  tests/SWT/java/SWT006_02.java, tests/SWT/java/SWT006_03.java,
+	  tests/SWT/java/SWTTestCase.java, tests/SWT/java/TestCase.java:
+	  See whatsnew on 02-03-04
+
+2004-02-29 22:10  dmik
+
+	* .cvsignore, build.xml, doc/diff.html, doc/swt.html,
+	  doc/swt005.html, doc/whatsnew.html,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/graphics/Device.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/graphics/Font.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/graphics/FontData.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/graphics/FontMetrics.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/graphics/GC.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/graphics/GCData.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/graphics/Image.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Canvas.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Composite.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Control.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Decorations.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Display.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT PI/pm/library/structs.c,
+	  src/plugins/org.eclipse.swt/Eclipse SWT PI/pm/library/structs.h,
+	  src/plugins/org.eclipse.swt/Eclipse SWT PI/pm/library/swt.c,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/FACENAMEDESC.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/FATTRS.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/FONTMETRICS.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/OS.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/PSZ.java,
+	  src/plugins/org.eclipse.swt.pm/classes.inc, tests/SWT/build.xml,
+	  tests/SWT/java/SWT005_01.java, tests/SWT/java/SWT005_02.java,
+	  tests/SWT/java/SWTTestCase.java, tests/SWT/java/TestCase.java:
+	  See whatsnew on 29-02-04
+
+2004-02-26 09:21  eli
+
+	* tests/SWT/java/SWTTestCase.java: Now implements Runnable
+	  interface
+
+2004-02-24 00:01  eli
+
+	* tests/SWT/java/: SWT006_01.java, SWT006_02.java, SWT006_03.java,
+	  SWTTestCase.java, TestCase.java, SWT003_01.java, SWT003_02.java,
+	  SWT003_03.java, SWT004_01.java, SWT004_02.java, SWT001.java,
+	  SWT002.java: Refactored to initialize inherited static variables
+	  in the static initializer
+
+2003-12-21 21:01  dmik
+
+	* doc/diff.html, doc/swt005.html, doc/swt006.html,
+	  doc/whatsnew.html, src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/graphics/GC.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/graphics/Region.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Composite.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Control.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Decorations.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT PI/pm/library/swt.c,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/FONTMETRICS.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/OS.java,
+	  tests/SWT/java/SWT006_03.java: See whatsnew on 2003-12-21
+
+2003-12-08 01:13  dmik
+
+	* src/plugins/org.eclipse.swt.pm/.cvsignore: See Whatsnew on
+	  08-12-03
+
+2003-12-08 01:07  dmik
+
+	* build.xml, doc/swt.html, doc/swt005.html, doc/whatsnew.html,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/graphics/FontMetrics.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT PI/pm/library/structs.c,
+	  src/plugins/org.eclipse.swt/Eclipse SWT PI/pm/library/structs.h,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/FATTRS.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/FONTMETRICS.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/OS.java,
+	  src/plugins/org.eclipse.swt.pm/classes.inc: See Whatsnew on
+	  08-12-03
+
+2003-12-06 17:59  eli
+
+	* src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/graphics/FontMetrics.java: Added to CVS
+
+2003-12-06 17:51  eli
+
+	* src/plugins/org.eclipse.swt/Eclipse SWT PI/pm/library/:
+	  structs.c, structs.h: Added getters and setters for FATTRS and
+	  FONTMETRICS structs
+
+2003-12-06 17:49  eli
+
+	* src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/: FATTRS.java,
+	  FONTMETRICS.java: Added to CVS
+
+2003-12-06 17:44  eli
+
+	* src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/OS.java: FACESIZE constant
+	  added
+
+2003-11-24 02:15  dmik
+
+	* build.xml, doc/diff.html, doc/index.html, doc/swt.html,
+	  doc/swt001.html, doc/swt003.html, doc/swt006.html,
+	  doc/whatsnew.html, misc/ant-1.5.4-patch-os2.jar, misc/ant.cmd,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/common/library/callback.h,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/graphics/GC.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/graphics/GCData.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/graphics/Image.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT PI/pm/library/structs.c,
+	  src/plugins/org.eclipse.swt/Eclipse SWT PI/pm/library/structs.h,
+	  src/plugins/org.eclipse.swt/Eclipse SWT PI/pm/library/swt.c,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/OS.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/POINTERINFO.java,
+	  tests/SWT/build.xml, tests/SWT/images/eclipse.ico,
+	  tests/SWT/images/test.ico, tests/SWT/images/test_bw.ico,
+	  tests/SWT/java/SWT006_01.java, tests/SWT/java/SWT006_02.java: See
+	  Whatsnew on 2003-11-24
+
+2003-09-22 22:15  dmik
+
+	* build.xml, doc/diff.html, doc/swt.html, doc/swt003.html,
+	  doc/swt006.html, doc/whatsnew.html,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/graphics/Device.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/graphics/GC.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/graphics/GCData.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/graphics/Image.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Button.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Composite.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Control.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Decorations.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Display.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Shell.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT PI/pm/library/swt.c,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/BITMAPINFOHEADER2.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/OS.java,
+	  src/plugins/org.eclipse.swt.pm/classes.inc, tests/SWT/build.xml,
+	  tests/SWT/images/icon48_full.alpha.png,
+	  tests/SWT/images/icon48_full.bmp, tests/SWT/images/img01.1.bmp,
+	  tests/SWT/images/img01.1.gif, tests/SWT/images/img01.1.png,
+	  tests/SWT/images/img01.1.tr-b.gif,
+	  tests/SWT/images/img01.1.tr-f.gif, tests/SWT/images/img01.24.bmp,
+	  tests/SWT/images/img01.24.jpg, tests/SWT/images/img01.24.png,
+	  tests/SWT/images/img01.24.tr.png, tests/SWT/images/img01.4.bmp,
+	  tests/SWT/images/img01.4.gif, tests/SWT/images/img01.4.png,
+	  tests/SWT/images/img01.8.bmp, tests/SWT/images/img01.8.gif,
+	  tests/SWT/images/img01.8.png, tests/SWT/images/img01.gray.bmp,
+	  tests/SWT/images/img01.gray.gif, tests/SWT/images/img01.gray.png,
+	  tests/SWT/java/SWT006_01.java, tests/SWT/java/SWT006_02.java: see
+	  Whatsnew on 22-09-03
+
+2003-07-29 21:17  dmik
+
+	* doc/whatsnew.html: See Whatsnew on 29-07-03
+
+2003-07-23 23:08  dmik
+
+	* build.xml, doc/swt.html, doc/swt002.html, doc/swt003.html,
+	  doc/swt004.html, doc/swt005.html, doc/swt006.html,
+	  doc/whatsnew.html, src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/graphics/GC.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/graphics/Region.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Button.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/ClientArea.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Composite.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Control.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Decorations.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Scrollable.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Shell.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Widget.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT PI/pm/library/structs.c,
+	  src/plugins/org.eclipse.swt/Eclipse SWT PI/pm/library/structs.h,
+	  src/plugins/org.eclipse.swt/Eclipse SWT PI/pm/library/swt.c,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/BITMAPINFOHEADER2.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/OS.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/PSZ.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/SWP.java,
+	  src/plugins/org.eclipse.swt.pm/classes.inc,
+	  tests/SWT/java/SWT003_01.java, tests/SWT/java/SWT003_02.java,
+	  tests/SWT/java/SWT003_03.java, tests/SWT/java/SWT004.java,
+	  tests/SWT/java/SWT004_01.java, tests/SWT/java/SWT004_02.java: See
+	  Whatsnew on 23-07-03
+
+2003-05-12 21:30  dmik
+
+	* build.xml, doc/cpl-v10.html, doc/index.html, doc/swt.html,
+	  doc/swt003.html, doc/whatsnew.html,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/common/library/callback.h,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/graphics/Color.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/graphics/Device.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/graphics/DeviceData.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/graphics/GC.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/graphics/GCData.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Canvas.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/ClientArea.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Composite.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Control.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Decorations.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Display.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Scrollable.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Shell.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Widget.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/WidgetTable.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/common_j2se/org/eclipse/swt/internal/Library.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT PI/pm/library/build.cmd,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/library/make_os2.icc, src/plugins/org.eclipse.swt/Eclipse
+	  SWT PI/pm/library/make_os2.mak,
+	  src/plugins/org.eclipse.swt/Eclipse SWT PI/pm/library/structs.c,
+	  src/plugins/org.eclipse.swt/Eclipse SWT PI/pm/library/structs.h,
+	  src/plugins/org.eclipse.swt/Eclipse SWT PI/pm/library/swt.c,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/CLASSINFO.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/FRAMECDATA.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/MPARAM.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/MRESULT.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/OS.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/PIB.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/POINTL.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/PSZ.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/QMSG.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/RECTL.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/RGNRECT.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/SWP.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/TIB.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/TIB2.java,
+	  src/plugins/org.eclipse.swt.pm/classes.inc,
+	  tests/SWT/java/SWT001.java, tests/SWT/java/SWT002.java,
+	  tests/SWT/java/SWT003.java, tests/SWT/java/SWT003_01.java,
+	  tests/SWT/java/SWT003_02.java, tests/SWT/java/SWT004.java,
+	  tests/SWT/java/SWTTestCase.java, tests/SWT/java/TestCase.java:
+	  See Whatsnew on 12-05-03
+
+2003-05-03 14:37  eli
+
+	* src/plugins/org.eclipse.swt/Eclipse SWT PI/pm/library/structs.h:
+	  [no log message]
+
+2003-04-20 14:01  dmik
+
+	* doc/swt.html, doc/swt002.html, doc/swt003.html, doc/swt004.html,
+	  doc/whatsnew.html, src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/graphics/Device.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/graphics/GC.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/graphics/GCData.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/ClientArea.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Composite.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Control.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Decorations.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Display.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Scrollable.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Shell.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT PI/pm/library/structs.c,
+	  src/plugins/org.eclipse.swt/Eclipse SWT PI/pm/library/structs.h,
+	  src/plugins/org.eclipse.swt/Eclipse SWT PI/pm/library/swt.c,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/OS.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/RGNRECT.java,
+	  src/plugins/org.eclipse.swt.pm/classes.inc,
+	  tests/SWT/java/SWT003.java, tests/SWT/java/SWT004.java: See
+	  Whatsnew on 20-04-03
+
+2003-03-17 21:21  dmik
+
+	* build.xml, doc/swt.html, doc/swt002.html, doc/swt004.html,
+	  doc/whatsnew.html, src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Control.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Decorations.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Display.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Shell.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT PI/pm/library/structs.c,
+	  src/plugins/org.eclipse.swt/Eclipse SWT PI/pm/library/structs.h,
+	  src/plugins/org.eclipse.swt/Eclipse SWT PI/pm/library/swt.c,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/OS.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/SWP.java,
+	  tests/SWT/java/SWT002.java, tests/SWT/java/SWT004.java: See
+	  Whatsnew on 17-03-03
+
+2003-03-11 22:16  dmik
+
+	* doc/: index.html, swt004.html, whatsnew.html: See Whatsnew on
+	  11-03-03
+
+2003-03-03 15:35  dmik
+
+	* doc/swt.html, doc/swt002.html, doc/swt003.html, doc/swt004.html,
+	  doc/whatsnew.html, src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/graphics/GC.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/graphics/GCData.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Canvas.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Composite.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Control.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Decorations.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Display.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Scrollable.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Shell.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Widget.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/WidgetTable.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT PI/pm/library/structs.c,
+	  src/plugins/org.eclipse.swt/Eclipse SWT PI/pm/library/structs.h,
+	  src/plugins/org.eclipse.swt/Eclipse SWT PI/pm/library/swt.c,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/CLASSINFO.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/FRAMECDATA.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/MRESULT.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/OS.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/PSZ.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/RECTL.java,
+	  src/plugins/org.eclipse.swt.pm/build.xml,
+	  src/plugins/org.eclipse.swt.pm/classes.inc, tests/SWT/build.xml,
+	  tests/SWT/java/SWT001.java, tests/SWT/java/SWT002.java: See
+	  Whatsnew on 03-03-03
+
+2003-02-04 01:00  dmik
+
+	* doc/swt.html, doc/swt001.html, doc/swt002.html,
+	  doc/whatsnew.html, src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/graphics/GC.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Display.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Widget.java,
+	  src/plugins/org.eclipse.swt.pm/classes.inc: See Whatsnew on
+	  04-02-03
+
+2003-01-21 13:30  dmik
+
+	* doc/: index.html, swt.html, whatsnew.html: See Whatsnew on
+	  21-01-03.
+
+2003-01-15 17:18  dmik
+
+	* doc/index.html, doc/swt.html, doc/swt001.html, doc/whatsnew.html,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/common/library/callback.h,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Display.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT PI/pm/library/.cvsignore,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/library/make_os2.icc, src/plugins/org.eclipse.swt/Eclipse
+	  SWT PI/pm/library/structs.c, src/plugins/org.eclipse.swt/Eclipse
+	  SWT PI/pm/library/structs.h, src/plugins/org.eclipse.swt/Eclipse
+	  SWT PI/pm/library/swt.c, src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/OS.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/PSZ.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/QMSG.java,
+	  src/plugins/org.eclipse.swt.pm/classes.inc,
+	  tests/SWT/java/SWT001.java: See Whatsnew on 15-01-03
+
+2003-01-05 17:44  dmik
+
+	* doc/index.html, doc/swt.html, doc/swt001.html, doc/whatsnew.html,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/graphics/Device.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/graphics/GCData.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Display.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT PI/pm/library/structs.c,
+	  src/plugins/org.eclipse.swt/Eclipse SWT PI/pm/library/structs.h,
+	  src/plugins/org.eclipse.swt/Eclipse SWT PI/pm/library/swt.c,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/OS.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/PIB.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/QMSG.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/TIB.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/TIB2.java,
+	  src/plugins/org.eclipse.swt.pm/classes.inc,
+	  tests/SWT/java/SWT001.java: See whatsnew on 05-01-03
+
+2002-12-08 16:04  eli
+
+	* misc/model.zip: [no log message]
+
+2002-12-02 18:36  dmik
+
+	* build.xml, doc/index.html, doc/swt.html, doc/swt001.html,
+	  doc/whatsnew.html, src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Display.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/common_j2se/org/eclipse/swt/internal/Library.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/library/make_os2.mak, src/plugins/org.eclipse.swt/Eclipse
+	  SWT PI/pm/library/swt.c, src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/MPARAM.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/OS.java,
+	  src/plugins/org.eclipse.swt.pm/build.xml,
+	  src/plugins/org.eclipse.swt.pm/classes.inc, tests/SWT/build.xml,
+	  tests/SWT/java/SWT001.java: [dmik] See Whatsnew on 02-12-02
+
+2002-11-18 16:57  dmik
+
+	* CVSROOT/: checkoutlist, cvsignore: Added global cvsignore.
+
+2002-11-18 16:40  ktk
+
+	* CVSROOT/writeinfo: write access to CVSROOT for dmik
+
+2002-11-18 16:04  dmik
+
+	* .cvsignore, build.xml, src/plugins/org.eclipse.swt/.cvsignore,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/common/library/callback.h,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/graphics/Device.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/graphics/DeviceData.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/graphics/GCData.java,
+	  src/plugins/org.eclipse.swt/Eclipse
+	  SWT/pm/org/eclipse/swt/widgets/Display.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/common_j2se/org/eclipse/swt/internal/Library.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT PI/pm/library/build.cmd,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/library/make_os2.icc, src/plugins/org.eclipse.swt/Eclipse
+	  SWT PI/pm/library/make_os2.mak,
+	  src/plugins/org.eclipse.swt/Eclipse SWT PI/pm/library/structs.c,
+	  src/plugins/org.eclipse.swt/Eclipse SWT PI/pm/library/structs.h,
+	  src/plugins/org.eclipse.swt/Eclipse SWT PI/pm/library/swt.c,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/MPARAM.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/OS.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/POINTL.java,
+	  src/plugins/org.eclipse.swt/Eclipse SWT
+	  PI/pm/org/eclipse/swt/internal/pm/QMSG.java,
+	  src/plugins/org.eclipse.swt.pm/.cvsignore,
+	  src/plugins/org.eclipse.swt.pm/.project,
+	  src/plugins/org.eclipse.swt.pm/about.html,
+	  src/plugins/org.eclipse.swt.pm/build.properties,
+	  src/plugins/org.eclipse.swt.pm/build.xml,
+	  src/plugins/org.eclipse.swt.pm/classes.inc,
+	  src/plugins/org.eclipse.swt.pm/fragment.xml, tests/SWT/build.xml,
+	  tests/SWT/java/SWT001.java: First checkin of new sources and
+	  build files (see SWT step 1 docs for more info)
+
+2002-11-18 15:34  dmik
+
+	* misc/: ant.cmd, xxe/xxe.cmd, xxe/xxe.ico,
+	  xxe/css/eclipseos2-xxe.css, xxe/template/eclipseos2.html: Misc
+	  directory added.
+
+2002-11-18 15:28  dmik
+
+	* readme.txt, doc/eclipseos2.css, doc/index.html, doc/other.html,
+	  doc/swt.html, doc/swt001.html, doc/whatsnew.html: Added readme
+	  and documentation
+
+2002-11-18 14:22  dmik
+
+	* src/plugins/org.eclipse.swt/: Eclipse
+	  SWT/common/library/callback.c, Eclipse
+	  SWT/common/library/callback.h, Eclipse
+	  SWT/common/library/make_common.mak, Eclipse
+	  SWT/common/library/swt.h, Eclipse SWT
+	  PI/common_j2se/org/eclipse/swt/internal/Library.java: Initial
+	  revision
+
+2002-11-18 14:22  dmik
+
+	* src/plugins/org.eclipse.swt/: Eclipse
+	  SWT/common/library/callback.c, Eclipse
+	  SWT/common/library/callback.h, Eclipse
+	  SWT/common/library/make_common.mak, Eclipse
+	  SWT/common/library/swt.h, Eclipse SWT
+	  PI/common_j2se/org/eclipse/swt/internal/Library.java: SWT cmmon
+	  native C code from [Base] and common_j2se from [PI] imported.
+
+2002-10-28 10:51  ktk
+
+	* CVSROOT/writers: new user: dmik
+
+2002-10-18 18:47  ktk
+
+	* CVSROOT/writers: new user: eli
+
+2002-10-18 18:11  warped
+
+	* CVSROOT/: checkoutlist, commitinfo, config, taginfo, writeinfo,
+	  writers: cvssenv: Added security
+
+2002-10-18 18:11  warped
+
+	* CVSROOT/cvswrappers: cvssenv: Added cvswrappers for binary files
+
+2002-10-18 18:10  warped
+
+	* CVSROOT/: checkoutlist, commitinfo, config, cvswrappers,
+	  editinfo, loginfo, modules, notify, rcsinfo, taginfo, verifymsg:
+	  initial checkin
+

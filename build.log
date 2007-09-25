@@ -1,0 +1,22 @@
+
+build.prp:
+
+swt009_05:
+
+init:
+
+build.prp:
+
+swt.test:
+
+run:
+
+init:
+
+run.target.regular:
+
+init:
+
+compile:
+
+BUILD SUCCESSFUL

@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="EclipseOS2 Transitional Project Build" default="help">
+
+    <!-- main build directory, $CVSROOT -->
+    <property name="basedir.main" value="${basedir}" />
+
+    <!-- user defined build properties file -->
+    <property name="build.prp" value="${basedir}/build.prp" />
+    <property file="${build.prp}"/>
+
+    <!--  default setting for bootclasspath if none specified  -->
+    <property name="bootclasspath" value="${java.home}/lib/rt.jar" />
+    <!--  default setting for test.jvm if none specified  -->
+    <property name="test.jvm" value="${java.home}/bin/java" />
+
+    <!-- path to compiled classes in development mode -->
+    <property name="dev.classes" value="${basedir}/-classes-" />
+
+    <!-- Definitions for AntHelper jEdit Plugin BEGIN -->
+    <path id="ah.classpath">
+        <pathelement path="${dev.classes}"/>
+    </path>
+    <path id="ah.sourcepath">
+        <pathelement path="${basedir}/src/plugins/org.eclipse.swt/Eclipse SWT PI/pm"/>
+        <pathelement path="${basedir}/src/plugins/org.eclipse.swt/Eclipse SWT/pm"/>
+    </path>
+    <!-- Definitions for AntHelper jEdit Plugin END -->
+    
+    <target name="init">
+        <record name="${basedir}/build.log" action="start" />
+        <available file="${build.prp}" property="is.build.prp" />
+    </target>
+
+    <!-- compile everything in development mode -->
+    <target name="compile" depends="build.prp">
+        <ant antfile="build.xml" target="compile" dir="tests/SWT" />
+    </target>
+
+    <!-- compile SWT dll -->
+    <target name="dll">
+		<mkdir dir="src/plugins/org.eclipse.swt.pm/os/os2/x86"/>
+        <exec executable="build.cmd" vmlauncher="false"
+            dir="src/plugins/org.eclipse.swt/Eclipse SWT PI/pm/library">
+        </exec>
+    </target>
+
+    <!-- run the cvs2cl script to generate ChangeLog -->
+    <target name="changelog">
+        <exec executable="cvs2cl.pl.cmd" vmlauncher="false" dir=".">
+            <arg value="--fsf"/>
+        </exec>
+    </target>
+
+    <!-- run particular test that set as default in build.prp -->
+    <target name="test" depends="build.prp">
+        <property name="test.step" value="${test.step.default}" />
+        <antcall target="${test.part.default}.test" />
+    </target>
+
+    <!-- cleans all subparts -->
+    <target name="clean" depends="init,build.prp">
+        <ant antfile="build.xml" target="clean" dir="src/plugins/org.eclipse.swt.pm" />
+        <ant antfile="build.xml" target="clean" dir="tests/SWT" />
+        <exec executable="build.cmd" vmlauncher="false"
+            dir="src/plugins/org.eclipse.swt/Eclipse SWT PI/pm/library">
+            <arg value="clean"/>
+        </exec>
+    </target>
+
+    <!-- original way of SWT compilation -->
+    <target name="swt.jar" depends="init,build.prp">
+        <ant antfile="build.xml" target="clean" dir="src/plugins/org.eclipse.swt.pm" />
+        <ant antfile="build.xml" target="build.jars" dir="src/plugins/org.eclipse.swt.pm" />
+    </target>
+
+    <!-- common point to run SWT testcase -->
+    <target name="swt.test" depends="build.prp">
+        <ant antfile="build.xml" target="run" dir="tests/SWT" />
+    </target>
+
+    <!-- individual SWT testcase entry points -->
+
+    <target name="swt001" depends="init,build.prp">
+        <property name="test.step" value="001" />
+        <antcall target="swt.test" />
+    </target>
+
+    <target name="swt002" depends="init,build.prp">
+        <property name="test.step" value="002" />
+        <antcall target="swt.test" />
+    </target>
+
+    <target name="swt003_01" depends="init,build.prp">
+        <property name="test.step" value="003_01" />
+        <antcall target="swt.test" />
+    </target>
+
+    <target name="swt003_02" depends="init,build.prp">
+        <property name="test.step" value="003_02" />
+        <antcall target="swt.test" />
+    </target>
+
+    <target name="swt003_03" depends="init,build.prp">
+        <property name="test.step" value="003_03" />
+        <antcall target="swt.test" />
+    </target>
+
+    <target name="swt004_01" depends="init,build.prp">
+        <property name="test.step" value="004_01" />
+        <antcall target="swt.test" />
+    </target>
+
+    <target name="swt004_02" depends="init,build.prp">
+        <property name="test.step" value="004_02" />
+        <antcall target="swt.test" />
+    </target>
+
+    <target name="swt005_01" depends="init,build.prp">
+        <property name="test.step" value="005_01" />
+        <antcall target="swt.test" />
+    </target>
+
+    <target name="swt005_02" depends="init,build.prp">
+        <property name="test.step" value="005_02" />
+        <antcall target="swt.test" />
+    </target>
+
+    <target name="swt006_01" depends="init,build.prp">
+        <property name="test.step" value="006_01" />
+        <antcall target="swt.test" />
+    </target>
+
+    <target name="swt006_02" depends="init,build.prp">
+        <property name="test.step" value="006_02" />
+        <antcall target="swt.test" />
+    </target>
+
+    <target name="swt006_03" depends="init,build.prp">
+        <property name="test.step" value="006_03" />
+        <antcall target="swt.test" />
+    </target>
+
+    <target name="swt007_01" depends="init,build.prp">
+        <property name="test.step" value="007_01" />
+        <antcall target="swt.test" />
+    </target>
+
+    <target name="swt007_02" depends="init,build.prp">
+        <property name="test.step" value="007_02" />
+        <antcall target="swt.test" />
+    </target>
+
+    <target name="swt008_01" depends="init,build.prp">
+        <property name="test.step" value="008_01" />
+        <antcall target="swt.test" />
+    </target>
+    
+    <target name="swt008_02" depends="init,build.prp">
+        <property name="test.step" value="008_02" />
+        <antcall target="swt.test" />
+    </target>
+
+   <target name="swt008_03" depends="init,build.prp">
+        <property name="test.step" value="008_03" />
+        <antcall target="swt.test" />
+    </target>
+
+    <target name="swt008_04" depends="init,build.prp">
+        <property name="test.step" value="008_04" />
+        <antcall target="swt.test" />
+    </target>
+
+    <target name="swt009_01" depends="init,build.prp">
+        <property name="test.step" value="009_01" />
+        <antcall target="swt.test" />
+    </target>
+
+    <target name="swt009_02" depends="init,build.prp">
+        <property name="test.step" value="009_02" />
+        <antcall target="swt.test" />
+    </target>
+    
+    <target name="swt009_03" depends="init,build.prp">
+        <property name="test.step" value="009_03" />
+        <antcall target="swt.test" />
+    </target>
+
+    <target name="swt009_04" depends="init,build.prp">
+        <property name="test.step" value="009_04" />
+        <antcall target="swt.test" />
+    </target>
+    
+    <target name="swt009_05" depends="init,build.prp">
+        <property name="test.step" value="009_05" />
+        <antcall target="swt.test" />
+    </target>
+
+    <!-- creates the default build.prp if nesessary -->
+    <target name="build.prp" depends="init" unless="is.build.prp">
+        <echo file="${build.prp}"># build.prp: EclipseOS2 build options
+
+# path to the original Eclipse source distribution
+eclipsedir.orig=f:/eclipse
+
+# default part and step number for test (run) target
+# currently the value for part can be 'swt' only
+test.part.default=swt
+test.step.default=001
+# does test target depend on compile
+test.dependoncompile=false
+# the JVM to use for launching testcases.
+# if commented the current JVM will be used.
+# this property is intended to make it possible to compile
+# Eclipse under one JVM and run it under another
+#test.jvm=C:/Java131/jre/bin/java.exe
+
+# path where to find Java runtime library.
+# if the project is being built under OS/2, this can be left
+# commented to be picked up from the current JVM environment
+#bootclasspath=C:/Java131/jre/lib/rt.jar
+
+# JNI-API call profiler (to detect system resource leaks).
+# set to true to enable (you must have the dll and the reporter,
+# they are not in CVS for now)
+test.apiprofiler=false
+# path to the profiled version of SWT DLL (generates swtstats.scratch.log)
+test.apiprofiler.dllpath=path_to_dll
+# filename of the reporting tool (understands -raw and -report options)
+test.apiprofiler.tool=path_to_exe/EDLLReport.exe
+
+        </echo>
+        <condition property="cr" value="&#13;">
+            <os family="os/2" />
+        </condition>
+        <property name="cr" value="" />
+        <fail>
+${cr}
+${cr}The default build properties file (${build.prp}) has been created.
+${cr}Please customize it to your environment and rerun the build.
+        </fail>
+    </target>
+
+    <target name="help" depends="init">
+        <echo>
+
+There's no default targets.
+Please see the doc\index.html for more info.
+        </echo>
+    </target>
+
+</project>
