@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/css"
+href="eclipseos2-xxe.css"
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"xhtml1-strict.dtd">
+<html>
+  <head>
+    <link href="eclipseos2.css" rel="stylesheet" type="text/css" />
+
+    <title>Eclipse for OS/2 Transitional Project Notes</title>
+  </head>
+
+  <body>
+    <h1>Known differences between Windows and OS/2 ports of Eclipse</h1>
+
+    <p>OS/2 port of Eclipse is based on the code of Windows port because of
+    similarity of their APIs. But of course, they are not identical, so there
+    is a number of differences in the behavior of OS/2 and Windows
+    implementations that is not covered by the Eclipse/SWT public API (which
+    is completely identical) and can lead to various side effects. These
+    differences are mentioned here.</p>
+
+    <h2>SWT differences</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+
+          <th>Windows</th>
+
+          <th>OS/2</th>
+
+          <th>Remarks</th>
+        </tr>
+      </thead>
+
+      <tr>
+        <td>001</td>
+
+        <td>In Windows, if a top level (frame) window is created with the
+        <code>CW_USEDEFAULT</code> constant as its size and position, it
+        doesn't receive the <code>WM_SIZE</code> message until it is shown for
+        the first time or explicitly resized/moved, while
+        <code>GetWindowRect()</code> (i.e. <code>Shell.getBounds()</code>)
+        already reports these default size and position, but not zeros. This
+        has one side effect: the <code>Shell</code> widget receives
+        <code>SWT.Resize/Move</code> events not right after creation but only
+        after the first <code>open()</code>, <code>setVisible()</code> or
+        <code>setBounds()</code> call. In turn, this allows to implicitly do
+        the <code>Shell</code> layout upon the first <code>open()</code>
+        without an explicit call to <code>layout()</code> since the layout is
+        done automatically during <code>WM_SIZE</code> message handling.</td>
+
+        <td>Although we can acquire nearly the same behavior in OS/2 by
+        specifying the <code>FS_SHELLPOSITION</code> flag during the frame
+        creation, the actual size/position of the window remains zero until it
+        is shown for the first time. This leads, for example, to the
+        impossibility to center the <code>Shell</code> widget before a call to
+        its <code>open()</code> method, which (as we think) breaks the SWT
+        API. So, we set the default <code>Shell</code> size/position (as told
+        us by the system through <code>WinQueryTaskSizePos()</code> call)
+        explicitly after widget creation and use <code>FS_SHELLPOSITION</code>
+        only to distinguish that the widget is being shown for the first time
+        and we need to do the "implicit" layout to emulate Windows behavior.
+        This has the side effect such as the <code>Shell</code> widget
+        receives <code>SWT.Resize/Move</code> events right after its creation,
+        not after the first open as in Windows. We don't see any reason to
+        emulate this thing too because it is logically more correct and either
+        behavior is not explicitly specified by the SWT API.</td>
+
+        <td></td>
+      </tr>
+
+      <tr>
+        <td>002</td>
+
+        <td><code>GC.drawRoundRectangle()</code> and
+        <code>GC.fillRoundRectangle()</code> for some reason (a bug?) draw
+        rectangles 1 pixel narrower both in horizontal and vertical than their
+        nonrounded versions with the same width and height
+        arguments.<br /><br />Also rectangles with the negative width or
+        height are drawn not with the same width and height as when these
+        arguments are positive.</td>
+
+        <td>Rounded and nonrounded rectangles are drawn with the same width
+        and height provided they are passed the same width and height
+        arguments.<br /><br />Rectangles of negative width/height are drawn
+        with the same size as with positive ones.</td>
+
+        <td>See also <a href="swt003.html#GraphicPrimitives">here</a>.</td>
+      </tr>
+
+      <tr>
+        <td><a name="003">003</a> - eliminated</td>
+
+        <td><code>GC.drawFocus()</code> draws the focus rectangle following
+        the rules of <code>fillRectangle()</code>-- width and height arguments
+        specify rectangle's width and height but not the position of right and
+        bottom borders as in <code>drawRectangle()</code>, although the
+        javadoc says that the latter is used to draw the focus on platforms
+        that do not support such a notion (so we get different width and
+        height on that platforms)</td>
+
+        <td><code>GC.drawFocus()</code> follows the same rules as
+        <code>drawRectangle()</code>.</td>
+
+        <td></td>
+      </tr>
+
+      <tr>
+        <td>004</td>
+
+        <td></td>
+
+        <td>Iconify / deiconify... different order of appearance of these
+        events...</td>
+
+        <td></td>
+      </tr>
+
+      <tr>
+        <td>005</td>
+
+        <td>When drawing on a palette-based image using <code>GC</code> its
+        <code>getForeground()</code> and <code>getBackground()</code> methods
+        do not always return actual RGB color values from the image's palette
+        that are used to assign colors to new pixels drawn by <code>GC</code>
+        methods. Instead, they return exactly the same RGB values as they were
+        passed before to <code>setForeground()/setBackground()</code> methods.
+        The difference between these values takes place when an RGB value for
+        a color specified in the <code>set...</code> method is absent in the
+        image's palette -- in this case Windows automatically selects the
+        closest match (which can differ seriously) as the color, but the RGB
+        value stored in the <code>GC</code> internal data (the device context
+        data) is the original one (not matched) and it will be used to return
+        a color when the <code>get...</code> method is called.</td>
+
+        <td>Under OS/2 also the closest match is selected from the image's
+        palette and used for drawing pixels when drawing on a palette-based
+        image. But the color returned by <code>GC.getForeground()</code> and
+        <code>getBackground()</code> methods always contains the actual
+        (matched) RGB value used for drawing.</td>
+
+        <td>Example. Suppose that we have an image that doesn't have a pure
+        red (255, 0, 0) in its palette. We create a red <code>Color</code> on
+        a direct-color <code>Display</code>, a <code>GC</code> on this image,
+        then call <code>GC.setForeground (red_color)</code> and
+        <code>GC.drawOval()</code>. The circle is drawn not in red but in the
+        color closest to red in the image's palette, as expected. In Windows,
+        a subsequent call to <code>GC.getForeground()</code> will always
+        return a color with the (255,0,0) RGB value while in OS/2 the RGB
+        value will be the closest match chosen from the image's palette and
+        used for drawing. See also the <code>SWT006_01</code> testcase.</td>
+      </tr>
+
+      <tr>
+        <td>006</td>
+
+        <td><code>Image.setBackground()</code> doesn't work for direct color
+        images.</td>
+
+        <td><code>Image.setBackground()</code> changes the transparent pixel
+        on direct color images as well as on palette-based.</td>
+
+        <td></td>
+      </tr>
+
+      <tr>
+        <td><a name="007">007</a></td>
+
+        <td>When the system is in 256-color mode, we can still get the image
+        data in its original color depth and palette after the image has been
+        loaded/created. This is true for direct color images also (this
+        probably false for icons only, where we get data converted to 8-bit,
+        regardless of the original).</td>
+
+        <td>When the system is in 256-color mode, all bitmaps are converted
+        and internally stored in 8-bit depth using the current palette,
+        regardless of their original depth and/or palette. This means it's
+        impossible to get back the same image data from the system as we
+        provided creating the bitmap (for example, when calling
+        <code>Image.getImageData()</code>) -- we always get data in the
+        converted form.</td>
+
+        <td>This is the unchangeable behavior of OS/2 (we don't know any
+        acceptable solution for this). Taking into account that the usage of
+        256-color mode is rare in our days we decided to leave things as they
+        are for the present.</td>
+      </tr>
+
+      <tr>
+        <td>008</td>
+
+        <td></td>
+
+        <td>Potential problem with icons... (OS/2 supports only 32/16 px and
+        40/20 px icons...)</td>
+
+        <td></td>
+      </tr>
+
+      <tr>
+        <td>009</td>
+
+        <td>When the window is not visible setting its maximized state to true
+        will not actually resize the window to the maximum size (because
+        windows cannot be maximized when invisible). This leads to the number
+        of hidden problems such as the <code>Shell</code>'s children having
+        zero size after adding them to a newly created <code>Shell</code>,
+        setting its layout and maximizing it but before calling the
+        <code>Shell.open()</code> method.</td>
+
+        <td>When the window is not visible setting its maximized state to true
+        will resize it as if it would be visible. This does not lead to any
+        problems except that we have to keep in mint the compatibility with
+        SWT for other platforms.</td>
+
+        <td></td>
+      </tr>
+
+      <tr>
+        <td>010</td>
+
+        <td>When the <code>SWT.RADIO</code> button is selected and all other
+        radio buttons in the group are automatically deselected, these
+        deselected buttons receive the <code>SWT.Selection</code> event
+        <b>before</b> the selected button.</td>
+
+        <td>Deselected radio buttons receive the <code>SWT.Selection</code>
+        event <b>after</b> the selected one receives it.</td>
+
+        <td>This seems not to essential.</td>
+      </tr>
+    </table>
+
+    <h2>Other differences</h2>
+
+    <p>[Haven't been started yet -- SWT part must be finished first]</p>
+  </body>
+</html>

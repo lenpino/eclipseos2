@@ -1,0 +1,535 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/css"
+href="eclipseos2-xxe.css"
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"xhtml1-strict.dtd">
+<html>
+  <head>
+    <link href="eclipseos2.css" rel="stylesheet" type="text/css" />
+
+    <title>Eclipse for OS/2 Transitional Project Notes</title>
+  </head>
+
+  <body>
+    <h1>Standard Widget Toolkit</h1>
+
+    <p>The main idea of the SWT library is such that its internal
+    implementation on the certain platform is made in the terms of that
+    platform, directly using its native API through the JNI interface, so the
+    look'n'feel comes close to the regular platform applications (i.e.
+    usability; other important benefits of such approach are: easiness,
+    stability, performance). This means that there is a different
+    implementation of the basics of SWT for each supported platform; only the
+    public interface of SWT classes is, of course, the same. So the term
+    "porting" in this case means rewriting the most part of the internal logic
+    from scratch (sometimes including the whole classes) rather than just
+    correcting it for the specific OS. Therefore we have chosen to start from
+    the very beginning and go possibly like original Eclipse developers did,
+    from the basics (the top of the class hierarchy) to details, creating the
+    java and the native code in parallel. The best way to do it is to divide
+    our work into little steps (tasks): every of them is the next level of the
+    implementation and can be tested regardless of other parts that are to be
+    implemented on the next levels.</p>
+
+    <h2>Brief description of SWT parts</h2>
+
+    <p>Technically, SWT sources consist of two parts: one is written in Java,
+    another is written in C and contains native methods that communicate with
+    Java code through JNI.</p>
+
+    <p>The table below represents basic subcomponents of SWT as they were
+    defined by the original developers. There's a separate directory for each
+    subcomponent in the structure of the Eclipse sources. Packages with names
+    in <b>bold</b> are platform specific (i.e. have their own implementation
+    on each platform), other are common for all platforms (but may require
+    some adaptation for a certain OS). <code>o.e.swt</code> here and further
+    is a short form of <code>org.eclipse.swt</code>, for convenience.</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+
+          <th>Description</th>
+
+          <th>Packages</th>
+
+          <th>Prognosis</th>
+        </tr>
+      </thead>
+
+      <tr>
+        <td>SWT Base</td>
+
+        <td>SWT Base. Contains the major part of all public classes and
+        interfaces. Implementations of many basic classes (Display, Widget
+        etc.) are individual for each supported platform.</td>
+
+        <td>o.e.swt.events<br />o.e.swt.graphics<br />o.e.swt.internal<br />o.e.swt.internal.image<br />o.e.swt.layout<br />o.e.swt.widgetsefwef<br /><b>o.e.swt.graphics</b><br /><b>o.e.swt.internal</b><br /><b>o.e.swt.widgets</b></td>
+
+        <td>Platform dependent parts need to be almost fully rewritten for
+        OS/2</td>
+      </tr>
+
+      <tr>
+        <td>SWT PI</td>
+
+        <td>SWT Platform Implementation. Contains platform dependent internal
+        implementations of SWT interface, including Java wrappers for platform
+        native API data structures.</td>
+
+        <td>o.e.swt.internal<br /><b>o.e.swt.internal.&lt;xxx&gt;</b></td>
+
+        <td>Needs to be almost fully rewritten for OS/2</td>
+      </tr>
+
+      <tr>
+        <td>SWT AWT</td>
+
+        <td>It's an experimental class (works currently only on Win32 and has
+        some limitations) to make it possible to embed AWT widgets to SWT
+        layout.</td>
+
+        <td><b>o.e.s.internal.awt.&lt;xxx&gt;</b></td>
+
+        <td>Can be implemented in the future?</td>
+      </tr>
+
+      <tr>
+        <td>SWT Accessibility</td>
+
+        <td>Accessibility support.</td>
+
+        <td>o.s.swt.accessibility<br /><b>o.s.swt.accessibility</b></td>
+
+        <td>Is it supported natively by OS/2 or should be emulated?</td>
+      </tr>
+
+      <tr>
+        <td>SWT Custom Widgets</td>
+
+        <td>Standard custom widgets library</td>
+
+        <td>o.e.swt.custom</td>
+
+        <td>Does not contain any platform dependent code?</td>
+      </tr>
+
+      <tr>
+        <td>SWT Drag and Drop</td>
+
+        <td>Public interface for D'n'D support</td>
+
+        <td>o.e.swt.dnd<br /><b>o.e.swt.dnd</b></td>
+
+        <td>Platform dependent implementations need to be rewritten (partially
+        ported from Win32?) for OS/2</td>
+      </tr>
+
+      <tr>
+        <td>SWT Printing</td>
+
+        <td>SWT printing capabilities</td>
+
+        <td><b>o.e.swt.printing</b><br />o.e.swt.printing</td>
+
+        <td>Needs to be almost fully rewritten for OS/2 (not a lot of work to
+        do)</td>
+      </tr>
+
+      <tr>
+        <td>SWT Program</td>
+
+        <td>OS specific program launching aspects</td>
+
+        <td><b>o.e.swt.program</b></td>
+
+        <td>Just one single class &lt;)</td>
+      </tr>
+
+      <tr>
+        <td>SWT OLE</td>
+
+        <td>OLE support</td>
+
+        <td><b>o.e.swt.ole.win32</b><br /><b>o.e.swt.internal.ole.win32</b></td>
+
+        <td>Can the similar one be implemented for OS/2 in the future?</td>
+      </tr>
+    </table>
+
+    <h3><a name="native.methods">Native methods [uncomplete]</a></h3>
+
+    <p>C sources of native methods are organized in the following way:</p>
+
+    <ul>
+      <li><kbd>swt.h</kbd> -- contains some definitions common for all C
+      code.</li>
+
+      <li><kbd>callback.h</kbd>, <kbd>callback.c</kbd> -- contain native
+      methods and helpers for <code>org.eclipse.swt.internal.Callback</code>
+      class, that allows using regular Java methods as callback functions by
+      the platform native API.</li>
+
+      <li><kbd>structs.h</kbd>, <kbd>structs.c</kbd> -- contain getter/setter
+      functions to convert data from platform native API structures to their
+      Java wrappers and back. These functions are used by native methods.</li>
+
+      <li><kbd>swt.c</kbd> -- contains definitions of native methods.</li>
+    </ul>
+
+    <p>Native methods serve as a bridge between SWT and underlying platform
+    API. One of Eclipse principles is that such mapping should be transparent
+    as much as it possible. It means that Java methods have exactly the same
+    name and behavior as their native counterparts, including the type and the
+    list of arguments and the return value. For that purposes there are Java
+    wrappers exist for native structures used by platform API functions to
+    exchange information with the application. These wrapper classes are
+    defined in the SWT PI part as well as the <code>o.e.swt.internal.OS</code>
+    class containing (almost?) all of native API-to-Java mappers. But due to
+    the fact that Java semantics differ from C there cannot be the full
+    equivalence between C and Java types, so some considerations about mapping
+    should be taken into account.</p>
+
+    <h4>Primitive types</h4>
+
+    <ul>
+      <li>C 32-bit integer types (<code>[unsigned] int</code>,
+      <code>[unsigned] long</code> and derived) are mapped to Java
+      <code>int</code> type.</li>
+
+      <li>In some cases 32-bit types that logically are boolean, can be mapped
+      to Java <code>boolean</code> type.</li>
+
+      <li>C 16-bit integer type <code>[unsigned] short</code> (and derived) is
+      mapped to Java <code>short</code> type.</li>
+
+      <li>C 8-bit integer type <code>[unsigned] char</code> (and derived) is
+      mapped to Java <code>byte</code> type.</li>
+    </ul>
+
+    <h4>Arrays</h4>
+
+    <p>...</p>
+
+    <h4>Pointers</h4>
+
+    <ul>
+      <li>Pointer to an array of primitive type is mapped to a Java reference
+      to an array of the corresponding primitive type (i.e., <code>int*</code>
+      is mapped to <code>int[]</code>). There's one exception with ASCIIZ
+      strings (see below).</li>
+
+      <li>Pointer to a C structure that have the corresponding Java wrapper is
+      mapped to a Java reference to that wrapper class (see below about
+      structures).</li>
+
+      <li>Pointer to a function and pointers to other types that are not
+      directly used by the Java code (and therefore do not have wrappers) are
+      mapped to Java <code>int</code> type.</li>
+
+      <li>Pointer to an array of C structures is mapped to Java
+      <code>int</code> array (see below).</li>
+    </ul>
+
+    <p>There's a special case with pointers to arrays and ASCIIZ strings,
+    which are <i>returned</i> by some platform API calls to represent some
+    data of variable length. There are few situations when such data is not
+    copied to the storage area provided by the caller, but the pointer to the
+    internal storage area is returned. In these situations we cannot allocate
+    the storage for that data in Java before a call to a native method,
+    because we don't know its size. The solution can be to create the
+    corresponding Java array object inside of the C implementation of the
+    native method after an API call (when we already know the size of the data
+    returned) fill it and return the reference to this object to the Java
+    caller.</p>
+
+    <p>Also there are sutiations when an API call returns a pointer to a
+    structure from its internal storage and the user should be able to access
+    this data directly to change some value (the good example is
+    <code>DosGetInfoBlocks()</code>). Since a Java structure wrapper class
+    contains a copy of the original data it doesn't make sence to use it as a
+    parameter to call such API -- it's better to return a pointer to the
+    caller "as is" using a reference to one-element array of <code>int</code>
+    type to use it for the direct access. But Java cannot read/write directly
+    to the specified memory address, so we need some helper functions to copy
+    data from a wrapper class directly to a given memory location and back.
+    These functions are overloaded versions of
+    <code>o.e.swt.internal.pm.OS.objcpy()</code>. They take two arguments: the
+    destination (the first one) and the source (the second one) of data to be
+    copied. One of them is a reference to a wrapper class and another is an
+    <code>int</code> value containing the address of (the pointer to) the
+    corresponding C structure. So, to the sequence of operations to get the
+    required result can be:</p>
+
+    <ol>
+      <li>Call API function to get the "real" pointer through an one-element
+      <code>int</code> array</li>
+
+      <li>Use it in <code>OS.objcpy()</code> to copy data to the object of the
+      wrapper class</li>
+
+      <li>Change object's nesessary fields</li>
+
+      <li>Use <code>OS.objcpy()</code> to copy data back from the object to
+      the memory</li>
+    </ol>
+
+    <p><b>Note.</b> These helper functions are potentionally dangerous and
+    should be used very carefully since there's no way to check whether a
+    given pointer really points to the structure of the appropriate type or
+    not. However, if zero or <code>null</code> is passed as one of arguments,
+    an <code>SWTError</code> exception will be thrown (this behavior depends
+    on the <code>DEBUG_CHECK_NULL_EXCEPTIONS</code> macro definition during
+    compilation of the SWT DLL).</p>
+
+    <h4>ASCIIZ strings</h4>
+
+    <p>ASCIIZ strings are mapped using references to the special Java wrapper
+    class: <code>o.e.swt.internal.pm.PSZ</code>. String data is actually
+    stored in its <code>bytes</code> field which is of <code>byte[]</code>
+    type. This class provides automatic appending of zero byte to the array
+    when constructed from Java <code>String</code> type and removing that byte
+    when converted back to <code>String</code>. Convertion between Unicode and
+    8-byte ASCII characters is done using the default system codepage. There
+    are helper functions to handle this wrapper in C:
+    <code>getPSZArray()</code>, <code>getPSZBytes()</code> and
+    <code>releasePSZBytes()</code>, see their description at the top of
+    <kbd>structs.h</kbd>.</p>
+
+    <h4>Structures</h4>
+
+    <p>C structures are mapped to Java classes (wrappers) with the same name
+    and fields (their order and names). Primitive fields' types are mapped
+    according to the rules above. For every structure the following C helper
+    functions are defined: <code>cacheXXXFids()</code> (and the correspondig
+    <code>XXX_FID_CACHE</code> structure) to cache Java field IDs,
+    <code>getXXXFields()</code> to fill the native C structure with values
+    from the Java wrapper structure before a call to platform API routine and
+    <code>setXXXFields()</code> for backward operation after a call.</p>
+
+    <p>If some field of the structure is itself a structure or a pointer to a
+    structure, there are two ways to handle this situation:</p>
+
+    <ul>
+      <li>The first way is to "unfold" such nested structure into regular
+      fields of the parent structure with names constructed according to the
+      following scheme: <code>xxx_yyy</code>, where <code>xxx</code> is the
+      name of the field representing the nested structure and <code>yyy</code>
+      is substituted with field names of that nested structure. It's useful
+      when the structure has few fields. As an example, see the
+      <code>o.e.swt.internal.pm.QMSG</code> wrapper class.</li>
+
+      <li>The second way can be used when there's a need to operate the nested
+      structure whth many fields as a whole (using a reference to it) rather
+      than accessing its fields directly. Such nested structure must have its
+      own Java wrapper (as descrbed above) and be mapped to a reference to
+      that type, and <code>getXXXFields()</code> and
+      <code>setXXXFields()</code> must correctly handle this case. For
+      example, see <code>TIB</code> and <code>TIB2</code> wrappers and their
+      getters/setters (though <code>TIB2</code> does not actually need to be
+      used as a whole, it was done so for clarity). Note that such nested
+      wrapper is newed (via the initializer expression) in the parent
+      wrapper's implicit constructor.</li>
+    </ul>
+
+    <p>Some structures have the special field (<code>cb</code> or
+    <code>cbFix</code>) that should be set to the length of the structure
+    before passing it to a function. In Win32 version this is achieved by
+    adding an extra field (<code>sizeof</code>) to Java wrapper of every
+    structure and then assigning its value to the length field when using the
+    structure from Java code. In OS/2, this is done not at the Java level, but
+    in the code of the structure's getter function. Therefore, the need in the
+    <code>sizeof</code> field is eliminated (tough,some strucrures will have
+    this field because there are some cases when arrays of that structures are
+    given us as a pointer from the C code and we need to know the address of
+    the particular structure in the array). Also, Java wrappers in OS/2 do not
+    contain the <code>cb</code> or <code>cbFix</code> field since it's useless
+    from the point of view of data the structure represents.</p>
+
+    <h4>Pointers to structures</h4>
+
+    <p>Since it's too complicated (in particular, requires two transformations
+    and two times more memory) to convert arrays of C structures to arrays of
+    their Java wrappers and back, such arrays are mapped to arrays of Java
+    <code>int</code> type, where every one or more elements of that array
+    correspond to a field from the structure, consequtively. Of course, it's
+    suitable only for structure types where all fields have the size which is
+    multiple of 32-bit <code>int</code> type, such as <code>POINTL</code> and
+    <code>RECTL</code>. This is primarily used in <code>Gpi*</code> API calls.
+    Hopefully, at the present time there is no need to work with other types
+    of structures.</p>
+
+    <p>For convenience, parameter names in the declaration (in Java) and in
+    the definition (in C) of native methods should be the same as in the
+    toolkit documentation.</p>
+
+    <h2>SWT compilation notes</h2>
+
+    <p>SWT compilation is driven by the <kbd>build.xml</kbd> located in the
+    <kbd>src\plugins\org.eclipse.swt.pm</kbd> directory of the repository. It
+    should not be used directly since there are some prerequisites that are
+    set up from the main build file.</p>
+
+    <p>Ant includes in compilation every <kbd>.java</kbd> file it finds in the
+    specified source directory. Since we go class by class, but use complete
+    common source directories from the original distribution, we need a way to
+    narrow a list of files to compile. Otherwise we will get many errors
+    because of missing platform dependent classes (which are not yet ready)
+    referenced from common sources during compilation. To exclude temporarily
+    the whole common directory is not a good idea because we might need some
+    classes from there. So, there is a special file called
+    <kbd>classes.inc</kbd> in the same directory as the SWT build file that
+    contains a list of all files to be compiled. Paths there are relative to
+    the source directories, so every entry there is just a full name of a
+    class but with dots replaced by slashes in the package name. Although file
+    masks can be used there it should be done carefully because file mask will
+    apply to every source directory (we cannot change this behavior in Ant)
+    and unnecessary files can be included.</p>
+
+    <h2>SWT porting roadmap</h2>
+
+    <p>Below is the plan and the progress of the SWT porting process. Each
+    step number and objective is a link to the corresponding step description.
+    The names of classes here, in the step descriptions and in some other
+    places follow the rule: the text in [square brackets] after the class name
+    shows the name of the SWT part the class belongs to (according to the
+    table above) and the sharp (#) sign before it means that the class is
+    platform specific, otherwise it is common.</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+
+          <th>Objective</th>
+
+          <th>Started</th>
+
+          <th>To be done</th>
+
+          <th>Actually done</th>
+        </tr>
+      </thead>
+
+      <tr>
+        <td><a href="swt001.html">1</a></td>
+
+        <td><a href="swt001.html">Initial moves</a>. CVS setup, dummy
+        <code>Device</code> [#Base] implementation.</td>
+
+        <td>2002-10-21</td>
+
+        <td>2003-01-15</td>
+
+        <td>2003-01-21</td>
+      </tr>
+
+      <tr>
+        <td><a href="swt002.html">2</a></td>
+
+        <td><a href="swt002.html">Basics of GUI, part 1</a>. Partially
+        implement the basic hierarchy from the <code>Widget</code> to
+        <code>Shell</code>.</td>
+
+        <td>2003-01-24</td>
+
+        <td>2003-02-24</td>
+
+        <td>2003-03-11</td>
+      </tr>
+
+      <tr>
+        <td><a href="swt003.html">3</a></td>
+
+        <td><a href="swt003.html">Basics of GUI, part 2</a>. Implement drawing
+        facilities</td>
+
+        <td>2003-03-12</td>
+
+        <td>2003-04-15</td>
+
+        <td>2003-07-11</td>
+      </tr>
+
+      <tr>
+        <td><a href="swt004.html">4</a></td>
+
+        <td><a href="swt004.html">Layout basics</a>. Implement the basics of
+        the layout management.</td>
+
+        <td>2003-03-12</td>
+
+        <td>2003-04-15</td>
+
+        <td>2003-07-11</td>
+      </tr>
+
+      <tr>
+        <td><a href="swt005.html">5</a></td>
+
+        <td><a href="swt005.html">Font handling</a>. Implement font
+        handling.</td>
+
+        <td>2003-07-12</td>
+
+        <td>2003-08-01</td>
+
+        <td>2004-02-29</td>
+      </tr>
+
+      <tr>
+        <td><a href="swt006.html">6</a></td>
+
+        <td><a href="swt006.html">Image handling</a>. Implement Image
+        handling</td>
+
+        <td>2003-07-22</td>
+
+        <td>2003-08-15</td>
+
+        <td>2003-11-24</td>
+      </tr>
+
+      <tr>
+        <td><a href="swt007.html">7</a></td>
+
+        <td><a href="swt007.html">Buttons</a>. Finish the implementation of
+        the <code>Button</code> widget</td>
+
+        <td>2004-03-01</td>
+
+        <td>2004-03-10</td>
+
+        <td>2004-10-31</td>
+      </tr>
+
+      <tr>
+        <td><a href="swt008.html">8</a></td>
+
+        <td><a href="swt008.html">Standard dialogs</a>. Implement standard
+        dialogs (<code>Dialog</code> derivants).</td>
+
+        <td>2004-12-09</td>
+
+        <td>??</td>
+
+        <td></td>
+      </tr>
+
+      <tr>
+        <td><a href="swt009.html">9</a></td>
+
+        <td><a href="swt009.html">Labels</a>. Implement the <code>Label</code>
+        class.</td>
+
+        <td>2004-12-09</td>
+
+        <td>??</td>
+
+        <td></td>
+      </tr>
+    </table>
+  </body>
+</html>

@@ -1,0 +1,273 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<?xml-stylesheet type="text/css"
+href="eclipseos2-xxe.css"
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"xhtml1-strict.dtd">
+<html>
+  <head>
+    <link type="text/css"
+          href="eclipseos2.css"
+          rel="stylesheet" />
+
+    <title>Eclipse for OS/2 Transitional Project Notes</title>
+  </head>
+
+  <body>
+    <h1>SWT Step 1. Initial moves</h1>
+
+    <h2>Objective</h2>
+
+    <p>Start our work by setting up a working environment (cvs) and creating a
+    skeleton of the SWT with the least possible functionality, that can be
+    successfully compiled and tested with the simplest dummy example (creation
+    of the <code>Display</code> object).</p>
+
+    <h2>Task notes</h2>
+
+    <p>The one of the basics of SWT is <code>o.e.swt.widgets.Display</code>
+    class that represents an SWT session. It represents a connection between
+    SWT an the underlying platform&#39;s GUI and manages the platform event
+    loop. It is created by the application&#39;s main thread (UI thread) which
+    runs the event loop and dispatches events directly from it. Every (?) SWT
+    program creates a <code>Display</code> object so it&#39;s a good place to
+    begin. The minimum functionality to implement is the message queue
+    creation/deletion, <code>readAndDispatch()</code> method and <code>internal_new_GC()</code>,
+    <code>intermal_dispose_GC()</code> methods (including their native
+    representations) which leads to a partial implementation of <code>o.e.swt.OS</code>
+    class and also few others (see checklist). All other stuff should be
+    temporarily commented. Of course, without any visible window (which is
+    represented by the <code>Shell</code> class) we cannot get keyboard and
+    mouse messages from the system but there should be a couple of system
+    events that we can get and write their info to the log file. As a criteria
+    of the step completion will be a simplified SWT example <kbd>HelloWorld1</kbd>
+    (with the <code>Shell</code> code ripped off).</p>
+
+    <h2>Step checklist</h2>
+
+    <table>
+      <col width="40%" />
+
+      <col />
+
+      <col width="50%" />
+
+      <thead>
+        <tr>
+          <th>Operation</th>
+
+          <th>Status</th>
+
+          <th>Remarks</th>
+        </tr>
+      </thead>
+
+      <tr>
+        <td>Create the initial directory structure in cvs, initially checkin
+        common SWT parts as <kbd>rel-2-0-1</kbd> on the <kbd>eclipse-team</kbd>
+        branch</td>
+
+        <td>Done [dmik]</td>
+
+        <td>Common native C code from [Base] (<kbd>\src\plugins\org.eclipse.swt\Eclipse
+        SWT\common\library</kbd>) and <code>o.e.swt.internal.Library</code>
+        [PI] are checked in.</td>
+      </tr>
+
+      <tr>
+        <td>Include <code>o.e.swt.Drawable</code> [Base] in compilation</td>
+
+        <td>Done [dmik]</td>
+
+        <td></td>
+      </tr>
+
+      <tr>
+        <td>Add <code>o.e.swt.graphics.<b>Device, DeviceData, GCData</b></code>
+        [Base] and comment all unnecessary parts</td>
+
+        <td>Done [dmik]</td>
+
+        <td><br /></td>
+      </tr>
+
+      <tr>
+        <td>Create <code>o.e.swt.internal.pm.<b>QMSG</b></code> [PI]</td>
+
+        <td>Done [eli]</td>
+
+        <td><a href="swt.html#o.e.swt.internal.pm.QMSG">[QMSG]</a></td>
+      </tr>
+
+      <tr>
+        <td>Create <code>o.e.swt.internal.pm.<b>MPARAM</b></code> [PI]</td>
+
+        <td>Done [eli]</td>
+
+        <td>Now it&#39;s uncomplete and not used.</td>
+      </tr>
+
+      <tr>
+        <td>Create <code>o.e.swt.internal.pm.<b>POINTL</b></code> [PI]</td>
+
+        <td>Done [eli]</td>
+
+        <td>Now it&#39;s not used.</td>
+      </tr>
+
+      <tr>
+        <td>Add <code>o.e.swt.widgets.<b>Display</b></code> [PI] and comment
+        unnecessary parts</td>
+
+        <td>Done [dmik]</td>
+
+        <td></td>
+      </tr>
+
+      <tr>
+        <td>Create <code>o.e.swt.internal.pm.<b>OS</b></code> [PI]</td>
+
+        <td>Done [dmik]</td>
+
+        <td></td>
+      </tr>
+
+      <tr>
+        <td>Port <code>o.e.swt.internal.Library</code> [PI]</td>
+
+        <td>Done [dmik]</td>
+
+        <td>OS/2 (or Java under OS/2) is unable to handle DLL files with long
+        names, only 8.3 format is allowed (see Q&#38;A #2). So, SWT DLL file
+        name will be constructed as <kbd>swtpNNNN.dll</kbd> (where NNNN is the
+        SWT version number). Revision number will be ignored.</td>
+      </tr>
+
+      <tr>
+        <td>Create dummy (empty) C natives [PI], port <kbd>callback.h</kbd>
+        [Base] and setup VAC4 compilation</td>
+
+        <td>Done [dmik]</td>
+
+        <td>At this moment the build of natives is done by <kbd>\src\plugins\org.eclipse.swt\Eclipse
+        SWT PI\pm\library\build.cmd</kbd> (later will be called from the main
+        build file). The native callback stuff seems to be compiled ok. Not
+        properly tested, but <code>o.e.swt.SWT.getPlatform()</code> (that uses
+        <code>o.e.swt.internal.Callback.getPlatform()</code>) works.</td>
+      </tr>
+
+      <tr>
+        <td>Implement <code>OS.WinAlarm()</code> (<kbd>swt.c</kbd>) as an
+        example of native mappings and <code>OS.WA_*</code> constants for it;
+        implement <code>Display.beep()</code></td>
+
+        <td>Done [dmik]</td>
+
+        <td>This is an analogue of Win32&#39;s <code>MessageBeep()</code>. <a
+        href="swt.html#o.e.swt.internal.pm.OS.WinAlarm">[WinAlarm]</a> (see
+        Q&#38;A #6).</td>
+      </tr>
+
+      <tr>
+        <td>Add <code>OS.HWND_DESKTOP</code> (=1) and <code>OS.NULLHANDLE</code>
+        (=0) constants.</td>
+
+        <td>Done [dmik]</td>
+
+        <td>See Q&#38;A #6.</td>
+      </tr>
+
+      <tr>
+        <td>Implement <code>OS.WinGetLastError()</code> for debugging purposes</td>
+
+        <td>Done [dmik]</td>
+
+        <td></td>
+      </tr>
+
+      <tr>
+        <td>Add <code>Display.hab</code> field (together with <code>hmq</code>)
+        and add its initialization and cleanup (<code>OS.WinInitialize()</code>
+        and <code><code>OS</code>.WinTerminate()</code>, <code><code>OS</code>.WinCreateMsgQueue()</code>
+        and <code><code>OS</code>.WinDestroyMsgQueue()</code>) to
+        <code>init()</code> and <code>release()</code> (actually <code>releaseDisplay()</code>)
+        methods</td>
+
+        <td>Done [dmik]</td>
+
+        <td>See O&#38;A #7. An attempt to create a msg queue in the program
+        started by <kbd>java.exe</kbd> will lead to <code>PMERR_NOT_IN_A_PM_SESSION</code>
+        (0x1051) error. Execution under <kbd>javaw.exe</kbd> is ok =&#62; see
+        O&#38;A #8.</td>
+      </tr>
+
+      <tr>
+        <td>Implement <code>OS.DosGetInfoBlocks()</code> to make it possible
+        to get the current thread and process id and create wrapper classes
+        for the corresponding structures: <code>o.e.swt.internal.pm.<b>TIB</b></code>,
+        <code>o.e.swt.internal.pm.<b>TIB2</b></code>, <code>o.e.swt.internal.pm.<b>PIB</b></code>,
+        and getters/setters for them (<kbd>structs.h</kbd>/<kbd>structs.c</kbd>).</td>
+
+        <td>Done [dmik]</td>
+
+        <td>Curently, <code>PIB.pib_pchcmd</code> and <code>PIB.pib_pchenv</code>
+        are not implemented. <br /><b>Note</b>: Useful information about the
+        implementation of native methods can be found <a
+        href="swt.html#native.methods">here</a>.</td>
+      </tr>
+
+      <tr>
+        <td>Change <code>OS.DosGetInfoBlocks()</code> implementation.</td>
+
+        <td>Done [dmik]</td>
+
+        <td>Since <code>DosGetInfoBlocks()</code>returns pointers to its
+        internal data rather than fills structures provided by the caller and
+        since we need the direct access to that data from Java, it will be
+        more &#34;native&#34; and useful to change arguments of the wrapper to
+        arrays of int with one element to return this pointers to Java caller
+        and then use <code>OS.objcpy</code> to excahge data between the memory
+        they point to and Java TIB/PIB structure wrappers.</td>
+      </tr>
+
+      <tr>
+        <td>Implement <code>OS.DosQuerySysInfo()</code> and <code>OS.QSV_*</code>
+        constants to get the OS/2 version and revision, define <code>OS.IsWarp3</code>,
+        <code>OS.IsWarp4</code>, <code>OS.IsAurora</code> constants.</td>
+
+        <td>Done [dmik]</td>
+
+        <td></td>
+      </tr>
+
+      <tr>
+        <td>Implement <code>OS.PSZ</code> wrapper and C helpers for it to
+        handle ASCIIZ strings.</td>
+
+        <td>Done [dmik]</td>
+
+        <td>See <a href="swt.html#native.methods">conventions</a> about ASCIIZ
+        strings.</td>
+      </tr>
+
+      <tr>
+        <td>Finish the preliminary <code>Display</code> imlementation to get a
+        working message queue and add the following <code>OS</code> natives
+        for this:<ul><li><code>WinRegisterClass</code> (and <code>CS_* </code>constants)</li><li><code>WinCreateWindow
+        </code>(and <code>WS_* </code>constants)</li><li><code>WinDestroyWindow</code></li><li><code>WinDefWinProc</code></li><li><code>WinPeekMsg</code></li><li><code>WinDispatchMsg</code></li><li><code>WinPostQueueMsg</code></li><li><code>WinWaitMsg</code></li></ul>Also
+        include some common classes in compilation (see <kbd>classes.inc</kbd>).</td>
+
+        <td>Done [dmik]</td>
+
+        <td>The last objective in the test example (<kbd>SWT001.java</kbd>)
+        shows the same behavior as its C equvivalent. Nonvisible message-only
+        window receives <code>WM_CREATE</code> upon creation, then
+        <code>WM_ADJUSTWINDOWPOS</code>, then a locale message, then the
+        message loop terminates and the window receives a <code>WM_CLOSE</code>
+        message upon destroying. This behavior does not depend on whether the
+        test is run in PM mode or in VIO. Everything seems to be working
+        correctly.</td>
+      </tr>
+    </table>
+  </body>
+</html>

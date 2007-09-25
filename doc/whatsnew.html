@@ -1,0 +1,520 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/css"
+href="eclipseos2-xxe.css"
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"xhtml1-strict.dtd">
+<html>
+  <head>
+    <link href="eclipseos2.css" rel="stylesheet" type="text/css" />
+
+    <title>Eclipse for OS/2 Transitional Project Notes</title>
+  </head>
+
+  <body>
+    <h1>What's new</h1>
+
+    <p>This section contains the project's history of changes, in general.
+    More detailed information can be available in the corresponding sections
+    of these Notes, as well as in the <a href="../ChangeLog">ChangeLog</a>
+    file. Changes are grouped by date, with more recent ones placed at the
+    bottom of this file.</p>
+
+    <h3>2002-11-17</h3>
+
+    <h4>[dmik]</h4>
+
+    <ul>
+      <li>Initial checkin. At last!</li>
+    </ul>
+
+    <h3>2002-12-02</h3>
+
+    <h4>[dmik]</h4>
+
+    <ul>
+      <li>added new <a href="index.html#compilation">compilation</a> targets
+      and properties in <kbd>build.prp</kbd>. Old one should be deleted in
+      order to be automatically recreated with new settings.</li>
+
+      <li>some new checkpoints in the <a href="swt001.html">SWT Step 001</a>
+      (in particular, the native <code>OS.WinAlarm()</code> is implemented as
+      an example of work with natives).</li>
+
+      <li>more classes (part is still hugely commented) included in
+      compilation (see
+      <kbd>$CVSROOT/src/plugins/org.eclipse.swt.pm/classes.inc</kbd>).</li>
+
+      <li><kbd>SWT001.java</kbd> exception handling is changed in order to
+      prevent thread racing when writing to the step log file.</li>
+    </ul>
+
+    <h3>2002-12-08</h3>
+
+    <h4>[eli]</h4>
+
+    <ul>
+      <li>added <kbd>misc/model.zip</kbd>. This file contains the UML model of
+      Win32 SWT in <kbd>.WMF</kbd> format, created by Together. The file is
+      very large in dimensions and possibly will not be viewed correctly
+      outside Together.</li>
+    </ul>
+
+    <h3>2003-01-05</h3>
+
+    <h4>[dmik]</h4>
+
+    <ul>
+      <li>some changes in <a href="">General SWT Q&amp;A</a>.</li>
+
+      <li>changes in <a href="swt001.html">SWT Step 001</a>: added
+      <code>hab</code> and <code>hmq</code> initialization,
+      <code>OS.DosGetInfoBlocks()</code> and stuff.</li>
+
+      <li>added <a href="index.html#ordinary.checkins">info</a> about ordinary
+      checkins policy.</li>
+    </ul>
+
+    <h3>2003-01-15</h3>
+
+    <h4>[dmik]</h4>
+
+    <ul>
+      <li>added useful <a href="swt.html#native.methods">info</a> and some
+      conventions about the implementation of SWT native methods [<i>Eli, look
+      at this, please!</i>].</li>
+
+      <li>changed <kbd>swt.dll</kbd> compilation: now it throws an
+      <code>SWTError</code> exception with the <kbd>Argument cannot be
+      NULL</kbd> message when a check of arguments in some native method
+      implementations fails -- this check should not seriously increase the
+      size of the dll, so it can be kept in the future.</li>
+
+      <li>changed linkage type for callback functions to work correctly under
+      OS/2 (<kbd>callback.h</kbd>).</li>
+
+      <li>new <a href="index.html#conventions">marker</a> to sign temporary
+      pieces of code</li>
+
+      <li>added lots of new code and some code changed (see <a
+      href="swt001.html">SWT Step 001</a>).</li>
+    </ul>
+
+    <h3>2003-01-21</h3>
+
+    <ul>
+      <li><a href="swt001.html">SWT Step 001</a> is considered to be done.
+      Repository contents are tagged as <kbd>tr-swt-001</kbd>.</li>
+    </ul>
+
+    <h3>2003-02-04</h3>
+
+    <h4>[dmik]</h4>
+
+    <ul>
+      <li><a href="swt002.html">SWT Step 002</a> started.</li>
+    </ul>
+
+    <h3>2003-03-03</h3>
+
+    <h4>[dmik]</h4>
+
+    <ul>
+      <li>handling of native structures in natives' implementation
+      (<kbd>swt.h</kbd>) changed a bit: now if <code>null</code> is passed as
+      a structure reference, then <code>NULL</code> will be passed to the
+      native call instead of the pointer to an empty native structure.</li>
+
+      <li><a href="swt002.html">SWT Step 002</a> objective is changed. Also
+      steps <a href="swt003.html">003</a> and <a href="swt004.html">004</a>
+      are added as drafts.</li>
+
+      <li>testcase <code>SWT001</code> is changed: the objective
+      <kbd>helloWorld1</kbd> is removed because the temporary message loop
+      handling in <code>Display</code> has been removed too (honestly,
+      commented for a while -- it can be necessary for debugging) and this
+      objective won't compile any more.</li>
+
+      <li>added lots of classes during the <a href="swt002.html">SWT Step
+      002</a> processing.</li>
+
+      <li><b>yeah</b>! testcase <code>SWT002</code> is added and seems to
+      function pretty well -- the top and the secondary SWT windows are
+      showing and even can be closed &lt;) Also their decorations can be
+      altered by the standard <code>o.e.swt.SWT</code> flags.</li>
+    </ul>
+
+    <h3>2003-03-11</h3>
+
+    <ul>
+      <li><a href="swt002.html">SWT Step 002</a> is considered to be done.
+      Repository contents are tagged as <kbd>tr-swt-002</kbd>.</li>
+
+      <li>Aqris Software AS gave us a free time limited license for using <a
+      href="http://www.refactorit.com">RefactorIT</a>, their handy refactoring
+      tool for Java, to help making the port quicker. Thanks them a lot.</li>
+    </ul>
+
+    <h3>2003-03-17</h3>
+
+    <ul>
+      <li><a href="swt004.html">SWT004</a>: widget size/position manipulation
+      methods are fixed (coordinate space flipping formula was not correct,
+      see <a href="swt002.html#ScreenCoordinates">SWT002</a> notes) and
+      improved.</li>
+
+      <li>testcase <code>SWT004</code> is added to test widget size/position
+      manipulation methods.</li>
+    </ul>
+
+    <h3>2003-04-20</h3>
+
+    <ul>
+      <li>added <a href="swt.html#native.methods">notes</a> about handling
+      pointers to C structures in native calls.</li>
+
+      <li>important <a href="swt002.html#ScreenCoordinates">info</a> about the
+      coordinate space flipping is updated.</li>
+
+      <li><a href="swt003.html">SWT003:</a> added a lot of code to implement
+      the <code>SWT.Paint</code> event functionality. it's now possible to
+      listen it and paint in a widget using <code>o.e.swt.GC</code> class
+      methods (just few of them are implemented). Also <code>Composite</code>
+      widgets understand <code>SWT.NO_REDRAW_RESIZE</code> and
+      <code>SWT.NO_MERGE_PAINTS</code> styles.</li>
+
+      <li>testcase <code>SWT003</code> is added.</li>
+
+      <li><a href="swt004.html">SWT004:</a> minimization/maximization methods
+      are implemented. Also the testcase uses
+      <code>Display.getClientArea()</code> implemented in <code>SWT003</code>
+      step to place windows at the center and corners.</li>
+    </ul>
+
+    <h3>2003-05-12</h3>
+
+    <ul>
+      <li><a href="swt003.html">SWT003:</a> fixed flipping matrix calculation
+      (zero <code>y</code> coordinate was outside the client area).</li>
+
+      <li>testcase <code>SWT003</code> is divided on two separate testcases
+      (<code>SWT003_01</code> and <code>SWT003_02</code>) and deleted.</li>
+
+      <li>two helper classes, <code>TestCase</code> and
+      <code>SWTTestCase</code>, are created to simplify the testcase writing;
+      tests <code>SWT003_01</code>, <code>SWT003_02</code> and
+      <code>SWT004</code> are now derived from the <code>SWTTestCase</code>
+      class, all new testcases will also be derived either from
+      <code>TestCase</code> or <code>SWTTestCase</code>.</li>
+
+      <li><a href="swt003.html">SWT003:</a>
+      <code>GC.{draw|fill}{{[Round]Rectangle}|Arc|Oval}()</code> methods are
+      finally implemented, see task notes for details.</li>
+
+      <li><a href="swt003.html">SWT003:</a> Color support and
+      <code>{set|get}{Background|Foreground}()</code> methods of
+      <code>GC</code> and <code>Control</code> classes are implemented.</li>
+
+      <li>All changes and additions to the source code are now copyrighted by
+      EclipseOS2 Team, see also <a
+      href="index.html#CopyrightNotice">here</a>.</li>
+    </ul>
+
+    <h3>2003-07-23</h3>
+
+    <ul>
+      <li><a href="swt003.html">SWT003:</a> <code>GC</code>: implemented
+      polylines and polygons, line style and width handling.</li>
+
+      <li><a href="swt003.html">SWT003:</a> implemented <code>Region</code>
+      class and clipping operations in GC.</li>
+
+      <li><a href="swt003.html">SWT003:</a> added testcase
+      <code>SWT003_03</code> to demonstrate regions and clipping.</li>
+
+      <li><a href="swt004.html">SWT004:</a> some basic <code>Button</code>
+      operations are implemented (currently only push/radio/check buttons
+      without images and alignment).</li>
+
+      <li><a href="swt004.html">SWT004:</a> sizing/positioning is improved
+      again (in particular, it's now possible to size/move all child widgets
+      of the parent widget at once -- this is used in layout management); also
+      the support for
+      <code>SWT.Size</code>/<code>Move</code>/<code>Iconify</code>/<code>Deiconify</code>
+      events is done.</li>
+
+      <li><a href="swt004.html">SWT004:</a> layout management is implemented
+      -- all existing layouts should work.</li>
+
+      <li>testcase <code>SWT004</code> is divided on two:
+      <code>SWT004_01</code> and <code>SWT004_02</code>.</li>
+
+      <li>the name and objective of the <a href="swt003.html">SWT003</a> step
+      is changed: font handling will be done on the separate step.</li>
+
+      <li>font handling implementation is transferred to the separate step: <a
+      href="swt005.html">SWT005</a>, also the <a href="swt006.html">SWT006</a>
+      step is added to the roadmap.</li>
+
+      <li>important <a href="swt004.html#WidgetHeight">info</a> about the
+      coordinate space flipping is updated again.</li>
+    </ul>
+
+    <h3>2003-07-29</h3>
+
+    <ul>
+      <li><a href="swt003.html">SWT Step 003</a> and <a href="swt004.html">SWT
+      Step 004</a> are considered to be done. Repository contents are tagged
+      as <kbd>tr-swt-003</kbd> and <kbd>tr-swt-004</kbd>.</li>
+    </ul>
+
+    <h3>2003-09-22</h3>
+
+    <ul>
+      <li>added <code><a href="diff.html">$CVSROOT/doc/diff.html</a></code>
+      that contains known differences between the Win32 and OS/2 ports.</li>
+
+      <li>changed the behavior of filled versions of some graphic primitives
+      in <code>GC</code> (rectangles and arcs) back to that one in Windows
+      (meaning that they are drawn 1 pixel narrower than their outlined
+      counterparts with the same width and height arguments) -- this is done
+      for compatibility reasons. Initial discussion of this issue was <a
+      href="swt003.html#GraphicPrimitives">here</a>.</li>
+
+      <li><a href="swt006.html">SWT006:</a> added testcases
+      <code>SWT006_01</code> (including test images) and
+      <code>SWT006_02</code>.</li>
+
+      <li><a href="swt006.html">SWT006:</a> great work is done (and many bugs
+      in OS/2 GRE are found and worked around) to implement and optimize image
+      support including transparency and alpha -- the <code>Image</code> class
+      and corresponding <code>GC</code> methods are implemented. However,
+      icons are not yet supported, only bitmap images are (including all
+      possible bit depths).</li>
+
+      <li>several minor fixes in different classes.</li>
+    </ul>
+
+    <h3>2003-11-24</h3>
+
+    <ul>
+      <li>added two special path definitions and several other changes to
+      <kbd>$CVSROOT/build.xml</kbd> and to <kbd>$CVSROOT/tests/build.xml</kbd>
+      in order the AntHelper jEdit's plugin to work correctly. <a
+      href="http://www.jedit.org">jEdit</a> is a great programmer's editor --
+      a good choice until the Eclipse for OS/2 is finished.</li>
+
+      <li>added new target to the main build file -- <kbd>dll</kbd>. This
+      target builds the SWT dll by launching the
+      <kbd>$CVSROOT/src/plugins/org.eclipse.swt/Eclipse&nbsp;SWT&nbsp;PI/pm/library/build.cmd</kbd>
+      file.</li>
+
+      <li>version 1.5.4 of <a href="http://ant.apache.org/">ant</a> is now
+      required in order for the <kbd>dll</kbd> target to work correctly. This
+      version is required because a patch is made for it to fix this boring
+      stuff with spaces in <code>dir</code> attribute and
+      <code>&lt;arg&gt;</code> elements of the <code>&lt;exec&gt;</code> task
+      under OS/2. This patch can be found on the repository
+      (<kbd>$CVSROOT/misc/ant-1.5.4-patch-os2.jar</kbd>). See the
+      <kbd>readme.txt</kbd> file inside the jar on how to install it. Also
+      <kbd>$CVSROOT/misc/ant.cmd</kbd> is updated in order to use the this
+      patch.</li>
+
+      <li>deleted some obsolete parts of the documentation (this includes
+      Q&amp;A sections on the main SWT page and per-step pages as well).</li>
+
+      <li><a href="swt006.html">SWT006:</a> changed the behavior of filled
+      versions of some graphic primitives in <code>GC</code>, to be compatible
+      with Windows (and conform to SWT specs). Now graphic primitives use the
+      convention where points that define a primitive are placed between
+      actual (screen) pixels, not inside them. So, when a filled figure is
+      drawn it affects all pixels that are inside the area defined by figure's
+      coordinates. When an outlined figure is drawn it touches pixels to the
+      left and to the bottom from every point that defines the figure's shape.
+      This, in particular, means that given the same width and height a filled
+      rectangle will be 1 pixel smaller in dimensions than an outlined one --
+      the former will occupy exactly the given number of pixels in width and
+      height while the latter will occupy width + 1 and height + 1 pixels
+      respectively.</li>
+
+      <li><a href="swt006.html">SWT006:</a> two small fixes to
+      <code>Decorations</code> and <code>Shell</code> classes regarding the
+      layout management.</li>
+
+      <li><a href="swt006.html">SWT006:</a> image handling implementation is
+      finished, including icons and support of 256-color display modes. Lots
+      of changes and improvements are made to <code>Image</code> and
+      <code>GC</code> classes to address different issues.</li>
+    </ul>
+
+    <h3>2003-12-08</h3>
+
+    <ul>
+      <li><a href="swt006.html">SWT Step 006</a> is considered to be done,
+      repository contents on 24-11-03 are tagged as
+      <kbd>tr-swt-006</kbd>.</li>
+
+      <li><a href="swt005.html">SWT005:</a> started implementation of font
+      support.</li>
+
+      <li>the <kbd>$CVSROOT/src/plugins/org.eclipse.swt.pm/os/os2/x86</kbd>
+      directory is taken out of CVS control, the <kbd>dll</kbd> target of
+      <kbd>$CVSROOT/build.xml</kbd> now creates it if necessary.</li>
+    </ul>
+
+    <h3>2003-12-21</h3>
+
+    <ul>
+      <li>fixed a bug in <code>WinCreateMsgQueue()</code> that caused a trap
+      inside the GoldenCode JVM when running <kbd><code>SWT006_01</code></kbd>
+      (see the native implementation of <code>OS.WinCreateMsgQueue()</code> in
+      <kbd>swt.c</kbd>), thanks goes to Gregory Shah from GoldenCode
+      (ges@goldencode.com) for the explanation of trap reasons</li>
+
+      <li><code>GC.drawFocus()</code> behavior now corresponds to one under
+      Windows (see the <a href="diff.html#003">Issue #003</a> in the list of
+      differences).</li>
+
+      <li>fixed update rectangle reporting in the <code>PaintEvent</code> and
+      some clipping issues.</li>
+
+      <li><a href="swt006.html">SWT006</a>: some missed <code>GC</code>
+      methods (<code>copyArea()</code>, <code>getClipping(Region)</code> and
+      <code>isClipping()</code>) are implemented, testcase
+      <code>SWT006_03</code> is created to test them.</li>
+    </ul>
+
+    <h3>2004-02-29</h3>
+
+    <ul>
+      <li>slightly modified <code>TestCase</code> and <code>SWTTestCase</code>
+      classes to simplify some operations in testcases. All testcases are
+      updated to support the new interface.</li>
+
+      <li>implemented some public methods of
+      <code>o.e.swt.grapthcs.Device</code> class (<code>getDepth()</code>,
+      <code>getDPI()</code>, <code>getSystemColor()</code>...).</li>
+
+      <li>added new property <kbd>test.jvm</kbd> to <kbd>build.prp</kbd>. This
+      property is intended to make it possible to compile Eclipse under one
+      JVM and run it under another. This can be necessary if, for example, we
+      edit and compile the code in the IDE that is running under Innotek JVM
+      which is currently incompatible with Eclipse for OS/2.</li>
+
+      <li><a href="swt005.html">SWT005:</a> font support is fully implemented
+      (except the locale support -- see step notes):
+      <code>o.e.swt.graphics.Font</code>, <code>FontData</code> and
+      <code>FontMetrics</code> classes are done and the
+      <code>o.e.swt.graphics.GC</code> class is completely finished -- now it
+      provides all functionality SWT should provide.
+      <code>o.e.swt.graphics.Device</code> is also fully implemented.
+      Testcases <code>SWT005_01</code> and <code>SWT005_02</code> are created
+      to test different uses of fonts.</li>
+    </ul>
+
+    <h3>2004-03-02</h3>
+
+    <ul>
+      <li>the current year is added to the copyright statement in all
+      sources.</li>
+
+      <li><code>TestCase</code> and <code>SWTTestCase</code> classes are
+      modified again to make it possible to run testcases from other
+      environments by creating a testcase instance and calling its
+      <code>run()</code> method, optionally on a separate thread:<ul>
+          <li>The <code>TestCase</code> class now implements the
+          <code><i>Runnable</i></code> interface (instead of
+          <code>SWTTestCase</code>) -- for simplicity;</li>
+
+          <li><code>TestCase.run()</code> is now final, it calls
+          <code>init()</code>, then <code>exec()</code> (a new method that
+          does the actual work), and then <code>done()</code>. This is done
+          for multithreaded environments to make it posiible to do some
+          initialization and cleanup at the same (newly created) thread where
+          <code>exec()</code> is executed.</li>
+        </ul></li>
+
+      <li><code>SWT004_01</code>, <code>SWT001</code> and <code>SWT002</code>
+      testcases are updated to incorporate the above changes.</li>
+    </ul>
+
+    <h3>2004-03-04</h3>
+
+    <ul>
+      <li><a href="swt005.html">SWT Step 005</a> is considered to be done,
+      repository contents on 2004-03-02 are tagged as
+      <kbd>tr-swt-005</kbd>.</li>
+
+      <li><a href="swt007.html">SWT007:</a> started new step to finish the
+      implementation of the <code>Button</code> widget.</li>
+    </ul>
+
+    <h3>2004-10-31</h3>
+
+    <h4>[dmik]</h4>
+
+    <ul>
+      <li>well, after quite a long period of inactivity the project goes on
+      again!</li>
+
+      <li>fixed some minor resource non-deallocation issues in
+      <code>GC</code>.</li>
+
+      <li><a href="swt007.html">SWT Step 007</a> seems to be done. Yes, this
+      means that now we have SWT buttons and additioanlly lots of other stuff
+      working (keyboard handling, focus traversal); <code>SWT007_01</code> and
+      <code>SWT007_02</code> testcases demonstrate this. See step notes.</li>
+
+      <li>there are no more step checkilsts in the step notes. Instead, usual
+      CVS commit messages are used to describe the changes, and the repository
+      contains a separate <a href="../ChangeLog">ChangeLog</a> file
+      (<kbd>/ChangeLog</kbd>, generated by a Perl script), that contains all
+      commit messages for all repository files. <a
+      href="index.html#ordinary.checkins">Here</a> is a new commit
+      policy.</li>
+    </ul>
+
+    <h3>2004-11-11</h3>
+
+    <h4>[dmik]</h4>
+
+    <ul>
+      <li>Updated <a href="index.html#documentation.tool">documentation
+      tool</a>.</li>
+
+      <li>Added new properties recognized in <kbd>build.prp</kbd> to enable
+      JNI-API call profiling. It requires the special version of the SWT DLL
+      and the report tool contributed by <a
+      href="mailto:kruseldaniel@iowatelecom.net">Daniel Lee Kruse</a>, they
+      are not currently on CVS. Provided that you've got them, rename your old
+      <kbd>build.prp</kbd> to let the main build script to generate a new one
+      containing new properties, then set them up according to comments. After
+      that, when <code>test.apiprofiler</code> is set to <code>true</code>,
+      all testcases begin to use the profiling version of <kbd>swt.dll</kbd>
+      that produces (together with the report tool) profiling logs like
+      <kbd>swtXXX_YYY.profile.log</kbd>, containing some statistics about
+      calls made to OS/2 API functions through JNI wrappers from the
+      <code>o.e.swt.internal.pm.OS</code> class.</li>
+
+      <li>Fixed a resource leak in the <code>Button</code> class.</li>
+
+      <li><a href="swt007.html">SWT Step 007</a> is considered to be done.
+      Repository contents are tagged as <kbd>tr-swt-007</kbd>.</li>
+    </ul>
+
+    <h3>2004-12-09</h3>
+
+    <h4>[dmik]</h4>
+
+    <ul>
+      <li>New steps <a href="swt008.html">SWT008</a> (standard dialogs) and <a
+      href="swt009.html">SWT009</a> (the <code>Label</code> class) have been
+      started.</li>
+
+      <li><a href="swt008.html">SWT008</a>: added
+      <code>o.e.swt.widgets.MessageBox</code> implementation (contributed by
+      <a href="mailto:kruseldaniel@iowatelecom.net">Daniel Lee Kruse</a>). No
+      test case yet.</li>
+    </ul>
+  </body>
+</html>

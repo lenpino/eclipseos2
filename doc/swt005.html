@@ -1,0 +1,320 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/css"
+href="eclipseos2-xxe.css"
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"xhtml1-strict.dtd">
+<html>
+  <head>
+    <link href="eclipseos2.css" rel="stylesheet" type="text/css" />
+
+    <title>Eclipse for OS/2 Transitional Project Notes</title>
+  </head>
+
+  <body>
+    <h1>SWT Step 5. Font handling</h1>
+
+    <h2>Objective</h2>
+
+    <p>Implement font handling (including implementation of
+    <code>o.e.swt.graphics.Font</code>, <code>FontData</code> and
+    <code>FontMetrics</code> classes). The test example of this step should
+    draw some text strings with various fonts on the SWT top window client
+    area using corresponding methods of <code>o.e.swt.graphics.GC</code>
+    class.</p>
+
+    <h2>Task notes</h2>
+
+    <h3>Font matching</h3>
+
+    <p>The <code>GpiQueryFaceString()</code> function is intended to compose a
+    font facename (that includes textual representation of the font style)
+    given a font family name and flags describing the desired style (bold,
+    italic etc), by searching the installed fonts for the exact match (the
+    font that truely has the requested style, without any emulation). But this
+    function is buggy and sometimes returns NULL even if the desired font
+    actually exists in the system. The example is the <kbd>Lucida Sans
+    Typewriter</kbd> font family shipped with Java. If we have all 4 styles of
+    this family installed (Regular, Bold, Oblique and Bold Oblique) and try to
+    call this function for it with <code>FWEIGHT_DONT_CARE</code>,
+    <code>FWIDTH_DONT_CARE</code> and <code>FTYPE_ITALIC</code> flags set
+    ((i.e. we request any <kbd>Lucida Sans Typewriter</kbd> font that has the
+    <code>FM_SEL_ITALIC</code> bit set in the
+    <code>FONTMETRICS.fsSelection</code> field, ignoring
+    <code>usWeightClass</code> and <code>usWidthClass)</code> we get nothing
+    although the <kbd>Lucida Sans Typewriter Oblique</kbd> exists and
+    completely matches the given criteria.</p>
+
+    <p>Due to this bug, the only way to find a font given its family name and
+    style is the full scan of the list of all fonts installed in the system.
+    So we decided to cache the complete font list in some useful way upon the
+    first font request from the SWT user to speed up further font searches.
+    Hopefully, there is a function <code>GpiQueryFontAction()</code> that can
+    tell us whether the font list has been changed since the last call or not,
+    which can be used to check the validity of the cache.</p>
+
+    <p>The font matching algorithm is close enough to the original algorithm
+    used by OS/2 to ensure that any font matched by our algorithm can be set
+    as the font for standard OS/2 window classes, but has some differences (in
+    particular, when there is no bitmap font of the requested size installed
+    in the system we select one with the closest size from the font family,
+    while OS/2 always selects the default font in that cases). See the
+    <code>Device.matchFont()</code> methods for more detailed info about the
+    matching algorithm.</p>
+
+    <h3>Font metrics</h3>
+
+    <p>There are numerous bugs with calculating font metrics in GPI. For
+    example, various text drawing functions start using and returning wrong
+    character box and string extent coordinates when we set the text alignment
+    (<code>GpiSetTextAlignment()</code>) other than default
+    (<code>TA_NORMAL_HORIZ</code>, <code>TA_NORMAL_VERT</code>). So we always
+    have to use this default alignment (instead of <code>TA_TOP</code> for
+    example, which would be more useful in SWT).</p>
+
+    <p>Also GPI wrongly fills the background of the string for true type fonts
+    -- it makes it one pixel higher than the real font height
+    (<code>lMaxBaselineExt</code>) and leaves unfilled gaps at the beginning
+    and at the end of the string. For this reason we always fill the
+    background ourselves instructing GPI not to fill it when drawing
+    strings.</p>
+
+    <p>Another problem is that <code>lMaxBaselineExt</code> (as returned by
+    <code>GpiQueryFontMetrics()</code>) is not always the sum of
+    <code>lMaxAscender</code> and <code>lMaxDescender</code>, sometimes this
+    sum is one pixel larger -- the example is the <kbd>Times New Roman</kbd>
+    TTF font drawn at 24 points (40 pixels). As a solution we calculate the
+    font descent value as <code>lMaxBaselineExt - lMaxAscender</code> instead
+    of taking <code>lMaxDescender</code> from returned font metrics.</p>
+
+    <h3>FATTRS and FONTMETRICS sz* fields</h3>
+
+    <p>Originally <code>FATTRS</code> and <code>FONTMETRICS</code> structures
+    have fields, <code>szFamilyname</code> and <code>szFacename</code>
+    (<code>FONTMETRICS</code> only) to store the font family and face name as
+    arrays of <code>char</code>s (not as pointers to arrays). In Java we can
+    only define poiners (references) to arrays as field members. As opposed to
+    Windows version of SWT, where they defined similar fields as a sequence of
+    separate N byte fields (where N is the length of the original array), in
+    OS/2 we defined them as references to java byte arrays. It is much easier
+    to work with these arrays but is potentially dangerous because one can
+    accidentally replace these references with references to arrays of
+    different size -- it must not happen because the code assumes that these
+    arrays always have the length of <code>OS.FACENAME</code> (32) bytes. When
+    the structure is instantiated these arrays are allocated automatically and
+    should not be reallocated later.</p>
+
+    <h3>Locales</h3>
+
+    <p>There are two ways to support unicode when working in OS/2 PM/GPI.</p>
+
+    <p>The first way is to convert unicode strings to single-byte strings
+    using <code>Uni*</code> API (availabel since Warp 4 Fixpak 5) before
+    passing them to PM/GPI calls and provide the corresponding single-byte
+    codepage numbers when creating logical fonts and setting the message queue
+    codepage.</p>
+
+    <p>The second way is to work in true unicode mode -- this means to use the
+    codepage <kbd>IBM-1200</kbd> for font creation and the message queue and
+    pass unicode strings to PM/GPI as is, i.e. as two-byte unicode
+    strings.</p>
+
+    <p>It's obvious that the second way is more convenient than the first
+    because it allows to draw characters from different languages
+    simultaneously, using the same logical font (of course, provided that the
+    font physically contains glyphs for all used character groups). It is also
+    the only way to display such different characters in the window's
+    titlebar. Unfortunately, the current implementation of this approach is
+    quite buggy in OS/2. The following bugs are known:</p>
+
+    <ul>
+      <li>For some bitmap fonts (<kbd>WarpSans</kbd> and <kbd>System
+      Proportional</kbd>) GPI reports the wrong character width/extent for
+      unicode characters that are absent in the font. GPI visualizes such
+      missing characters with an empty rectangle character, but the reported
+      width is two times smaller than its actual width. This causes some
+      problems when formatting text and concatenating text strings in
+      SWT.</li>
+
+      <li>There is a very strange bug appearing when we draw strings using
+      <kbd>Courier New</kbd> and <kbd>Courier New Bold</kbd> TrueType fonts --
+      GPI places an extra space (equal to the average character width) between
+      every character it draws which makes this fonts unusable in unicode
+      mode.</li>
+
+      <li>For some bitmap fonts (<kbd>WarpSans</kbd>) GPI refuses to draw
+      characters from some unicode groups (for example, japanese characters in
+      range <code>0xFF00 - 0xFFEF</code>) although their glypths are actually
+      present in the font.</li>
+    </ul>
+
+    <p>When we use the first approach (single-byte strings with convertion)
+    bugs pointed above do not appear. But this approach doesn't allow to draw
+    characters from different languages using the same font (a separate font
+    for every character group is required).</p>
+
+    <p>In SWT, the only way to deal with locales is to use the
+    <code>FontData.setLocale()</code> method to create fonts from different
+    locales. As we understand this method makes sense only on systems that
+    lack the true unicode support (Win95?) and it corresponds to the first way
+    of working with unicode described above. For systems that support true
+    unicode it is useless and even produces worse results (WinXP).</p>
+
+    <p>Since OS/2 provides the true unicode support it seems to be more
+    logical to use it in SWT. But at the present time we decided not to do it
+    because of listed bugs. Currently the only alternative way is to use
+    single-byte approach and implement the <code>setLocale()</code> method.
+    But we decided not to go this way also because of its conceptual
+    limitations and because we believe that bugs of true unicode mode will be
+    fixed in the near future by switching to the usage of the <a
+    href="http://www.freetype.org">FreeType</a> library to work with fonts
+    which is free of many-many font-related bugs seen in OS/2. So, currently,
+    only unicode characters that correspond to the system locale are displayed
+    correctly (unicode is converted to single-byte using
+    <code>String.toBytes()</code> method) and there is no way to switch
+    locales (from the font usage point of view) dynamically in runtime.</p>
+
+    <h2>Step checklist</h2>
+
+    <table>
+      <col width="40%" />
+
+      <col />
+
+      <col width="50%" />
+
+      <thead>
+        <tr>
+          <th>Operation</th>
+
+          <th>Status</th>
+
+          <th>Remarks</th>
+        </tr>
+      </thead>
+
+      <tr>
+        <td>Add <code>FATTRS</code> and <code>FONTMETRICS</code> classes and
+        their native getters/setters, <code>FATTRS_*</code> constants,
+        <code>FM_TYPE_*</code>, <code>FM_DEFN_*</code>, <code>FM_SEL_*</code>,
+        <code>FM_CAP_*</code> constants</td>
+
+        <td>Done [eli, dmik]</td>
+
+        <td></td>
+      </tr>
+
+      <tr>
+        <td>Implement <code>FontMetrics</code> class</td>
+
+        <td>Done [eli, dmik]</td>
+
+        <td></td>
+      </tr>
+
+      <tr>
+        <td>Implement several missing methods in the <code>GC</code>
+        class</td>
+
+        <td>Done [dmik]</td>
+
+        <td>See the updated <a href="swt006.html">SWT006 Step</a> for more
+        info</td>
+      </tr>
+
+      <tr>
+        <td>Add <code>OS.WinSetPresParam (...byte[])</code>,
+        <code>WinQueryPresParam()</code></td>
+
+        <td>Done [dmik]</td>
+
+        <td></td>
+      </tr>
+
+      <tr>
+        <td>Add <code>OS.GpiQueryFaceString()</code>,
+        <code>FACENAMEDESC</code> and <code>FWEIGHT_*</code>,
+        <code>FWIDTH_*</code>, <code>FTYPE_*</code> constants...
+        remove!!!</td>
+
+        <td>Done [dmik]</td>
+
+        <td></td>
+      </tr>
+
+      <tr>
+        <td>Add <code>OS.GpiQueryFontAction()</code> and <code>QFA_*</code>
+        constants; <code>GpiQueryFonts()</code> and <code>QF_*</code>
+        constants, <code>GpiQueryFontMetrics()</code></td>
+
+        <td>Done [dmik]</td>
+
+        <td></td>
+      </tr>
+
+      <tr>
+        <td>Add <code>OS.GpiCreateLogFont()</code> and <code>FONT_*</code>
+        constants, <code>GpiSetCharSet()</code>,
+        <code>GpiSetCharBox()</code></td>
+
+        <td>Done [dmik]</td>
+
+        <td></td>
+      </tr>
+
+      <tr>
+        <td>Add <code>OS.GpiCharStringAt()</code>,
+        <code>GpiSetTextAlignment()</code>, <code>GpiQueryTextBox()</code>
+        &amp; <code>TXTBOX_*</code> constants</td>
+
+        <td>Done [dmik]</td>
+
+        <td></td>
+      </tr>
+
+      <tr>
+        <td>Add <code>OS.PrfQueryProfileSize()</code>,
+        <code>PrfQueryProfileString()</code> and <code>HINI_*</code>
+        constants</td>
+
+        <td>Done [dmik]</td>
+
+        <td>to read the system font value from OS2.INI</td>
+      </tr>
+
+      <tr>
+        <td>Add <code>OS.WinEnableWindow()</code> and implement
+        <code>Control.setEnabled()</code></td>
+
+        <td>Done [dmik]</td>
+
+        <td></td>
+      </tr>
+
+      <tr>
+        <td>Implement <code>FontData</code> and <code>Font</code> classes</td>
+
+        <td>Done [dmik]</td>
+
+        <td></td>
+      </tr>
+
+      <tr>
+        <td>Imlement string methods in the <code>GC</code> class</td>
+
+        <td>Done [dmik]</td>
+
+        <td></td>
+      </tr>
+
+      <tr>
+        <td>Add testcases <code>SWT005_01</code> and
+        <code>SWT005_02</code></td>
+
+        <td>Done [dmik]</td>
+
+        <td></td>
+      </tr>
+    </table>
+  </body>
+</html>

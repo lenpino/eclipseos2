@@ -1,0 +1,68 @@
+/*
+ * A CSS stylesheet for eclipseos2 project
+ *
+ */
+
+html {
+    font-family: Arial, sans-serif;
+}
+
+head, title {
+    display: block;
+}
+
+title {
+    text-align: center;
+    font-weight: bold;
+    font-size: 2em;
+    color: black;
+    margin-top: .67ex;
+    margin-bottom: .67ex;
+    padding: 1ex;
+    background-color: #ADD8E6;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: #800000;
+}
+h1 {
+    font-size: 1.8em;
+}
+h2 {
+    font-size: 1.33em;
+}
+h4 {
+   color: black;
+}
+
+table {
+    border: 1px outset gray;
+    border-spacing: 0px;
+}
+
+td, th {
+    border: 1px inset gray;
+    padding: 2px;
+    vertical-align: baseline;
+}
+
+kbd {
+    color: rgb(173,103,62); /* #4C7F7F; */ /* #4682B4; */
+}
+
+code {
+    color: rgb(51,102,153); /* #000090; */ /*blue;*/ /* #4169E1; */
+}
+
+dt {
+    font-weight: bold;
+}
+
+pre {
+    background-color: #E0E0E0;
+    border: thin solid gray;
+}
+
+a[href] {
+    color: #007800; /*#228B22; */
+}

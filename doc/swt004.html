@@ -1,0 +1,220 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<?xml-stylesheet type="text/css"
+href="eclipseos2-xxe.css"
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"xhtml1-strict.dtd">
+<html>
+  <head>
+    <link type="text/css"
+          href="eclipseos2.css"
+          rel="stylesheet" />
+
+    <title>Eclipse for OS/2 Transitional Project Notes</title>
+  </head>
+
+  <body>
+    <h1>SWT Step 4. Layout basics</h1>
+
+    <h2>Objective</h2>
+
+    <p>Implement the basics of the layout management. The testcase example
+    shoud be able to create a top shell containing a simple button.</p>
+
+    <h2>Task notes</h2>
+
+    <h3>Default Shell size and position</h3>
+
+    <p>In SWT, it&#39;s assumed that the <code>o.e.swt.widgets.Shell</code> is
+    created with the default size and position assigned by the system.</p>
+
+    <p>Since OS/2 handles the <code>FS_SHELLPOSITION</code> flag in a very
+    strange manner (the size/position of the frame after creation remains zero
+    until the frame is shown for the first time, and there&#39;s no way
+    neither to get the size/position the system is going to assign nor to
+    change them before the frame is shown) the workaround is made using
+    <code>WinQueryTaskSizePos()</code> (it seems to return the same values the
+    system uses when <code>FS_SHELLPOSITION</code> is specified). This means,
+    that the <code>Shell.getBounds()</code> method will return system assigned
+    values (but not zero as it would be in the case of <code>FS_SHELLPOSITION</code>)
+    after <code>Shell</code> creation and before opening (showing) it and
+    it&#39;s also possible to change them -- the same behavior is shown in
+    Windows.</p>
+
+    <h3>Notification messages</h3>
+
+    <p>In OS/2 control notification messages (<code>WM_CONTROL</code>,
+    <code>WM_COMMAND</code>) do not necessarily contain the control window
+    handle in their parameters, only the identity is guaranteed to present in
+    most cases. Therefore, in order to send the message back to the widget
+    (this is an SWT logic and it is quite handy) the only way to determine its
+    handle, which we need to obtain a reference to the widget, is to use its
+    window ID. This, in turn, requires an algorithm to generate IDs during
+    window creation, that are unique within the owner window context. The
+    window handle could be such unique identifier, but the problem is that the
+    window ID is a 16-bit value. However, at the present, we still use it for
+    that purpose taking its low 16 bits, which is based on the assumption that
+    handles in OS/2 always have a form of <code>0x8000nnnn</code>. But this
+    assumtion is possibly erroneous, so in the future this algorithm should be
+    replaced with another one.</p>
+
+    <h3><a name="WidgetHeight">Widget height</a></h3>
+
+    <p>As mentioned in task notes of the <a
+    href="swt002.html#ScreenCoordinates">SWT002</a> step about screen
+    coordinates, we need an easy way to obtain the height of a widget as well
+    as the height of its parent to do necessary calculations related to the
+    coordinate space flipping. The package method <code>Control.getHeight()</code>
+    can still be used to get the height of the widget itself (respecting the
+    situation when the widget is the <code>Decorations</code> instance and it
+    is minimized). The height of the widget&#39;s parent can be obtained by
+    the <code>Control.getParentHeight()</code> call (which, for the
+    <code>Shell</code> class, returns the value of the <code>Shell.display.getHeight()</code>
+    method, rather then <code>parent.getHeight()</code>, if the parent is
+    <code>null</code>). The situation for non-<code>Shell</code> windows when
+    the parent is <code>null</code> is inapplicable, so the exception is
+    thrown in this case. The <code>Control.getBounds(SWP)</code> package
+    method returns the height of the parent just as it returned by the
+    <code>getParentHeight()</code> method.</p>
+
+    <h2>Step checklist</h2>
+
+    <table>
+      <col width="40%" />
+
+      <col />
+
+      <col width="50%" />
+
+      <thead>
+        <tr>
+          <th>Operation</th>
+
+          <th>Status</th>
+
+          <th>Remarks</th>
+        </tr>
+      </thead>
+
+      <tr>
+        <td>Make the size and position methods of widgets to work correcty
+        (add <code>OS.SWP</code> structre, <code>OS.WinQueryTaskSizePos()</code>,
+        <code>WinQueryWindowPos()</code>); implement <code>Display.getBounds()</code></td>
+
+        <td>Done [dmik]</td>
+
+        <td>Size and position relative methods are completely rewritten: now
+        they use the package helper method <code>getBounds(SWP)</code> which
+        uses <code>WinQueryWindowPos()</code> instead of <code>WinQueryWindowRect()</code>.</td>
+      </tr>
+
+      <tr>
+        <td>Implement <code>Decorations.{get|set}{Minimized|Maximized}()</code>
+        methods</td>
+
+        <td>Done [dmik]</td>
+
+        <td></td>
+      </tr>
+
+      <tr>
+        <td>Add <code>OS.objcpy (int, SWP)</code>, <code>objcpy(SWP, int)</code>;
+        <code>WM_WINDOWPOSCHANGED</code>, <code>WM_ADJUSTWINDOWPOS</code>
+        message handling and <code>AWP_*</code> constants; implement
+        <code>SWT.Resize</code>, <code>SWT.Move</code>, <code>SWT.Iconify</code>,
+        <code>SWT.Deiconify</code> events... Activate?</td>
+
+        <td>Done [dmik]</td>
+
+        <td></td>
+      </tr>
+
+      <tr>
+        <td>Add <code>OS.WinGetSysBitmap()</code> and <code>SBMP_*</code>
+        constants, <code>GpiQueryBitmapInfoHeader()</code> and <code>BITMAPINFOHEADER2</code>
+        class, <code>GpiDeleteBitmap()</code></td>
+
+        <td>Done [dmik]</td>
+
+        <td>Currently used to detect dimensions of the check box</td>
+      </tr>
+
+      <tr>
+        <td>Add <code>OS.WinSetPresParam()</code> and <code>PP_*</code>
+        constants, implement two helper methods (<code>Control.setPres{Foreground|Background}()</code>)</td>
+
+        <td>Done [dmik]</td>
+
+        <td>Used to set the background and foreground colors of standard
+        controls drawn by the system</td>
+      </tr>
+
+      <tr>
+        <td>add <code>BS_*</code>, <code>BM_*</code>, <code>BN_*</code>,
+        <code>BDS_*</code> constants</td>
+
+        <td>Done [dmik]</td>
+
+        <td></td>
+      </tr>
+
+      <tr>
+        <td>Add <code>malloc()</code>, <code>free()</code>, <code>memcpy()</code>,
+        <code>memset()</code>; add 3 static helper methods to <code>Control</code>:
+        <code>beginDeferWindowPos()</code>, <code>endDeferWindowPos()</code>
+        and <code>deferWindowPos()</code>; add <code>OS.WinSetMultWindowPos()</code>,
+        <code>WinIsWindow()</code></td>
+
+        <td>Done [dmik]</td>
+
+        <td>We use standard C memory management functions because there&#39;s
+        no advantage to organize a heap on the Java level. Without the heap,
+        direct calls to <code>DosAllocMem()</code> to allocate small amounts
+        waste memory since they always allocate it by blocks of 4KB.<br /><br /><code>OS.WinSetMultWindowPos()</code>
+        is used to improve the performance of sizing/moving operations.</td>
+      </tr>
+
+      <tr>
+        <td>Add handlers for <code>WM_CONTROL</code>, <code>WM_COMMAND</code>
+        messages, <code>CMDSRC_*</code> constants; Add and partially implement
+        the <code>Button</code> class (basic OS/2 buttons, <code>setSelection()</code>,
+        <code>getSelection()</code>, <code>SWT.Selection</code> event)</td>
+
+        <td>Done [dmik]</td>
+
+        <td>Only OS/2 basic button styles are now implemented (excluding
+        imaged ones)</td>
+      </tr>
+
+      <tr>
+        <td>Add <code>OS.WinCalcFrameRect()</code>, Implement <code>Composite.setLayout()</code>,
+        <code>getLayout()</code>, <code>layout()</code>, <code>Control.computeSize()</code>,
+        <code>Scrollable.computeTrim()</code></td>
+
+        <td>Done [dmik]</td>
+
+        <td>Currently scrollbars are not taken into account when calculating
+        the widget&#39;s preferred size</td>
+      </tr>
+
+      <tr>
+        <td>Replace the <code>SWT004</code> testcase with <code>SWT004_01</code>
+        and <code>SWT004_02</code> ones</td>
+
+        <td>Done [dmik]</td>
+
+        <td></td>
+      </tr>
+
+      <tr>
+        <td>Make <code>Control.getBorderWidth()</code> to return values
+        applicable for individual widgets</td>
+
+        <td>Will be done on next steps</td>
+
+        <td>Now it always returns the value of <code>SV_CXBORDER</code>, which
+        is not the case for many widgets</td>
+      </tr>
+    </table>
+  </body>
+</html>

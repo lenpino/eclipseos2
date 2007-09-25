@@ -1,0 +1,393 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/css"
+href="eclipseos2-xxe.css"
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"xhtml1-strict.dtd">
+<html>
+  <head>
+    <link href="eclipseos2.css" rel="stylesheet" type="text/css" />
+
+    <title>Eclipse for OS/2 Transitional Project Notes</title>
+  </head>
+
+  <body>
+    <h1>Introduction</h1>
+
+    <p>This document contains various notes about the structure and concepts
+    of the Eclipse SDK (<a href="www.eclipse.org">www.eclipse.org</a>)
+    relative to the Eclipse for OS/2 project, the discussion of porting
+    process, the roadmap of the project, the description of the current
+    project status and may be something else which that can be useful. The
+    content of this document assumes that someone is familiar enough with the
+    basics of Eclipse.</p>
+
+    <p>These Notes are best viewed with Mozilla (since Netscape's CSS support
+    is terrible).</p>
+
+    <p>To get a brief description of changes in the project go to the <a
+    href="whatsnew.html">whatsnew</a> section.</p>
+
+    <p><i>Please note that this is an internal document intended for people
+    who work on this project (like sticky notes on a monitor) so any graceful
+    narration is not expected.</i></p>
+
+    <h2>Porting strategy</h2>
+
+    <p>Eclipse platform consists of several parts (components), each of them
+    implements one of the basic aspects of functionality. The most significant
+    part (from the porting point of view) is the Standard Widget Toolkit (SWT)
+    component, an alternative UI library that is used as a GUI base for all
+    other components of Eclipse, including the Eclipse JDT (Java Development
+    Tooling, an Eclipse IDE). The main goal of SWT is its "nativeness", as
+    opposed to the standard Java 2 Swing library. This means that it is based
+    on the mechanisms of the host platform's windowing system, directly using
+    its API from the native Java methods.</p>
+
+    <p>So, the porting process can be divided into two main parts: porting of
+    SWT and then porting of all other platform sensitive parts (such as
+    workspace core classes, launcher, updater and so on). Each part, in turn,
+    is divided into small steps (for the easiness of porting and maintenance)
+    and has its own porting roadmap. The first one that must be ported is SWT:
+    it is completely independent from everything else in Eclipse, but many
+    other components depend on it.</p>
+
+    <p>Here are:</p>
+
+    <ul>
+      <li><a href="swt.html">notes on porting SWT</a></li>
+
+      <li><a href="other.html">notes on porting other components</a></li>
+    </ul>
+
+    <p>As a base for our work we decided to take the release 2.0.1 of Eclipse
+    SDK as the most recent release to the day we have started. The total size
+    of the Eclipse source code is about 100 MB and it's not necessary to keep
+    them all in our project because only a small part will be affected by the
+    porting process. So we will put in the project's repository only the
+    pieces that are changed by us and, of course, new ones we create for OS/2
+    support.</p>
+
+    <h2>Repository structure</h2>
+
+    <p>The <b>eclipseos2</b> repository has the following structure:</p>
+
+    <table>
+      <tr>
+        <td><kbd>doc/</kbd></td>
+
+        <td>Project documentation, including these Notes.</td>
+      </tr>
+
+      <tr>
+        <td><kbd>src/</kbd></td>
+
+        <td>The sources of Eclipse we are working with. It includes only the
+        sources that make an OS/2 platform support in Eclipse, but the
+        structure of this directory is similar to the original, which will
+        help to join the main stream in the future.</td>
+      </tr>
+
+      <tr>
+        <td><kbd>tests/</kbd></td>
+
+        <td>This contains our C and Java test suites.</td>
+      </tr>
+
+      <tr>
+        <td><kbd>misc/</kbd></td>
+
+        <td>Various tools, helper scripts, docs and other useful stuff.</td>
+      </tr>
+    </table>
+
+    <h3>Tag policy</h3>
+
+    <p>Original Eclipse sources, that are common for all platforms but need to
+    be changed to include OS/2 support, are placed on the
+    <kbd>eclipse-team</kbd> branch. Tags on that branch correspond to the
+    official Eclipse releases. Currently, there is only one release (that one
+    we are based on) in the repository tagged as <kbd>rel-2-0-1</kbd>. When we
+    add a new part of common Eclipse sources to our repository we put them
+    with this tag.</p>
+
+    <p>Tags on the main trunk are composed according to the following scheme:
+    <kbd>tr-&lt;ppp&gt;-&lt;NNN&gt;</kbd>, where <kbd>tr</kbd> means
+    transitional, <kbd>&lt;ppp&gt;</kbd> can be <kbd>swt </kbd>or <kbd>other
+    </kbd>and <kbd>&lt;NNN&gt;</kbd> is the step number. These tags are
+    assigned when the certain step is completely done.</p>
+
+    <h3><a name="ordinary.checkins">Ordinary checkins</a></h3>
+
+    <p>Ordinary checkins (commits) are done using the following rules:</p>
+
+    <ul>
+      <li>On commit, all more or less significant changes must be placed to
+      the commit message of a file (or a group of files) being committed.
+      Every separate entry in the commit message starts with a dash (minus
+      sign) followed by a space. Sub-entries (if any) start with an asterisk
+      and a space. Every entry ends with a new line character (note: no new
+      line characters should be entered in the middle of the entry).</li>
+
+      <li>For the group of files committed at once, if the message entry does
+      not apply to all of them, then it should start with a comma-separated
+      list of files it relates to, followed by a colon.</li>
+
+      <li>In case of several sequental commits (a series of commits), these
+      commits should be done as close as possible to each other (in time), to
+      provide the repository consistensy. It is forbidden for the series of
+      relative commits to span two or more days. The repository contents must
+      be compiled without errors after every commit or the series of
+      commits.</li>
+
+      <li>After every commit (or a series of commits) the <a
+      href="../ChangeLog">ChangeLog</a> must be updated (using the Perl
+      script, see below). All major changes must be briefly described in the
+      <a href="whatsnew.html">whatsnew</a> file. The conceptual changes and
+      other important information not suitable for the ChangeLog must be
+      placed to the corresponding step notes file (to the <b>Task notes</b>
+      section).</li>
+
+      <li>ChangeLog, whatsnew and step notes must be committed immediately
+      after a series of relative commits, with an empty commit message. Every
+      whatsnew section must start with a date (in the format
+      <kbd>YYYY-MM-DD</kbd>) followed by a name of the contributor.</li>
+    </ul>
+
+    <p>Here is an example of the typical message typed during commit:</p>
+
+    <pre>- This is a common message to the entire commit operation.
+- This is another common commit message, detailed like this:
+* some detail;
+* some another detail.
+- o/e/swt/graphics/GC.java, o/e/swt/widgets/Control.java, Button.java: a commit message specific only to a subset of files being committed.
+- o.e.swt.graphics.GC, o.e.swt.widgets.Control: java files can be alternatively listed like this.</pre>
+
+    <p>The ChangeLog file must be always updated automatically by the Perl
+    script, <kbd>cvs2cl.pl.cmd</kbd>, that is located in the <kbd>/misc</kbd>
+    subdirectory of the repository. Manual ChangeLog changes will be simply
+    overwritten by the script. The preferred way to execute the script is to
+    use the <kbd>changelog</kbd> ant target (see below) that sets up necessary
+    command line arguments. Note: in order to be able to run the script you
+    must have Perl installed on your system. A recent OS/2 version of Perl can
+    be downloaded from here: <a
+    href="http://www.cpan.org/ports/os2/">http://www.cpan.org/ports/os2/</a>.
+    The script is tested to work well with at least v5.8.2 of Perl for
+    OS/2.</p>
+
+    <h2><a name="conventions">Porting conventions</a></h2>
+
+    <p>We use special marks in common source files (i.e. files which are
+    shared between all platforms) to flag the changes we made to add an OS/2
+    support. Also the special form of "todo" and "temp" markers is used. Here
+    is an example of usage of this stuff:</p>
+
+    <pre><b>//@@OS2+</b>
+    lines added or changed for OS/2 begin here
+    ...
+    and up to here
+<b>//@@OS2-</b>
+    ...
+    and here's a single added/changed line <b>//@@OS2</b>
+    ...
+<b>//@@OS2:</b> and this is an OS/2 related comment
+    ...
+    ... <b>//@@TODO</b>: not to forget to check the value returned
+    ...
+    ... <b>//@@TEMP:</b> the section of code below is temporary and will be changed/removed in short</pre>
+
+    <p>There are two attributes in the Eclipse terminology (plugin/package
+    naming conventions, build process and so on) to identify the platform
+    which the certain build of the Eclipse is intended to be run on. They are
+    <i>os</i> (operating system) and <i>ws</i> (windowing system of that
+    operating system). We decided the following is the best for OS/2: os =
+    <b>os2</b> and ws = <b>pm</b>.</p>
+
+    <h2><a name="compilation">Compilation notes</a></h2>
+
+    <p>Since we do not keep all the Eclipse sources in our repository, the
+    original Eclipse SDK release 2.0.1 <a
+    href="http://download.eclipse.org/downloads/drops/R-2.0.1-200208291828/download.php?dropFile=eclipse-sourceBuild-srcIncluded-2.0.1.zip">sources</a>
+    are needed in order to get something compiled -- components that are not
+    affected by our work are taken from there. The original sources should not
+    be placed under our project directory structure, but somewhere else.</p>
+
+    <h3>Java code build</h3>
+
+    <p>To build the Java code the Java Toolkit 1.3 or 1.3.1 for OS/2 is
+    required. Version 1.3 is recommended since it takes less memory during
+    execution and is free of the unpleasant OS/2=&gt;Java clipboard bug.</p>
+
+    <p>The build process is controlled by <a
+    href="http://jakarta.apache.org/ant/index.html">Ant</a>. The recommended
+    version is 1.5.4. Also a patch for this version is required (in order, to
+    use the <kbd>dll</kbd> target, see below). This patch can be found on the
+    repository (<kbd>$CVSROOT/misc/ant-1.5.4-patch-os2.jar</kbd>). See the
+    <kbd>readme.txt</kbd> file inside the jar on how to install it. The
+    <code><kbd>misc</kbd></code> directory of the repository also contains the
+    <kbd>ant.cmd</kbd> file, which can be used to run Ant and contains the
+    correct classpath definition needed to use the patch. This file can be
+    placed somewhere in the PATH -- just ensure that the <code>ant_home</code>
+    variable inside it points to the right Ant installation directory (correct
+    it if necessary) and that you have the <code>JAVA_HOME</code> environment
+    variable set.</p>
+
+    <p>The main build file is <kbd>build.xml</kbd> located in the root of the
+    repository. The build process needs to be customized through the
+    <kbd>build.prp</kbd> properties file. This file does not present in the
+    repository (since it's user dependent) but the default one will be created
+    after the first launch of the build if it doesn't exist. See comments
+    inside of it on what to customize.</p>
+
+    <p>The build process is started by launching Ant in the root of the
+    project, optionally with the target specified. There are the following
+    build targets exist:</p>
+
+    <table>
+      <tr>
+        <td><kbd>compile</kbd></td>
+
+        <td>Compile everything in development mode -- all <kbd>*.class</kbd>
+        files are placed to <kbd>$CVSROOT\-classes-</kbd> directory.</td>
+      </tr>
+
+      <tr>
+        <td><kbd>test</kbd></td>
+
+        <td>Run the default testcase as it set in the <kbd>build.prp</kbd>
+        file. The actual run is done via the <kbd>swt.test</kbd> target.</td>
+      </tr>
+
+      <tr>
+        <td><kbd>clean</kbd></td>
+
+        <td>Delete everything that is built by the main build process.</td>
+      </tr>
+
+      <tr>
+        <td><kbd>swtNNN[_TT]</kbd> or
+        <kbd>swt.test&nbsp;-Dtest.step=NNN[_TT]</kbd></td>
+
+        <td>Run the SWT testcase for the step number NNN, where TT is the
+        optional testcase number. If the corresponding value is set in the
+        <kbd>build.prp</kbd> compilation will be done if necessary. SWT
+        library and steps are compiled using
+        <kbd>$CVSROOT\tests\SWT\build.xml</kbd> file.</td>
+      </tr>
+
+      <tr>
+        <td><kbd>swt.jar</kbd></td>
+
+        <td>Compile (in the way used in the original source distribution) the
+        SWT library and place it to the
+        <kbd>$CVSROOT\src\plugins\org.eclipse.swt.pm\ws\pm\swt.jar</kbd>.
+        There are no dependencies regarded during compilation, every time the
+        build is made from scratch.</td>
+      </tr>
+
+      <tr>
+        <td><kbd>dll</kbd></td>
+
+        <td>Compile the <kbd>swt.dll</kbd> (see the <b>C (native) code
+        build</b> section below). Note that target requires the usage of Ant
+        1.5.4 and the patch mentioned above.</td>
+      </tr>
+
+      <tr>
+        <td><kbd>changelog</kbd></td>
+
+        <td>Updates the ChangeLog file by calling a special Perl script (see
+        <a href="#ordinary.checkins">here</a>).</td>
+      </tr>
+    </table>
+
+    <p>Any build target creates the <kbd>build.log</kbd> file in the root of
+    the project, that contains the full output of the build process, which is
+    overwritten every time the build is run. Also, every test case target
+    creates its own log at the same place, where an output of the test
+    execution is redirected to. Its name matches the name of the target, i.e.
+    <kbd>swt001.log</kbd> for the target <kbd>swt001</kbd>.</p>
+
+    <p><b>Note.</b> Ant file masks and path-like structures seem to be case
+    sensitive under OS/2 (??), so all source directories should be in lower
+    case (except those that are in mixed case, if any). Also note that all
+    backslash chars in pathnames must be escaped (doubled).</p>
+
+    <h3>C (native) code build</h3>
+
+    <p>Native libraries are compiled by Visual Age C 4.0 for OS/2.</p>
+
+    <p>Paths to Java libraries and headers are expected to present in the
+    <kbd>LIB</kbd> and <kbd>INCLUDE</kbd> environment variables (made by
+    default by the Java installer).</p>
+
+    <p>There are makefiles used to control C build process, so
+    <kbd>nmake.exe</kbd> should be somewhere in <kbd>PATH</kbd>.</p>
+
+    <p><kbd>VACPPMAIN</kbd> environment variable must point to the
+    installation directory of Visual Age C 4.0.</p>
+
+    <p>SWT native DLL is built by the
+    <kbd>$CVSROOT\src\plugins\org.eclipse.swt\Eclipse SWT
+    PI\pm\library\build.cmd</kbd> file and placed to the
+    <kbd>$CVSROOT\src\plugins\org.eclipse.swt.pm\os\os2\x86</kbd> directory.
+    Please note that if there is a lot of changes since the last build it's
+    better first to clean everything (with <kbd>build.cmd clean</kbd>) and
+    then build it from scratch -- it will avoid potential VAC codestore
+    problems when it "forgets" to do some important things (such as type
+    checking).</p>
+
+    <p>Also, as it shown in the above table, a special target <kbd>dll</kbd>
+    is now available in the main build file for convenience. It simply calls
+    the script mentioned above.</p>
+
+    <h2><a name="documentation.tool">Documentation tool</a></h2>
+
+    <p>To maintain these Notes we use the <a
+    href="http://www.xmlmind.com/xmleditor">XMLmind XML Editor Standard
+    Edition</a> (XXE) for Java, version V2.5p2. It requires JRE 1.4 and runs
+    well under <a
+    href="http://www.innotek.de/products/javaos2/javaos2general_e.html">Innotek
+    Java 1.4.2 for OS/2</a>.</p>
+
+    <p>There is some stuff for it in the <kbd>\misc\xxe</kbd> directory: a
+    .cmd launcher, an OS/2 icon and a template for new pages of these
+    Notes.</p>
+
+    <h2>Refactoring tool</h2>
+
+    <p>Its useful to get various statistics (such as different aspects of the
+    usage of some symbol) on the source code when trying to understand what it
+    does. Since there are a lot of classes in the Eclipse sources, sometimes
+    it's hard to do it manually. Yes, Eclipse itself has worthy refactoring
+    capabilities, but we don't have it under OS/2 yet &lt;). So, <a
+    href="http://www.refactorit.com">RefactorIT</a> is a good choice for that
+    purpose. We've been given a free time limited license from Aqris Software
+    AS to use it in this project.</p>
+
+    <h1>EclipseOS2 Team</h1>
+
+    <p>EclipseOS2 Team is a group of people who are working on this project on
+    their own time and budget. They are:</p>
+
+    <ul>
+      <li>Dmitry A. Kuminov (<a href="mailto:dmik@hugaida.com">dmik@hugaida.com</a>),
+      known as dmik</li>
+
+      <li>Eli Krakovsky (<a
+      href="mailto:eli@alfacom.net">eli@alfacom.net</a>), known as eli</li>
+    </ul>
+
+    <p>The official team and project site is <a
+    href="http://eclipseos2.netlabs.org">http://eclipseos2.netlabs.org</a>.</p>
+
+    <h1><a name="CopyrightNotice">Copyright notice</a></h1>
+
+    <p>All changes and additions to the Eclipse source code that are contained
+    within this project are copyrighted by EclipseOS2 Team and made publicly
+    available through the CVS (see the official project site) under the terms
+    and conditions of the <a href="cpl-v10.html">Common Public License Version
+    1.0</a> ("CPL"). A copy of the CPL is also available at <a
+    href="http://www.eclipse.org/legal/cpl-v10.html">http://www.eclipse.org/legal/cpl-v10.html</a>.</p>
+  </body>
+</html>

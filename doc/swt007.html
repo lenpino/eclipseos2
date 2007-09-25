@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/css"
+href="eclipseos2-xxe.css"
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"xhtml1-strict.dtd">
+<html>
+  <head>
+    <link href="eclipseos2.css" rel="stylesheet" type="text/css" />
+
+    <title>Eclipse for OS/2 Transitional Project Notes</title>
+  </head>
+
+  <body>
+    <h1>SWT Step 7. Buttons</h1>
+
+    <h2>Objective</h2>
+
+    <p>Complete the implementation of the <code>o.e.swt.widgets.Button</code>
+    widget. The test example should demonstrate all types of buttons that
+    exist in SWT.</p>
+
+    <h2>Task notes</h2>
+
+    <p>Button text and icon alignment styles (<code>SWT.LEFT</code>,
+    <code>SWT.RIGHT</code>, <code>SWT.CENTER</code>) are not currently
+    supported. I personally see no need in these styles at all. Besides this,
+    supporting them will make it impossible to keep the system look and feel
+    for <code>SWT.PUSH</code> buttons (for example, provided by eStyler).</p>
+
+    <p>However, <code>SWT.TOGGLE</code> buttons currently lose the pushbutton
+    L&amp;F provided by eStyler in any case, since they are completely drawn
+    by hand due to lack of this type of buttons in OS/2. We're in contact with
+    the eStyler author and hope this will be worked around later.</p>
+
+    <p>When implementing this step, it turned out that some other
+    functionality has to be implemented within it, and something needs to be
+    changed. In particular, the following has been additionally
+    implemented:</p>
+
+    <ul>
+      <li>keyboard handling (<code>SWT.KeyDown</code>/<code>KeyUp</code>
+      events)</li>
+
+      <li>focus traversal (<code>SWT.FocusIn</code>/<code>FocusOut</code>)
+      using the keyboard (<kbd>TAB</kbd>/<kbd>Shift-TAB</kbd>, arrows,
+      mnemonic keys [with and w/o the <kbd>Alt</kbd> key])</li>
+
+      <li>shell activation/deactivation
+      (<code>SWT.Activate</code>/<code>Deactivate</code>)</li>
+    </ul>
+
+    <p>Also, it became necessary to change the <code>Decorations</code>
+    implementation.</p>
+
+    <p>The following subsections provide some further details.</p>
+
+    <h4>keyboard handling</h4>
+
+    <p>The current implementation of keyboard events is very simple: OS/2
+    virtual keys supported by Eclipse are reported as Eclipse virtual keys
+    (<code>KeyEvent::keyCode</code>) with <code>KeyEvent::character</code> set
+    to zero. All other events have <code>keyCode</code> set to zero and
+    <code>character</code> equal to what OS/2 reports in the <code>usch</code>
+    parameter of the <code>WM_CHAR</code> message (converted to unicode
+    according to the curent locale), except the situation when both
+    <code>keyCode</code> and <code>character</code> are zero (no
+    <code>KeyEvent</code> is generated in this case).</p>
+
+    <p>This differs a bit from how Eclipse/Win32 generates key events. For
+    example, when we press <kbd>Ctrl</kbd> and then press and release the
+    <kbd>A</kbd> key, Eclipse/OS2 reports <kbd>a</kbd> (<code>0x71</code>) in
+    the <code>character</code> field of the key press event and the control
+    code <code>0x11</code> in the same field of the key release event (i.e.
+    key press character doesn't match key release character); Win32 reports
+    <code>0x11</code> in both cases. Another example is <kbd>Alt</kbd> plus
+    letter. Eclipse/OS2 doesn't generate the key release event for the letter
+    at all, since <code>usch</code> in <code>WM_CHAR</code> is zero in this
+    case (Win32 reports both).</p>
+
+    <p>The reason why I left the OS/2 behavior as is for now (i.e. not fully
+    compatible with Win32) is simple: currently, I don't get the logic how
+    keyboard messages are handled in Win32. For example, if you press
+    <kbd>Alt</kbd> there, then press some letter, then release <kbd>Alt</kbd>
+    and finally release the letter you get three events: a press event with
+    <code>keyCode=SWT.ALT</code> and <code>character=0</code>, a press event
+    with <code>keyCode=0</code> and <code>character=&lt;letter&gt;</code>, and
+    a combined release event with <code>keyCode=SWT.ALT</code> and
+    <code>character=&lt;letter&gt;</code> (i.e. we also get press/release pair
+    mismatch) -- that seems strage to me. But all this is related to the
+    pretty outdated SWT version 2.01, and I think things have changed in
+    recent SWT/Win32 releases, so the keyboard handling in Eclipse/OS2 will be
+    improved later, when we move the whole project to one of current Eclipse
+    releases.</p>
+
+    <h4>Decorations reimplementation</h4>
+
+    <p>The previous <code>Decorations</code> <a
+    href="swt003.html#FrameClientWindow">implementation</a> involved a special
+    internal SWT widget (<code>ClientArea</code>) to represent the client area
+    of any top-level window. This caused lots of problems related (not only)
+    to focus traversal because of the explicitly expressed parent-child
+    relationship (on SWT level) between the frame and client window
+    (<code>ClientArea</code> was created as a child of
+    <code>Decorations</code>, both in OS/2 and in SWT terms). This broke the
+    children-related functionality in SWT and led to some other issues.</p>
+
+    <p>So, I chose a bit different solution. Instead of having a special SWT
+    class for the client area, <code>Decorations</code> now maintains two
+    window handles directly -- one is a regular <code>Control::handle</code>
+    field that now holds a handle to the client window (not a frame window
+    handle as before), and another one is a separate field,
+    <code>Decorations::frameHandle</code>, to hold the frame window
+    (<code>WC_FRAME</code>) handle. Both windows are created by
+    <code>Decorations::createHandle()</code>. The majority of new or overriden
+    <code>Decorations</code> methods use the <code>frameHandle</code> field,
+    while methods derived from <code>Composite</code>, <code>Control</code>
+    etc. continue to use the <code>handle</code> field. Also, PM message
+    handling was explicitely separated: <code>Decorations</code> has an
+    additional window procedure, <code>windowFrameProc()</code>, that delivers
+    messages addressed to the <code>WC_FRAME</code> window to
+    <code>Decoration</code>'s methods. These methods are named
+    <code>FRAME_WM_*</code> to differ from regular <code>WM_*</code> messages
+    processed by <code>windowProc()</code> as usual.</p>
+
+    <p>The <code>ClientArea</code> class has been completely removed.</p>
+  </body>
+</html>

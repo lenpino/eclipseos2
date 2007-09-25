@@ -1,0 +1,489 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<?xml-stylesheet type="text/css"
+href="eclipseos2-xxe.css"
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"xhtml1-strict.dtd">
+<html>
+  <head>
+    <link type="text/css"
+          href="eclipseos2.css"
+          rel="stylesheet" />
+
+    <title>Eclipse for OS/2 Transitional Project Notes</title>
+  </head>
+
+  <body>
+    <h1>SWT Step 2. Basics of GUI, part 1</h1>
+
+    <h2>Objective</h2>
+
+    <p>Implement the basic SWT class hierarchy: from <code>o.e.swt.widgets.Widget</code>
+    to <code>o.e.swt.widgets.Shell</code> to be able to create windows in the
+    context of SWT. This will allow to do many other things just as they
+    should be done. The test example should create and show two SWT windows:
+    the top shell (filled with the default SWT background color, without any
+    content) and the secondary shell (also empty) which is always above the
+    top shell. Also it should handle the event queue in minimal, i.e. react to
+    the close action, clean up correctly and exit.</p>
+
+    <h2>Task notes</h2>
+
+    <h3>Device contexts</h3>
+
+    <p>In fact, that there are two different layers of output device
+    abstraction in OS/2: device contexts and presentation spaces, as opposed
+    to Windows where the device context plays the role of both -- and handle
+    to it is just allocated and returned by <code>Drawable.internal_new_GC()</code>
+    method which is overriden for different types of devices. In OS/2 we use
+    the presentation space handle as a return value of the <code>internal_new_GC()</code>.
+    The handle to the device context is stored in the <code>GCData.hdc</code>
+    field if non-null GCData object is passed to the <code>internal_new_GC()</code>.</p>
+
+    <p>For windows, the device context is not really opened by the
+    <code>internal_new_GC()</code>, the handle to it is just obtained via
+    <code>OS.GpiQueryDevice()</code> call with the presentation space handle
+    of the window passed as an argument. Correspondingly, it is not closed by
+    the <code>internal_dispose_GC()</code>.</p>
+
+    <p>For other devices, that require the real creation of the device context
+    (which, together with the creation of the presentation space and
+    associating the latter with the former, is made inside the <code>internal_new_GC()</code>),
+    the GCData object passed in should not be <code>null</code>, because the
+    handle of the device context will be necessary to correctly close this
+    context by the <code>internal_dispose_GC()</code>.</p>
+
+    <h4>Win32 API to OS/2 PM API mappings relative to device contexts</h4>
+
+    <p>Below is the approximate correspondence between Windows device context
+    functions and OS/2 ones:</p>
+
+    <table>
+      <tr>
+        <td><b>Windows GUI API</b></td>
+
+        <td><b>OS/2 PM API</b></td>
+
+        <td><b>Remarks</b></td>
+      </tr>
+
+      <tr>
+        <td>hDC = BeginPaint(hwnd...)</td>
+
+        <td>hps = WinBeginPaint(hwnd, NULL...) [Cached PS]</td>
+
+        <td>To draw during WM_PAINT message</td>
+      </tr>
+
+      <tr>
+        <td>EndPaint(hwnd...)</td>
+
+        <td>WinEndPaint(hps)</td>
+
+        <td></td>
+      </tr>
+
+      <tr>
+        <td>hDC = GetDC(hwnd) or hDC = GetWindowDC(hwnd)</td>
+
+        <td>hps = WinGetPS(hwnd), hps = WinGetScreenPS(hwndDesktop) [Cached
+        PS]</td>
+
+        <td>To draw during any message</td>
+      </tr>
+
+      <tr>
+        <td>ReleaseDC(hwnd, hDC)</td>
+
+        <td>WinReleasePS(hps)</td>
+
+        <td></td>
+      </tr>
+
+      <tr>
+        <td>hDC = CreateDC(...)</td>
+
+        <td>hdc = WinOpenWindowDC(hwnd) or DevOpenDC(...), hps =
+        GpiCreatePS(hab, hdc...) [Micro/Normal PS]</td>
+
+        <td>To dtaw on any device (usually display or printer)</td>
+      </tr>
+
+      <tr>
+        <td>DeleteDC(hDC)</td>
+
+        <td>GpiDestroyPS(hps), DevCloseDC(hdc)</td>
+
+        <td></td>
+      </tr>
+
+      <tr>
+        <td>CreateCompatibleDC(hDC)</td>
+
+        <td>hdcCompat = DevOpenDC(...hDC)</td>
+
+        <td>DC compatible with given</td>
+      </tr>
+    </table>
+
+    <h3><a name="ScreenCoordinates">Screen coordinates</a></h3>
+
+    <p>The coordinate space in OS/2 is flipped horizontally when compared to
+    its traditional orientation in the context of windows. That is, the origin
+    of the coordinate space is located in the lower left corner but not in the
+    upper left, as it considered to be in SWT or in Windows, in particular.
+    This should be always kept in mind. The formula to recalculate the
+    <kbd>y</kbd> coordinate of the rectangle from one system to another is
+    very simple: <code>y = parentHeight - (y + height)</code>, where
+    <code>parentHeight</code> is the height of the parent&#39;s space,
+    coordinates of the rectangle are relative to.</p>
+
+    <p>[<i><b>Note</b>: the following information is partially outdated, see
+    <a href="swt004.html#WidgetHeight">here</a></i>] The package method
+    <code>Control.getHeight()</code> can be used by classes within the
+    <code>o.e.swt.widgets</code> package to easily obtain the height of the
+    control itself and/or the height of its parent using <code>parent.getHeight()</code>
+    call (note, that if the parent is <code>null</code> or when the control is
+    a <code>Shell</code> instance, the <code>Display.getHeight()</code> must
+    be used to obtain the parent&#39;s height). Also, the <code>Control.getBounds(SWP)
+    </code>package method returns the height of the control&#39;s parent
+    (respecting the situation when the parent is <code>null</code> or the
+    control is a <code>Shell</code>) as the side effect of its invocation,
+    which is used, for example by the <code>setBounds()</code> method. But for
+    simple calculations the <code>getHeight()</code> method is more preferable
+    since it does less calculations.</p>
+
+    <p>The above applies to all <code>Win*</code> API calls relative to
+    sizing/positioning (such as <code>WinQueryWindowRect()</code>,
+    <code>WinSetWindowPos()</code> and so on). Hopefully, for <code>Gpi*</code>
+    calls we can setup the automatic horizontal flipping of the coordinate
+    space to be done by changing the default view transformation matrix of the
+    window&#39;s presentation space, so there&#39;s no need to do any
+    coordinate conversion when using <code>Gpi*</code> functions (see also
+    task notes in the <a href="swt003.html">SWT Step 003</a>).</p>
+
+    <h3>Windows</h3>
+
+    <p>In OS/2 every window has two types of relationship: parent-child and
+    ownership. In both SWT and Windows there is only the parentship. Although
+    the code for OS/2 related to these things will be a bit more complicated,
+    the situation is very simple: in most cases (window controls) the parent
+    and the owner is be the same. For shells the parent is the Desktop and the
+    owner is null (for top shells) or another shell (for secondary ones). Also
+    for some other windows (such as popup menus) the Desktop willbe the
+    parent. In SWT the term (and the field) <i>parent</i> references to the
+    real parent (the window which confines a child visually) except (not
+    embedded) shells, for which the <i>parent</i> is their owner (the window
+    which receives messages from them).</p>
+
+    <p>In OS/2 the frame window is the composite window of the special class
+    containing the decorative elements such as a titlebar, min/max buttons,
+    scroll bars (which are all windows themselves) as its children and ownees,
+    as opposed to Windows where this decoration is defined just by window
+    style flags in a call to the window creation function. So, the work with
+    frame windows (starting with the Decorations class in the widget
+    hierarchy) in OS/2 is slightly different -- in particular, the
+    <code>Decorations.createHandle()</code> (see below) does some additional
+    calls to create various frame controls (decorative elements) for the frame
+    window being created.</p>
+
+    <p>Dialog windows in OS/2 are just extensions of frame windows, they
+    subclass them and do some additional work (for example, handle the focus
+    traversal over dialog controls and maintain the result code of the dialog
+    window). Possibly, in SWT these windows will not be used at all and their
+    behavior will be just emulated on the basis of the ordinary <code>Shell</code>
+    widget.</p>
+
+    <h4>SWT window creation</h4>
+
+    <p>The common point of the native window creation is the <code>Control.createHandle()</code>
+    method, which is used almost by all subclasses. The logic of its work is
+    as follows:</p>
+
+    <ul>
+      <li>If the <code>Control</code>&#39;s parent is not <code>null</code>
+      the <code>hwndOwner</code> of the window being created is the
+      <code>parent.handle</code>, otherwise <code>null</code>.</li>
+
+      <li>If the <code>Control</code> supplies some nonzero handle value
+      before making a call to its <code>createHandle()</code>method (i.e. in
+      the constructor, before calling the <code>createWidget()</code>) it is
+      used as the window&#39;s <code>hwndParent</code>. Otherwise the
+      <code>parent.handle</code> is used as the <code>hwndParent</code> or
+      <code>HWND_DESKTOP</code> if the parent is <code>null</code>.</li>
+
+      <li>Window class and window style bits are obtained via the
+      <code>windowClass()</code>and <code>widgetStyle()</code>methods,
+      respectively. These methods are usually overrided by subclasses.</li>
+
+      <li>Window is then subclassed in the following way: the <code>Display.windowProc()</code>
+      becomes the new window procedure, which calls the <code>Control.windowProc()</code>,
+      which usually calls the old window procedure via the <code>Control.callWindowProc()</code>.</li>
+    </ul>
+
+    <h2>Step checklist</h2>
+
+    <table>
+      <col width="40%" />
+
+      <col />
+
+      <col width="50%" />
+
+      <thead>
+        <tr>
+          <th>Operation</th>
+
+          <th>Status</th>
+
+          <th>Remarks</th>
+        </tr>
+      </thead>
+
+      <tr>
+        <td>Partially implement the <code>Widget</code> class</td>
+
+        <td>Done [dmik]</td>
+
+        <td>Only the character translation is not implemented.</td>
+      </tr>
+
+      <tr>
+        <td>Partially Implement the <code>GC</code> class</td>
+
+        <td>Delayed</td>
+
+        <td>Almost completely commented. The major work will be done on the
+        step 3.</td>
+      </tr>
+
+      <tr>
+        <td>Add <code>EventTable</code>, <code>Listener</code>, <code>Event</code>,
+        <code>TypedListener</code> to compilation</td>
+
+        <td>Done [dmik]</td>
+
+        <td></td>
+      </tr>
+
+      <tr>
+        <td>Implement <code>Display.internal_new_GC()</code> and <code>Display.internal_dispose_GC()</code></td>
+
+        <td>Done [dmik]</td>
+
+        <td>See Task notes above.</td>
+      </tr>
+
+      <tr>
+        <td>Add <code>o.e.swt.events.*Listener</code>, <code>*Event</code> and
+        <code>*Adapter</code> classes to compilation</td>
+
+        <td>Done [dmik]</td>
+
+        <td></td>
+      </tr>
+
+      <tr>
+        <td>Add <code>o.e.swt.accessibility.*</code> (common and emulated) to
+        compilation</td>
+
+        <td>Done [dmik]</td>
+
+        <td></td>
+      </tr>
+
+      <tr>
+        <td>Add message time obtaining to <code>Widget.sendEvent()</code> and
+        <code>Widget.postEvent()</code></td>
+
+        <td>Done [dmik]</td>
+
+        <td></td>
+      </tr>
+
+      <tr>
+        <td>Implement <code>OS.WinSendMsg</code>, <code>OS.WinPostMsg()</code>,
+        <code>OS.WinQueryMsgTime()</code></td>
+
+        <td>Done [dmik]</td>
+
+        <td></td>
+      </tr>
+
+      <tr>
+        <td>Add standard <code>WM_*</code> constants</td>
+
+        <td>Done [dmik]</td>
+
+        <td>Most of them are commented and will be uncommented on demand</td>
+      </tr>
+
+      <tr>
+        <td>Add standard <code>WC_*</code> constants</td>
+
+        <td>Done [dmik]</td>
+
+        <td>Most of them are commented and will be uncommented on demand.
+        Since they actually are integer values (integer atoms) but natives
+        that use them require PSZ as a class name, a special static method
+        getAtom() is added to PSZ class that returns a string representation
+        of an atom.</td>
+      </tr>
+
+      <tr>
+        <td>Implement the <code>WidgetTable</code> class, <code>OS.Win[Set|Query]Window[ULong|UShort]()</code>
+        and add <code>QW[L|S]_*</code> constants</td>
+
+        <td>Done [dmik]</td>
+
+        <td></td>
+      </tr>
+
+      <tr>
+        <td>Implement the <code>OS.WinQueryClassInfo()</code> and add
+        <code>CLASSINFO</code> class</td>
+
+        <td>Done [dmik]</td>
+
+        <td></td>
+      </tr>
+
+      <tr>
+        <td>Implement <code>OS.WinQueryWindowRect()</code>, <code>OS.WinMapWindowPoints()</code>,
+        <code>RECTL</code> class</td>
+
+        <td>Done [dmik]</td>
+
+        <td></td>
+      </tr>
+
+      <tr>
+        <td>Implement <code>OS.WinIsWindowEnabled()</code>, <code>WinIsWindowVisible()</code>,
+        <code>WinQueryFocus()</code>, <code>WinQueryWindow()</code>,
+        <code>WinShowWindow()</code></td>
+
+        <td>Done [dmik]</td>
+
+        <td></td>
+      </tr>
+
+      <tr>
+        <td>Implement <code>OS.WinGetPS()</code>, <code>WinReleasePS()</code>,
+        <code>WinBeginPaint()</code>, <code>WinEndPaint()</code>,
+        <code>WinInvalidateRect()</code>, <code>WinUpdateWindow()</code></td>
+
+        <td>Done [dmik]</td>
+
+        <td></td>
+      </tr>
+
+      <tr>
+        <td>Implement the <code>OS.WinQuerySysValue()</code> and <code>SV_*</code>
+        constants</td>
+
+        <td>Done [dmik]</td>
+
+        <td></td>
+      </tr>
+
+      <tr>
+        <td>Add the static <code>Display.height</code> field</td>
+
+        <td>Done [dmik]</td>
+
+        <td>This field is used to flip the window coordinate space vertically</td>
+      </tr>
+
+      <tr>
+        <td>Add <code>o.e.swt.internal.pm.MRESULT</code> class</td>
+
+        <td>Done [dmik]</td>
+
+        <td>The reason it was added is that, as opposed to the simple int
+        type, <code>null</code> can be returned by individual message handlers
+        indicating that the message hasn&#39;t been processed and therefore
+        should be passed to the default window procedure.</td>
+      </tr>
+
+      <tr>
+        <td>Implement the helper function <code>OS.WinCallWindowProc()</code></td>
+
+        <td>Done [dmik]</td>
+
+        <td>To get the ability to call the window procedure given as the int
+        value (actually the C pointer to a function)</td>
+      </tr>
+
+      <tr>
+        <td>implement the <code>OS.WinSetWindowPos()</code> and <code>SWP_*</code>
+        constants</td>
+
+        <td>Done [dmik]</td>
+
+        <td></td>
+      </tr>
+
+      <tr>
+        <td>implement the <code>OS.WinCreateFrameControls()</code> and
+        <code>FCF_*</code>, <code>FS_*</code>, <code>FF_*</code> constants</td>
+
+        <td>Done [dmik]</td>
+
+        <td></td>
+      </tr>
+
+      <tr>
+        <td>Implement the <code>OS.WinGetScreenPC()</code> and <code>OS.GpiQueryDevice()</code></td>
+
+        <td>Done [dmik]</td>
+
+        <td></td>
+      </tr>
+
+      <tr>
+        <td>Implement <code>OS.WinQueryWindowTextLength()</code>,
+        <code>WinQueryWindowText()</code>, <code>WinSetWindowText()</code>,
+        add a new constructor to the <code>PSZ</code> class taking an integer
+        as the length of an empty string to create</td>
+
+        <td>Done [dmik]</td>
+
+        <td>Used to get/set shell titles</td>
+      </tr>
+
+      <tr>
+        <td>Implement the <code>OS.WinFillRect()</code> and <code>OS.objcpy()</code>
+        for the <code>RECTL</code> structure</td>
+
+        <td>Done [dmik]</td>
+
+        <td>Needed to handle <code>WM_ERASEBACKGROUND</code> message.</td>
+      </tr>
+
+      <tr>
+        <td>Partially implement the following classes to reach the step
+        objective: <code>o.e.swt.widgets.Control</code>, <code>Scrollable</code>,
+        <code>Composite</code>, <code>Canvas</code>, <code>Decorations</code>,
+        <code>Shell</code> and some others (<code>WidgetTable</code> etc) they
+        depend on</td>
+
+        <td>Done [dmik]</td>
+
+        <td>The majority of work has been done in the Control, Decorations and
+        Shell classes, others are almost fully commented.</td>
+      </tr>
+
+      <tr>
+        <td>Add the <code>SWT002</code> testcase</td>
+
+        <td>Done [dmik]</td>
+
+        <td>Note: <code>WinDestroyWindow()</code> is not called for secondary
+        shells explicitly. It&#39;s a planned behavior of SWT (see the
+        description of the <code>Widget.destroyWidget()</code>). It is
+        suitable for OS/2 when the window&#39;s owner is a <code>WC_FRAME</code>
+        window. See remarks inside the <code>Control.createHandle()</code>.</td>
+      </tr>
+    </table>
+  </body>
+</html>

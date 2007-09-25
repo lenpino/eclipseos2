@@ -1,0 +1,218 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<?xml-stylesheet type="text/css"
+href="eclipseos2-xxe.css"
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"xhtml1-strict.dtd">
+<html>
+  <head>
+    <link type="text/css"
+          href="eclipseos2.css"
+          rel="stylesheet" />
+
+    <title>Eclipse for OS/2 Transitional Project Notes</title>
+  </head>
+
+  <body>
+    <h1>SWT Step 6. Image handling</h1>
+
+    <h2>Objective</h2>
+
+    <p>Implement image handling (including <code>o.e.swt.graphics.Image</code>
+    class). The test example of this step should draw images of different
+    formats in the SWT top window client area using corresponding methods of
+    <code>o.e.swt.graphics.GC</code> class.</p>
+
+    <h2>Task notes</h2>
+
+    <p>There is one issue with getting image data when the system (the
+    display) is in 256-color mode -- it is described <a href="diff.html#007">here</a>.</p>
+
+    <p>Also we have a potential problem with icons, because OS/2 supports only
+    32x32/16x16 px and 40x40/20x20 px icons. Although we made it possible to
+    create and draw icons of any size we cannot use non-standard ones in
+    places where OS/2 accepts standard icon/pointer handlers (for example, in
+    some controls).</p>
+
+    <h2>Step checklist</h2>
+
+    <table>
+      <col width="40%" />
+
+      <col />
+
+      <col width="50%" />
+
+      <thead>
+        <tr>
+          <th>Operation</th>
+
+          <th>Status</th>
+
+          <th>Remarks</th>
+        </tr>
+      </thead>
+
+      <tr>
+        <td>Add <code>OS.DevOpenDC()</code> and <code>OD_*</code> constants,
+        <code>DevCloseDC()</code>; <code>OS.GpiCreatePS()</code> and
+        <code>PU_*</code>, <code>GPIF_*</code>, <code>GPIT_*</code>,
+        <code>GPIA_*</code>, <code>GPIM_*</code> constants, GpiDestr</td>
+
+        <td>Done [dmik]</td>
+
+        <td>During to complicacy of one of its parameters <code>OS.DevOpenDC()</code>is
+        implemented in an unusual way, see the source</td>
+      </tr>
+
+      <tr>
+        <td>Add <code>Display.internal_get_HAB()</code> method</td>
+
+        <td>Done [dmik]</td>
+
+        <td>This is a static and public method, not intended for use by
+        applications. It is intended for those classes inside SWT to obtain
+        the <code>HAB</code> which don&#39;t have the direct access to the
+        <code>Display</code> object but need it.</td>
+      </tr>
+
+      <tr>
+        <td>Add <code>OS.GpiQueryDeviceBitmapFormats()</code>, <code>GpiCreateBitmap()</code>
+        and <code>CBM_INIT</code> constant, constants for <code>BITMAPINFOHEADER2</code>:
+        <code>OS.BCA_*</code>, <code>BRU_*</code>, <code>BRA_*</code>,
+        <code>BRH_*</code> and <code>BCE_*</code>, <code>OS.GpiSetBitmap()</code></td>
+
+        <td>Done [dmik]</td>
+
+        <td></td>
+      </tr>
+
+      <tr>
+        <td>Add two static helper methods to <code>Image</code> class:
+        <code>new_compatible_GC()</code> and <code>dispose_compatible_GC()</code></td>
+
+        <td>Done [dmik]</td>
+
+        <td>Done for convenience</td>
+      </tr>
+
+      <tr>
+        <td>Add <code>OS.GpiBitBlt()</code> and <code>CBM_*</code>,
+        <code>ROP_*</code>, <code>BBO_*</code> constants</td>
+
+        <td>Done [dmik]</td>
+
+        <td></td>
+      </tr>
+
+      <tr>
+        <td>Implement <code>GC.fillGradientRectagle()</code></td>
+
+        <td>Done [dmik]</td>
+
+        <td></td>
+      </tr>
+
+      <tr>
+        <td>Add <code>OS.GpiQueryPalette()</code>, <code>OS.GpiQueryBitmapBits()</code>,
+        <code>OS.GpiSetBitmapBits()</code>, <code>GpiDrawBits()</code>,
+        <code>GpiWCBitBlt()</code>, <code>GpiQueryDefaultViewMatrix()</code></td>
+
+        <td>Done [dmik]</td>
+
+        <td><code>GpiWCBitBlt()</code> is used now instead of <code>GpiBitBlt()</code>
+        when possible -- because it does blitting faster.</td>
+      </tr>
+
+      <tr>
+        <td>Add the package static method <code>Image.createBitmap()</code>,
+        the protected field <code>Device.has32bitDepth</code></td>
+
+        <td>Done [dmik]</td>
+
+        <td>Used for convenience when dealing with bitmaps. <code>has32BitDepth</code>
+        is true when the device supports the 32-bit color depth.</td>
+      </tr>
+
+      <tr>
+        <td>Add <code>OS.WinCreatePointerIndirect()</code>, <code>WinDestroyPointer()</code>,
+        <code>WinDrawPointer()</code>, <code>WinQueryPointerInfo()</code>,
+        <code>DP_*</code> constants and <code>POINTERINFO</code> class</td>
+
+        <td>Done [dmik]</td>
+
+        <td></td>
+      </tr>
+
+      <tr>
+        <td>Implement <code>GC.drawImage()</code></td>
+
+        <td>Done [dmik]</td>
+
+        <td></td>
+      </tr>
+
+      <tr>
+        <td>Implement <code>Image</code> class, add <code>SWT006_01</code>
+        testcase + different test images, add <code>SWT006_02</code> testcase</td>
+
+        <td>Done [dmik]</td>
+
+        <td></td>
+      </tr>
+
+      <tr>
+        <td>Change the behavior of filled versions of some graphic primitives
+        in <code>GC</code> (rectangles and arcs) back to that one in Windows
+        (meaning that they are drawn 1 pixel narrower than their outlined
+        counterparts with the same width and height arguments)</td>
+
+        <td>Done [dmik]</td>
+
+        <td>This is done for compatibility reasons -- filling an area of a
+        client window with <code>GC.fillRectangle()</code> is quite a frequent
+        task and must work equally across platforms (see <a
+        href="swt003.html#GraphicPrimitives">here</a> for initial discussion
+        of this issue).</td>
+      </tr>
+
+      <tr>
+        <td>Fix <code>Decorations</code>: redirect the call to <code>layout()</code>
+        to <code>client.layout()</code>; fix <code>Shell</code>: do implicit
+        layout upon the first <code>open()</code> or <code>setVisible()</code>
+        call as it done in Windows.</td>
+
+        <td>Done [dmik]</td>
+
+        <td></td>
+      </tr>
+
+      <tr>
+        <td>Add <code>OS.WinScrollWindow()</code> and <code>SW_*</code>
+        constants, <code>HRGN_ERROR</code> constant; implement <code>GC.copyArea()</code></td>
+
+        <td>Done [dmik]</td>
+
+        <td>Note, that this item and the following ones are added after the
+        SWT006 Step was considered to be done and tagged in the repository.</td>
+      </tr>
+
+      <tr>
+        <td>Add <code>OS.GpiSetRegion()</code>, <code>GpiQueryClipBox()</code>;
+        implement <code>GC.getClipping(Region)</code>, <code>isClipped()</code></td>
+
+        <td>Done [dmik]</td>
+
+        <td></td>
+      </tr>
+
+      <tr>
+        <td>Add <code>SWT006_03</code> testcase</td>
+
+        <td>Done [dmik]</td>
+
+        <td>This testcase is for testing of two items above.</td>
+      </tr>
+    </table>
+  </body>
+</html>
