@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Eclipse SWT Tests for OS/2" default="init">
+
+    <property name="basedir.main" value="${basedir}\..\.." />
+    <!-- user defined build properties file -->
+    <property name="build.prp" value="${basedir.main}/build.prp" />
+    <property file="${build.prp}"/>
+    <!--  default setting for bootclasspath if none specified  -->
+    <property name="bootclasspath" value="${java.home}/lib/rt.jar" />
+
+    <!-- Definitions for AntHelper jEdit Plugin BEGIN -->
+    <path id="ah.classpath">
+        <pathelement path="${dev.classes}"/>
+    </path>
+    <path id="ah.sourcepath">
+        <pathelement path="${basedir.main}/src/plugins/org.eclipse.swt/Eclipse SWT PI/pm"/>
+        <pathelement path="${basedir.main}/src/plugins/org.eclipse.swt/Eclipse SWT/pm"/>
+        <pathelement path="${basedir.main}/tests/SWT/java"/>
+    </path>
+    <!-- Definitions for AntHelper jEdit Plugin END -->
+
+    <target name="init">
+        <property name="dev.classes" value="${basedir.main}/-classes-" />
+        <property name="swt.jar" value="${basedir.main}/src/plugins/org.eclipse.swt.pm/ws/pm/swt.jar" />
+        <property name="test.step" value="${test.step.default}" />
+        <property name="plugindir" value="${basedir.main}/src/plugins/org.eclipse.swt" />
+        <property name="plugindir.orig" value="${eclipsedir.orig}/plugins/org.eclipse.swt"/>
+        <property name="classes.inc" value="${basedir.main}/src/plugins/org.eclipse.swt.pm/classes.inc" />
+    </target>
+
+    <target name="compile" depends="init" unless="do.not.compile">
+        <antcall target="swt.compile" />
+        <javac debug="on" failonerror="yes" destdir="${dev.classes}" classpath="${dev.classes}">
+            <src path="java/" />
+        </javac>
+    </target>
+
+    <target name="run">
+        <condition property="run.target" value="run.target.apiprofiler">
+            <istrue value="${test.apiprofiler}" />
+        </condition>
+        <condition property="run.target" value="run.target.regular">
+            <not><isset property="run.target" /></not>
+        </condition>
+        <antcall target="${run.target}" />
+    </target>
+
+    <target name="run.target.regular" depends="init">
+        <condition property="do.not.compile">
+            <not><istrue value="${test.dependoncompile}" /></not>
+        </condition>
+        <antcall target="compile" />
+        <record name="${basedir.main}/build.log" action="stop" />
+        <record name="${basedir.main}/swt${test.step}.log" action="start" />
+        <java classname="SWT${test.step}" classpath="${dev.classes}" dir="${basedir.main}" fork="true" jvm="${test.jvm}">
+            <sysproperty key="java.library.path" value="${basedir.main}\src\plugins\org.eclipse.swt.pm\os\os2\x86;${java.library.path}" />
+            <sysproperty key="user.dir" value="${basedir.main}" />
+        </java>
+        <record name="${basedir.main}/swt${test.step}.log" action="stop" />
+        <record name="${basedir.main}/build.log" action="start" />
+    </target>
+
+    <target name="run.target.apiprofiler" depends="init">
+        <condition property="do.not.compile">
+            <not><istrue value="${test.dependoncompile}" /></not>
+        </condition>
+        <antcall target="compile" />
+        <delete file="${basedir.main}/swtstats.scratch.log" quiet="true" />
+        <delete file="${basedir.main}/swt${test.step}.profiler.log" quiet="true" />
+        <record name="${basedir.main}/build.log" action="stop" />
+        <record name="${basedir.main}/swt${test.step}.log" action="start" />
+        <java classname="SWT${test.step}" classpath="${dev.classes}" dir="${basedir.main}" fork="true" jvm="${test.jvm}">
+            <sysproperty key="java.library.path" value="${test.apiprofiler.dllpath};${java.library.path}" />
+            <sysproperty key="user.dir" value="${basedir.main}" />
+        </java>
+        <record name="${basedir.main}/swt${test.step}.log" action="stop" />
+        <record name="${basedir.main}/build.log" action="start" />
+        <exec executable="${test.apiprofiler.tool}" dir="${basedir.main}">
+            <arg value="-raw" />
+            <arg path="${basedir.main}/swtstats.scratch.log" />
+            <arg value="-report" />
+            <arg path="${basedir.main}/swt${test.step}.profiler.log" />
+        </exec>
+        <delete file="${basedir.main}/swtstats.scratch.log" quiet="true" />
+    </target>
+
+    <target name="clean" depends="init">
+        <!--delete includeEmptyDirs="true">
+            <fileset dir="${dev.classes}" includes="**/*.class" />
+        </delete-->
+        <delete dir="${dev.classes}" failonerror="false" />
+    </target>
+
+    <target name="swt.compile" depends="init">
+        <mkdir dir="${dev.classes}" />
+        <javac destdir="${dev.classes}" debug="on" failonerror="yes" bootclasspath="${bootclasspath}" includesfile="${classes.inc}">
+            <src path="${plugindir}/Eclipse SWT/pm/" />
+            <src path="${plugindir.orig}/Eclipse SWT/common/" />
+            <src path="${plugindir.orig}/Eclipse SWT/common_j2se/" />
+
+            <src path="${plugindir}/Eclipse SWT PI/pm/" />
+            <src path="${plugindir}/Eclipse SWT PI/common_j2se/" />
+
+            <!-- possible to implement OLE under OS/2? -->
+            <!-- src path="${plugindir}/Eclipse SWT OLE OS2/pm/" / -->
+
+            <!-- possible to implement Accessibility under OS/2? -->
+            <src path="${plugindir.orig}/Eclipse SWT Accessibility/emulated/" />
+            <src path="${plugindir.orig}/Eclipse SWT Accessibility/common/" />
+
+            <!-- possible to implement AWT under OS/2? -->
+            <!-- src path="${plugindir}/Eclipse SWT AWT/pm/"/ -->
+
+            <!-- src path="${plugindir}/Eclipse SWT Drag and Drop/pm/"/ -->
+            <!-- src path="${plugindir}/Eclipse SWT Drag and Drop/common/"/ -->
+            <!-- src path="${plugindir}/Eclipse SWT Printing/pm/"/ -->
+            <!-- src path="${plugindir}/Eclipse SWT Printing/common/"/ -->
+            <!-- src path="${plugindir}/Eclipse SWT Program/pm/"/ -->
+            <!-- src path="${plugindir}/Eclipse SWT Program/common/"/ -->
+            <!-- src path="${plugindir}/Eclipse SWT Custom Widgets/common/"/ -->
+        </javac>
+    </target>
+
+</project>
