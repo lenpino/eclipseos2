@@ -1,0 +1,5 @@
+med.cfg
+med.lru
+*.dll
+*.lib
+*.ics

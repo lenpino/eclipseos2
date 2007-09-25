@@ -1,0 +1,32 @@
+/*
+ * Copyright (c) 2002, 2004 EclipseOS2 Team.
+ * This file is made available under the terms of the Common Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v10.html
+ */
+
+/**
+ * VAC build file for SWT libraries on OS/2
+ */
+
+option ProjectOptions =
+//    incl( searchPath, '..\..\..\Eclipse SWT\common\library' ), // for sources, spaces in path are accepted
+//    incl( searchPath, '"..\..\..\Eclipse SWT\common\library"' ), // for headers, path need to be in quotes (VAC bug?)
+    info( cnd, no ) // disable "condition always true" messages
+{
+    option
+        link( pmtype, pm ),
+        link( linkwithmultithreadlib),
+        link( linkwithsharedlib),
+        define( DEBUG_CHECK_NULL_EXCEPTIONS )
+//        opt( level, "2" )
+    {
+        target $SWT_LIB
+        {
+                source "E:\\tmp\\inst\\dllsrc\\editcol.c"
+                source "E:\\tmp\\inst\\dllsrc\\editcol.h"
+                source "E:\\tmp\\inst\\dllsrc\\editcol.rc"
+            	source "swt.c", "structs.c", "callback.c"
+        }
+    }
+}

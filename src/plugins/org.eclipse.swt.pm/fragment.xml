@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fragment
+   id="org.eclipse.swt.pm"
+   name="Standard Widget Toolkit for Presentation Manager"
+   version="2.0.1"
+   provider-name="Eclipse.org"
+   plugin-id="org.eclipse.swt"
+   plugin-version="2.0.1">
+
+   <runtime>
+   </runtime>
+
+
+</fragment>
