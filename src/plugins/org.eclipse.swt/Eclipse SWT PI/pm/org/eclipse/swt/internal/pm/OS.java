@@ -133,7 +133,7 @@ public class OS {
 //    public static final int WC_CONTAINER =      0xffff0025;
 //    public static final int WC_SLIDER =         0xffff0026;
 //    public static final int WC_VALUESET =       0xffff0027;
-//    public static final int WC_NOTEBOOK =       0xffff0028;
+    public static final int WC_NOTEBOOK =       0xffff0028;
 //    public static final int WC_PENFIRST =       0xffff0029;
 //    public static final int WC_PENLAST =        0xffff002C;
 //    public static final int WC_MMPMFIRST =      0xffff0040;
@@ -1824,6 +1824,156 @@ public class OS {
    public static final int CBN_LBSCROLL               = 5;
    public static final int CBN_SHOWLIST               = 6;
    public static final int CBN_ENTER                  = 7;
+   /**********************************************************************/
+   /*                                                                    */
+   /*                          N O T E B O O K                           */
+   /*                                                                    */
+   /**********************************************************************/
+   
+   /**********************************************************************/
+   /* Message ids                                                        */
+   /**********************************************************************/
+   public static final int BKM_CALCPAGERECT                 = 0x0353;  /* Calc book/page rectangle  */
+   public static final int BKM_DELETEPAGE                       = 0x0354;  /* Delete page(s)            */
+   public static final int BKM_INSERTPAGE                        = 0x0355;  /* Insert page               */
+   public static final int BKM_INVALIDATETABS                 = 0x0356;  /* Invalidate tab area       */
+   public static final int BKM_TURNTOPAGE                      = 0x0357;  /* Turn to page              */
+   public static final int BKM_QUERYPAGECOUNT           = 0x0358;  /* Query number of pages     */
+   public static final int BKM_QUERYPAGEID                      =0x0359;  /* Query page identifier     */
+   public static final int BKM_QUERYPAGEDATA                = 0x035a;  /* Query page user data      */
+   public static final int BKM_QUERYPAGEWINDOWHWND  = 0x035b;  /* Query page window handle  */
+   public static final int BKM_QUERYTABBITMAP       = 0x035c;  /* Query tab bitmap handle   */
+   public static final int BKM_QUERYTABTEXT         = 0x035d;  /* Query tab text pointer    */
+   public static final int BKM_SETDIMENSIONS        = 0x035e;  /* Set tab/dogear dimensions */
+   public static final int BKM_SETPAGEDATA          = 0x035f;  /* Set page user data        */
+   public static final int BKM_SETPAGEWINDOWHWND    = 0x0360;  /* Set page window handle    */
+   public static final int BKM_SETSTATUSLINETEXT    = 0x0361;  /* Set status line text      */
+   public static final int BKM_SETTABBITMAP         = 0x0362;  /* Set tab bitmap            */
+   public static final int BKM_SETTABTEXT           = 0x0363;  /* Set tab text              */
+   public static final int BKM_SETNOTEBOOKCOLORS    = 0x0364;  /* Set Notebook colors       */
+   public static final int BKM_QUERYPAGESTYLE       = 0x0365;  /* Query page style          */
+   public static final int BKM_QUERYSTATUSLINETEXT  = 0x0366;  /* Query status line text    */
+   public static final int BKM_SETPAGEINFO          = 0x0367;   /* Set page information     */
+   public static final int BKM_QUERYPAGEINFO        = 0x0368;   /* Query page information   */
+   public static final int BKM_SETTABCOLOR          = 0x0374;  /* Set book tab color        */
+   public static final int BKM_SETNOTEBOOKBUTTONS   = 0x0375;  /* Set common pushbuttons    */
+   
+   public static final int BKN_PAGESELECTED         = 130;     /* New page selected by user */
+   public static final int BKN_NEWPAGESIZE          = 131;     /* App page size changed     */
+   public static final int BKN_HELP                 = 132;     /* Help notification         */
+   public static final int BKN_PAGEDELETED          = 133;     /* Page deleted notification */
+   public static final int BKN_PAGESELECTEDPENDING  = 134;     /* New page selected by user */
+   
+   /**********************************************************************/
+   /* Page deletion flags (usDeleteFlag)                                 */
+   /**********************************************************************/
+   public static final int BKA_ALL                  = 0x0001;  /* all pages                 */
+   public static final int BKA_SINGLE               = 0x0002;  /* single page               */
+   public static final int BKA_TAB                  = 0x0004;  /* minor/major section       */
+   
+   /**********************************************************************/
+   /* Page insertion/query order (usPageOrder, usQueryOrder)             */
+   /**********************************************************************/
+   public static final int BKA_LAST                 = 0x0002;  /* Insert/Query last page    */
+   public static final int BKA_FIRST                = 0x0004;  /* Insert/Query first page   */
+   public static final int BKA_NEXT                 = 0x0008;  /* Insert/Query after page   */
+   public static final int BKA_PREV                 = 0x0010;  /* Insert/Query before page  */
+   public static final int BKA_TOP                  = 0x0020;  /* Query topmost page        */
+   
+   /**********************************************************************/
+   /* Notebook region types (usBookRegion, usType)                       */
+   /**********************************************************************/
+   public static final int BKA_MAJORTAB             = 0x0001;  /* Major Tab                 */
+   public static final int BKA_MINORTAB             = 0x0002;  /* Minor Tab                 */
+   public static final int BKA_PAGEBUTTON           = 0x0100;  /* Page Turning Button       */
+   
+   /**********************************************************************/
+   /* Page insertion/query styles (usPageStyle,usQueryEnd)               */
+   /**********************************************************************/
+   public static final int BKA_STATUSTEXTON         = 0x0001;  /* status area text          */
+   public static final int BKA_MAJOR                = 0x0040;  /* Major Tab                 */
+   public static final int BKA_MINOR                = 0x0080;  /* Minor Tab                 */
+   public static final int BKA_AUTOPAGESIZE         = 0x0100;  /* Page window position/size */
+   public static final int BKA_END                  = 0x0200;  /* Query to end of book      */
+   
+   /**********************************************************************/
+   /* Tab window contents (usTabDisplay)                                 */
+   /**********************************************************************/
+   public static final int BKA_TEXT                 = 0x0400;  /* text data                 */
+   public static final int BKA_BITMAP               = 0x0800;  /* bitmap                    */
+   
+   /**********************************************************************/
+   /* Tabbed dialog-specific constants                                   */
+   /**********************************************************************/
+   public static final int BKA_AUTOCOLOR            = (-1);    /* Automatically color tabs  */
+   public static final int BKA_MAXBUTTONID          = 7999;    /* Max id for common buttons */
+   
+   /**********************************************************************/
+   /* Notebook window styles (ulNotebookStyles)                          */
+   /**********************************************************************/
+   
+   /**********************************************************************/
+   /* Backpage Orientation                                               */
+   /**********************************************************************/
+   public static final int BKS_BACKPAGESBR          = 0x00000001;  /* Bottom right          */
+   public static final int BKS_BACKPAGESBL          = 0x00000002;  /* Bottom left           */
+   public static final int BKS_BACKPAGESTR          = 0x00000004;   /* Top right             */
+   public static final int BKS_BACKPAGESTL          = 0x00000008;  /* Top left              */
+   
+   /**********************************************************************/
+   /* Major Tab Side                                                     */
+   /**********************************************************************/
+   public static final int BKS_MAJORTABRIGHT        = 0x00000010;  /* Major tabs right      */
+   public static final int BKS_MAJORTABLEFT         = 0x00000020;  /* Major tabs left       */
+   public static final int BKS_MAJORTABTOP          = 0x00000040;  /* Major tabs top        */
+   public static final int BKS_MAJORTABBOTTOM       = 0x00000080;  /* Major tabs bottom     */
+   
+   /**********************************************************************/
+   /* Tab Type                                                           */
+   /**********************************************************************/
+   public static final int BKS_SQUARETABS           = 0x00000000;  /* Square edged tabs     */
+   public static final int BKS_ROUNDEDTABS          = 0x00000100;  /* Round edged tabs      */
+   public static final int BKS_POLYGONTABS          = 0x00000200;  /* Polygon edged tabs    */
+   
+   /**********************************************************************/
+   /* Binding type                                                       */
+   /**********************************************************************/
+   public static final int BKS_SOLIDBIND            = 0x00000000;  /* Solid binding         */
+   public static final int BKS_SPIRALBIND           = 0x00000400;  /* Spiral binding        */
+   
+   /**********************************************************************/
+   /* Status line text justification                                     */
+   /**********************************************************************/
+   public static final int BKS_STATUSTEXTLEFT       = 0x00000000;  /* Left justify text     */
+   public static final int BKS_STATUSTEXTRIGHT      = 0x00001000;  /* Right justify text    */
+   public static final int BKS_STATUSTEXTCENTER     = 0x00002000;  /* Center text           */
+   
+   /**********************************************************************/
+   /* Tab text justification                                             */
+   /**********************************************************************/
+   public static final int BKS_TABTEXTLEFT          = 0x00000000;  /* Left justify tab text */
+   public static final int BKS_TABTEXTRIGHT         = 0x00004000;  /* Right justify tab text*/
+   public static final int BKS_TABTEXTCENTER        = 0x00008000;  /* Center tab text       */
+   
+   /**********************************************************************/
+   /* Tabbed dialog styles                                               */
+   /**********************************************************************/
+   public static final int BKS_TABBEDDIALOG         = 0x00000800;  /* Tabbed dialog         */
+   public static final int BKS_BUTTONAREA           = 0x00000200;  /* Reserve space for     */
+   
+   /**********************************************************************/
+   /* Notebook color presentation param attributes                       */
+   /**********************************************************************/
+   public static final int BKA_BACKGROUNDPAGECOLORINDEX  = 0x0001; /* Page Background       */
+   public static final int BKA_BACKGROUNDPAGECOLOR       = 0x0002;
+   public static final int BKA_BACKGROUNDMAJORCOLORINDEX = 0x0003; /* Major Tab Background  */
+   public static final int BKA_BACKGROUNDMAJORCOLOR      = 0x0004;
+   public static final int BKA_BACKGROUNDMINORCOLORINDEX = 0x0005; /* Minor Tab Background  */
+   public static final int BKA_BACKGROUNDMINORCOLOR      = 0x0006;
+   public static final int BKA_FOREGROUNDMAJORCOLORINDEX = 0x0007; /* Major Tab Text        */
+   public static final int BKA_FOREGROUNDMAJORCOLOR      = 0x0008;
+   public static final int BKA_FOREGROUNDMINORCOLORINDEX = 0x0009; /* Minor Tab Text        */
+   public static final int BKA_FOREGROUNDMINORCOLOR      = 0x000A;
 
 /* PM macros */
 
