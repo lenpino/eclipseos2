@@ -504,7 +504,7 @@ boolean translateMnemonic (char key) {
 
 int widgetStyle () {
 	/* Temporary code to force SWT.CLIP_SIBLINGS */
-	return super.widgetStyle () | OS.WS_CLIPCHILDREN;
+	return super.widgetStyle ();// | OS.WS_CLIPCHILDREN;
 }
 
 MRESULT WM_CALCVALIDRECTS (int mp1, int mp2) {
