@@ -40,6 +40,8 @@ org\eclipse\swt\widgets\Text.java
 org\eclipse\swt\widgets\List.java
 org\eclipse\swt\widgets\Combo.java
 org\eclipse\swt\widgets\Slider.java
+org\eclipse\swt\widgets\TabFolder.java
+org\eclipse\swt\widgets\TabItem.java
 # SWT Base
 
 org\eclipse\swt\graphics\Drawable.java
