@@ -195,12 +195,17 @@
         <antcall target="swt.test" />
     </target>
 
+    <target name="swt009_06" depends="init,build.prp">
+        <property name="test.step" value="009_06" />
+        <antcall target="swt.test" />
+    </target>
+
     <!-- creates the default build.prp if nesessary -->
     <target name="build.prp" depends="init" unless="is.build.prp">
         <echo file="${build.prp}"># build.prp: EclipseOS2 build options
 
 # path to the original Eclipse source distribution
-eclipsedir.orig=f:/eclipse
+eclipsedir.orig=x:/apps/dev/fuentes/eclipse2.0.1
 
 # default part and step number for test (run) target
 # currently the value for part can be 'swt' only
