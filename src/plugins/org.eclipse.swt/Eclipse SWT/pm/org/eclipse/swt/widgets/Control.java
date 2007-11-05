@@ -2889,11 +2889,10 @@ public void update () {
     OS.WinUpdateWindow (handle);
 }
 
-//@@TODO(dmik)
-//void updateFont (Font oldFont, Font newFont) {
-//      Font font = getFont ();
-//      if (font.equals (oldFont)) setFont (newFont);
-//}
+void updateFont (Font oldFont, Font newFont) {
+      Font font = getFont ();
+      if (font.equals (oldFont)) setFont (newFont);
+}
 
 //@@TODO(dmik): need to make borders under OS/2?
 //int widgetExtStyle () {
@@ -3087,10 +3086,10 @@ MRESULT WM_COMMAND (int mp1, int mp2) {
         //case OS.CMDSRC_MENU:
         //    return null;
         case OS.CMDSRC_PUSHBUTTON:
-        //@@TODO(dmik)
-        //case OS.CMDSRC_FONTDLG:
-        //case OS.CMDSRC_FILEDLG:
-        //case OS.CMDSRC_COLORDLG:
+        //@@TODO(lpino)
+        case OS.CMDSRC_FONTDLG:
+        case OS.CMDSRC_FILEDLG:
+        case OS.CMDSRC_COLORDLG:
         //case OS.CMDSRC_PRINTDLG:
             int hwndChild = OS.WinWindowFromID (handle, OS.SHORT1FROMMP (mp1));
             Control control = WidgetTable.get (hwndChild);
