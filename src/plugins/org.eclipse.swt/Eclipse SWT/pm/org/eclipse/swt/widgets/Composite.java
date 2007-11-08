@@ -637,7 +637,6 @@ MRESULT WM_PAINT (int mp1, int mp2) {
 	* Do not uncomment this code.
 	*/
 //	if (!hooks (SWT.Paint)) return null;
-
     /* lazily obtain a long-term cached micro presentation space */
 	GCData data = new GCData ();
     if (hps == 0) {
