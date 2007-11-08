@@ -407,9 +407,9 @@ static synchronized void checkDisplay (Thread thread) {
 //    for (int i=0; i<shells.length; i++) shells [i].updateModal ();
 //}
 
-//@@TODO (dmik): later
+//@@TODO (dmik): later (lpino) using WinUpperChar
 //int controlKey (int key) {
-//    int upper = OS.CharUpper ((short) key);
+//    int upper = OS.WinUpperChar ((short) key);
 //    if (64 <= upper && upper <= 95) return upper & 0xBF;
 //    return key;
 //}
@@ -620,10 +620,10 @@ public static synchronized Display findDisplay (Thread thread) {
  *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
  * </ul>
  */
-//@@TODO (dmik):  
+//@@TODO (dmik) Implement it using WinQueryActiveWindow(OS.HWND_DESKTOP)(lpino):  
 //public Shell getActiveShell () {
 //    checkDevice ();
-//    Control control = findControl (OS.GetActiveWindow ());
+//    Control control = findControl (OS.WinQueryActiveWindow(OS.HWND_DESKTOP));
 //    if (control instanceof Shell) return (Shell) control;
 //    return null;
 //}
@@ -673,7 +673,7 @@ public Rectangle getClientArea () {
  *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
  * </ul>
  */
-//@@TODO (dmik):  
+//@@TODO (dmik) using WinQueryCursorInfo (lpino):  
 //public Control getCursorControl () {
 //    checkDevice ();
 //    POINT pt = new POINT ();
@@ -691,7 +691,7 @@ public Rectangle getClientArea () {
  *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
  * </ul>
  */
-//@@TODO (dmik):  
+//@@TODO (dmik):using WinQueryCursorInfo (lpino):  
 //public Point getCursorLocation () {
 //    checkDevice ();
 //    POINT pt = new POINT ();
@@ -793,12 +793,10 @@ public Object getData () {
  *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
  * </ul>
  */
-//@@TODO (dmik):  
-// WinQuerySysValue(HWND_DESKTOP, .SV_DBLCLKTIME)
-//public int getDoubleClickTime () {
-//    checkDevice ();
-//    return OS.GetDoubleClickTime ();
-//}
+public int getDoubleClickTime () {
+    checkDevice ();
+    return OS.WinQuerySysValue(OS.HWND_DESKTOP, OS.SV_DBLCLKTIME);
+}
 
 /**
  * Returns the control which currently has keyboard focus,
@@ -1045,22 +1043,22 @@ public Thread getSyncThread () {
  *
  * @see SWT
  */
-//@@TODO (dmik):  
-//public Color getSystemColor (int id) {
-//    checkDevice ();
-//    int pixel = 0x02000000;
-//    switch (id) {
-//        case SWT.COLOR_WIDGET_DARK_SHADOW:      pixel = OS.GetSysColor (OS.COLOR_3DDKSHADOW);   break;
+//@@TODO finish the rest of the colors(lpino):  
+public Color getSystemColor (int id) {
+    checkDevice ();
+    int pixel = 0x02000000;
+    switch (id) {
+//        case SWT.COLOR_WIDGET_DARK_SHADOW:      pixel = OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_SHADOW,0);   break;
 //        case SWT.COLOR_WIDGET_NORMAL_SHADOW:    pixel = OS.GetSysColor (OS.COLOR_3DSHADOW);     break;
 //        case SWT.COLOR_WIDGET_LIGHT_SHADOW:     pixel = OS.GetSysColor (OS.COLOR_3DLIGHT);      break;
 //        case SWT.COLOR_WIDGET_HIGHLIGHT_SHADOW: pixel = OS.GetSysColor (OS.COLOR_3DHIGHLIGHT);  break;
 //        case SWT.COLOR_WIDGET_BACKGROUND:       pixel = OS.GetSysColor (OS.COLOR_3DFACE);   break;
-//        case SWT.COLOR_WIDGET_BORDER:       pixel = OS.GetSysColor (OS.COLOR_WINDOWFRAME);  break;
+        case SWT.COLOR_WIDGET_BORDER:       pixel = OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_WINDOWFRAME,0);   break;
 //        case SWT.COLOR_WIDGET_FOREGROUND:
-//        case SWT.COLOR_LIST_FOREGROUND:         pixel = OS.GetSysColor (OS.COLOR_WINDOWTEXT);   break;
-//        case SWT.COLOR_LIST_BACKGROUND:         pixel = OS.GetSysColor (OS.COLOR_WINDOW);   break;
-//        case SWT.COLOR_LIST_SELECTION:      pixel = OS.GetSysColor (OS.COLOR_HIGHLIGHT);    break;
-//        case SWT.COLOR_LIST_SELECTION_TEXT:     pixel = OS.GetSysColor (OS.COLOR_HIGHLIGHTTEXT);break;
+        case SWT.COLOR_LIST_FOREGROUND:         pixel = OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_WINDOWTEXT,0);   break;
+        case SWT.COLOR_LIST_BACKGROUND:         pixel = OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_WINDOW,0);   break;
+        case SWT.COLOR_LIST_SELECTION:      pixel = OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_MENUHILITEBGND,0);   break;
+        case SWT.COLOR_LIST_SELECTION_TEXT:     pixel =OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_MENUHILITE,0);   break;
 //        case SWT.COLOR_INFO_FOREGROUND:     pixel = OS.GetSysColor (OS.COLOR_INFOTEXT); break;
 //        case SWT.COLOR_INFO_BACKGROUND:     pixel = OS.GetSysColor (OS.COLOR_INFOBK);       break;
 //        case SWT.COLOR_TITLE_FOREGROUND:        pixel = OS.GetSysColor (OS.COLOR_CAPTIONTEXT);  break;
@@ -1075,11 +1073,11 @@ public Thread getSyncThread () {
 //            pixel = OS.GetSysColor (OS.COLOR_GRADIENTINACTIVECAPTION);
 //            if (pixel == 0) pixel = OS.GetSysColor (OS.COLOR_INACTIVECAPTION);
 //            break;
-//        default:
-//            return super.getSystemColor (id);
-//    }
-//    return Color.win32_new (this, pixel);
-//}
+        default:
+            return super.getSystemColor (id);
+    }
+    return Color.pm_new (this, pixel);
+}
 
 /**
  * Returns the user-interface thread for the receiver.
@@ -1761,24 +1759,24 @@ public static void setAppName (String name) {
     /* Do nothing */
 }
 
-//void setModal (Shell shell) {
-//    if (ModalWidgets == null) ModalWidgets = new Shell [4];
-//    int index = 0, length = ModalWidgets.length;
-//    while (index < length) {
-//        if (ModalWidgets [index] == shell) return;
-//        if (ModalWidgets [index] == null) break;
-//        index++;
-//    }
-//    if (index == length) {
-//        Shell [] newModalWidgets = new Shell [length + 4];
-//        System.arraycopy (ModalWidgets, 0, newModalWidgets, 0, length);
-//        ModalWidgets = newModalWidgets;
-//    }
-//    ModalWidgets [index] = shell;
-//    if (!TrimEnabled) return;
-//    Shell [] shells = getShells ();
-//    for (int i=0; i<shells.length; i++) shells [i].updateModal ();
-//}
+void setModal (Shell shell) {
+    if (ModalWidgets == null) ModalWidgets = new Shell [4];
+    int index = 0, length = ModalWidgets.length;
+    while (index < length) {
+        if (ModalWidgets [index] == shell) return;
+        if (ModalWidgets [index] == null) break;
+        index++;
+    }
+    if (index == length) {
+        Shell [] newModalWidgets = new Shell [length + 4];
+        System.arraycopy (ModalWidgets, 0, newModalWidgets, 0, length);
+        ModalWidgets = newModalWidgets;
+    }
+    ModalWidgets [index] = shell;
+    if (!TrimEnabled) return;
+    Shell [] shells = getShells ();
+    for (int i=0; i<shells.length; i++) shells [i].updateModal ();
+}
 
 /**
  * Sets the synchronizer used by the display to be
@@ -1793,14 +1791,14 @@ public static void setAppName (String name) {
  *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
  * </ul>
  */
-//public void setSynchronizer (Synchronizer synchronizer) {
-//    checkDevice ();
-//    if (synchronizer == null) error (SWT.ERROR_NULL_ARGUMENT);
-//    if (this.synchronizer != null) {
-//        this.synchronizer.runAsyncMessages();
-//    }
-//    this.synchronizer = synchronizer;
-//}
+public void setSynchronizer (Synchronizer synchronizer) {
+    checkDevice ();
+    if (synchronizer == null) error (SWT.ERROR_NULL_ARGUMENT);
+    if (this.synchronizer != null) {
+        this.synchronizer.runAsyncMessages();
+    }
+    this.synchronizer = synchronizer;
+}
 
 //int shiftedKey (int key) {
 //    if (OS.IsWinCE) return 0;
@@ -1981,16 +1979,16 @@ static int untranslateKey (int key) {
  *
  * @see Control#update
  */
-//public void update() {
-//    checkDevice ();
-//    Shell[] shells = WidgetTable.shells ();
-//    for (int i=0; i<shells.length; i++) {
-//        Shell shell = shells [i];
-//        if (!shell.isDisposed () && this == shell.getDisplay ()) {
-//            shell.update ();
-//        }
-//    }
-//}
+public void update() {
+    checkDevice ();
+    Shell[] shells = WidgetTable.shells ();
+    for (int i=0; i<shells.length; i++) {
+        Shell shell = shells [i];
+        if (!shell.isDisposed () && this == shell.getDisplay ()) {
+            shell.update ();
+        }
+    }
+}
 
 //void updateFont () {
 //    if (OS.IsWinCE) return;
