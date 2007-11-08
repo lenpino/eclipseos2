@@ -354,11 +354,14 @@ void createHandle () {
      *  a WC_FRAME window since its handle is used as an owner (see below).
      */
     int hwndOwner = OS.NULLHANDLE;
-    if (parent != null)
-        if (parent instanceof Shell)
+    if (parent != null){
+        if (parent instanceof Shell){
             hwndOwner = ((Shell) parent).frameHandle;
-        else
+        }
+        else{
             hwndOwner = parent.handle;
+        }
+    }
     int hwndParent = OS.HWND_DESKTOP;
     /*
      *  Shell constructor presets the handle to OS.HWND_DESKTOP (which is
@@ -1644,7 +1647,7 @@ MRESULT WM_CLOSE (int mp1, int mp2) {
 }
 
 MRESULT WM_SETFOCUS (int mp1, int mp2) {
-	MRESULT result  = super.WM_SETFOCUS (mp1, mp2);
+    MRESULT result  = super.WM_SETFOCUS (mp1, mp2);
     boolean gotFocus = OS.SHORT1FROMMP (mp2) > 0;
     if (gotFocus) {
         restoreFocus();
