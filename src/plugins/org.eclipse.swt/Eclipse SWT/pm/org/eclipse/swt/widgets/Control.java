@@ -527,12 +527,12 @@ void destroyWidget () {
     }
 }
 
-//@@TODO(dmik)
-//void drawBackground (int hps) {
-//    RECT rect = new RECT ();
-//    OS.GetClientRect (handle, rect); //@@ WinQueryWindowRect
-//    drawBackground (hDC, rect);
-//}
+
+void drawBackground (int hps) {
+    RECTL rcl = new RECTL ();
+    OS.WinQueryWindowRect (handle, rcl);
+    drawBackground (hps, rcl);
+}
 
 void drawBackground (int hps, RECTL rcl) {
     /*
@@ -688,10 +688,6 @@ public int getBorderWidth () {
     checkWidget ();
     // Individual controls will use OS.CV_CXBORDER (or other) when appropriate
     return 0;
-//@@TODO(dmik): remove
-//    int bits = OS.GetWindowLong (handle, OS.GWL_EXSTYLE);
-//    if ((bits & OS.WS_EX_CLIENTEDGE) != 0) return OS.GetSystemMetrics (OS.SM_CXEDGE);
-//    if ((bits & OS.WS_EX_STATICEDGE) != 0) return OS.GetSystemMetrics (OS.SM_CXBORDER);
 }
 
 /*
@@ -701,12 +697,6 @@ public int getBorderWidth () {
 int getBounds (SWP swp) {
     if (parent != null) {
         if (parent.pswp != 0) {
-//@@TODO(dmik): remove
-//            int oldHdwp = parent.hdwp;
-//            parent.hdwp = 0;
-//            OS.EndDeferWindowPos (oldHdwp);
-//            int count = parent.getChildrenCount ();
-//            parent.hdwp = OS.BeginDeferWindowPos (count);
             endDeferWindowPos (parent);
             int count = parent.getChildrenCount ();
             beginDeferWindowPos (parent, count);
@@ -1426,9 +1416,6 @@ String patchMnemonics (String string) {
 public void redraw () {
     checkWidget ();
     if (!OS.WinIsWindowVisible (handle)) return;
-//@@TODO (dmik): remove    
-//    int flags = OS.RDW_ERASE | OS.RDW_FRAME | OS.RDW_INVALIDATE;
-//    OS.RedrawWindow (handle, null, 0, flags);
 //@@TODO(dmik): should we always invalidate children?
     OS.WinInvalidateRect (handle, null, false);
 }
