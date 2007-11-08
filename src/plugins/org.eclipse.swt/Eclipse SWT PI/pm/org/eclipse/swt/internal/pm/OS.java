@@ -452,7 +452,7 @@ public class OS {
 
     /* Win[Query|Set]SysValue constants */
 //    public static final int SV_SWAPBUTTON =         0;
-//    public static final int SV_DBLCLKTIME =         1;
+    public static final int SV_DBLCLKTIME =         1;
 //    public static final int SV_CXDBLCLK =           2;
 //    public static final int SV_CYDBLCLK =           3;
 //    public static final int SV_CXSIZEBORDER =       4;
@@ -854,8 +854,8 @@ public class OS {
 //    public static final int SYSCLR_SHADOWTEXT =             -48;
     public static final int SYSCLR_ENTRYFIELD =             -47;
 //    public static final int SYSCLR_MENUDISABLEDTEXT =       -46;
-//    public static final int SYSCLR_MENUHILITE =             -45;
-//    public static final int SYSCLR_MENUHILITEBGND =         -44;
+    public static final int SYSCLR_MENUHILITE =             -45;
+    public static final int SYSCLR_MENUHILITEBGND =         -44;
 //    public static final int SYSCLR_PAGEBACKGROUND =         -43;
 //    public static final int SYSCLR_FIELDBACKGROUND =        -42;
     public static final int SYSCLR_BUTTONLIGHT =            -41;
@@ -863,7 +863,7 @@ public class OS {
     public static final int SYSCLR_BUTTONDARK =             -39;
     public static final int SYSCLR_BUTTONDEFAULT =          -38;
 //    public static final int SYSCLR_TITLEBOTTOM =            -37;
-//    public static final int SYSCLR_SHADOW =                 -36;
+    public static final int SYSCLR_SHADOW =                 -36;
 //    public static final int SYSCLR_ICONTEXT =               -35;
     public static final int SYSCLR_DIALOGBACKGROUND =       -34;
 //    public static final int SYSCLR_HILITEFOREGROUND =       -33;
@@ -879,8 +879,8 @@ public class OS {
 //    public static final int SYSCLR_ACTIVETITLE =            -23;
 //    public static final int SYSCLR_INACTIVETITLE =          -22;
 //    public static final int SYSCLR_MENU =                   -21;
-//    public static final int SYSCLR_WINDOW =                 -20;
-//    public static final int SYSCLR_WINDOWFRAME =            -19;
+    public static final int SYSCLR_WINDOW =                 -20;
+    public static final int SYSCLR_WINDOWFRAME =            -19;
     public static final int SYSCLR_MENUTEXT =               -18;
     public static final int SYSCLR_WINDOWTEXT =             -17;
 //    public static final int SYSCLR_TITLETEXT =              -16;
