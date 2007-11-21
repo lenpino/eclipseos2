@@ -1,8 +1,3 @@
-/* $Id: os2_eclipse.c,v 1.1 2002/07/10 04:28:02 phaller Exp $ */
-
-/*
- * Contributed by Mark Hale
- */
 
 #include "eclipseOS.h"
 
@@ -34,7 +29,6 @@ static HWND hwndClient = NULLHANDLE;
 static PFNWP oldProc;
 #define SPLASH_WINDOW_ID 100
 #define MSG_BOX_ID 11
-#define BMP_SPLASH_BITMAP 501
 
 /* Define local variables for running the JVM and detecting its exit. */
 static char*   javaVM         = NULL;
@@ -51,7 +45,6 @@ static char*   hiResSplash = "splash_full.bmp";
 static HBITMAP   loadSplashImage(char *baseDir, char *fileName);
 static void      splashTimeout(void);
 static MRESULT EXPENTRY clientWndProc (HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2);
-
 
 /*
  * Overrides for platform-neutral macros
@@ -161,7 +154,6 @@ APIRET BmpRead (HPS      hpsBitmap,
 
   if (phBitmap == NULL)                              /* ParameterÅberprÅfung */
     return (ERROR_INVALID_PARAMETER);                /* Fehler signalisieren */
-
 
         /* Find out how big the file is, allocate that much memory, and read */
                                                     /* in the entire bitmap. */
@@ -336,7 +328,7 @@ HBITMAP  MMLoadBitmap(HAB hab,
 {
   HPS     hps = WinGetScreenPS( HWND_DESKTOP );
   HBITMAP hbmp;
-  APIRET  rc = BmpRead(hps,
+  APIRET  rc = BmpReadFile(hps,
                        featureImage,
                        &hbmp);
   WinReleasePS( hps );
@@ -348,17 +340,10 @@ HBITMAP  MMLoadBitmap(HAB hab,
 }
 
 
-
-
 /* Display a Message */
 void displayMessage( char* message )
 {
-  WinMessageBox(HWND_DESKTOP,
-                hwndFrame,
-                message,
-                NULL,
-                MSG_BOX_ID,
-                MB_OK | MB_MOVEABLE);
+   WinMessageBox( HWND_DESKTOP, hwndFrame, message, NULL, MSG_BOX_ID, MB_OK );
 }
 
 /* Initialize Window System
@@ -435,13 +420,12 @@ int showSplash( char* timeoutString, char* homeDir, char* featureImage )
    hDC = WinOpenWindowDC(hwndClient);
    DevQueryCaps(hDC, CAPS_COLOR_PLANES, 2, devCaps);
    depth = devCaps[0] * devCaps[1];
+
     if (featureImage != NULL)
     	hBitmap = MMLoadBitmap(hab, featureImage);
-
     /* If the bitmap could not be found, try again using the install directory. */
     if (hBitmap == NULLHANDLE)
-    	hBitmap = loadSplashImage( homeDir, depth <= LO_RES_DEPTH ? loResSplash : hiResSplash );
-
+    	 hBitmap = loadSplashImage( homeDir, depth <= LO_RES_DEPTH ? loResSplash : hiResSplash );
     /* If the bitmap could not be found, return an error. */
     if (hBitmap == NULLHANDLE)
     	return ERROR_FILE_NOT_FOUND;
@@ -561,50 +545,38 @@ static void splashTimeout(void)
  */
 static HBITMAP loadSplashImage(char* baseDir, char *fileName)
 {
-  HBITMAP hBitmap = NULLHANDLE;
-  char *langEnvVar;
-  char lang[4] = {0};
-  char country[4] = {0};
-  char *splashFile;
+	HBITMAP hBitmap = NULLHANDLE;
+	char *langEnvVar;
+	char lang[4] = {0};
+	char country[4] = {0};
+	char *splashFile;
 
-  langEnvVar = getenv("LANG");
-  if(langEnvVar != NULL && strlen(langEnvVar) == 5) {
-    lang[0] = langEnvVar[0];
-    lang[1] = langEnvVar[1];
-    lang[2] = '\0';
-    country[0] = langEnvVar[3];
-    country[1] = langEnvVar[4];
-    country[2] = '\0';
-  }
+   langEnvVar = getenv("LANG");
+   if(langEnvVar != NULL && strlen(langEnvVar) == 5) {
+      lang[0] = langEnvVar[0];
+      lang[1] = langEnvVar[1];
+      lang[2] = '\0';
+      country[0] = langEnvVar[3];
+      country[1] = langEnvVar[4];
+      country[2] = '\0';
+   }
 
-  splashFile = malloc ( strlen( baseDir ) + 256 );
+   splashFile = malloc ( strlen( baseDir ) + 256 );
 
-  sprintf( splashFile, "%s\\splash\\%s_%s\\%s", baseDir, lang, country, fileName );
-  hBitmap = MMLoadBitmap(hab, splashFile);
-  if(hBitmap == NULLHANDLE) {
-    sprintf( splashFile, "%s\\splash\\%s\\%s", baseDir, lang, fileName );
-    hBitmap = MMLoadBitmap(hab, splashFile);
-  }
+   sprintf( splashFile, "%s\\splash\\%s_%s\\%s", baseDir, lang, country, fileName );
+   hBitmap = MMLoadBitmap(hab, splashFile);
+   if(hBitmap == NULLHANDLE) {
+      sprintf( splashFile, "%s\\splash\\%s\\%s", baseDir, lang, fileName );
+      hBitmap = MMLoadBitmap(hab, splashFile);
+   }
 
-  if(hBitmap == NULLHANDLE) {
-    sprintf( splashFile, "%s\\splash\\%s", baseDir, fileName );
-    hBitmap = MMLoadBitmap(hab, splashFile);
-  }
+   if(hBitmap == NULLHANDLE) {
+      sprintf( splashFile, "%s\\splash\\%s", baseDir, fileName );
+      hBitmap = MMLoadBitmap(hab, splashFile);
+   }
 
-  // load bitmap from resource table
-  {
-    HPS     hps = WinGetScreenPS( HWND_DESKTOP );
-    hBitmap = GpiLoadBitmap(hps,
-                            (HMODULE)NULLHANDLE,
-                            BMP_SPLASH_BITMAP,
-                            0,
-                            0);
-    WinReleasePS( hps );
-  }
-
-
-  free (splashFile);
-  return hBitmap;
+   free (splashFile);
+   return hBitmap;
 }
 
 
@@ -629,35 +601,3 @@ static MRESULT EXPENTRY clientWndProc (HWND hwnd, ULONG msg, MPARAM mp1, MPARAM 
    return oldProc(hwnd, msg, mp1, mp2);
 }
 
-
-/*****************************************************************************
- * Name      : char* findCommandOS2
- * Purpose   : Scan environment and system configuration for a given command
- * Parameter : char* pszCommand
- * Variables :
- * Result    : NULL if not found,
- *             fully qualified name otherwise
- * Remark    : The method is mainly used to determine which javaw.exe to start,
- *             Eclipse expects the following priorisation:
- *             1 - %ECLIPSE%\jre\bin\javaw.exe
- *             :
- *             :
- *             2 - HINIUSER\Java131\USER_HOME -> javaw.exe
- *             3 - HINIUSER\Java13\USER_HOME -> javaw.exe
- *             4 - %PATH% -> javaw.exe
- *
- * Author    : Patrick Haller 2002-07-10
- *****************************************************************************/
-
-char*  findCommandOS2( char* command )
-{
-  // @@@PH not yet implemented
-  return NULL;
-}
-
-/*
- * $Log: os2_eclipse.c,v $
- * Revision 1.1  2002/07/10 04:28:02  phaller
- * Added Mark Hale's launcher code
- *
- */
