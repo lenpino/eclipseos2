@@ -1975,6 +1975,94 @@ public class OS {
    public static final int BKA_FOREGROUNDMINORCOLORINDEX = 0x0009; /* Minor Tab Text        */
    public static final int BKA_FOREGROUNDMINORCOLOR      = 0x000A;
 
+      /* Menu control styles */
+   
+   public static final int MS_ACTIONBAR               = 0x00000001;
+   public static final int MS_TITLEBUTTON            =  0x00000002;
+   public static final int MS_VERTICALFLIP            = 0x00000004;
+   
+   public static final int MS_CONDITIONALCASCADE      = 0x00000040;
+           
+   /* Menu control messages */
+   
+   public static final int MM_INSERTITEM              = 0x0180;
+   public static final int MM_DELETEITEM              = 0x0181;
+   public static final int MM_QUERYITEM               = 0x0182;
+   public static final int MM_SETITEM                 = 0x0183;
+   public static final int MM_QUERYITEMCOUNT          = 0x0184;
+   public static final int MM_STARTMENUMODE           = 0x0185;
+   public static final int MM_ENDMENUMODE             = 0x0186;
+   public static final int MM_REMOVEITEM              = 0x0188;
+   public static final int MM_SELECTITEM              = 0x0189;
+   public static final int MM_QUERYSELITEMID          = 0x018a;
+   public static final int MM_QUERYITEMTEXT           = 0x018b;
+   public static final int MM_QUERYITEMTEXTLENGTH     = 0x018c;
+   public static final int MM_SETITEMHANDLE           = 0x018d;
+   public static final int MM_SETITEMTEXT             = 0x018e;
+   public static final int MM_ITEMPOSITIONFROMID      = 0x018f;
+   public static final int MM_ITEMIDFROMPOSITION      = 0x0190;
+   public static final int MM_QUERYITEMATTR           = 0x0191;
+   public static final int MM_SETITEMATTR             = 0x0192;
+   public static final int MM_ISITEMVALID             = 0x0193;
+   public static final int MM_QUERYITEMRECT           = 0x0194;
+   
+   public static final int MM_QUERYDEFAULTITEMID      = 0x0431;
+   public static final int MM_SETDEFAULTITEMID        = 0x0432;
+
+   public static final int MIT_END                   =  -1;
+   public static final int MIT_NONE                   = -1;
+   public static final int MIT_MEMERROR               = -1;
+   public static final int MIT_ERROR                  = -1;
+   public static final int MIT_FIRST                  = -2;
+   public static final int MIT_LAST                   = -3;
+//   public static final int MID_NONE                   
+   public static final int MID_ERROR                  = -1;
+   
+   /* Menu item styles & attributes */
+   
+   public static final int MIS_TEXT                   = 0x0001;
+   
+   public static final int MIS_BITMAP                 = 0x0002;
+   public static final int MIS_SEPARATOR              = 0x0004;
+   
+   public static final int MIS_OWNERDRAW             =  0x0008;
+   
+   public static final int MIS_SUBMENU                = 0x0010;
+   public static final int MIS_MULTMENU               = 0x0020;      /* multiple choice submenu     */
+   public static final int MIS_SYSCOMMAND             = 0x0040;
+   public static final int MIS_HELP                   = 0x0080;
+   public static final int MIS_STATIC                 = 0x0100;
+   public static final int MIS_BUTTONSEPARATOR        = 0x0200;
+   public static final int MIS_BREAK                 =  0x0400;
+   public static final int MIS_BREAKSEPARATOR        =  0x0800;
+   public static final int MIS_GROUP                  = 0x1000;      /* multiple choice group start */
+   /* In multiple choice submenus a style of 'single' denotes the item is a
+   ** radiobutton.  Absence of this style defaults the item to a checkbox.       */
+   public static final int MIS_SINGLE                 = 0x2000;
+   
+   public static final int MIA_NODISMISS              = 0x0020;
+   public static final int MIA_FRAMED                 = 0x1000;
+   public static final int MIA_CHECKED                = 0x2000;
+   public static final int MIA_DISABLED               = 0x4000;
+   public static final int MIA_HILITED                = 0x8000;
+
+   public static final int PU_POSITIONONITEM          = 0x0001; /* Need idItem parameter */
+   
+   public static final int PU_HCONSTRAIN              = 0x0002; /* Keep menu on left and right edge */
+   public static final int PU_VCONSTRAIN              = 0x0004; /* Keep menu on top and bottom edge */
+   
+   public static final int PU_NONE                    = 0x0000; /* If invoked by keyboard */
+   public static final int PU_MOUSEBUTTON1DOWN        = 0x0008; /* If invoked by button 1 */
+   public static final int PU_MOUSEBUTTON2DOWN        = 0x0010; /* If invoked by button 2 */
+   public static final int PU_MOUSEBUTTON3DOWN        = 0x0018; /* If invoked by button 3 */
+   
+   public static final int PU_SELECTITEM              = 0x0020; /* Set selected item (use with kbd) */
+   
+   public static final int PU_MOUSEBUTTON1            = 0x0040; /* If button1 use allowed */
+   public static final int PU_MOUSEBUTTON2            = 0x0080; /* If button2 use allowed */
+   public static final int PU_MOUSEBUTTON3            = 0x0100; /* If button3 use allowed */
+   public static final int PU_KEYBOARD                = 0x0200; /* If keyboard use allowed */
+
 /* PM macros */
 
 public static final short SHORT1FROMMP (int mp) { return (short)mp; }    
