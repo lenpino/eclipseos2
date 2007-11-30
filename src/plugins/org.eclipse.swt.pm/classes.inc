@@ -43,6 +43,8 @@ org\eclipse\swt\widgets\Slider.java
 org\eclipse\swt\widgets\TabFolder.java
 org\eclipse\swt\widgets\TabItem.java
 org\eclipse\swt\widgets\Group.java
+org\eclipse\swt\widgets\Menu.java
+org\eclipse\swt\widgets\MenuItem.java
 # SWT Base
 
 org\eclipse\swt\graphics\Drawable.java
@@ -189,6 +191,9 @@ org\eclipse\swt\internal\pm\FILEDLG.java
 org\eclipse\swt\internal\pm\FONTDLG.java
 org\eclipse\swt\internal\pm\SBCDATA.java
 org\eclipse\swt\internal\pm\LBOXINFO.java
+org\eclipse\swt\internal\pm\MENUITEM.java
+org\eclipse\swt\internal\pm\OWNERITEM.java
+
 # SWT PI (+)
 
 org\eclipse\swt\internal\Library.java
