@@ -625,7 +625,7 @@ public class OS {
 //    public static final int FID_SYSMENU =           0x8002;
 //    public static final int FID_TITLEBAR =          0x8003;
 //    public static final int FID_MINMAX =            0x8004;
-//    public static final int FID_MENU =              0x8005;
+    public static final int FID_MENU =              0x8005;
 //    public static final int FID_VERTSCROLL =        0x8006;
 //    public static final int FID_HORZSCROLL =        0x8007;
     public static final int FID_CLIENT =            0x8008;
@@ -878,7 +878,7 @@ public class OS {
 //    public static final int SYSCLR_BACKGROUND =             -24;
 //    public static final int SYSCLR_ACTIVETITLE =            -23;
 //    public static final int SYSCLR_INACTIVETITLE =          -22;
-//    public static final int SYSCLR_MENU =                   -21;
+    public static final int SYSCLR_MENU =                   -21;
     public static final int SYSCLR_WINDOW =                 -20;
     public static final int SYSCLR_WINDOWFRAME =            -19;
     public static final int SYSCLR_MENUTEXT =               -18;
@@ -2250,6 +2250,7 @@ public static final native int WinEditColorDlg (int hwndParent, int hwndOwner, i
 public static final native boolean WinFileDlg (int hwndParent, int hwndOwner, FILEDLG filedlg);
 public static final native boolean WinFreeFileDlgList (PSZ[] papszFQFilename);
 public static final native int WinOpenWindowDC(int hwnd);
+public static final native boolean WinPopupMenu(int hwndParent, int hwndOwner, int hwndMenu, int x, int y, int idItem, short fs);
 public static final native boolean PrfQueryProfileSize (int hini, PSZ pszApp,
     PSZ pszKey, int[] pulDataLen);
 public static final native int PrfQueryProfileString (int hini, PSZ pszApp,
