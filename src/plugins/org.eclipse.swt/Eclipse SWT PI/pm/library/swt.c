@@ -1306,14 +1306,12 @@ JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinFreeFileDlgLis
     jboolean rc;
 
     if (papszFQFilename) {
-        c_pppapszFQFilename = getPAPSZArray(env, papszFQFilename);
-        printf("HONOR!!!\n");
+        c_pppapszFQFilename = getPAPSZArray(env, papszFQFilename);;
     }
 
     DEBUG_CALL("WinFreeFileDlgList\n")
 
     rc = (jboolean)WinFreeFileDlgList(c_pppapszFQFilename);
-    printf("PATRIA!!! = %d\n", rc);
     if (papszFQFilename)
         releasePAPSZArray(env, c_papszFQFilenameList, c_pppapszFQFilename);
 
@@ -1325,6 +1323,13 @@ JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_WinOpenWindowDC
     DEBUG_CALL("WinOpenWindowDC\n")
 
     return (jint)WinOpenWindowDC((HWND)hwnd);
+}
+JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinPopupMenu
+        (JNIEnv *env, jclass that, jint hwndParent, jint hwndOwner, jint hwndMenu, jint x, jint y, jint idItem, jshort fs)
+{
+    DEBUG_CALL("WinPopupMenu\n")
+
+    return (jboolean)WinPopupMenu((HWND)hwndParent, (HWND)hwndOwner, (HWND)hwndMenu, x, y, idItem, fs);
 }
 JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_PrfQueryProfileSize
         (JNIEnv *env, jclass that, jint hini, jobject pszApp, jobject pszKey,
