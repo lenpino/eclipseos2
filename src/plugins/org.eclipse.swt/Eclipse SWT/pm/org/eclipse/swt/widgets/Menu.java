@@ -1,7 +1,7 @@
 package org.eclipse.swt.widgets;
 /*
  * OS/2 version.
- * Copyright (c) 2002, 2004 EclipseOS2 Team.
+ * Copyright (c) 2002, 2007 EclipseOS2 Team.
  */
 
 /*
@@ -95,7 +95,7 @@ public Menu (Control parent) {
 public Menu (Decorations parent, int style) {
 	super (parent, checkStyle (style));
 	this.parent = parent;
-//	createWidget ();
+	createWidget ();
 }
 
 /**
@@ -218,98 +218,97 @@ static int checkStyle (int style) {
 	return checkBits (style, SWT.POP_UP, SWT.BAR, SWT.DROP_DOWN, 0, 0, 0);
 }
 
-//void createHandle () {
-//	if ((style & SWT.BAR) != 0) {
-//		/*
-//		* Note in WinCE PPC.  CreateMenu cannot insert items of type 
-//		* separator.  The workaround is to always use CreatePopupMenu.
-//		*/
-//		handle = OS.IsPPC ? OS.CreatePopupMenu () : OS.CreateMenu();
-//	} else {
-//		handle = OS.CreatePopupMenu ();
-//	}
-//	if (handle == 0) error (SWT.ERROR_NO_HANDLES);
-//}
-//
-//void createItem (MenuItem item, int index) {
-//	int count = GetMenuItemCount (handle);
-//	if (!(0 <= index && index <= count)) error (SWT.ERROR_INVALID_RANGE);
-//	parent.add (item);
-//	boolean success = false;
-//	if (OS.IsWinCE) {
-//		int uFlags = OS.MF_BYPOSITION;
-//		TCHAR lpNewItem = null;
-//		if ((item.style & SWT.SEPARATOR) != 0) {
-//			uFlags |= OS.MF_SEPARATOR;
-//		} else {
-//			lpNewItem = new TCHAR (0, "", true);
-//		}
-//		success = OS.InsertMenu (handle, index, uFlags, item.id, lpNewItem);
-//		if (success) {
-//			MENUITEMINFO info = new MENUITEMINFO ();
-//			info.cbSize = MENUITEMINFO.sizeof;
-//			info.fMask = OS.MIIM_DATA;
-//			info.dwItemData = item.id;
-//			success = OS.SetMenuItemInfo (handle, index, true, info);
-//			
-//			if (OS.IsPPC) {
-//				/* if it is a top level menu item, display it on the toolbar */
-//				if (item.parent == parent.menuBar) {
-//					TBBUTTON lpButton = new TBBUTTON ();
-//					lpButton.idCommand = item.id;
-//					lpButton.fsStyle = (byte) (OS.TBSTYLE_DROPDOWN | OS.TBSTYLE_AUTOSIZE | 0x80);
-//					lpButton.fsState = (byte) OS.TBSTATE_ENABLED;
-//					lpButton.iBitmap = OS.I_IMAGENONE;
-//					if ((item.style & SWT.SEPARATOR) != 0) {
-//						lpButton.fsStyle = (byte) OS.BTNS_SEP;
-//					} 
-//					success = OS.SendMessage (parent.hwndTB, OS.TB_INSERTBUTTON, index, lpButton) != 0;
-//				}
-//			}
-//		}
-//	} else {
-//		/*
-//		* Bug in Windows.  For some reason, when InsertMenuItem ()
-//		* is used to insert an item without text, it is not possible
-//		* to use SetMenuItemInfo () to set the text at a later time.
-//		* The fix is to insert the item with an empty string.
-//		*/
-//		int hHeap = OS.GetProcessHeap ();
-//		int pszText = OS.HeapAlloc (hHeap, OS.HEAP_ZERO_MEMORY, TCHAR.sizeof);
-//		MENUITEMINFO info = new MENUITEMINFO ();
-//		info.cbSize = MENUITEMINFO.sizeof;
-//		info.fMask = OS.MIIM_ID | OS.MIIM_TYPE | OS.MIIM_DATA;
-//		info.wID = info.dwItemData = item.id;
-//		info.fType = item.widgetStyle ();
-//		info.dwTypeData = pszText;
-//		success = OS.InsertMenuItem (handle, index, true, info);
-//		if (pszText != 0) OS.HeapFree (hHeap, 0, pszText);
-//	}
-//	if (!success) {
-//		parent.remove (item);
-//		error (SWT.ERROR_ITEM_NOT_ADDED);
-//	}
-//	redraw ();
-//}
+void createHandle () {
+	if ((style & SWT.BAR) != 0) {
+            handle = OS.WinCreateWindow (OS.HWND_DESKTOP,	/* parent window */
+                                                        PSZ.getAtom (OS.WC_MENU),	/* class name */
+                                                        new PSZ(""),	/* window text */
+                                                        OS.MS_ACTIONBAR,	/* window style */
+                                                        0, 0, 0, 0, /* size and position */
+                                                        OS.HWND_DESKTOP,	/* owner window */
+                                                        OS.HWND_TOP, /* sibling window */
+                                                        OS.FID_MENU,	/* ID */
+                                                        OS.NULLHANDLE,	/* control data */
+                                                        0		/* presentation parameters */
+                                                        );
+	} else {
+            short flOptions = OS.PU_MOUSEBUTTON1DOWN | OS.PU_KEYBOARD | OS.PU_MOUSEBUTTON1;
+            handle = OS.WinCreateWindow (OS.HWND_DESKTOP,	/* parent window */
+                                                        PSZ.getAtom (OS.WC_MENU),	/* class name */
+                                                        new PSZ(""),	/* window text */
+                                                        0,	/* window style */
+                                                        0, 0, 0, 0, /* size and position */
+                                                        OS.HWND_DESKTOP,	/* owner window */
+                                                        OS.HWND_TOP, /* sibling window */
+                                                        OS.FID_MENU,	/* ID */
+                                                        OS.NULLHANDLE,	/* control data */
+                                                        0		/* presentation parameters */
+                                                        );
+          boolean rc = OS.WinPopupMenu(OS.HWND_DESKTOP, OS.HWND_DESKTOP, handle, 0, 0, 0, flOptions);
+              
+	}
+	if (handle == 0) error (SWT.ERROR_NO_HANDLES);
+}
 
-//void createWidget () {
-//	createHandle ();
-//	parent.add (this);
-//}
+void createItem (MenuItem item, int index) {
+	int count = GetMenuItemCount (handle);
+	if (!(0 <= index && index <= count)) error (SWT.ERROR_INVALID_RANGE);
+	parent.add (item);
+	boolean success = false;
 
-/*
-* Currently not used.
-*/
-//int defaultBackground () {
-//	return OS.GetSysColor (OS.COLOR_MENU);
-//}
+        
+        MENUITEM item = new MENUITEM();;
+        item .iPosition = position;
+        item . afStyle = style;
+        item . afAttribute = attributes;
+        item . id = id;
+        item . hwndSubMenu = submenu;
+        item . hItem = 0;
+
+        return (SHORT1FROMMR (WinSendMsg (menu, MM_INSERTITEM,  (MPFROMP (&item)), (MPFROMP (text)))));
+
+		/*
+		* Bug in Windows.  For some reason, when InsertMenuItem ()
+		* is used to insert an item without text, it is not possible
+		* to use SetMenuItemInfo () to set the text at a later time.
+		* The fix is to insert the item with an empty string.
+		*/
+		int hHeap = OS.GetProcessHeap ();
+		int pszText = OS.HeapAlloc (hHeap, OS.HEAP_ZERO_MEMORY, TCHAR.sizeof);
+		MENUITEMINFO info = new MENUITEMINFO ();
+		info.cbSize = MENUITEMINFO.sizeof;
+		info.fMask = OS.MIIM_ID | OS.MIIM_TYPE | OS.MIIM_DATA;
+		info.wID = info.dwItemData = item.id;
+		info.fType = item.widgetStyle ();
+		info.dwTypeData = pszText;
+		success = OS.InsertMenuItem (handle, index, true, info);
+		if (pszText != 0) OS.HeapFree (hHeap, 0, pszText);
+
+	if (!success) {
+		parent.remove (item);
+		error (SWT.ERROR_ITEM_NOT_ADDED);
+	}
+	redraw ();
+}
+
+void createWidget () {
+	createHandle ();
+	parent.add (this);
+}
 
 /*
 * Currently not used.
 */
-//int defaultForeground () {
-//	return OS.GetSysColor (OS.COLOR_MENUTEXT);
-//}
+int defaultBackground () {
+	return OS.WinQuerySysColor(handle, OS.SYSCLR_MENU, 0);
+}
+
+/*
+* Currently not used.
+*/
+int defaultForeground () {
+	return OS.WinQuerySysColor(handle, OS.SYSCLR_MENUTEXT, 0);
+}
 
 //void destroyAcceleratorTable () {
 //	parent.destroyAcceleratorTable ();
