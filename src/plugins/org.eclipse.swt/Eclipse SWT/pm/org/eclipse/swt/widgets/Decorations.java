@@ -94,9 +94,9 @@ import org.eclipse.swt.events.*;
 public class Decorations extends Canvas {
 //@@TODO(dmik)    
 //	Image image;
-//	Menu menuBar;
-//	Menu [] menus;
-//	MenuItem [] items;
+	Menu menuBar;
+	Menu [] menus;
+	MenuItem [] items;
 	Control savedFocus;
 	Button defaultButton, saveDefault;
 //@@TODO (dmik): later    
@@ -107,7 +107,8 @@ public class Decorations extends Canvas {
 //	* The start value for WM_COMMAND id's.
 //	* Windows reserves the values 0..100.
 //	*/
-//	static final int ID_START = 100;
+//@@TODO (lpino): For now we keep this in place
+	static final int ID_START = 100;
 
     int frameHandle;
 
@@ -175,36 +176,36 @@ public Decorations (Composite parent, int style) {
     super (parent, checkStyle (style));
 }
 
-//@@TODO(dmik)
-//void add (Menu menu) {
-//	if (menus == null) menus = new Menu [4];
-//	for (int i=0; i<menus.length; i++) {
-//		if (menus [i] == null) {
-//			menus [i] = menu;
-//			return;
-//		}
-//	}
-//	Menu [] newMenus = new Menu [menus.length + 4];
-//	newMenus [menus.length] = menu;
-//	System.arraycopy (menus, 0, newMenus, 0, menus.length);
-//	menus = newMenus;
-//}
-//
-//void add (MenuItem item) {
-//	if (items == null) items = new MenuItem [12];
-//	for (int i=0; i<items.length; i++) {
-//		if (items [i] == null) {
-//			item.id = i + ID_START;
-//			items [i] = item;
-//			return;
-//		}
-//	}
-//	item.id = items.length + ID_START;
-//	MenuItem [] newItems = new MenuItem [items.length + 12];
-//	newItems [items.length] = item;
-//	System.arraycopy (items, 0, newItems, 0, items.length);
-//	items = newItems;
-//}
+
+void add (Menu menu) {
+	if (menus == null) menus = new Menu [4];
+	for (int i=0; i<menus.length; i++) {
+		if (menus [i] == null) {
+			menus [i] = menu;
+			return;
+		}
+	}
+	Menu [] newMenus = new Menu [menus.length + 4];
+	newMenus [menus.length] = menu;
+	System.arraycopy (menus, 0, newMenus, 0, menus.length);
+	menus = newMenus;
+}
+
+void add (MenuItem item) {
+	if (items == null) items = new MenuItem [12];
+	for (int i=0; i<items.length; i++) {
+		if (items [i] == null) {
+			item.id = i + ID_START;
+			items [i] = item;
+			return;
+		}
+	}
+	item.id = items.length + ID_START;
+	MenuItem [] newItems = new MenuItem [items.length + 12];
+	newItems [items.length] = item;
+	System.arraycopy (items, 0, newItems, 0, items.length);
+	items = newItems;
+}
 
 void bringToTop () {
 //@@TODO(dmik): how to take SWT.ON_TOP flag into account under OS/2?
@@ -322,18 +323,6 @@ public Rectangle computeTrim (int x, int y, int width, int height) {
 //				}
 //			}
 //		}
-//	}
-//	if (OS.IsPPC) {
-//		/* 
-//		* Note on WinCE PPC.  Close the shell when user taps CTRL-Q.
-//		* IDOK represents the "Done Button" which also closes the shell.
-//		*/
-//		accel.fVirt = OS.FVIRTKEY | OS.FCONTROL;
-//		accel.key = 'Q';
-//		accel.cmd = OS.IDOK;
-//		OS.MoveMemory (buffer1, accel, size);
-//		System.arraycopy (buffer1, 0, buffer2, nAccel * size, size);
-//		nAccel++;			
 //	}
 //	if (nAccel != 0) hAccel = OS.CreateAcceleratorTable (buffer2, nAccel);
 //}
@@ -798,12 +787,12 @@ void releaseWidget () {
 //		}
 //	}
 //}
-//
-//void remove (MenuItem item) {
-//	if (items == null) return;
-//	items [item.id - ID_START] = null;
-//	item.id = -1;
-//}
+
+void remove (MenuItem item) {
+	if (items == null) return;
+	items [item.id - ID_START] = null;
+	item.id = -1;
+}
 
 boolean restoreFocus () {
 	if (savedFocus != null && savedFocus.isDisposed ()) savedFocus = null;
