@@ -444,6 +444,25 @@ void cacheLBOXINFOFids(JNIEnv *env, jobject lpObject, PLBOXINFO_FID_CACHE lpCach
 PLBOXINFO getLBOXINFOFields(JNIEnv *env, jobject lpObject, PLBOXINFO lpStruct, PLBOXINFO_FID_CACHE lpCache);
 void setLBOXINFOFields(JNIEnv *env, jobject lpObject, PLBOXINFO lpStruct, PLBOXINFO_FID_CACHE lpCache);
 
+/* MENUITEM struct */
+typedef struct MENUITEM_FID_CACHE {
+    int cached;
+    jclass clazz;
+    jfieldID
+    iPosition,
+    afStyle,
+    afAttribute,
+    id,
+    hwndSubMenu,
+    hItem;
+} MENUITEM_FID_CACHE;
+typedef MENUITEM_FID_CACHE *PMENUITEM_FID_CACHE;
+
+void cacheMENUITEMFids(JNIEnv *env, jobject lpObject, PMENUITEM_FID_CACHE lpCache);
+PMENUITEM getMENUITEMFields(JNIEnv *env, jobject lpObject, PMENUITEM lpStruct, PMENUITEM_FID_CACHE lpCache);
+void setMENUITEMFields(JNIEnv *env, jobject lpObject, PMENUITEM lpStruct, PMENUITEM_FID_CACHE lpCache);
+
+
 typedef struct SBCDATA_FID_CACHE {
 	int cached;
 	jclass clazz;
@@ -461,6 +480,27 @@ typedef SBCDATA_FID_CACHE *PSBCDATA_FID_CACHE;
 void cacheSBCDATAFids(JNIEnv *env, jobject lpObject, PSBCDATA_FID_CACHE lpCache);
 PSBCDATA getSBCDATAFields(JNIEnv *env, jobject lpObject, PSBCDATA lpStruct, PSBCDATA_FID_CACHE lpCache);
 void setSBCDATAFields(JNIEnv *env, jobject lpObject, PSBCDATA lpStruct, PSBCDATA_FID_CACHE lpCache);
+
+/* OWNERITEM stuct */
+typedef struct OWNERITEM_FID_CACHE {
+    int cached;
+    jclass clazz;
+    jfieldID
+    hwnd,
+    hps,
+    fsState,
+    fsAttribute,
+    fsStateOld,
+    fsAttributeOld,
+    rclItem,
+     idItem,
+    hItem;
+} OWNERITEM_FID_CACHE;
+typedef OWNERITEM_FID_CACHE *POWNERITEM_FID_CACHE;
+
+void cacheOWNERITEMFids(JNIEnv *env, jobject lpObject, POWNERITEM_FID_CACHE lpCache);
+POWNERITEM getOWNERITEMFields(JNIEnv *env, jobject lpObject, POWNERITEM lpStruct, POWNERITEM_FID_CACHE lpCache);
+void setOWNERITEMFields(JNIEnv *env, jobject lpObject, POWNERITEM lpStruct, POWNERITEM_FID_CACHE lpCache);
 
 /* FACENAMEDESC struct */
 /*@@TODO (dmik): remove!
@@ -501,6 +541,8 @@ extern FONTDLG_FID_CACHE FONTDLGFc;
 extern FILEDLG_FID_CACHE FILEDLGFc;
 extern LBOXINFO_FID_CACHE LBOXINFOFc;
 extern SBCDATA_FID_CACHE SBCDATAFc;
+extern MENUITEM_FID_CACHE MENUITEMFc;
+extern OWNERITEM_FID_CACHE OWNERITEMFc;
 /*@@TODO (dmik): remove! 
 extern FACENAMEDESC_FID_CACHE FACENAMEDESCFc;
 */
