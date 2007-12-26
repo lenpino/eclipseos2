@@ -1332,6 +1332,102 @@ void setSBCDATAFields(JNIEnv *env, jobject lpObject, PSBCDATA lpStruct, PSBCDATA
     (*env)->SetShortField(env, lpObject, lpCache->cTotal, lpStruct->cTotal);
 }
 
+/* MENUITEM struct */
+
+void cacheMENUITEMFids(JNIEnv *env, jobject lpObject, PMENUITEM_FID_CACHE lpCache)
+{
+    if (lpCache->cached) return;
+    lpCache->clazz = (*env)->GetObjectClass(env, lpObject);
+    lpCache->iPosition = (*env)->GetFieldID(env, lpCache->clazz, "iPosition", "S");
+    lpCache->afStyle = (*env)->GetFieldID(env, lpCache->clazz, "afStyle", "S");
+    lpCache->afAttribute = (*env)->GetFieldID(env, lpCache->clazz, "afAttribute", "S");
+    lpCache->id = (*env)->GetFieldID(env, lpCache->clazz, "id", "S");
+    lpCache->hwndSubMenu = (*env)->GetFieldID(env, lpCache->clazz, "hwndSubMenu", "I");
+    lpCache->hItem = (*env)->GetFieldID(env, lpCache->clazz, "hItem", "I");
+    lpCache->cached = 1;
+}
+
+PMENUITEM getMENUITEMFields(JNIEnv *env, jobject lpObject, PMENUITEM lpStruct, PMENUITEM_FID_CACHE lpCache)
+{
+    if (!lpCache->cached) cacheMENUITEMFids(env, lpObject, lpCache);
+    lpStruct->iPosition = (*env)->GetShortField(env, lpObject, lpCache->iPosition);
+    lpStruct->afStyle = (*env)->GetShortField(env, lpObject, lpCache->afStyle);
+    lpStruct->afAttribute = (*env)->GetShortField(env, lpObject, lpCache->afAttribute);
+    lpStruct->id = (*env)->GetShortField(env, lpObject, lpCache->id);
+    lpStruct->hwndSubMenu = (*env)->GetIntField(env, lpObject, lpCache->hwndSubMenu);
+    lpStruct->hItem = (*env)->GetIntField(env, lpObject, lpCache->hItem);
+    return lpStruct;
+}
+
+void setMENUITEMFields(JNIEnv *env, jobject lpObject, PMENUITEM lpStruct, PMENUITEM_FID_CACHE lpCache)
+{
+    if (!lpCache->cached) cacheMENUITEMFids(env, lpObject, lpCache);
+    (*env)->SetShortField(env, lpObject, lpCache->iPosition, lpStruct->iPosition);
+    (*env)->SetShortField(env, lpObject, lpCache->afStyle, lpStruct->afStyle);
+    (*env)->SetShortField(env, lpObject, lpCache->afAttribute, lpStruct->afAttribute);
+    (*env)->SetShortField(env, lpObject, lpCache->id, lpStruct->id);
+    (*env)->SetIntField(env, lpObject, lpCache->hwndSubMenu, lpStruct->hwndSubMenu);
+    (*env)->SetIntField(env, lpObject, lpCache->hItem, lpStruct->hItem);
+}
+
+/* OWNERITEM struct */
+
+void cacheOWNERITEMFids(JNIEnv *env, jobject lpObject, POWNERITEM_FID_CACHE lpCache)
+{
+    if (lpCache->cached) return;
+    lpCache->clazz = (*env)->GetObjectClass(env, lpObject);
+    lpCache->hwnd = (*env)->GetFieldID(env, lpCache->clazz, "hwnd", "I");
+    lpCache->hps = (*env)->GetFieldID(env, lpCache->clazz, "hps", "I");
+    lpCache->fsState = (*env)->GetFieldID(env, lpCache->clazz, "fsState", "I");
+    lpCache->fsAttribute = (*env)->GetFieldID(env, lpCache->clazz, "fsAttribute", "I");
+    lpCache->fsStateOld = (*env)->GetFieldID(env, lpCache->clazz, "fsStateOld", "I");
+    lpCache->fsAttributeOld = (*env)->GetFieldID(env, lpCache->clazz, "fsAttributeOld", "I");
+    lpCache->rclItem = (*env)->GetFieldID(env, lpCache->clazz, "rclItem", "Lorg/eclipse/swt/internal/pm/RECTL;");
+    lpCache->idItem = (*env)->GetFieldID(env, lpCache->clazz, "idItem", "I");
+    lpCache->hItem = (*env)->GetFieldID(env, lpCache->clazz, "hItem", "I");
+    lpCache->cached = 1;
+}
+
+POWNERITEM getOWNERITEMFields(JNIEnv *env, jobject lpObject, POWNERITEM lpStruct, POWNERITEM_FID_CACHE lpCache)
+{
+    if (!lpCache->cached) cacheOWNERITEMFids(env, lpObject, lpCache);
+    lpStruct->hwnd = (*env)->GetIntField(env, lpObject, lpCache->hwnd);
+    lpStruct->hps = (*env)->GetIntField(env, lpObject, lpCache->hps);
+    lpStruct->fsState = (*env)->GetIntField(env, lpObject, lpCache->fsState);
+    lpStruct->fsAttribute = (*env)->GetIntField(env, lpObject, lpCache->fsAttribute);
+    lpStruct->fsStateOld = (*env)->GetIntField(env, lpObject, lpCache->fsStateOld);
+    lpStruct->fsAttributeOld = (*env)->GetIntField(env, lpObject, lpCache->fsAttributeOld);
+    {
+        jobject prclItem = (*env)->GetObjectField(env, lpObject, lpCache->rclItem);
+        if (prclItem){
+		if(&(lpStruct->rclItem)){
+			getRECTLFields(env, prclItem, &(lpStruct->rclItem), &PGLOB(RECTLFc));
+		}
+	}
+    }
+    lpStruct->idItem = (*env)->GetIntField(env, lpObject, lpCache->idItem);
+    lpStruct->hItem = (*env)->GetIntField(env, lpObject, lpCache->hItem);
+    return lpStruct;
+}
+
+void setOWNERITEMFields(JNIEnv *env, jobject lpObject, POWNERITEM lpStruct, POWNERITEM_FID_CACHE lpCache)
+{
+    if (!lpCache->cached) cacheOWNERITEMFids(env, lpObject, lpCache);
+    (*env)->SetIntField(env, lpObject, lpCache->hwnd, lpStruct->hwnd);
+    (*env)->SetIntField(env, lpObject, lpCache->hps, lpStruct->hps);
+    (*env)->SetIntField(env, lpObject, lpCache->fsState, lpStruct->fsState);
+    (*env)->SetIntField(env, lpObject, lpCache->fsAttribute, lpStruct->fsAttribute);
+    (*env)->SetIntField(env, lpObject, lpCache->fsStateOld, lpStruct->fsStateOld);
+    (*env)->SetIntField(env, lpObject, lpCache->fsAttributeOld, lpStruct->fsAttributeOld);
+    {
+        jobject prclItem = (*env)->GetObjectField(env, lpObject, lpCache->rclItem);
+        if (prclItem && &(lpStruct->rclItem))
+		setRECTLFields(env, prclItem, &(lpStruct->rclItem), &PGLOB(RECTLFc));
+    }
+    (*env)->SetIntField(env, lpObject, lpCache->idItem, lpStruct->idItem);
+    (*env)->SetIntField(env, lpObject, lpCache->hItem, lpStruct->hItem);
+}
+
 /* FACENAMEDESC struct */
 /*@@TODO (dmik): don't need, remove!
 void cacheFACENAMEDESCFids(JNIEnv *env, jobject lpObject, PFACENAMEDESC_FID_CACHE lpCache)
