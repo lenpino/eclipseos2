@@ -511,6 +511,42 @@ JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_WinSendMsg__IILorg_ec
     return rc;
 }
 
+JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_WinSendMsg__IILorg_eclipse_swt_internal_pm_MENUITEM_2Lorg_eclipse_swt_internal_pm_PSZ_2
+         (JNIEnv *env, jclass that, jint hwnd, jint ulMsgid, jobject mpParam1, jobject mpParam2)
+{
+    PAPSZ c_mpParam2 = NULL;
+    MENUITEM c_mpParam1, *c_pmpParam1 = NULL;
+
+    if (mpParam2) 
+        c_mpParam2 = getPAPSZArray(env, mpParam2);
+    if (mpParam1) 
+        c_pmpParam1 = getMENUITEMFields(env, mpParam1, &c_mpParam1, &PGLOB(MENUITEMFc));
+
+    rc = (jint)WinSendMsg((HWND)hwnd, ulMsgid, c_pmpParam1, c_mpParam2);
+
+    if (mpParam2)
+        releasePAPSZArray(env, mpParam2, c_mpParam2);
+    if (mpParam1)
+        setMENUITEMFields(env, mpParam1, c_pmpParam1, &PGLOB(MENUITEMFc));
+    return rc;
+
+}
+
+JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_WinSendMsg__IIILorg_eclipse_swt_internal_pm_MENUITEM_2
+         (JNIEnv *env, jclass that, jint hwnd, jint ulMsgid, jint mpParam1, jobject mpParam2)
+{
+    MENUITEM c_mpParam2, *c_pmpParam2 = NULL;
+    if (mpParam2) 
+        c_pmpParam2 = getMENUITEMFields(env, mpParam1, &c_mpParam2, &PGLOB(MENUITEMFc));
+
+    jint rc = (jint)WinSendMsg((HWND)hwnd, ulMsgid, (MPARAM)mpParam1, c_pmpParam2);
+
+    if (mpParam2)
+        setMENUITEMFields(env, mpParam2, c_pmpParam2, &PGLOB(MENUITEMFc));
+
+    return rc;
+}
+
 JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinPostMsg
         (JNIEnv *env, jclass that, jint hwnd, jint ulMsgid, jint mpParam1, jint mpParam2)
 {
