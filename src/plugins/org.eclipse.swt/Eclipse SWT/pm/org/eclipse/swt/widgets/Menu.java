@@ -257,38 +257,22 @@ void createItem (MenuItem item, int index) {
 	boolean success = false;
 
         
-        MENUITEM item = new MENUITEM();;
-        item .iPosition = position;
-        item . afStyle = style;
-        item . afAttribute = attributes;
-        item . id = id;
-        item . hwndSubMenu = submenu;
-        item . hItem = 0;
-
-        return (SHORT1FROMMR (WinSendMsg (menu, MM_INSERTITEM,  (MPFROMP (&item)), (MPFROMP (text)))));
-
-		/*
-		* Bug in Windows.  For some reason, when InsertMenuItem ()
-		* is used to insert an item without text, it is not possible
-		* to use SetMenuItemInfo () to set the text at a later time.
-		* The fix is to insert the item with an empty string.
-		*/
-		int hHeap = OS.GetProcessHeap ();
-		int pszText = OS.HeapAlloc (hHeap, OS.HEAP_ZERO_MEMORY, TCHAR.sizeof);
-		MENUITEMINFO info = new MENUITEMINFO ();
-		info.cbSize = MENUITEMINFO.sizeof;
-		info.fMask = OS.MIIM_ID | OS.MIIM_TYPE | OS.MIIM_DATA;
-		info.wID = info.dwItemData = item.id;
-		info.fType = item.widgetStyle ();
-		info.dwTypeData = pszText;
-		success = OS.InsertMenuItem (handle, index, true, info);
-		if (pszText != 0) OS.HeapFree (hHeap, 0, pszText);
-
+        MENUITEM info = new MENUITEM();
+        info.iPosition = OS.MIT_END;
+        info.afStyle = OS.MIS_TEXT;
+        info.afAttribute = 0;
+        info.id = (short)item.id;
+        info.hwndSubMenu = OS.NULLHANDLE;
+        info.hItem = 0;
+        
+        int rc = OS.WinSendMsg (handle, OS.MM_INSERTITEM,  info, new PSZ(""));
+        if(rc != OS.MIT_MEMERROR && rc != OS.MIT_ERROR)
+            success = true;
 	if (!success) {
 		parent.remove (item);
 		error (SWT.ERROR_ITEM_NOT_ADDED);
 	}
-	redraw ();
+//	redraw ();
 }
 
 void createWidget () {
@@ -314,44 +298,19 @@ int defaultForeground () {
 //	parent.destroyAcceleratorTable ();
 //}
 
-//void destroyItem (MenuItem item) {
-//	if (OS.IsWinCE) {
-//		int index = 0;
-//		MENUITEMINFO info = new MENUITEMINFO ();
-//		info.cbSize = MENUITEMINFO.sizeof;
-//		info.fMask = OS.MIIM_DATA;
-//		while (OS.GetMenuItemInfo (handle, index, true, info)) {
-//			if (info.dwItemData == item.id) break;
-//			index++;
-//		}
-//		if (info.dwItemData != item.id) {
-//			error (SWT.ERROR_ITEM_NOT_REMOVED);
-//		}	
-//		if (!OS.RemoveMenu (handle, index, OS.MF_BYPOSITION)) {
-//			error (SWT.ERROR_ITEM_NOT_REMOVED);
-//		}
-//		/* 
-//		* if it is a top level menu item, remove the corresponding
-//		* tool item.
-//		*/
-//		if (parent.menuBar == this) {
-//			OS.SendMessage (parent.hwndTB, OS.TB_DELETEBUTTON, index, 0);
-//		}
-//	} else {
-//		if (!OS.RemoveMenu (handle, item.id, OS.MF_BYCOMMAND)) {
-//			error (SWT.ERROR_ITEM_NOT_REMOVED);
-//		}
-//	}
+void destroyItem (MenuItem item) {
+    int count = GetMenuItemCount (handle);
+    int rc = OS.WinSendMsg (handle, OS.MM_DELETEITEM,  OS.MPFROM2SHORT ((short)item.id, (short)OS.TRUE), 0);
+		if (rc == count) {
+			error (SWT.ERROR_ITEM_NOT_REMOVED);
+		}
 //	redraw ();
-//}
-//
-//void destroyWidget () {
-//	int hMenu = handle;
-//	releaseHandle ();
-//	if (hMenu != 0) {
-//		OS.DestroyMenu (hMenu);
-//	}
-//}
+}
+
+void destroyWidget () {
+	int hMenu = handle;
+	releaseHandle ();
+}
 
 /**
  * Returns the default menu item or null if none has
@@ -365,19 +324,19 @@ int defaultForeground () {
  *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
  * </ul>
  */
-//public MenuItem getDefaultItem () {
-//	checkWidget ();
-//	if (OS.IsWinCE) return null;
-//	int id = OS.GetMenuDefaultItem (handle, OS.MF_BYCOMMAND, OS.GMDI_USEDISABLED);
-//	if (id == -1) return null;
-//	MENUITEMINFO info = new MENUITEMINFO ();
+public MenuItem getDefaultItem () {
+	checkWidget ();
+        int id = OS.WinSendMsg (handle, OS.MM_QUERYDEFAULTITEMID,  0, 0);
+	if (id == 0) return null;
+	MENUITEM info = new MENUITEM();
+        int rc = OS.WinSendMsg (handle, OS.MM_QUERYITEM,  OS.MPFROM2SHORT ((short)id, (short)OS.TRUE), info);
 //	info.cbSize = MENUITEMINFO.sizeof;
 //	info.fMask = OS.MIIM_ID;
 //	if (OS.GetMenuItemInfo (handle, id, false, info)) {
 //		return parent.findMenuItem (info.wID);
 //	}
-//	return null;
-//}
+	return null;
+}
 
 public Display getDisplay () {
 	Decorations parent = this.parent;
@@ -484,19 +443,12 @@ public boolean getEnabled () {
 //	System.arraycopy (items, 0, result, 0, index);
 //	return result;
 //}
-//
-//int GetMenuItemCount (int handle) {
-//	checkWidget ();
-//	if (OS.IsWinCE) {
-//		int count = 0;
-//		MENUITEMINFO info = new MENUITEMINFO ();
-//		info.cbSize = MENUITEMINFO.sizeof;
-//		while (OS.GetMenuItemInfo (handle, count, true, info)) count++;
-//		return count;
-//	}
-//	return OS.GetMenuItemCount (handle);
-//}
-//
+
+int GetMenuItemCount (int handle) {
+	checkWidget ();
+	return OS.WinSendMsg(handle, OS.MM_QUERYITEMCOUNT, 0, 0);
+}
+
 //String getNameText () {
 //	String result = "";
 //	MenuItem [] items = getItems ();
