@@ -456,13 +456,13 @@ void destroyWidget () {
 //	}
 //	return null;
 //}
-//
-//MenuItem findMenuItem (int id) {
-//	if (items == null) return null;
-//	id = id - ID_START;
-//	if (0 <= id && id < items.length) return items [id];
-//	return null;
-//}
+
+MenuItem findMenuItem (int id) {
+	if (items == null) return null;
+	id = id - ID_START;
+	if (0 <= id && id < items.length) return items [id];
+	return null;
+}
 
 int getBounds (SWP swp) {
     if ((OS.WinQueryWindowULong (frameHandle, OS.QWL_STYLE) & OS.WS_MINIMIZED) != 0) {
