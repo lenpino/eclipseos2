@@ -329,7 +329,9 @@ public MenuItem getDefaultItem () {
         int id = OS.WinSendMsg (handle, OS.MM_QUERYDEFAULTITEMID,  0, 0);
 	if (id == 0) return null;
 	MENUITEM info = new MENUITEM();
-        int rc = OS.WinSendMsg (handle, OS.MM_QUERYITEM,  OS.MPFROM2SHORT ((short)id, (short)OS.TRUE), info);
+        if(OS.WinSendMsg (handle, OS.MM_QUERYITEM,  OS.MPFROM2SHORT ((short)id, (short)OS.TRUE), info))
+            return parent.findMenuItem (info.id);
+        
 //	info.cbSize = MENUITEMINFO.sizeof;
 //	info.fMask = OS.MIIM_ID;
 //	if (OS.GetMenuItemInfo (handle, id, false, info)) {
@@ -379,16 +381,19 @@ public boolean getEnabled () {
  *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
  * </ul>
  */
-//public MenuItem getItem (int index) {
-//	checkWidget ();
+public MenuItem getItem (int index) {
+	checkWidget ();
 //	MENUITEMINFO info = new MENUITEMINFO ();
 //	info.cbSize = MENUITEMINFO.sizeof;
 //	info.fMask = OS.MIIM_DATA;
-//	if (!OS.GetMenuItemInfo (handle, index, true, info)) {
-//		error (SWT.ERROR_INVALID_RANGE);
-//	}
-//	return parent.findMenuItem (info.dwItemData);
-//}
+        MENUITEM info = new MENUITEM();
+	int id = OS.WinSendMsg (handle, OS.MM_ITEMIDFROMPOSITION,  (short)index, 0); 
+        if(id == OS.MIT_ERROR){
+            error (SWT.ERROR_INVALID_RANGE);
+	}
+        OS.WinSendMsg (handle, OS.MM_QUERYITEM,  OS.MPFROM2SHORT ((short)id, (short)OS.TRUE), info);	
+	return parent.findMenuItem (info.id);
+}
 
 /**
  * Returns the number of items contained in the receiver.
@@ -400,11 +405,10 @@ public boolean getEnabled () {
  *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
  * </ul>
  */
-//public int getItemCount () {
-//	checkWidget ();
-////	return OS.GetMenuItemCount (handle);
-//	return GetMenuItemCount (handle);
-//}
+public int getItemCount () {
+	checkWidget ();
+	return OS.WinSendMsg (handle, OS.MM_QUERYITEMCOUNT,  0, 0);
+}
 
 /**
  * Returns an array of <code>MenuItem</code>s which are the items
@@ -422,45 +426,48 @@ public boolean getEnabled () {
  *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
  * </ul>
  */
-//public MenuItem [] getItems () {
-//	checkWidget ();
-//	int index = 0;
-//	int length = OS.IsWinCE ? 4 : OS.GetMenuItemCount (handle);
-//	MenuItem [] items = new MenuItem [length];
-//	MENUITEMINFO info = new MENUITEMINFO ();
+public MenuItem [] getItems () {
+	checkWidget ();
+	int index = 0;
+	int length = OS.WinSendMsg (handle, OS.MM_QUERYITEMCOUNT,  0, 0);
+	MenuItem [] items = new MenuItem [length];
+	MENUITEM info = new MENUITEM();
 //	info.cbSize = MENUITEMINFO.sizeof;
 //	info.fMask = OS.MIIM_DATA;
-//	while (OS.GetMenuItemInfo (handle, index, true, info)) {
-//		if (index == items.length) {
-//			MenuItem [] newItems = new MenuItem [index + 4];
-//			System.arraycopy (items, 0, newItems, 0, index);
-//			items = newItems;
-//		}
-//		items [index++] = parent.findMenuItem (info.dwItemData);
-//	}
-//	if (index == items.length) return items;
-//	MenuItem [] result = new MenuItem [index];
-//	System.arraycopy (items, 0, result, 0, index);
-//	return result;
-//}
+        int idItem = 0;
+//      Revisa si esto es redundante o  no
+	while ((idItem=OS.WinSendMsg (handle, OS.MM_ITEMIDFROMPOSITION,  index, 0)) != OS.MIT_ERROR) {
+		if (index == items.length) {
+			MenuItem [] newItems = new MenuItem [index + 4];
+			System.arraycopy (items, 0, newItems, 0, index);
+			items = newItems;
+		}
+                OS.WinSendMsg (handle, OS.MM_QUERYITEM, OS.MPFROM2SHORT ((short)idItem, (short)OS.TRUE), info);
+		items [index++] = parent.findMenuItem (info.id);
+	}
+	if (index == items.length) return items;
+	MenuItem [] result = new MenuItem [index];
+	System.arraycopy (items, 0, result, 0, index);
+	return result;
+}
 
 int GetMenuItemCount (int handle) {
 	checkWidget ();
 	return OS.WinSendMsg(handle, OS.MM_QUERYITEMCOUNT, 0, 0);
 }
 
-//String getNameText () {
-//	String result = "";
-//	MenuItem [] items = getItems ();
-//	int length = items.length;
-//	if (length > 0) {
-//		for (int i=0; i<length-1; i++) {
-//			result = result + items [i].getNameText() + ", ";
-//		}
-//		result = result + items [length-1].getNameText ();
-//	}
-//	return result;
-//}
+String getNameText () {
+	String result = "";
+	MenuItem [] items = getItems ();
+	int length = items.length;
+	if (length > 0) {
+		for (int i=0; i<length-1; i++) {
+			result = result + items [i].getNameText() + ", ";
+		}
+		result = result + items [length-1].getNameText ();
+	}
+	return result;
+}
 
 /**
  * Returns the receiver's parent, which must be a <code>Decorations</code>.
@@ -549,13 +556,13 @@ public Shell getShell () {
  *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
  * </ul>
  */
-//public boolean getVisible () {
-//	checkWidget ();
-//	if ((style & SWT.BAR) != 0) {
-//		return this == parent.menuShell ().menuBar;
-//	}
-//	return this == getShell ().activeMenu;
-//}
+public boolean getVisible () {
+	checkWidget ();
+	if ((style & SWT.BAR) != 0) {
+		return this == parent.menuShell ().menuBar;
+	}
+	return this == getShell ().activeMenu;
+}
 
 /**
  * Searches the receiver's list starting at the first item
@@ -574,19 +581,23 @@ public Shell getShell () {
  *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
  * </ul>
  */
-//public int indexOf (MenuItem item) {
-//	checkWidget ();
-//	if (item == null) error (SWT.ERROR_NULL_ARGUMENT);
-//	int index = 0;
+public int indexOf (MenuItem item) {
+	checkWidget ();
+	if (item == null) error (SWT.ERROR_NULL_ARGUMENT);
+	int index = 0;
+        MENUITEM info = new MENUITEM();
+        int idItem = 0;
 //	MENUITEMINFO info = new MENUITEMINFO ();
 //	info.cbSize = MENUITEMINFO.sizeof;
 //	info.fMask = OS.MIIM_DATA;
-//	while (OS.GetMenuItemInfo (handle, index, true, info)) {
-//		if (info.dwItemData == item.id) return index;
-//		index++;
-//	}
-//	return -1;
-//}
+	while ((idItem=OS.WinSendMsg (handle, OS.MM_ITEMIDFROMPOSITION,  index, 0)) != OS.MIT_ERROR) {
+            //@@TODO(lpino) Check if the next call is necesary or we could use the idItem directly
+                OS.WinSendMsg (handle, OS.MM_QUERYITEM, OS.MPFROM2SHORT ((short)idItem, (short)OS.TRUE), info);
+		if (info.id == item.id) return index;
+		index++;
+	}
+	return -1;
+}
 
 /**
  * Returns <code>true</code> if the receiver is enabled and all
@@ -624,10 +635,10 @@ public boolean isEnabled () {
  *
  * @see #getVisible
  */
-//public boolean isVisible () {
-//	checkWidget ();
-//	return getVisible ();
-//}
+public boolean isVisible () {
+	checkWidget ();
+	return getVisible ();
+}
 
 //void redraw () {
 //	if (OS.IsPPC) return;
@@ -681,17 +692,17 @@ void releaseHandle () {
 	handle = 0;
 }
 
-//void releaseWidget () {
-//	MenuItem [] items = getItems ();
-//	for (int i=0; i<items.length; i++) {
-//		MenuItem item = items [i];
-//		if (!item.isDisposed ()) item.releaseWidget ();
-//	}
-//	super.releaseWidget ();
-//	if (parent != null) parent.remove (this);
-//	parent = null;
-//	cascade = null;
-//}
+void releaseWidget () {
+	MenuItem [] items = getItems ();
+	for (int i=0; i<items.length; i++) {
+		MenuItem item = items [i];
+		if (!item.isDisposed ()) item.releaseWidget ();
+	}
+	super.releaseWidget ();
+	if (parent != null) parent.remove (this);
+	parent = null;
+	cascade = null;
+}
 
 /**
  * Removes the listener from the collection of listeners who will
@@ -756,17 +767,16 @@ public void removeMenuListener (MenuListener listener) {
  *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
  * </ul>
  */
-//public void setDefaultItem (MenuItem item) {
-//	checkWidget ();
-//	int command = -1;
-//	if (item != null) {
-//		if (item.isDisposed()) error(SWT.ERROR_INVALID_ARGUMENT);
-//		command = item.id;
-//	}
-//	if (OS.IsWinCE) return;
-//	OS.SetMenuDefaultItem (handle, command, OS.MF_BYCOMMAND);
+public void setDefaultItem (MenuItem item) {
+	checkWidget ();
+	int command = -1;
+	if (item != null) {
+		if (item.isDisposed()) error(SWT.ERROR_INVALID_ARGUMENT);
+		command = item.id;
+	}
+        OS.WinSendMsg (handle, OS.MM_SETDEFAULTITEMID,  command, 0);
 //	redraw ();
-//}
+}
 
 /**
  * Enables the receiver if the argument is <code>true</code>,
