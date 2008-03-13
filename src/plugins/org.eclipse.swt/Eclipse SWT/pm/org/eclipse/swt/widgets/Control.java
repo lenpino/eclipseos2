@@ -47,7 +47,7 @@ public abstract class Control extends Widget implements Drawable {
     int drawCount, hCursor;
     int foreground, background;
 //@@TODO(dmik)
-//    Menu menu;
+    Menu menu;
     String toolTipText;
     Object layoutData;
     Accessible accessible;
