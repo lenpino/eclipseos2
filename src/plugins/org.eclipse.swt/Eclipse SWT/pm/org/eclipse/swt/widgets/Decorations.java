@@ -447,15 +447,15 @@ void destroyWidget () {
     }
 }
 
-//@@TODO (dmik): later
-//Menu findMenu (int hMenu) {
-//	if (menus == null) return null;
-//	for (int i=0; i<menus.length; i++) {
-//		Menu menu = menus [i];
-//		if ((menu != null) && (hMenu == menu.handle)) return menu;
-//	}
-//	return null;
-//}
+
+Menu findMenu (int hMenu) {
+	if (menus == null) return null;
+	for (int i=0; i<menus.length; i++) {
+		Menu menu = menus [i];
+		if ((menu != null) && (hMenu == menu.handle)) return menu;
+	}
+	return null;
+}
 
 MenuItem findMenuItem (int id) {
 	if (items == null) return null;
@@ -746,22 +746,21 @@ void releaseHandle () {
     frameHandle = 0;
 }
 
-void releaseWidget () {
-//@@TODO (dmik): later    
-//	if (menuBar != null) {
-//		menuBar.releaseWidget ();
-//		menuBar.releaseHandle ();
-//	}
-//	menuBar = null;
-//	if (menus != null) {
-//		for (int i=0; i<menus.length; i++) {
-//			Menu menu = menus [i];
-//			if (menu != null && !menu.isDisposed ()) {
-//				menu.dispose ();
-//			}
-//		}
-//	}
-//	menus = null;
+void releaseWidget () {   
+	if (menuBar != null) {
+		menuBar.releaseWidget ();
+		menuBar.releaseHandle ();
+	}
+	menuBar = null;
+	if (menus != null) {
+		for (int i=0; i<menus.length; i++) {
+			Menu menu = menus [i];
+			if (menu != null && !menu.isDisposed ()) {
+				menu.dispose ();
+			}
+		}
+	}
+	menus = null;
 
     super.releaseWidget ();
     
@@ -777,16 +776,15 @@ void releaseWidget () {
 //	hwndCB = 0;
 }
 
-//@@TODO(dmik)
-//void remove (Menu menu) {
-//	if (menus == null) return;
-//	for (int i=0; i<menus.length; i++) {
-//		if (menus [i] == menu) {
-//			menus [i] = null;
-//			return;
-//		}
-//	}
-//}
+void remove (Menu menu) {
+	if (menus == null) return;
+	for (int i=0; i<menus.length; i++) {
+		if (menus [i] == menu) {
+			menus [i] = null;
+			return;
+		}
+	}
+}
 
 void remove (MenuItem item) {
 	if (items == null) return;
