@@ -75,7 +75,7 @@ public class MenuItem extends Item {
 public MenuItem (Menu parent, int style) {
 	super (parent, checkStyle (style));
 	this.parent = parent;
-//	parent.createItem (this, parent.getItemCount ());
+	parent.createItem (this, parent.getItemCount ());
 }
 
 /**
@@ -116,7 +116,7 @@ public MenuItem (Menu parent, int style) {
 public MenuItem (Menu parent, int style, int index) {
 	super (parent, checkStyle (style));
 	this.parent = parent;
-//	parent.createItem (this, index);
+	parent.createItem (this, index);
 }
 
 /**
