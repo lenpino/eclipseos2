@@ -102,7 +102,7 @@ import org.eclipse.swt.events.*;
 public class Shell extends Decorations {
     Display display;
 //@@TODO(dmik)
-//    Menu activeMenu;
+    Menu activeMenu;
 //    int hIMC;
 //    int [] brushes;
 //    boolean showWithParent;
