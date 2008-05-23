@@ -247,7 +247,7 @@ public class OS {
     public static final int WM_INITMENU =           0x0033;
     public static final int WM_MENUSELECT =         0x0034;
     public static final int WM_MENUEND =            0x0035;
-//    public static final int WM_DRAWITEM =           0x0036;
+    public static final int WM_DRAWITEM =           0x0036;
     public static final int WM_MEASUREITEM =        0x0037;
 //    public static final int WM_CONTROLPOINTER =     0x0038;
     public static final int WM_QUERYDLGCODE =       0x003a;
@@ -262,7 +262,7 @@ public class OS {
     
     /* Frame window related messages */
 //    public static final int WM_FLASHWINDOW =        0x0040;
-//    public static final int WM_FORMATFRAME =        0x0041;
+    public static final int WM_FORMATFRAME =        0x0041;
     public static final int WM_UPDATEFRAME =        0x0042;
 //    public static final int WM_FOCUSCHANGE =        0x0043;
 //    public static final int WM_SETBORDERSIZE =      0x0044;
@@ -270,12 +270,12 @@ public class OS {
 //    public static final int WM_MINMAXFRAME =        0x0046;
 //    public static final int WM_SETICON =            0x0047;
 //    public static final int WM_QUERYICON =          0x0048;
-//    public static final int WM_SETACCELTABLE =      0x0049;
-//    public static final int WM_QUERYACCELTABLE =    0x004a;
-//    public static final int WM_TRANSLATEACCEL =     0x004b;
+    public static final int WM_SETACCELTABLE =      0x0049;
+    public static final int WM_QUERYACCELTABLE =    0x004a;
+    public static final int WM_TRANSLATEACCEL =     0x004b;
 //    public static final int WM_QUERYTRACKINFO =     0x004c;
-//    public static final int WM_QUERYBORDERSIZE =    0x004d;
-//    public static final int WM_NEXTMENU =           0x004e;
+    public static final int WM_QUERYBORDERSIZE =    0x004d;
+    public static final int WM_NEXTMENU =           0x004e;
     public static final int WM_ERASEBACKGROUND =    0x004f;
 //    public static final int WM_QUERYFRAMEINFO =     0x0050;
 //    public static final int WM_QUERYFOCUSCHAIN =    0x0051;
@@ -585,7 +585,7 @@ public class OS {
 //    public static final int FCF_NOBYTEALIGN =       0x00001000;
 //    public static final int FCF_NOMOVEWITHOWNER =   0x00002000;
 //    public static final int FCF_ICON =              0x00004000;
-//    public static final int FCF_ACCELTABLE =        0x00008000;
+    public static final int FCF_ACCELTABLE =        0x00008000;
 //    public static final int FCF_SYSMODAL =          0x00010000;
 //    public static final int FCF_SCREENALIGN =       0x00020000;
 //    public static final int FCF_MOUSEALIGN =        0x00040000;
@@ -622,7 +622,7 @@ public class OS {
 //    public static final int FF_DIALOGBOX =          0x0100;
 
     /* Frame control IDs    */
-//    public static final int FID_SYSMENU =           0x8002;
+    public static final int FID_SYSMENU =           0x8002;
 //    public static final int FID_TITLEBAR =          0x8003;
 //    public static final int FID_MINMAX =            0x8004;
     public static final int FID_MENU =              0x8005;
@@ -853,7 +853,7 @@ public class OS {
 //    public static final int SYSCLR_SHADOWHILITEFGND =       -49;
 //    public static final int SYSCLR_SHADOWTEXT =             -48;
     public static final int SYSCLR_ENTRYFIELD =             -47;
-//    public static final int SYSCLR_MENUDISABLEDTEXT =       -46;
+    public static final int SYSCLR_MENUDISABLEDTEXT =       -46;
     public static final int SYSCLR_MENUHILITE =             -45;
     public static final int SYSCLR_MENUHILITEBGND =         -44;
 //    public static final int SYSCLR_PAGEBACKGROUND =         -43;
@@ -1031,18 +1031,18 @@ public class OS {
 //    public static final int PP_INACTIVETEXTBGNDCOLOR        = 28;
 //    public static final int PP_INACTIVETEXTBGNDCOLORINDEX   = 29;
 //    public static final int PP_SHADOW                       = 30;
-//    public static final int PP_MENUFOREGROUNDCOLOR          = 31;
-//    public static final int PP_MENUFOREGROUNDCOLORINDEX     = 32;
-//    public static final int PP_MENUBACKGROUNDCOLOR          = 33;
-//    public static final int PP_MENUBACKGROUNDCOLORINDEX     = 34;
-//    public static final int PP_MENUHILITEFGNDCOLOR          = 35;
-//    public static final int PP_MENUHILITEFGNDCOLORINDEX     = 36;
-//    public static final int PP_MENUHILITEBGNDCOLOR          = 37;
-//    public static final int PP_MENUHILITEBGNDCOLORINDEX     = 38;
-//    public static final int PP_MENUDISABLEDFGNDCOLOR        = 39;
-//    public static final int PP_MENUDISABLEDFGNDCOLORINDEX   = 40;
-//    public static final int PP_MENUDISABLEDBGNDCOLOR        = 41;
-//    public static final int PP_MENUDISABLEDBGNDCOLORINDEX   = 42;
+    public static final int PP_MENUFOREGROUNDCOLOR          = 31;
+    public static final int PP_MENUFOREGROUNDCOLORINDEX     = 32;
+    public static final int PP_MENUBACKGROUNDCOLOR          = 33;
+    public static final int PP_MENUBACKGROUNDCOLORINDEX     = 34;
+    public static final int PP_MENUHILITEFGNDCOLOR          = 35;
+    public static final int PP_MENUHILITEFGNDCOLORINDEX     = 36;
+    public static final int PP_MENUHILITEBGNDCOLOR          = 37;
+    public static final int PP_MENUHILITEBGNDCOLORINDEX     = 38;
+    public static final int PP_MENUDISABLEDFGNDCOLOR        = 39;
+    public static final int PP_MENUDISABLEDFGNDCOLORINDEX   = 40;
+    public static final int PP_MENUDISABLEDBGNDCOLOR        = 41;
+    public static final int PP_MENUDISABLEDBGNDCOLORINDEX   = 42;
 //    public static final int PP_SHADOWTEXTCOLOR              = 43;
 //    public static final int PP_SHADOWTEXTCOLORINDEX         = 44;
 //    public static final int PP_SHADOWHILITEFGNDCOLOR        = 45;
@@ -2062,12 +2062,24 @@ public class OS {
    public static final int PU_MOUSEBUTTON2            = 0x0080; /* If button2 use allowed */
    public static final int PU_MOUSEBUTTON3            = 0x0100; /* If button3 use allowed */
    public static final int PU_KEYBOARD                = 0x0200; /* If keyboard use allowed */
+   /* ACCEL fs bits */
+
+  public static final int AF_CHAR                    = 0x0001;
+  public static final int AF_VIRTUALKEY              = 0x0002;
+  public static final int AF_SCANCODE                = 0x0004;
+  public static final int AF_SHIFT                   = 0x0008;
+  public static final int AF_CONTROL                 = 0x0010;
+  public static final int AF_ALT                     = 0x0020;
+  public static final int AF_LONEKEY                 = 0x0040;
+  public static final int AF_SYSCOMMAND              = 0x0100;
+  public static final int AF_HELP                    = 0x0200;
 
 /* PM macros */
 
 public static final short SHORT1FROMMP (int mp) { return (short)mp; }    
 public static final short SHORT2FROMMP (int mp) { return (short)(mp >> 16); }
-public static final int MPFROM2SHORT(short s1, short s2){ return ((s1 << 16) + s2);}
+public static final int MPFROM2SHORT(short s1, short s2){ return (((int)(s1)) | ((int)(s2)) << 16);}
+//public static final int MPFROM2SHORT(short s1, short s2){ return ((s1 << 16) + s2);}
 //public static final int MAKELONG (short l, short h) {
 //    return ((int)l) | (((int)h) << 16);
 //}
@@ -2138,7 +2150,7 @@ public static final native int WinSendMsg (int hwnd, int ulMsgid, PSZ mpParam1, 
 public static final native int WinSendMsg (int hwnd, int ulMsgid, int mpParam1, PSZ mpParam2);
 public static final native int WinSendMsg (int hwnd, int ulMsgid, LBOXINFO mpParam1, PSZ[] mpParam2);
 public static final native int WinSendMsg (int hwnd, int ulMsgid, MENUITEM mpParam1, PSZ mpParam2);
-public static final native int WinSendMsg (int hwnd, int ulMsgid, int mpParam1, MENUITEM mpParam2);
+public static final native boolean WinSendMsg (int hwnd, int ulMsgid, int mpParam1, MENUITEM mpParam2);
 public static final native boolean WinPostMsg (int hwnd, int ulMsgid,int mpParam1, int mpParam2);
 public static final native int WinQueryMsgTime (int hab);
 public static final native boolean WinQueryMsgPos (int hab, int[] pptl);
@@ -2247,6 +2259,7 @@ public static final native boolean WinFileDlg (int hwndParent, int hwndOwner, FI
 public static final native boolean WinFreeFileDlgList (PSZ[] papszFQFilename);
 public static final native int WinOpenWindowDC(int hwnd);
 public static final native boolean WinPopupMenu(int hwndParent, int hwndOwner, int hwndMenu, int x, int y, int idItem, short fs);
+public static final native int WinCreateAccelTable(int hab, ACCELTABLE acctAccelTable);
 public static final native boolean PrfQueryProfileSize (int hini, PSZ pszApp,
     PSZ pszKey, int[] pulDataLen);
 public static final native int PrfQueryProfileString (int hini, PSZ pszApp,
