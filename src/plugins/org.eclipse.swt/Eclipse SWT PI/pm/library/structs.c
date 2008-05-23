@@ -169,6 +169,7 @@ LBOXINFO_FID_CACHE LBOXINFOFc;
 SBCDATA_FID_CACHE SBCDATAFc;
 MENUITEM_FID_CACHE MENUITEMFc;
 OWNERITEM_FID_CACHE OWNERITEMFc;
+ACCEL_FID_CACHE ACCELFc;
 
 /*@@TODO (dmik): remove
 FACENAMEDESC_FID_CACHE FACENAMEDESCFc;
@@ -1428,6 +1429,35 @@ void setOWNERITEMFields(JNIEnv *env, jobject lpObject, POWNERITEM lpStruct, POWN
     }
     (*env)->SetIntField(env, lpObject, lpCache->idItem, lpStruct->idItem);
     (*env)->SetIntField(env, lpObject, lpCache->hItem, lpStruct->hItem);
+}
+
+/* ACCEL struct */
+
+void cacheACCELFids(JNIEnv *env, jobject lpObject, PACCEL_FID_CACHE lpCache)
+{
+    if (lpCache->cached) return;
+    lpCache->clazz = (*env)->GetObjectClass(env, lpObject);
+    lpCache->fs = (*env)->GetFieldID(env, lpCache->clazz, "fs", "S");
+    lpCache->key = (*env)->GetFieldID(env, lpCache->clazz, "key", "S");
+    lpCache->cmd = (*env)->GetFieldID(env, lpCache->clazz, "cmd", "S");
+    lpCache->cached = 1;
+}
+
+PACCEL getACCELFields(JNIEnv *env, jobject lpObject, PACCEL lpStruct, PACCEL_FID_CACHE lpCache)
+{
+    if (!lpCache->cached) cacheACCELFids(env, lpObject, lpCache);
+    lpStruct->fs = (*env)->GetShortField(env, lpObject, lpCache->fs);
+    lpStruct->key = (*env)->GetShortField(env, lpObject, lpCache->key);
+    lpStruct->cmd = (*env)->GetShortField(env, lpObject, lpCache->cmd);
+    return lpStruct;
+}
+
+void setACCELFields(JNIEnv *env, jobject lpObject, PACCEL lpStruct, PACCEL_FID_CACHE lpCache)
+{
+    if (!lpCache->cached) cacheACCELFids(env, lpObject, lpCache);
+    (*env)->SetShortField(env, lpObject, lpCache->fs, lpStruct->fs);
+    (*env)->SetShortField(env, lpObject, lpCache->key, lpStruct->key);
+    (*env)->SetShortField(env, lpObject, lpCache->cmd, lpStruct->cmd);
 }
 
 /* FACENAMEDESC struct */
