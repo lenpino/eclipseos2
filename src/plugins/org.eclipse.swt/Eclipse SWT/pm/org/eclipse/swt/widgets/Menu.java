@@ -220,22 +220,30 @@ static int checkStyle (int style) {
 
 void createHandle () {
 	if ((style & SWT.BAR) != 0) {
-            handle = OS.WinCreateWindow (OS.HWND_DESKTOP,	/* parent window */
+            System.out.println("Menu:createHandle:  Menu Bar");
+            handle = OS.WinCreateWindow (parent.frameHandle,	/* parent window */
                                                         PSZ.getAtom (OS.WC_MENU),	/* class name */
-                                                        new PSZ(""),	/* window text */
+                                                        null,	/* window text */
                                                         OS.MS_ACTIONBAR,	/* window style */
                                                         0, 0, 0, 0, /* size and position */
-                                                        OS.HWND_DESKTOP,	/* owner window */
+                                                        parent.frameHandle,	/* owner window */
                                                         OS.HWND_TOP, /* sibling window */
                                                         OS.FID_MENU,	/* ID */
                                                         OS.NULLHANDLE,	/* control data */
                                                         0		/* presentation parameters */
                                                         );
-	} else {
+//System.out.println (
+//    "Menu.createHandle(): FID_MENU window has been created:\n" +
+//    "    hwnd = " + Integer.toHexString (handle) + "\n" +
+//    "    hwnd.parent = hwnd.owner = " + Integer.toHexString (handle) + "\n" +
+//    "    class = WC_MENU\n" +
+//    "    style = MS_ACTIONBAR"
+//);
+	} else  if ((style & SWT.POP_UP) != 0) {
             short flOptions = OS.PU_MOUSEBUTTON1DOWN | OS.PU_KEYBOARD | OS.PU_MOUSEBUTTON1;
             handle = OS.WinCreateWindow (OS.HWND_DESKTOP,	/* parent window */
                                                         PSZ.getAtom (OS.WC_MENU),	/* class name */
-                                                        new PSZ(""),	/* window text */
+                                                        null,	/* window text */
                                                         0,	/* window style */
                                                         0, 0, 0, 0, /* size and position */
                                                         OS.HWND_DESKTOP,	/* owner window */
@@ -245,7 +253,34 @@ void createHandle () {
                                                         0		/* presentation parameters */
                                                         );
           boolean rc = OS.WinPopupMenu(OS.HWND_DESKTOP, OS.HWND_DESKTOP, handle, 0, 0, 0, flOptions);
+System.out.println (
+    "Menu.createHandle(): FID_MENU window has been created:\n" +
+    "    hwnd = " + Integer.toHexString (handle) + "\n" +
+    "    hwnd.parent = hwnd.owner = " + Integer.toHexString (handle) + "\n" +
+    "    class = WC_MENU\n" +
+    "    style = MS_ACTIONBAR"
+);
               
+	} else if ((style & SWT.DROP_DOWN) != 0) {
+            System.out.println("Menu:createHandle:  Menu DropDown");
+            handle = OS.WinCreateWindow (OS.HWND_DESKTOP,	/* parent window */
+                                                        PSZ.getAtom (OS.WC_MENU),	/* class name */
+                                                        null,	/* window text */
+                                                        0,	/* window style */
+                                                        0, 0, 0, 0, /* size and position */
+                                                        OS.HWND_DESKTOP,	/* owner window */
+                                                        OS.HWND_TOP, /* sibling window */
+                                                        OS.FID_MENU,	/* ID */
+                                                        OS.NULLHANDLE,	/* control data */
+                                                        0		/* presentation parameters */
+                                                        );
+//System.out.println (
+//    "Menu.createHandle(): A menu has been created:\n" +
+//    "    hwnd = " + Integer.toHexString (handle) + "\n" +
+//    "    hwnd.parent = hwnd.owner = " + Integer.toHexString (handle) + "\n" +
+//    "    class = WC_MENU\n" +
+//    "    style = 0"
+//);
 	}
 	if (handle == 0) error (SWT.ERROR_NO_HANDLES);
 }
@@ -256,23 +291,22 @@ void createItem (MenuItem item, int index) {
 	parent.add (item);
 	boolean success = false;
 
-        
         MENUITEM info = new MENUITEM();
         info.iPosition = OS.MIT_END;
         info.afStyle = OS.MIS_TEXT;
         info.afAttribute = 0;
         info.id = (short)item.id;
+        System.out.println("Menu:createItem ID = " + info.id);
         info.hwndSubMenu = OS.NULLHANDLE;
         info.hItem = 0;
-        
-        int rc = OS.WinSendMsg (handle, OS.MM_INSERTITEM,  info, new PSZ(""));
+        int rc = OS.WinSendMsg (handle, OS.MM_INSERTITEM,  info, new PSZ(" "));
         if(rc != OS.MIT_MEMERROR && rc != OS.MIT_ERROR)
             success = true;
 	if (!success) {
 		parent.remove (item);
 		error (SWT.ERROR_ITEM_NOT_ADDED);
 	}
-//	redraw ();
+	redraw ();
 }
 
 void createWidget () {
@@ -294,17 +328,18 @@ int defaultForeground () {
 	return OS.WinQuerySysColor(handle, OS.SYSCLR_MENUTEXT, 0);
 }
 
-//void destroyAcceleratorTable () {
-//	parent.destroyAcceleratorTable ();
-//}
+void destroyAcceleratorTable () {
+	parent.destroyAcceleratorTable ();
+}
 
 void destroyItem (MenuItem item) {
     int count = GetMenuItemCount (handle);
+    System.out.println("ITEMS antes de destroy = " + count);
     int rc = OS.WinSendMsg (handle, OS.MM_DELETEITEM,  OS.MPFROM2SHORT ((short)item.id, (short)OS.TRUE), 0);
 		if (rc == count) {
 			error (SWT.ERROR_ITEM_NOT_REMOVED);
 		}
-//	redraw ();
+	redraw ();
 }
 
 void destroyWidget () {
@@ -332,11 +367,6 @@ public MenuItem getDefaultItem () {
         if(OS.WinSendMsg (handle, OS.MM_QUERYITEM,  OS.MPFROM2SHORT ((short)id, (short)OS.TRUE), info))
             return parent.findMenuItem (info.id);
         
-//	info.cbSize = MENUITEMINFO.sizeof;
-//	info.fMask = OS.MIIM_ID;
-//	if (OS.GetMenuItemInfo (handle, id, false, info)) {
-//		return parent.findMenuItem (info.wID);
-//	}
 	return null;
 }
 
@@ -383,9 +413,6 @@ public boolean getEnabled () {
  */
 public MenuItem getItem (int index) {
 	checkWidget ();
-//	MENUITEMINFO info = new MENUITEMINFO ();
-//	info.cbSize = MENUITEMINFO.sizeof;
-//	info.fMask = OS.MIIM_DATA;
         MENUITEM info = new MENUITEM();
 	int id = OS.WinSendMsg (handle, OS.MM_ITEMIDFROMPOSITION,  (short)index, 0); 
         if(id == OS.MIT_ERROR){
@@ -432,8 +459,6 @@ public MenuItem [] getItems () {
 	int length = OS.WinSendMsg (handle, OS.MM_QUERYITEMCOUNT,  0, 0);
 	MenuItem [] items = new MenuItem [length];
 	MENUITEM info = new MENUITEM();
-//	info.cbSize = MENUITEMINFO.sizeof;
-//	info.fMask = OS.MIIM_DATA;
         int idItem = 0;
 //      Revisa si esto es redundante o  no
 	while ((idItem=OS.WinSendMsg (handle, OS.MM_ITEMIDFROMPOSITION,  index, 0)) != OS.MIT_ERROR) {
@@ -587,9 +612,6 @@ public int indexOf (MenuItem item) {
 	int index = 0;
         MENUITEM info = new MENUITEM();
         int idItem = 0;
-//	MENUITEMINFO info = new MENUITEMINFO ();
-//	info.cbSize = MENUITEMINFO.sizeof;
-//	info.fMask = OS.MIIM_DATA;
 	while ((idItem=OS.WinSendMsg (handle, OS.MM_ITEMIDFROMPOSITION,  index, 0)) != OS.MIT_ERROR) {
             //@@TODO(lpino) Check if the next call is necesary or we could use the idItem directly
                 OS.WinSendMsg (handle, OS.MM_QUERYITEM, OS.MPFROM2SHORT ((short)idItem, (short)OS.TRUE), info);
@@ -640,24 +662,14 @@ public boolean isVisible () {
 	return getVisible ();
 }
 
-//void redraw () {
-//	if (OS.IsPPC) return;
-//	if (OS.IsHPC) {
-//		/*
-//		* Each time a menu has been modified, we need
-//		* to redraw the command bar.
-//		*/
-//		OS.CommandBar_DrawMenuBar (parent.hwndCB, 0);
-//		return;
-//	}
-//	if ((style & SWT.BAR) != 0) {
+void redraw () {
+	if ((style & SWT.BAR) != 0) {
+//            OS.WinSendMsg (frameHandle, OS.WM_UPDATEFRAME, OS.FCF_MENU, 0);
 //		OS.DrawMenuBar (parent.handle);
-//		return;
-//	}
-//	if ((OS.WIN32_MAJOR << 16 | OS.WIN32_MINOR) < (4 << 16 | 10)) {
-//		return;
-//	}
-//	boolean hasCheck = false, hasImage = false;
+		return;
+	}
+
+//        boolean hasCheck = false, hasImage = false;
 //	MenuItem [] items = getItems ();
 //	for (int i=0; i<items.length; i++) {
 //		MenuItem item = items [i];
@@ -678,15 +690,15 @@ public boolean isVisible () {
 //		lpcmi.dwStyle &= ~OS.MNS_CHECKORBMP;
 //	}
 //	OS.SetMenuInfo (handle, lpcmi);
-//}
+}
 
-//void releaseChild () {
-//	super.releaseChild ();
-//	if (cascade != null) cascade.setMenu (null);
-//	if ((style & SWT.BAR) != 0 && this == parent.menuBar) {
-//		parent.setMenuBar (null);
-//	}
-//}
+void releaseChild () {
+	super.releaseChild ();
+	if (cascade != null) cascade.setMenu (null);
+	if ((style & SWT.BAR) != 0 && this == parent.menuBar) {
+		parent.setMenuBar (null);
+	}
+}
 
 void releaseHandle () {
 	handle = 0;
@@ -775,7 +787,7 @@ public void setDefaultItem (MenuItem item) {
 		command = item.id;
 	}
         OS.WinSendMsg (handle, OS.MM_SETDEFAULTITEMID,  command, 0);
-//	redraw ();
+	redraw ();
 }
 
 /**
@@ -837,10 +849,10 @@ public void setLocation (int x, int y) {
  *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
  * </ul>
  */
-//public void setVisible (boolean visible) {
-//	checkWidget ();
-//	if ((style & (SWT.BAR | SWT.DROP_DOWN)) != 0) return;
-//	int hwndParent = parent.handle;
+public void setVisible (boolean visible) {
+	checkWidget ();
+	if ((style & (SWT.BAR | SWT.DROP_DOWN)) != 0) return;
+	int hwndParent = parent.handle;
 //	if (!visible) {
 //		OS.SendMessage (hwndParent, OS.WM_CANCELMODE, 0, 0);
 //		return;
@@ -852,23 +864,23 @@ public void setLocation (int x, int y) {
 //		nX = (short) (pos & 0xFFFF);
 //		nY = (short) (pos >> 16);
 //	}
-//	/*
-//	* Feature in Windows.  It is legal use TrackPopupMenu ()
-//	* to display an empty menu as long as menu items are added
-//	* inside of WM_INITPOPUPMENU.  If no items are added, then
-//	* TrackPopupMenu () fails and does not send an indication
-//	* that the menu has been closed.  This is not strictly a
-//	* bug but leads to unwanted behavior when application code
-//	* assumes that every WM_INITPOPUPMENU will eventually result
-//	* in a WM_MENUSELECT, wParam=0xFFFF0000, lParam=0 to indicate
-//	* that the menu has been closed.  The fix is to detect the
-//	* case when TrackPopupMenu fails and the number of items in
-//	* the menu is zero and issue a fake WM_MENUSELECT.
-//	*/
+	/*
+	* Feature in Windows.  It is legal use TrackPopupMenu ()
+	* to display an empty menu as long as menu items are added
+	* inside of WM_INITPOPUPMENU.  If no items are added, then
+	* TrackPopupMenu () fails and does not send an indication
+	* that the menu has been closed.  This is not strictly a
+	* bug but leads to unwanted behavior when application code
+	* assumes that every WM_INITPOPUPMENU will eventually result
+	* in a WM_MENUSELECT, wParam=0xFFFF0000, lParam=0 to indicate
+	* that the menu has been closed.  The fix is to detect the
+	* case when TrackPopupMenu fails and the number of items in
+	* the menu is zero and issue a fake WM_MENUSELECT.
+	*/
 //	boolean success = OS.TrackPopupMenu (handle, flags, nX, nY, 0, hwndParent, null);
 //	if (!success && GetMenuItemCount (handle) == 0) {
 //		OS.SendMessage (hwndParent, OS.WM_MENUSELECT, 0xFFFF0000, 0);
 //	}
-//}
+}
 
 }
