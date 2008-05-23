@@ -502,6 +502,21 @@ void cacheOWNERITEMFids(JNIEnv *env, jobject lpObject, POWNERITEM_FID_CACHE lpCa
 POWNERITEM getOWNERITEMFields(JNIEnv *env, jobject lpObject, POWNERITEM lpStruct, POWNERITEM_FID_CACHE lpCache);
 void setOWNERITEMFields(JNIEnv *env, jobject lpObject, POWNERITEM lpStruct, POWNERITEM_FID_CACHE lpCache);
 
+/* ACCEL struct */
+typedef struct ACCEL_FID_CACHE {
+    int cached;
+    jclass clazz;
+    jfieldID
+        fs,
+        key,
+        cmd;
+} ACCEL_FID_CACHE;
+typedef ACCEL_FID_CACHE *PACCEL_FID_CACHE;
+
+void cacheACCELFids(JNIEnv *env, jobject lpObject, PACCEL_FID_CACHE lpCache);
+PACCEL getACCELFields(JNIEnv *env, jobject lpObject, PACCEL lpStruct, PACCEL_FID_CACHE lpCache);
+void setACCELFields(JNIEnv *env, jobject lpObject, PACCEL lpStruct, PACCEL_FID_CACHE lpCache);
+
 /* FACENAMEDESC struct */
 /*@@TODO (dmik): remove!
 typedef struct FACENAMEDESC_FID_CACHE {
@@ -543,6 +558,7 @@ extern LBOXINFO_FID_CACHE LBOXINFOFc;
 extern SBCDATA_FID_CACHE SBCDATAFc;
 extern MENUITEM_FID_CACHE MENUITEMFc;
 extern OWNERITEM_FID_CACHE OWNERITEMFc;
+extern ACCEL_FID_CACHE ACCELFc;
 /*@@TODO (dmik): remove! 
 extern FACENAMEDESC_FID_CACHE FACENAMEDESCFc;
 */
