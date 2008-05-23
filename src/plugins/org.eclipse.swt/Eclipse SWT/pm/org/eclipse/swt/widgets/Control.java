@@ -2320,19 +2320,19 @@ public void setLocation (Point location) {
  * </ul>
  */
 //@@TODO(dmik)
-//public void setMenu (Menu menu) {
-//    checkWidget ();
-//    if (menu != null) {
-//        if (menu.isDisposed()) SWT.error(SWT.ERROR_INVALID_ARGUMENT);
-//        if ((menu.style & SWT.POP_UP) == 0) {
-//            error (SWT.ERROR_MENU_NOT_POP_UP);
-//        }
-//        if (menu.parent != menuShell ()) {
-//            error (SWT.ERROR_INVALID_PARENT);
-//        }
-//    }
-//    this.menu = menu;
-//}
+public void setMenu (Menu menu) {
+    checkWidget ();
+    if (menu != null) {
+        if (menu.isDisposed()) SWT.error(SWT.ERROR_INVALID_ARGUMENT);
+        if ((menu.style & SWT.POP_UP) == 0) {
+            error (SWT.ERROR_MENU_NOT_POP_UP);
+        }
+        if (menu.parent != menuShell ()) {
+            error (SWT.ERROR_INVALID_PARENT);
+        }
+    }
+    this.menu = menu;
+}
 
 void setPresBackground () {
     int[] value = {getBackgroundPixel ()};
