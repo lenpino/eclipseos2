@@ -100,7 +100,7 @@ public class Decorations extends Canvas {
 	Control savedFocus;
 	Button defaultButton, saveDefault;
 //@@TODO (dmik): later    
-//	int swFlags, hAccel, nAccel;
+	int swFlags, hAccel, nAccel;
 //	int hwndCB, hwndTB, hIcon;
 //	
 //	/*
@@ -293,39 +293,38 @@ public Rectangle computeTrim (int x, int y, int width, int height) {
         rcl.xRight - rcl.xLeft, rcl.yTop - rcl.yBottom);
 }
 
-//@@TODO(dmik)
-//void createAcceleratorTable () {
-//	hAccel = nAccel = 0;
-//	int maxAccel = 0;
-//	if (menuBar == null || items == null) {
-//		if (!OS.IsPPC) return;
-//		maxAccel = 1;
-//	} else {
-//		maxAccel = OS.IsPPC ? items.length + 1 : items.length;
-//	}
-//	int size = ACCEL.sizeof;
-//	ACCEL accel = new ACCEL ();
-//	byte [] buffer1 = new byte [size];	
-//	byte [] buffer2 = new byte [maxAccel * size];
-//	if (menuBar != null && items != null) {
-//		for (int i=0; i<items.length; i++) {
-//			MenuItem item = items [i];
-//			if (item != null && item.accelerator != 0) {
-//				Menu parent = item.parent;
-//				while (parent != null && parent != menuBar) {
-//					parent = parent.getParentMenu ();
-//				}
-//				if (parent == menuBar) {
-//					item.fillAccel (accel);
-//					OS.MoveMemory (buffer1, accel, size);
-//					System.arraycopy (buffer1, 0, buffer2, nAccel * size, size);
-//					nAccel++;
-//				}
-//			}
-//		}
-//	}
-//	if (nAccel != 0) hAccel = OS.CreateAcceleratorTable (buffer2, nAccel);
-//}
+void createAcceleratorTable () {
+	hAccel = nAccel = 0;
+	int maxAccel = 0;
+	if (menuBar == null || items == null) {
+             return;
+	} else {
+		maxAccel = items.length;
+	}
+	int size = ACCEL.sizeof;
+	ACCEL accel = new ACCEL ();
+	byte [] buffer1 = new byte [size];	
+	byte [] buffer2 = new byte [maxAccel * size];
+	if (menuBar != null && items != null) {
+		for (int i=0; i<items.length; i++) {
+			MenuItem item = items [i];
+			if (item != null && item.accelerator != 0) {
+				Menu parent = item.parent;
+				while (parent != null && parent != menuBar) {
+					parent = parent.getParentMenu ();
+				}
+				if (parent == menuBar) {
+					item.fillAccel (accel);
+					OS.MoveMemory (buffer1, accel, size);
+					System.arraycopy (buffer1, 0, buffer2, nAccel * size, size);
+					nAccel++;
+				}
+			}
+		}
+	}
+//        hAccel = OS.WinCreateAccelTable(hab, pacctAccelTable);
+	if (nAccel != 0) hAccel = OS.CreateAcceleratorTable (buffer2, nAccel);
+}
 
 void createHandle () {
     /*
@@ -428,11 +427,10 @@ void createHandle () {
 //    hAccel = -1;
 //}
 
-//@@TODO (dmik): later
-//void destroyAcceleratorTable () {
-//	if (hAccel != 0 && hAccel != -1) OS.DestroyAcceleratorTable (hAccel);
-//	hAccel = -1;
-//}
+void destroyAcceleratorTable () {
+	if (hAccel != 0 && hAccel != -1) OS.DestroyAcceleratorTable (hAccel);
+	hAccel = -1;
+}
 
 void destroyWidget () {
     int hwnd = frameHandle;
@@ -584,10 +582,10 @@ public boolean getMaximized () {
 // *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
 // * </ul>
 // */
-//public Menu getMenuBar () {
-//	checkWidget ();
-//	return menuBar;
-//}
+public Menu getMenuBar () {
+	checkWidget ();
+	return menuBar;
+}
 
 /**
  * Returns <code>true</code> if the receiver is currently
@@ -1043,145 +1041,23 @@ public void setMaximized (boolean maximized) {
 // *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
 // * </ul>
 // */
-//public void setMenuBar (Menu menu) {
-//	checkWidget ();
-//	if (menuBar == menu) return;
-//	if (menu != null) {
-//		if (menu.isDisposed()) error(SWT.ERROR_INVALID_ARGUMENT);
-//		if ((menu.style & SWT.BAR) == 0) error (SWT.ERROR_MENU_NOT_BAR);
-//		if (menu.parent != this) error (SWT.ERROR_INVALID_PARENT);
-//	}	
-//	if (OS.IsPPC) {
-//		/*
-//		* Note in WinCE PPC.  MenuBar is a separate popup window. If
-//		* the Shell is full screen, resize its window to leave
-//		* space for the MenuBar.
-//		*/
-//		boolean resize = (getMaximized() && menuBar != menu);
-//		if (menuBar != null) {
-//			OS.CommandBar_Destroy (hwndCB);
-//			hwndCB = 0;
-//			hwndTB = 0;
-//		}
-//		menuBar = menu;
-//		if (menuBar != null) {		
-//			SHMENUBARINFO mbi = new SHMENUBARINFO ();
-//			mbi.cbSize = mbi.sizeof;
-//			mbi.hwndParent = handle;
-//			mbi.dwFlags = 0;
-//			mbi.nToolBarId = 100; /* as defined in .rc file */
-//			mbi.hInstRes = OS.GetLibraryHandle ();
-//			boolean success = OS.SHCreateMenuBar (mbi);
-//			hwndCB = mbi.hwndMB;
-//
-//			/* get toolbar */
-//			if (success && hwndCB != 0) hwndTB = OS.GetWindow (hwndCB, OS.GW_CHILD);
-//						
-//			if (hwndTB == 0) {
-//				/* we can't use the menubar */
-//				if (hwndCB != 0) OS.CommandBar_Destroy (hwndCB);
-//				return;
-//			}
-//			/* remove the menu item coming from the resource file */
-//			OS.SendMessage (hwndTB, OS.TB_DELETEBUTTON, 0, 0);
-//			
-//			/* populate tool bar mapping menu items to tool items */
-//			if (menuBar.getItemCount () > 0) {
-//				MenuItem[] items = menuBar.getItems ();
-//				TBBUTTON lpButton = new TBBUTTON ();
-//				TBBUTTONINFO info = new TBBUTTONINFO ();
-//				info.cbSize = TBBUTTONINFO.sizeof;
-//				info.dwMask = OS.TBIF_TEXT;
-//				
-//				int cch = 128;
-//				int hHeap = OS.GetProcessHeap ();
-//				int byteCount = cch * TCHAR.sizeof;
-//				int pszText = OS.HeapAlloc (hHeap, OS.HEAP_ZERO_MEMORY, byteCount);
-//				MENUITEMINFO mii = new MENUITEMINFO ();
-//				mii.cbSize = MENUITEMINFO.sizeof;
-//				mii.fMask = OS.MIIM_STATE | OS.MIIM_TYPE;
-//				mii.dwTypeData = pszText;
-//
-//				for (int i = 0; i < items.length; i++) {
-//					MenuItem item = items[i];
-//					/* insert item */
-//					lpButton.idCommand = item.id;
-//					lpButton.fsStyle = (byte) (OS.TBSTYLE_DROPDOWN | OS.TBSTYLE_AUTOSIZE | 0x80);
-//					lpButton.fsState = (byte) OS.TBSTATE_ENABLED;
-//					lpButton.iBitmap = OS.I_IMAGENONE;
-//					if ((item.style & SWT.SEPARATOR) != 0) {
-//						lpButton.fsStyle = (byte) OS.BTNS_SEP;
-//					}
-//					OS.SendMessage (hwndTB, OS.TB_INSERTBUTTON, i, lpButton);
-//
-//					if ((item.style & SWT.SEPARATOR) == 0) {
-//						/* set text and state info */
-//						Menu parent = item.parent;
-//						int id = item.id;
-//						int hMenu = parent.handle;
-//												
-//						mii.cch = cch;
-//						success = OS.GetMenuItemInfo (hMenu, i, true, mii);
-//						if (!success) error (SWT.ERROR_INVALID_ARGUMENT);
-//						boolean enabled = (mii.fState & (OS.MFS_DISABLED | OS.MFS_GRAYED)) == 0;
-//						if (!enabled) {
-//							info.dwMask |= OS.TBIF_STATE;
-//							info.fsStyle = 0;
-//						}						
-//						info.pszText = pszText;
-//						OS.SendMessage (hwndTB, OS.TB_SETBUTTONINFO, item.id, info);
-//
-//						/* set menu */
-//						Menu menu2 = item.menu;
-//						if (menu2 != null) {
-//							OS.SendMessage (hwndCB, OS.SHCMBM_SETSUBMENU, item.id, menu2.handle);
-//						}
-//					}
-//				}
-//				if (pszText != 0) OS.HeapFree (hHeap, 0, pszText);
-//			}
-//		}
-//		if (resize) setMaximized (true);
-//	} else if (OS.IsHPC) {
-//		boolean resize = menuBar != menu;
-//		if (menuBar != null) {
-//			/*
-//			* Because CommandBar_Destroy destroys the menu bar, it
-//			* is necessary to move the current items into a new menu
-//			* before it is called.
-//			*/
-//			int hMenu = OS.CreateMenu ();
-//			if (!moveMenu (menuBar.handle, hMenu)) {
-//				error (SWT.ERROR_CANNOT_SET_MENU);
-//			}
-//			menuBar.handle = hMenu;
-//			if (hwndCB != 0) OS.CommandBar_Destroy (hwndCB);
-//			hwndCB = 0;
-//		}
-//		menuBar = menu;
-//		if (menuBar != null) {		
-//			hwndCB = OS.CommandBar_Create (OS.GetModuleHandle (null), handle, 1);
-//			OS.CommandBar_InsertMenubarEx (hwndCB, 0, menuBar.handle, 0);
-//			/*
-//			* The command bar hosts the 'close' button when the window does not
-//			* have a caption.
-//			*/
-//			if ((style & SWT.CLOSE) != 0 && (style & SWT.TITLE) == 0) {
-//				OS.CommandBar_AddAdornments(hwndCB, 0, 0);
-//			}
-//		}
-//		if (resize) {
-//			sendEvent (SWT.Resize);
-//			layout (false);
-//		}
-//	} else {
-//		menuBar = menu;
-//		int hMenu = 0;
-//		if (menuBar != null) hMenu = menuBar.handle;
-//		OS.SetMenu (handle, hMenu);
-//	}
+public void setMenuBar (Menu menu) {
+	checkWidget ();
+	if (menuBar == menu) return;
+	if (menu != null) {
+		if (menu.isDisposed()) error(SWT.ERROR_INVALID_ARGUMENT);
+		if ((menu.style & SWT.BAR) == 0) error (SWT.ERROR_MENU_NOT_BAR);
+		if (menu.parent != this) error (SWT.ERROR_INVALID_PARENT);
+	}	
+        menuBar = menu;
+        int hMenu = 0;
+        if (menuBar != null) 
+            hMenu = menuBar.handle;
+//        OS.SetMenu (handle, hMenu);
+        OS.WinSendMsg (frameHandle, OS.WM_UPDATEFRAME, OS.FCF_MENU, 0);
+        System.out.println("Decorations:setMenuBar");
 //	destroyAcceleratorTable ();
-//}
+}
 
 /**
  * Sets the minimized stated of the receiver.
