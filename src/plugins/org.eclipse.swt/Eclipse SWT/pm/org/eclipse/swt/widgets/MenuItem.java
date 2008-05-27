@@ -211,16 +211,16 @@ static int checkStyle (int style) {
 	return checkBits (style, SWT.PUSH, SWT.CHECK, SWT.RADIO, SWT.SEPARATOR, SWT.CASCADE, 0);
 }
 
-//void fillAccel (ACCEL accel) {
-//	accel.fVirt = 0;
-//	accel.cmd = accel.key = 0;
-//	if (accelerator == 0) return;
-//	int fVirt = OS.FVIRTKEY;
-//	int key = accelerator & ~(SWT.ALT | SWT.CTRL | SWT.SHIFT);
-//	int vKey = Display.untranslateKey (key);
-//	if (vKey != 0) {
-//		key = vKey;	
-//	} else {
+void fillAccel (ACCEL accel) {
+	accel.fs = 0;
+	accel.cmd = accel.key = 0;
+	if (accelerator == 0) return;
+	int fs = OS.AF_VIRTUALKEY;
+	int key = accelerator & ~(SWT.ALT | SWT.CTRL | SWT.SHIFT);
+	int vKey = Display.untranslateKey (key);
+	if (vKey != 0) {
+		key = vKey;	
+	} //else {
 //		switch (key) {
 //			/*
 //			* Bug in Windows.  For some reason, VkKeyScan
@@ -228,31 +228,33 @@ static int checkStyle (int style) {
 //			* VK_DELETE.  The fix is to map these keys
 //			* as a special case.
 //			*/
-//			case 27: key = OS.VK_ESCAPE; break;
+//			case 27: key = OS.VK_ESC; break;
 //			case 127: key = OS.VK_DELETE; break;
 //			default: {
-//				key = wcsToMbcs ((char) key);
+////				key = wcsToMbcs ((char) key);
 //				if (key == 0) return;
-//				if (OS.IsWinCE) {
-//					key = OS.CharUpper ((short) key);
-//				} else {
+////				if (OS.IsWinCE) {
+////					key = OS.CharUpper ((short) key);
+////				} else {
 //					vKey = OS.VkKeyScan ((short) key) & 0xFF;
 //					if (vKey == -1) {
-//						fVirt = 0;
+//						fs = 0;
 //					} else {
 //						key = vKey;
 //					}
-//				}
+////				}
 //			}
 //		}
 //	}
-//	accel.key = (short) key;
-//	accel.cmd = (short) id;
-//	accel.fVirt = (byte) fVirt;
-//	if ((accelerator & SWT.ALT) != 0) accel.fVirt |= OS.FALT;
-//	if ((accelerator & SWT.CTRL) != 0) accel.fVirt |= OS.FCONTROL;
-//	if ((accelerator & SWT.SHIFT) != 0) accel.fVirt |= OS.FSHIFT;
-//}
+	accel.key = (short) key;
+	accel.cmd = (short) id;
+	accel.fs = (byte) fs;
+	if ((accelerator & SWT.ALT) != 0) accel.fs |= OS.AF_ALT;
+	if ((accelerator & SWT.CTRL) != 0) accel.fs |= OS.AF_CONTROL;
+	if ((accelerator & SWT.SHIFT) != 0) accel.fs |= OS.AF_SHIFT;
+        
+        System.out.println("MenuItem.fillAccel - KEY = " + accel.key);
+}
 
 /**
  * Return the widget accelerator.  An accelerator is the bit-wise
@@ -293,23 +295,12 @@ public Display getDisplay () {
  * 
  * @see #isEnabled
  */
-//public boolean getEnabled () {
-//	checkWidget ();
-//	int hMenu = parent.handle;
-//	MENUITEMINFO info = new MENUITEMINFO ();
-//	info.cbSize = MENUITEMINFO.sizeof;
-//	info.fMask = OS.MIIM_STATE;
-//	boolean success;
-//	if (OS.IsWinCE) {
-//		int index = parent.indexOf (this);
-//		if (index == -1) error (SWT.ERROR_CANNOT_GET_ENABLED);
-//		success = OS.GetMenuItemInfo (hMenu, index, true, info);
-//	} else {
-//		success = OS.GetMenuItemInfo (hMenu, id, false, info);
-//	}
-//	if (!success) error (SWT.ERROR_CANNOT_GET_ENABLED);
-//	return (info.fState & (OS.MFS_DISABLED | OS.MFS_GRAYED)) == 0;
-//}
+public boolean getEnabled () {
+	checkWidget ();
+	int hMenu = parent.handle;
+        short sState = (short) OS.WinSendMsg(hMenu, OS.MM_QUERYITEMATTR,  OS.MPFROM2SHORT((short)id, (short)OS.FALSE), OS.MIA_DISABLED);
+	return (sState & OS.MIA_DISABLED) == 0;
+}
 
 /**
  * Returns the receiver's cascade menu if it has one or null
@@ -364,17 +355,13 @@ public Menu getParent () {
  *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
  * </ul>
  */
-//public boolean getSelection () {
-//	checkWidget ();
-//	if ((style & (SWT.CHECK | SWT.RADIO)) == 0) return false;
-//	int hMenu = parent.handle;
-//	MENUITEMINFO info = new MENUITEMINFO ();
-//	info.cbSize = MENUITEMINFO.sizeof;
-//	info.fMask = OS.MIIM_STATE;
-//	boolean success = OS.GetMenuItemInfo (hMenu, id, false, info);
-//	if (!success) error (SWT.ERROR_CANNOT_GET_SELECTION);
-//	return (info.fState & OS.MFS_CHECKED) !=0;
-//}
+public boolean getSelection () {
+	checkWidget ();
+	if ((style & (SWT.CHECK | SWT.RADIO)) == 0) return false;
+	int hMenu = parent.handle;
+        short sState = (short) OS.WinSendMsg(hMenu, OS.MM_QUERYITEMATTR,  OS.MPFROM2SHORT((short)id, (short)OS.FALSE), OS.MIA_CHECKED);
+	return (sState & OS.MIA_CHECKED) !=0;
+}
 
 /**
  * Returns <code>true</code> if the receiver is enabled and all
@@ -391,32 +378,32 @@ public Menu getParent () {
  * 
  * @see #getEnabled
  */
-//public boolean isEnabled () {
-//	return getEnabled () && parent.isEnabled ();
-//}
-//
-//void releaseChild () {
-//	super.releaseChild ();
-//	if (menu != null) menu.dispose ();
-//	menu = null;
-//	parent.destroyItem (this);
-//}
+public boolean isEnabled () {
+	return getEnabled () && parent.isEnabled ();
+}
 
-//void releaseWidget () {
-//	if (menu != null) {
-//		menu.releaseWidget ();
-//		menu.releaseHandle ();
-//	}
-//	menu = null;
-//	super.releaseWidget ();
+void releaseChild () {
+	super.releaseChild ();
+	if (menu != null) menu.dispose ();
+	menu = null;
+	parent.destroyItem (this);
+}
+
+void releaseWidget () {
+	if (menu != null) {
+		menu.releaseWidget ();
+		menu.releaseHandle ();
+	}
+	menu = null;
+	super.releaseWidget ();
 //	if (accelerator != 0) {
 //		parent.destroyAcceleratorTable ();
 //	}
-//	accelerator = 0;
-//	Decorations shell = parent.parent;
-//	shell.remove (this);
-//	parent = null;
-//}
+	accelerator = 0;
+	Decorations shell = parent.parent;
+	shell.remove (this);
+	parent = null;
+}
 
 /**
  * Removes the listener from the collection of listeners who will
@@ -502,11 +489,11 @@ public void removeSelectionListener (SelectionListener listener) {
  *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
  * </ul>
  */
-//public void setAccelerator (int accelerator) {
-//	checkWidget ();
-//	this.accelerator = accelerator;
-//	parent.destroyAcceleratorTable ();
-//}
+public void setAccelerator (int accelerator) {
+	checkWidget ();
+	this.accelerator = accelerator;
+	parent.destroyAcceleratorTable ();
+}
 
 /**
  * Enables the receiver if the argument is <code>true</code>,
@@ -521,37 +508,22 @@ public void removeSelectionListener (SelectionListener listener) {
  *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
  * </ul>
  */
-//public void setEnabled (boolean enabled) {
-//	checkWidget ();
-//	int hMenu = parent.handle;
-//	if (OS.IsWinCE) {
-//		int index = parent.indexOf (this);
-//		if (index == -1) return;
-//		int uEnable = OS.MF_BYPOSITION | (enabled ? OS.MF_ENABLED : OS.MF_GRAYED);
-//		OS.EnableMenuItem (hMenu, index, uEnable);
-//		if (OS.IsPPC) {
-//			/* if it is a top level menu item, set the state in the corresponding tool item */
-//			Decorations shell = parent.parent;
-//			if (parent == shell.menuBar) {
-//				int fsState = OS.SendMessage (shell.hwndTB, OS.TB_GETSTATE, id, 0);
-//				fsState &= ~OS.TBSTATE_ENABLED;
-//				if (enabled) fsState |= OS.TBSTATE_ENABLED;
-//				OS.SendMessage (shell.hwndTB, OS.TB_SETSTATE, id, fsState);
-//			}
-//		}
-//	} else {
+public void setEnabled (boolean enabled) {
+	checkWidget ();
+	int hMenu = parent.handle;
 //		MENUITEMINFO info = new MENUITEMINFO ();
 //		info.cbSize = MENUITEMINFO.sizeof;
 //		info.fMask = OS.MIIM_STATE;
+        short sState = (short) OS.WinSendMsg(hMenu, OS.MM_QUERYITEMATTR,  OS.MPFROM2SHORT((short)id, (short)OS.FALSE), OS.MIA_DISABLED);
 //		boolean success = OS.GetMenuItemInfo (hMenu, id, false, info);
 //		if (!success) error (SWT.ERROR_CANNOT_SET_ENABLED);
-//		info.fState &= ~(OS.MFS_DISABLED | OS.MFS_GRAYED);
-//		if (!enabled) info.fState |= (OS.MFS_DISABLED | OS.MFS_GRAYED);
-//		success = OS.SetMenuItemInfo (hMenu, id, false, info);
+	sState &= ~(OS.MIA_DISABLED);
+	if (!enabled) sState |= (OS.MIA_DISABLED);
+        int success = OS.WinSendMsg(hMenu, OS.MM_SETITEMATTR,  OS.MPFROM2SHORT((short)id, (short)OS.FALSE), OS.MPFROM2SHORT((short)OS.MIA_DISABLED, sState));
+//		boolean success = OS.SetMenuItemInfo (hMenu, id, false, info);
 //		if (!success) error (SWT.ERROR_CANNOT_SET_ENABLED);
-//	}
 //	parent.redraw ();
-//}
+}
 
 /**
  * Sets the image the receiver will display to the argument.
@@ -608,106 +580,60 @@ public void removeSelectionListener (SelectionListener listener) {
  *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
  * </ul>
  */
-//public void setMenu (Menu menu) {
-//	checkWidget ();
-//
-//	/* Check to make sure the new menu is valid */
-//	if ((style & SWT.CASCADE) == 0) {
-//		error (SWT.ERROR_MENUITEM_NOT_CASCADE);
-//	}
-//	if (menu != null) {
-//		if (menu.isDisposed()) error(SWT.ERROR_INVALID_ARGUMENT);
-//		if ((menu.style & SWT.DROP_DOWN) == 0) {
-//			error (SWT.ERROR_MENU_NOT_DROP_DOWN);
-//		}
-//		if (menu.parent != parent.parent) {
-//			error (SWT.ERROR_INVALID_PARENT);
-//		}
-//	}
-//
-//	/* Assign the new menu */
-//	Menu oldMenu = this.menu;
-//	if (oldMenu == menu) return;
-//	if (oldMenu != null) oldMenu.cascade = null;
-//	this.menu = menu;
-//
-//	/* Assign the new menu in the OS */
-//	
-//	/*
-//	* Feature in Windows.  When SetMenuItemInfo () is used to
-//	* set a submenu and the menu item already has a submenu,
-//	* Windows destroys the previous menu.  This is undocumented
-//	* and unexpected but not necessarily wrong.  The fix is to
-//	* remove the item with RemoveMenu () which does not destroy
-//	* the submenu and then insert the item with InsertMenuItem ().
-//	*/
-//	int hMenu = parent.handle;
-//	MENUITEMINFO info = new MENUITEMINFO ();
-//	info.cbSize = MENUITEMINFO.sizeof;
-//	info.fMask = OS.MIIM_DATA;
-//	int index = 0;
-//	while (OS.GetMenuItemInfo (hMenu, index, true, info)) {
-//		if (info.dwItemData == id) break;
-//		index++;
-//	}
-//	if (info.dwItemData != id) return;
-//	int cch = 128;
-//	int hHeap = OS.GetProcessHeap ();
-//	int byteCount = cch * TCHAR.sizeof;
-//	int pszText = OS.HeapAlloc (hHeap, OS.HEAP_ZERO_MEMORY, byteCount);
-//	info.fMask = OS.MIIM_STATE | OS.MIIM_ID | OS.MIIM_TYPE | OS.MIIM_DATA;
-//	info.dwTypeData = pszText;
-//	info.cch = cch;
-//	boolean success = OS.GetMenuItemInfo (hMenu, index, true, info);
-//	if (menu != null) {
-//		menu.cascade = this; 
-//		info.fMask |= OS.MIIM_SUBMENU;
-//		info.hSubMenu = menu.handle;
-//	}
-//	OS.RemoveMenu (hMenu, index, OS.MF_BYPOSITION);
-//	if (OS.IsWinCE) {
-//		/*
-//		* On WinCE, InsertMenuItem is not available.  SetMenuItemInfo
-//		* does not set the menu item state and submenu use InsertMenu
-//		* to set these fields and SetMenuItemInfo to set the menu item
-//		* data.  NOTE: SetMenuItemInfo is also used to set the string
-//		* that was queried from the original menu item.
-//		*/
-//		int uIDNewItem = id;
-//		int uFlags = OS.MF_BYPOSITION;
-//		if (menu != null) {
-//			uFlags |= OS.MF_POPUP;
-//			uIDNewItem = menu.handle;
-//		}
-//		TCHAR lpNewItem = new TCHAR (0, "", true);
-//		success = OS.InsertMenu (hMenu, index, uFlags, uIDNewItem, lpNewItem);
-//		if (success) {
-//			info.fMask = OS.MIIM_DATA | OS.MIIM_TYPE;
-//			success = OS.SetMenuItemInfo (hMenu, index, true, info);
-//			if ((info.fState & (OS.MFS_DISABLED | OS.MFS_GRAYED)) != 0) {
-//				OS.EnableMenuItem (hMenu, index, OS.MF_BYPOSITION | OS.MF_GRAYED);
-//			}
-//			if ((info.fState & OS.MFS_CHECKED) != 0) {
-//				OS.CheckMenuItem (hMenu, index, OS.MF_BYPOSITION | OS.MF_CHECKED);
-//			}
-//			if (OS.IsPPC) {
-//				if (success) {
-//					/* if it is a top level menu item, update the corresponding tool item */
-//					Decorations shell = parent.parent;
-//					if (parent == shell.menuBar) {
-//						OS.SendMessage (shell.hwndCB, OS.SHCMBM_SETSUBMENU, id, uIDNewItem);
-//					}
-//				}
-//			}
-//		}
-//		
-//	} else {
-//		success = OS.InsertMenuItem (hMenu, index, true, info);
-//	}
-//	if (pszText != 0) OS.HeapFree (hHeap, 0, pszText);
-//	if (!success) error (SWT.ERROR_CANNOT_SET_MENU);
+public void setMenu (Menu menu) {
+	checkWidget ();
+	/* Check to make sure the new menu is valid */
+	if ((style & SWT.CASCADE) == 0) {
+		error (SWT.ERROR_MENUITEM_NOT_CASCADE);
+	}
+	if (menu != null) {
+		if (menu.isDisposed()) 
+                    error(SWT.ERROR_INVALID_ARGUMENT);
+		if ((menu.style & SWT.DROP_DOWN) == 0) {
+			error (SWT.ERROR_MENU_NOT_DROP_DOWN);
+		}
+		if (menu.parent != parent.parent) {
+			error (SWT.ERROR_INVALID_PARENT);
+		}
+	}
+	/* Assign the new menu */
+	Menu oldMenu = this.menu;
+	if (oldMenu == menu) return;
+	if (oldMenu != null) oldMenu.cascade = null;
+	this.menu = menu;
+
+	/* Assign the new menu in the OS */
+	
+	int hMenu = parent.handle;
+	MENUITEM info = new MENUITEM ();
+	int index = 0;
+	while (index < parent.getItemCount ()) {
+		if (OS.WinSendMsg (hMenu, OS.MM_ITEMIDFROMPOSITION,  (short)index, 0) == id) 
+                    break;
+		index++;
+	}
+        int idItem = OS.WinSendMsg (hMenu, OS.MM_ITEMIDFROMPOSITION,  (short)index, 0);
+        OS.WinSendMsg (hMenu, OS.MM_QUERYITEM,  OS.MPFROM2SHORT ((short)idItem, (short)OS.TRUE), info);
+        int length = 128;
+        PSZ buffer = new PSZ (length);
+	if (menu != null) {
+		menu.cascade = this; 
+		info.afStyle |= OS.MIS_SUBMENU;
+		info.hwndSubMenu = menu.handle;
+	}
+        
+        //Given an id of a menuitem changes it to a MIS_SUBMENU type of item
+        //Note: You have to delete and reinsert a menu item if you want to change it from
+        
+        OS.WinSendMsg (hMenu, OS.MM_QUERYITEMTEXT,  OS.MPFROM2SHORT ((short)idItem, (short)length), buffer);
+        OS.WinSendMsg (hMenu, OS.MM_DELETEITEM,  OS.MPFROM2SHORT ((short)idItem, (short)OS.FALSE), 0);
+        int rc = OS.WinSendMsg (hMenu, OS.MM_INSERTITEM,  info, buffer);
+//        boolean success = OS.WinSendMsg (hMenu, OS.MM_SETITEM,  OS.MPFROM2SHORT ((short)0, (short)OS.TRUE), info);
+        System.out.println("RC = " + rc);
+        if(rc == OS.MIT_ERROR || rc == OS.MIT_MEMERROR)
+            error (SWT.ERROR_CANNOT_SET_MENU);
 //	parent.destroyAcceleratorTable ();
-//}
+}
 
 /**
  * Sets the selection state of the receiver.
@@ -722,118 +648,54 @@ public void removeSelectionListener (SelectionListener listener) {
  *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
  * </ul>
  */
-//public void setSelection (boolean selected) {
-//	checkWidget ();
-//	if ((style & (SWT.CHECK | SWT.RADIO)) == 0) return;
-//	int hMenu = parent.handle;
-//	if (OS.IsWinCE) {
-//		int index = parent.indexOf (this);
-//		if (index == -1) return;
-//		int uCheck = OS.MF_BYPOSITION | (selected ? OS.MF_CHECKED : OS.MF_UNCHECKED);
-//		OS.CheckMenuItem (hMenu, index, uCheck);
-//	} else {
-//		MENUITEMINFO info = new MENUITEMINFO ();
-//		info.cbSize = MENUITEMINFO.sizeof;
-//		info.fMask = OS.MIIM_STATE;
-//		boolean success = OS.GetMenuItemInfo (hMenu, id, false, info);
-//		if (!success) error (SWT.ERROR_CANNOT_SET_SELECTION);
-//		info.fState &= ~OS.MFS_CHECKED;
-//		if (selected) info.fState |= OS.MFS_CHECKED;
-//		success = OS.SetMenuItemInfo (hMenu, id, false, info);
-//		if (!success) error (SWT.ERROR_CANNOT_SET_SELECTION);
-//	}
-//	parent.redraw ();
-//}
+public void setSelection (boolean selected) {
+	checkWidget ();
+	if ((style & (SWT.CHECK | SWT.RADIO)) == 0) return;
+	int hMenu = parent.handle;
+        
+        int sState = OS.WinSendMsg(hMenu, OS.MM_QUERYITEMATTR, OS.MPFROM2SHORT((short)id, (short)OS.TRUE), OS.MIA_CHECKED);
+        sState &= ~OS.MIA_CHECKED;
+        if (selected) sState |= OS.MIA_CHECKED;
+        int success = OS.WinSendMsg(hMenu, OS.MM_SETITEMATTR, OS.MPFROM2SHORT((short)id, (short)OS.TRUE), OS.MPFROM2SHORT((short)OS.MIA_CHECKED, (short)sState));
+        if (success == 0) error (SWT.ERROR_CANNOT_SET_SELECTION);
 
-//public void setText (String string) {
-//	checkWidget ();
-//	if (string == null) error (SWT.ERROR_NULL_ARGUMENT);
-//	if ((style & SWT.SEPARATOR) != 0) return;
-//	super.setText (string);
-//	boolean fixPPCMenuBar = false;
-//	if (OS.IsPPC) {
-//		Decorations shell = parent.parent;
-//		if (parent == shell.menuBar) {
-//			fixPPCMenuBar = true;
-//			/*
-//			* Bug in WinCE PPC.  Tool items on the menubar don't resize
-//			* correctly when the character '&' is used (even when it
-//			* is a sequence '&&').  The fix is to remove all '&' from
-//			* the string. 
-//			*/
-//			if (string.indexOf ('&') != -1) {
-//				int length = string.length ();
-//				char[] text = new char [length];
-//				string.getChars( 0, length, text, 0);
-//				int i = 0, j = 0;
-//				for (i=0; i<length; i++) {
-//					if (text[i] != '&') text [j++] = text [i];
-//				}
-//				if (j < i) string = new String (text, 0, j);
-//			}
-//		}
-//	}
-//	int hMenu = parent.handle;
-//	int hHeap = OS.GetProcessHeap ();
-//	/* Use the character encoding for the default locale */
-//	TCHAR buffer = new TCHAR (0, string, true);
-//	int byteCount = buffer.length () * TCHAR.sizeof;
-//	int pszText = OS.HeapAlloc (hHeap, OS.HEAP_ZERO_MEMORY, byteCount);
-//	OS.MoveMemory (pszText, buffer, byteCount);
-//	MENUITEMINFO info = new MENUITEMINFO ();
-//	info.cbSize = MENUITEMINFO.sizeof;
-//	info.fMask = OS.MIIM_TYPE;
-//	info.fType = widgetStyle ();
-//	info.dwTypeData = pszText;
-//	boolean success = OS.SetMenuItemInfo (hMenu, id, false, info);
-//	/*
-//	* Bug in Windows 2000.  For some reason, when MIIM_TYPE is set
-//	* on a menu item that also has MIIM_BITMAP, the MIIM_TYPE clears
-//	* the MIIM_BITMAP style.  The fix is to reset both MIIM_BITMAP.
-//	* Note, this does not happen on Windows 98.
-//	*/
-//	if (!OS.IsWinCE) {
-//		if ((OS.WIN32_MAJOR << 16 | OS.WIN32_MINOR) >= (4 << 16 | 10)) {
-//			if (image != null) {
-//				info.fMask = OS.MIIM_BITMAP;
-//				info.hbmpItem = OS.HBMMENU_CALLBACK;
-//				success = OS.SetMenuItemInfo (hMenu, id, false, info);
-//			}
-//		}
-//	}
-//	if (fixPPCMenuBar) {
-//		Decorations shell = parent.parent;
-//		TBBUTTONINFO info2 = new TBBUTTONINFO ();
-//		info2.cbSize = TBBUTTONINFO.sizeof;
-//		info2.dwMask = OS.TBIF_TEXT;
-//		info2.pszText = pszText;
-//		OS.SendMessage (shell.hwndTB, OS.TB_SETBUTTONINFO, id, info2);
-//	}
-//	if (pszText != 0) OS.HeapFree (hHeap, 0, pszText);
-//	if (!success) error (SWT.ERROR_CANNOT_SET_TEXT);
-//	parent.redraw ();
-//}
+	parent.redraw ();
+}
 
-//int widgetStyle () {
-//	if ((style & SWT.SEPARATOR) != 0) return OS.MFT_SEPARATOR;
+public void setText (String string) {
+	checkWidget ();
+	if (string == null) error (SWT.ERROR_NULL_ARGUMENT);
+	if ((style & SWT.SEPARATOR) != 0) return;
+	super.setText (string);
+	int hMenu = parent.handle;
+        PSZ buffer = new PSZ(string);
+        int rc = OS.WinSendMsg (hMenu, OS.MM_SETITEMTEXT,  (short)id, buffer);
+	if (rc != 1) 
+            error (SWT.ERROR_CANNOT_SET_TEXT);
+	parent.redraw ();
+}
+
+int widgetStyle () {
+	if ((style & SWT.SEPARATOR) != 0) return OS.MIS_SEPARATOR;
 //	if ((style & SWT.RADIO) != 0) return OS.MFT_RADIOCHECK;
-//	return OS.MFT_STRING;
-//}
+	return OS.MIS_TEXT;
+}
 
-//LRESULT wmCommandChild (int wParam, int lParam) {
-//	if ((style & (SWT.CHECK | SWT.RADIO)) != 0) {
-//		setSelection (!getSelection ());
-//	}
-//	Event event = new Event ();
-//	if (OS.GetKeyState (OS.VK_MENU) < 0) event.stateMask |= SWT.ALT;
-//	if (OS.GetKeyState (OS.VK_SHIFT) < 0) event.stateMask |= SWT.SHIFT;
-//	if (OS.GetKeyState (OS.VK_CONTROL) < 0) event.stateMask |= SWT.CONTROL;
-//	if (OS.GetKeyState (OS.VK_LBUTTON) < 0) event.stateMask |= SWT.BUTTON1;
-//	if (OS.GetKeyState (OS.VK_MBUTTON) < 0) event.stateMask |= SWT.BUTTON2;
-//	if (OS.GetKeyState (OS.VK_RBUTTON) < 0) event.stateMask |= SWT.BUTTON3;
-//	postEvent (SWT.Selection, event);
-//	return null;
-//}
+MRESULT wmCommandChild (int mp1, int mp2) {
+	if ((style & (SWT.CHECK | SWT.RADIO)) != 0) {
+		setSelection (!getSelection ());
+	}
+        System.out.println("MenuItem:wmCommandChild");
+	Event event = new Event ();
+	if ((OS.WinGetKeyState (OS.HWND_DESKTOP, OS.VK_MENU) & 0x8000) != 0) event.stateMask |= SWT.ALT;
+	if ((OS.WinGetKeyState (OS.HWND_DESKTOP, OS.VK_SHIFT) & 0x8000) != 0) event.stateMask |= SWT.SHIFT;
+	if ((OS.WinGetKeyState (OS.HWND_DESKTOP, OS.VK_CTRL) & 0x8000) != 0) event.stateMask |= SWT.CONTROL;
+	if ((OS.WinGetKeyState (OS.HWND_DESKTOP, OS.VK_BUTTON1) & 0x8000) != 0) event.stateMask |= SWT.BUTTON1;
+	if ((OS.WinGetKeyState (OS.HWND_DESKTOP, OS.VK_BUTTON2) & 0x8000) != 0) event.stateMask |= SWT.BUTTON2;
+	if ((OS.WinGetKeyState (OS.HWND_DESKTOP, OS.VK_BUTTON3) & 0x8000) != 0) event.stateMask |= SWT.BUTTON3;
+	postEvent (SWT.Selection, event);
+	return null;
+}
 
 //LRESULT wmDrawChild (int wParam, int lParam) {
 //	DRAWITEMSTRUCT struct = new DRAWITEMSTRUCT ();
