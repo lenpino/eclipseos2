@@ -1,6 +1,6 @@
 /*
  * OS/2 version.
- * Copyright (c) 2002, 2004 EclipseOS2 Team.
+ * Copyright (c) 2002, 2008 EclipseOS2 Team.
  */
 
 /*
@@ -1365,6 +1365,52 @@ JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinPopupMenu
 
     return (jboolean)WinPopupMenu((HWND)hwndParent, (HWND)hwndOwner, (HWND)hwndMenu, x, y, idItem, fs);
 }
+JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_WinCreateAccelTable
+        (JNIEnv *env, jclass that, jint hab, jobject pacctAccelTable)
+{
+    DEBUG_CALL("WinCreateAccelTable\n")
+    jint haccelhAccel;
+    ACCELTABLE c_pacctAccelTable, *c_ppacctAccelTable = NULL;
+
+    if (pacctAccelTable) c_ppacctAccelTable = getACCELTABLEFields(env, pacctAccelTable, &c_pacctAccelTable, &PGLOB(ACCELTABLEFc));
+
+    haccelhAccel = (jint)WinCreateAccelTable((HAB)hab, c_ppacctAccelTable);
+
+    if (pacctAccelTable) setACCELTABLEFields(env, pacctAccelTable, c_ppacctAccelTable, &PGLOB(ACCELTABLEFc));
+
+    return haccelhAccel;
+}
+JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinDestroyAccelTable
+        (JNIEnv *env, jclass that, jint haccelAccel)
+{
+    DEBUG_CALL("WinDestroyAccelTable\n")
+
+    return (jboolean)WinDestroyAccelTable((HACCEL)haccelAccel);
+}
+JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinSetAccelTable
+        (JNIEnv *env, jclass that, jint hab, jint haccelAccel, jint hwndFrame)
+{
+    DEBUG_CALL("WinSetAccelTable\n")
+
+    return (jboolean)WinSetAccelTable((HAB)hab, (HACCEL)haccelAccel, (HWND)hwndFrame);
+}
+JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinTranslateAccel
+        (JNIEnv *env, jclass that, jint hab, jint hwnd, jint haccelAccel, jobject qmsg)
+{
+    QMSG c_qmsg, *c_pqmsg = NULL;
+    jboolean rc;
+    DEBUG_CALL("WinTranslateAccel\n")
+
+    if (qmsg) c_pqmsg = getQMSGFields(env, qmsg, &c_qmsg, &PGLOB(QMSGFc));
+
+    rc = (jboolean)WinTranslateAccel((HAB)hab, (HWND)hwnd, (HACCEL)haccelAccel, c_pqmsg);
+
+    if (qmsg) setQMSGFields(env, qmsg, c_pqmsg, &PGLOB(QMSGFc));
+
+    return rc;
+}
+
+
 JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_PrfQueryProfileSize
         (JNIEnv *env, jclass that, jint hini, jobject pszApp, jobject pszKey,
         jintArray pulDataLen)
