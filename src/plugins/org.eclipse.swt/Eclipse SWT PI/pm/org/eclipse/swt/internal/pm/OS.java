@@ -258,7 +258,7 @@ public class OS {
 //    public static final int WM_SEMANTICEVENT =      0x0490;
 //    public static final int WM_HELPBASE =           0x0F00;
 //    public static final int WM_HELPTOP =            0x0FFF;
-//    public static final int WM_USER =               0x1000;
+    public static final int WM_USER =               0x1000;
     
     /* Frame window related messages */
 //    public static final int WM_FLASHWINDOW =        0x0040;
@@ -383,7 +383,7 @@ public class OS {
 //    public static final int VK_COPY =       0x3F;
 //    public static final int VK_BLK1 =       0x40;
 //    public static final int VK_BLK2 =       0x41;
-//    public static final int VK_MENU =       VK_F10;
+    public static final int VK_MENU =       VK_F10;
 //    public static final int VK_DBCSFIRST =  0x0080;
 //    public static final int VK_DBCSLAST =   0x00ff;
 //    public static final int VK_BIDI_FIRST = 0xE0;
@@ -2260,6 +2260,9 @@ public static final native boolean WinFreeFileDlgList (PSZ[] papszFQFilename);
 public static final native int WinOpenWindowDC(int hwnd);
 public static final native boolean WinPopupMenu(int hwndParent, int hwndOwner, int hwndMenu, int x, int y, int idItem, short fs);
 public static final native int WinCreateAccelTable(int hab, ACCELTABLE acctAccelTable);
+public static final native boolean WinDestroyAccelTable(int haccelAccel);
+public static final native boolean WinSetAccelTable(int hab, int haccelAccel, int hwndFrame);
+public static final native boolean WinTranslateAccel(int hab, int hwnd, int haccelAccel, QMSG qmsg);
 public static final native boolean PrfQueryProfileSize (int hini, PSZ pszApp,
     PSZ pszKey, int[] pulDataLen);
 public static final native int PrfQueryProfileString (int hini, PSZ pszApp,
