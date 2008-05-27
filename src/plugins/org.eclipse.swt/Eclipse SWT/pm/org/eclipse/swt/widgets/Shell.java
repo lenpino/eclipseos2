@@ -2,7 +2,7 @@ package org.eclipse.swt.widgets;
 
 /*
  * OS/2 version.
- * Copyright (c) 2002, 2004 EclipseOS2 Team.
+ * Copyright (c) 2002, 2008 EclipseOS2 Team.
  */
 
 /*
@@ -703,11 +703,11 @@ void releaseWidget () {
     lastActive = null;
 }
 
-//@@TODO(dmik)
-//void remove (Menu menu) {
-//	super.remove (menu);
-//	if (menu == activeMenu) activeMenu = null;
-//}
+
+void remove (Menu menu) {
+	super.remove (menu);
+	if (menu == activeMenu) activeMenu = null;
+}
 
 /**
  * Removes the listener from the collection of listeners who will
