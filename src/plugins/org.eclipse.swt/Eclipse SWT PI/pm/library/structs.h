@@ -517,6 +517,21 @@ void cacheACCELFids(JNIEnv *env, jobject lpObject, PACCEL_FID_CACHE lpCache);
 PACCEL getACCELFields(JNIEnv *env, jobject lpObject, PACCEL lpStruct, PACCEL_FID_CACHE lpCache);
 void setACCELFields(JNIEnv *env, jobject lpObject, PACCEL lpStruct, PACCEL_FID_CACHE lpCache);
 
+/* ACCELTABLE struct */
+typedef struct ACCELTABLE_FID_CACHE {
+    int cached;
+    jclass clazz;
+    jfieldID
+        cAccel,
+        codepage,
+        aaccel;
+} ACCELTABLE_FID_CACHE;
+typedef ACCELTABLE_FID_CACHE *PACCELTABLE_FID_CACHE;
+
+void cacheACCELTABLEFids(JNIEnv *env, jobject lpObject, PACCELTABLE_FID_CACHE lpCache);
+PACCELTABLE getACCELTABLEFields(JNIEnv *env, jobject lpObject, PACCELTABLE lpStruct, PACCELTABLE_FID_CACHE lpCache);
+void setACCELTABLEFields(JNIEnv *env, jobject lpObject, PACCELTABLE lpStruct, PACCELTABLE_FID_CACHE lpCache);
+
 /* FACENAMEDESC struct */
 /*@@TODO (dmik): remove!
 typedef struct FACENAMEDESC_FID_CACHE {
@@ -559,6 +574,7 @@ extern SBCDATA_FID_CACHE SBCDATAFc;
 extern MENUITEM_FID_CACHE MENUITEMFc;
 extern OWNERITEM_FID_CACHE OWNERITEMFc;
 extern ACCEL_FID_CACHE ACCELFc;
+extern ACCELTABLE_FID_CACHE ACCELTABLEFc;
 /*@@TODO (dmik): remove! 
 extern FACENAMEDESC_FID_CACHE FACENAMEDESCFc;
 */
