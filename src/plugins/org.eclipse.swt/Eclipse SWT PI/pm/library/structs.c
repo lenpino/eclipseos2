@@ -1,6 +1,6 @@
 /*
  * OS/2 version.
- * Copyright (c) 2002, 2004 EclipseOS2 Team.
+ * Copyright (c) 2002, 2008 EclipseOS2 Team.
  */
 
 /*
@@ -170,6 +170,7 @@ SBCDATA_FID_CACHE SBCDATAFc;
 MENUITEM_FID_CACHE MENUITEMFc;
 OWNERITEM_FID_CACHE OWNERITEMFc;
 ACCEL_FID_CACHE ACCELFc;
+ACCELTABLE_FID_CACHE ACCELTABLEFc;
 
 /*@@TODO (dmik): remove
 FACENAMEDESC_FID_CACHE FACENAMEDESCFc;
@@ -1458,6 +1459,55 @@ void setACCELFields(JNIEnv *env, jobject lpObject, PACCEL lpStruct, PACCEL_FID_C
     (*env)->SetShortField(env, lpObject, lpCache->fs, lpStruct->fs);
     (*env)->SetShortField(env, lpObject, lpCache->key, lpStruct->key);
     (*env)->SetShortField(env, lpObject, lpCache->cmd, lpStruct->cmd);
+}
+
+/* ACCELTABLE struct */
+
+void cacheACCELTABLEFids(JNIEnv *env, jobject lpObject, PACCELTABLE_FID_CACHE lpCache)
+{
+    if (lpCache->cached) return;
+    lpCache->clazz = (*env)->GetObjectClass(env, lpObject);
+    lpCache->cAccel = (*env)->GetFieldID(env, lpCache->clazz, "cAccel", "S");
+    lpCache->codepage = (*env)->GetFieldID(env, lpCache->clazz, "codepage", "S");
+    lpCache->aaccel = (*env)->GetFieldID(env, lpCache->clazz, "aaccel", "[Lorg/eclipse/swt/internal/pm/ACCEL;");
+    lpCache->cached = 1;
+}
+
+PACCELTABLE getACCELTABLEFields(JNIEnv *env, jobject lpObject, PACCELTABLE lpStruct, PACCELTABLE_FID_CACHE lpCache)
+{
+    if (!lpCache->cached) cacheACCELTABLEFids(env, lpObject, lpCache);
+    lpStruct->cAccel = (*env)->GetShortField(env, lpObject, lpCache->cAccel);
+    lpStruct->codepage = (*env)->GetShortField(env, lpObject, lpCache->codepage);
+    {
+        jobjectArray aaccel = (*env)->GetObjectField(env, lpObject, lpCache->aaccel);
+        jsize length = (*env)->GetArrayLength(env, aaccel);
+
+        if (aaccel) {
+            DEBUG_CALL("getACCELTABLEFields:aaccel array.\n")
+            jint ulAccelLen = sizeof( sizeof(ACCEL )*length) + sizeof( ACCELTABLE );
+            PACCELTABLE pacctAccelTable = (PACCELTABLE) malloc ( ulAccelLen );
+
+            ACCEL c_pacctAccel, *c_ppacctAccel = NULL;
+            int i=0;
+            for(i=0; i<length;i++){
+                jobject jaccel = (*env)->GetObjectArrayElement(env, aaccel, i);
+                if (pacctAccelTable) c_ppacctAccel = getACCELFields(env, jaccel, &c_pacctAccel, &PGLOB(ACCELFc));
+                lpStruct->aaccel[i] = *c_ppacctAccel;
+            }
+        }
+    }
+    return lpStruct;
+}
+
+void setACCELTABLEFields(JNIEnv *env, jobject lpObject, PACCELTABLE lpStruct, PACCELTABLE_FID_CACHE lpCache)
+{
+    if (!lpCache->cached) cacheACCELTABLEFids(env, lpObject, lpCache);
+    (*env)->SetShortField(env, lpObject, lpCache->cAccel, lpStruct->cAccel);
+    (*env)->SetShortField(env, lpObject, lpCache->codepage, lpStruct->codepage);
+    {
+        jobjectArray aaccel = (*env)->GetObjectField(env, lpObject, lpCache->aaccel);
+        (*env)->SetObjectField(env, lpObject, lpCache->aaccel, aaccel);
+    }
 }
 
 /* FACENAMEDESC struct */
