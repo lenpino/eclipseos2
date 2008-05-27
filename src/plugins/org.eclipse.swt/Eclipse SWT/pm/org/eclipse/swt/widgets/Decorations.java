@@ -2,7 +2,7 @@ package org.eclipse.swt.widgets;
 
 /*
  * OS/2 version.
- * Copyright (c) 2002, 2004 EclipseOS2 Team.
+ * Copyright (c) 2002, 2008 EclipseOS2 Team.
  */
 
 /*
@@ -301,10 +301,11 @@ void createAcceleratorTable () {
 	} else {
 		maxAccel = items.length;
 	}
-	int size = ACCEL.sizeof;
-	ACCEL accel = new ACCEL ();
-	byte [] buffer1 = new byte [size];	
-	byte [] buffer2 = new byte [maxAccel * size];
+//	int size = ACCEL.sizeof;
+        ACCELTABLE pacctAccelTable = new ACCELTABLE();
+        ACCEL[] accelList = new ACCEL[maxAccel];
+//	byte [] buffer1 = new byte [size];	
+//	byte [] buffer2 = new byte [maxAccel * size];
 	if (menuBar != null && items != null) {
 		for (int i=0; i<items.length; i++) {
 			MenuItem item = items [i];
@@ -314,16 +315,30 @@ void createAcceleratorTable () {
 					parent = parent.getParentMenu ();
 				}
 				if (parent == menuBar) {
+                                    	ACCEL accel = new ACCEL ();
 					item.fillAccel (accel);
-					OS.MoveMemory (buffer1, accel, size);
-					System.arraycopy (buffer1, 0, buffer2, nAccel * size, size);
+                                        accelList[nAccel] = accel;
+//					OS.MoveMemory (buffer1, accel, size);
+//					System.arraycopy (buffer1, 0, buffer2, nAccel * size, size);
 					nAccel++;
 				}
 			}
 		}
+                pacctAccelTable.cAccel = (short)nAccel;
+                //@@TEMP(lpino): in the future we should get this value from somewhere
+                pacctAccelTable.codepage = (short)437;
+                pacctAccelTable.aaccel = new ACCEL[nAccel];
+                for(int i= 0;i < nAccel;i++)
+                    pacctAccelTable.aaccel[i] = accelList[i];
 	}
-//        hAccel = OS.WinCreateAccelTable(hab, pacctAccelTable);
-	if (nAccel != 0) hAccel = OS.CreateAcceleratorTable (buffer2, nAccel);
+        hAccel = OS.WinCreateAccelTable(getDisplay().hab, pacctAccelTable);
+        System.out.println("Decorations:createAcceleratorTable - Handle of accelerator table = " + hAccel);
+        if(!OS.WinSetAccelTable(getDisplay().hab, hAccel, frameHandle)){
+            System.out.println("Decorations:createAcceleratorTable - Thread did not attach accelerator table to the frame");
+            if(!OS.WinDestroyAccelTable(hAccel))
+                System.out.println("Decorations:createAcceleratorTable - The accelerator table was not destroyed");
+        }    
+//	if (nAccel != 0) hAccel = OS.CreateAcceleratorTable (buffer2, nAccel);
 }
 
 void createHandle () {
@@ -428,7 +443,7 @@ void createHandle () {
 //}
 
 void destroyAcceleratorTable () {
-	if (hAccel != 0 && hAccel != -1) OS.DestroyAcceleratorTable (hAccel);
+	if (hAccel != 0 && hAccel != -1) OS.WinDestroyAccelTable (hAccel);
 	hAccel = -1;
 }
 
@@ -1263,13 +1278,12 @@ public void setVisible (boolean visible) {
 }
 
 boolean translateAccelerator (QMSG qmsg) {
-    return false;
-//@@TODO (dmik): later    
-//	if (!isEnabled () || !isActive ()) return false;
-//	if (menuBar != null && !menuBar.isEnabled ()) return false;
-//	if (hAccel == -1) createAcceleratorTable ();
-//	if (hAccel == 0) return false;
-//	return OS.TranslateAccelerator (handle, hAccel, msg) != 0;
+	if (!isEnabled () || !isActive ()) return false;
+	if (menuBar != null && !menuBar.isEnabled ()) return false;
+	if (hAccel == -1) createAcceleratorTable ();
+	if (hAccel == 0) return false;
+	return OS.WinTranslateAccel (getDisplay().hab, handle, hAccel, qmsg);
+    
 }
 
 boolean traverseItem (boolean next) {
@@ -1285,13 +1299,13 @@ boolean traverseReturn () {
 
 int windowProc (int msg, int mp1, int mp2) {
 //@@TODO (dmik): remove
-//    switch (msg) {
+    switch (msg) {
 //@@TODO(dmik)
-//        case OS.WM_APP:
-//        case OS.WM_APP+1:
-//            if (hAccel == -1) createAcceleratorTable ();
-//            return msg == OS.WM_APP ? nAccel : hAccel;
-//    }
+        case OS.WM_USER:
+        case OS.WM_USER+1:
+            if (hAccel == -1) createAcceleratorTable ();
+            return msg == OS.WM_USER ? nAccel : hAccel;
+    }
     return super.windowProc (msg, mp1, mp2);
 }
 
