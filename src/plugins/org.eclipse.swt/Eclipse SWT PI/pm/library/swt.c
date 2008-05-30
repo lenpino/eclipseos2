@@ -1409,6 +1409,13 @@ JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinTranslateAccel
 
     return rc;
 }
+JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_WinQueryActiveWindow
+        (JNIEnv *env, jclass that, jint hab, jint hwndParent)
+{
+    DEBUG_CALL("WinQueryActiveWindow\n")
+
+    return (jint)WinQueryActiveWindow((HWND)hwndParent);
+}
 
 
 JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_PrfQueryProfileSize
