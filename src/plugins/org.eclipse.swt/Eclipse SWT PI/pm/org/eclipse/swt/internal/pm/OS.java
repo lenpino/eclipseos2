@@ -3,7 +3,7 @@ package org.eclipse.swt.internal.pm;
 
 /*
  * OS/2 version.
- * Copyright (c) 2002, 2004 EclipseOS2 Team.
+ * Copyright (c) 2002, 2008 EclipseOS2 Team.
  */
 
 /*
@@ -288,6 +288,7 @@ public class OS {
 //    public static final int WM_SETHELPINFO =        0x005C;
 //    public static final int WM_ERROR =              0x005D;
     public static final int WM_REALIZEPALETTE =     0x005E;
+    public static final int WM_CONTEXTMENU =        0x0424;
     /* WM_QUERYFRAMEINFO constants */
 //    public static final int FI_FRAME =              0x00000001;
 //    public static final int FI_OWNERHIDE =          0x00000002;
@@ -322,7 +323,7 @@ public class OS {
     public static final int VK_BUTTON2 =    0x02;
     public static final int VK_BUTTON3 =    0x03;
 //    public static final int VK_BREAK =      0x04;
-//    public static final int VK_BACKSPACE =  0x05;
+    public static final int VK_BACKSPACE =  0x05;
     public static final int VK_TAB =        0x06;
     public static final int VK_BACKTAB =    0x07;
     public static final int VK_NEWLINE =    0x08;
@@ -333,7 +334,7 @@ public class OS {
 //    public static final int VK_PAUSE =      0x0D;
     public static final int VK_CAPSLOCK =   0x0E;
     public static final int VK_ESC =        0x0F;
-//    public static final int VK_SPACE =      0x10;
+    public static final int VK_SPACE =      0x10;
     public static final int VK_PAGEUP =     0x11;
     public static final int VK_PAGEDOWN =   0x12;
     public static final int VK_END =        0x13;
@@ -2263,6 +2264,7 @@ public static final native int WinCreateAccelTable(int hab, ACCELTABLE acctAccel
 public static final native boolean WinDestroyAccelTable(int haccelAccel);
 public static final native boolean WinSetAccelTable(int hab, int haccelAccel, int hwndFrame);
 public static final native boolean WinTranslateAccel(int hab, int hwnd, int haccelAccel, QMSG qmsg);
+public static final native int WinQueryActiveWindow(int hwndParent);
 public static final native boolean PrfQueryProfileSize (int hini, PSZ pszApp,
     PSZ pszKey, int[] pulDataLen);
 public static final native int PrfQueryProfileString (int hini, PSZ pszApp,
