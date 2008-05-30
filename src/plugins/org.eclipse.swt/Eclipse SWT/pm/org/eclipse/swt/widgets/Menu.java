@@ -232,33 +232,33 @@ void createHandle () {
                                                         OS.NULLHANDLE,	/* control data */
                                                         0		/* presentation parameters */
                                                         );
-//System.out.println (
-//    "Menu.createHandle(): FID_MENU window has been created:\n" +
-//    "    hwnd = " + Integer.toHexString (handle) + "\n" +
-//    "    hwnd.parent = hwnd.owner = " + Integer.toHexString (handle) + "\n" +
-//    "    class = WC_MENU\n" +
-//    "    style = MS_ACTIONBAR"
-//);
-	} else  if ((style & SWT.POP_UP) != 0) {
-            short flOptions = OS.PU_MOUSEBUTTON1DOWN | OS.PU_KEYBOARD | OS.PU_MOUSEBUTTON1;
-            handle = OS.WinCreateWindow (OS.HWND_DESKTOP,	/* parent window */
-                                                        PSZ.getAtom (OS.WC_MENU),	/* class name */
-                                                        null,	/* window text */
-                                                        0,	/* window style */
-                                                        0, 0, 0, 0, /* size and position */
-                                                        OS.HWND_DESKTOP,	/* owner window */
-                                                        OS.HWND_TOP, /* sibling window */
-                                                        OS.FID_MENU,	/* ID */
-                                                        OS.NULLHANDLE,	/* control data */
-                                                        0		/* presentation parameters */
-                                                        );
-          boolean rc = OS.WinPopupMenu(OS.HWND_DESKTOP, OS.HWND_DESKTOP, handle, 0, 0, 0, flOptions);
 System.out.println (
     "Menu.createHandle(): FID_MENU window has been created:\n" +
     "    hwnd = " + Integer.toHexString (handle) + "\n" +
     "    hwnd.parent = hwnd.owner = " + Integer.toHexString (handle) + "\n" +
     "    class = WC_MENU\n" +
     "    style = MS_ACTIONBAR"
+);
+	} else  if ((style & SWT.POP_UP) != 0) {
+//            short flOptions = OS.PU_MOUSEBUTTON1DOWN | OS.PU_KEYBOARD | OS.PU_MOUSEBUTTON1;
+            handle = OS.WinCreateWindow (OS.HWND_DESKTOP,	/* parent window */
+                                                        PSZ.getAtom (OS.WC_MENU),	/* class name */
+                                                        null,	/* window text */
+                                                        0,	/* window style */
+                                                        0, 0, 0, 0, /* size and position */
+                                                        OS.NULLHANDLE,	/* owner window */
+                                                        OS.HWND_TOP, /* sibling window */
+                                                        0,	/* ID */
+                                                        OS.NULLHANDLE,	/* control data */
+                                                        0		/* presentation parameters */
+                                                        );
+//          boolean rc = OS.WinPopupMenu(OS.HWND_DESKTOP, OS.HWND_DESKTOP, handle, 0, 0, 0, flOptions);
+System.out.println (
+    "Menu.createHandle(): POPUP menu window has been created:\n" +
+    "    hwnd = " + Integer.toHexString (handle) + "\n" +
+    "    hwnd.parent = hwnd.owner = " + Integer.toHexString (parent.handle) + "\n" +
+    "    class = WC_MENU\n" +
+    "    style = 0"
 );
               
 	} else if ((style & SWT.DROP_DOWN) != 0) {
@@ -290,7 +290,7 @@ void createItem (MenuItem item, int index) {
 	if (!(0 <= index && index <= count)) error (SWT.ERROR_INVALID_RANGE);
 	parent.add (item);
 	boolean success = false;
-
+        
         MENUITEM info = new MENUITEM();
         info.iPosition = OS.MIT_END;
         info.afStyle = OS.MIS_TEXT;
@@ -334,7 +334,6 @@ void destroyAcceleratorTable () {
 
 void destroyItem (MenuItem item) {
     int count = GetMenuItemCount (handle);
-    System.out.println("ITEMS antes de destroy = " + count);
     int rc = OS.WinSendMsg (handle, OS.MM_DELETEITEM,  OS.MPFROM2SHORT ((short)item.id, (short)OS.TRUE), 0);
 		if (rc == count) {
 			error (SWT.ERROR_ITEM_NOT_REMOVED);
@@ -664,7 +663,7 @@ public boolean isVisible () {
 
 void redraw () {
 	if ((style & SWT.BAR) != 0) {
-//            OS.WinSendMsg (frameHandle, OS.WM_UPDATEFRAME, OS.FCF_MENU, 0);
+            OS.WinSendMsg (parent.frameHandle, OS.WM_UPDATEFRAME, OS.FCF_MENU, 0);
 //		OS.DrawMenuBar (parent.handle);
 		return;
 	}
@@ -877,6 +876,9 @@ public void setVisible (boolean visible) {
 	* case when TrackPopupMenu fails and the number of items in
 	* the menu is zero and issue a fake WM_MENUSELECT.
 	*/
+         System.out.println("Menu:setVisible - HANDLE = " + Integer.toHexString (handle));
+         short flOptions = OS.PU_MOUSEBUTTON1DOWN | OS.PU_KEYBOARD | OS.PU_MOUSEBUTTON1;
+         boolean success = OS.WinPopupMenu(OS.HWND_DESKTOP, parent.handle, handle, 0, 0, 0, flOptions);
 //	boolean success = OS.TrackPopupMenu (handle, flags, nX, nY, 0, hwndParent, null);
 //	if (!success && GetMenuItemCount (handle) == 0) {
 //		OS.SendMessage (hwndParent, OS.WM_MENUSELECT, 0xFFFF0000, 0);
