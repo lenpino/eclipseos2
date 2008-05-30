@@ -2,7 +2,7 @@ package org.eclipse.swt.widgets;
 
 /*
  * OS/2 version.
- * Copyright (c) 2002, 2004 EclipseOS2 Team.
+ * Copyright (c) 2002, 2008 EclipseOS2 Team.
  */
 
 /*
@@ -620,13 +620,12 @@ public static synchronized Display findDisplay (Thread thread) {
  *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
  * </ul>
  */
-//@@TODO (dmik) Implement it using WinQueryActiveWindow(OS.HWND_DESKTOP)(lpino):  
-//public Shell getActiveShell () {
-//    checkDevice ();
-//    Control control = findControl (OS.WinQueryActiveWindow(OS.HWND_DESKTOP));
-//    if (control instanceof Shell) return (Shell) control;
-//    return null;
-//}
+public Shell getActiveShell () {
+    checkDevice ();
+    Control control = findControl (OS.WinQueryActiveWindow(OS.HWND_DESKTOP));
+    if (control instanceof Shell) return (Shell) control;
+    return null;
+}
 
 /**
  * Returns a rectangle describing the receiver's size and location.
@@ -1251,20 +1250,20 @@ boolean isValidThread () {
 }
 
 //@@TODO (dmik): not sure we need this
-//boolean isVirtualKey (int key) {
-//    switch (key) {
-//        case OS.VK_TAB:
-//        case OS.VK_MENU:
-//        case OS.VK_RETURN:
-//        case OS.VK_BACK:
-//        case OS.VK_SPACE:
-//        case OS.VK_ESCAPE:
-//        case OS.VK_SHIFT:
-//        case OS.VK_CONTROL:
-//            return true;
-//    }
-//    return false;
-//}
+boolean isVirtualKey (int key) {
+    switch (key) {
+        case OS.VK_TAB:
+        case OS.VK_MENU:
+        case OS.VK_ENTER:
+        case OS.VK_BACKSPACE:
+        case OS.VK_SPACE:
+        case OS.VK_ESC:
+        case OS.VK_SHIFT:
+        case OS.VK_CTRL:
+            return true;
+    }
+    return false;
+}
 
 protected FATTRS matchFont (String fontNameSize) {
     return super.matchFont (fontNameSize);
