@@ -1071,7 +1071,7 @@ public void setMenuBar (Menu menu) {
 //        OS.SetMenu (handle, hMenu);
         OS.WinSendMsg (frameHandle, OS.WM_UPDATEFRAME, OS.FCF_MENU, 0);
         System.out.println("Decorations:setMenuBar");
-//	destroyAcceleratorTable ();
+	destroyAcceleratorTable ();
 }
 
 /**
