@@ -682,10 +682,10 @@ int widgetStyle () {
 }
 
 MRESULT wmCommandChild (int mp1, int mp2) {
+    System.out.println("MenuItem:wmCommandChild");
 	if ((style & (SWT.CHECK | SWT.RADIO)) != 0) {
 		setSelection (!getSelection ());
 	}
-        System.out.println("MenuItem:wmCommandChild");
 	Event event = new Event ();
 	if ((OS.WinGetKeyState (OS.HWND_DESKTOP, OS.VK_MENU) & 0x8000) != 0) event.stateMask |= SWT.ALT;
 	if ((OS.WinGetKeyState (OS.HWND_DESKTOP, OS.VK_SHIFT) & 0x8000) != 0) event.stateMask |= SWT.SHIFT;
