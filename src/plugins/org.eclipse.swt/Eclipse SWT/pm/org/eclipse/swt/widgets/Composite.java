@@ -860,5 +860,4 @@ MRESULT WM_SIZE (int mp1, int mp2) {
 //	/* Return the result */
 //	return result;
 //}
-
 }
