@@ -2,7 +2,7 @@ package org.eclipse.swt.widgets;
 
 /*
  * OS/2 version.
- * Copyright (c) 2002, 2004 EclipseOS2 Team.
+ * Copyright (c) 2002, 2008 EclipseOS2 Team.
  */
 
 /*
@@ -471,13 +471,13 @@ void createHandle () {
     OS.WinSetWindowUShort (handle, OS.QWS_ID, (short)(handle & 0xFFFF));
 
 //@@TODO (dmik): debug code, remove when no more necessary 
-//System.out.println (
-//    "Control.createHandle(): Window has been created:\n" +
-//    "    hwnd = " + Integer.toHexString (handle) + "\n" +
-//    "    hwnd.parent = hwnd.owner = " + Integer.toHexString (parent.handle) + "\n" +
-//    "    class = " + windowClass() + "\n" +
-//    "    style = " + Integer.toHexString (widgetStyle())
-//);
+System.out.println (
+    "Control.createHandle(): Window has been created:\n" +
+    "    hwnd = " + Integer.toHexString (handle) + "\n" +
+    "    hwnd.parent = hwnd.owner = " + Integer.toHexString (parent.handle) + "\n" +
+    "    class = " + windowClass() + "\n" +
+    "    style = " + Integer.toHexString (widgetStyle())
+);
 
 //@@TODO(dmik): DBCS handling?
 //    if (OS.IsDBLocale && parent != null) {
@@ -2319,7 +2319,7 @@ public void setLocation (Point location) {
  *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
  * </ul>
  */
-//@@TODO(dmik)
+
 public void setMenu (Menu menu) {
     checkWidget ();
     if (menu != null) {
@@ -2948,7 +2948,7 @@ int windowProc (int msg, int mp1, int mp2) {
         case OS.WM_CLOSE: result = WM_CLOSE (mp1, mp2); break;
         case OS.WM_COMMAND: result = WM_COMMAND (mp1, mp2); break;
 //@@TODO (dmik): later
-//        case OS.WM_CONTEXTMENU: result = WM_CONTEXTMENU (wParam, lParam); break;
+        case OS.WM_CONTEXTMENU: result = WM_CONTEXTMENU (mp1, mp2); break;
         case OS.WM_CONTROL: result = WM_CONTROL (mp1, mp2); break;
 //@@TODO (dmik): later        
 //        case OS.WM_CTLCOLORBTN:
@@ -2968,7 +2968,7 @@ int windowProc (int msg, int mp1, int mp2) {
         case OS.WM_HSCROLL: result = WM_HSCROLL (mp1, mp2); break;
 //        case OS.WM_IME_CHAR: result = WM_IME_CHAR (wParam, lParam); break;
 //        case OS.WM_IME_COMPOSITION: result = WM_IME_COMPOSITION (wParam, lParam); break;
-//        case OS.WM_INITMENUPOPUP: result = WM_INITMENUPOPUP (wParam, lParam); break;
+        case OS.WM_INITMENU: result = WM_INITMENU (mp1, mp2); break;
 //        case OS.WM_GETFONT: result = WM_GETFONT (wParam, lParam); break;
 //        case OS.WM_GETOBJECT: result = WM_GETOBJECT (wParam, lParam); break;
 //        case OS.WM_KEYDOWN: result = WM_KEYDOWN (wParam, lParam); break;
@@ -2981,7 +2981,8 @@ int windowProc (int msg, int mp1, int mp2) {
 //        case OS.WM_MBUTTONUP: result = WM_MBUTTONUP (wParam, lParam); break;
         case OS.WM_MEASUREITEM: result = WM_MEASUREITEM (mp1, mp2); break;
 //        case OS.WM_MENUCHAR: result = WM_MENUCHAR (wParam, lParam); break;
-//        case OS.WM_MENUSELECT: result = WM_MENUSELECT (wParam, lParam); break;
+        case OS.WM_MENUEND: result = WM_MENUEND (mp1, mp2); break;
+        case OS.WM_MENUSELECT: result = WM_MENUSELECT (mp1, mp2); break;
 //        case OS.WM_MOUSEACTIVATE: result = WM_MOUSEACTIVATE (wParam, lParam); break;
 //        case OS.WM_MOUSEHOVER: result = WM_MOUSEHOVER (wParam, lParam); break;
 //        case OS.WM_MOUSELEAVE: result = WM_MOUSELEAVE (wParam, lParam); break;
@@ -3034,7 +3035,7 @@ MRESULT WM_CALCVALIDRECTS (int mp1, int mp2) {
 MRESULT WM_CHAR (int mp1, int mp2) {
     boolean keyUp = (OS.SHORT1FROMMP (mp1) & OS.KC_KEYUP) != 0;
 //@@TODO (dmik): debug, remove    
-//System.out.println("WM_CHAR ("+this+"): vk="+OS.SHORT2FROMMP (mp2)+" keyup="+keyUp);
+System.out.println("WM_CHAR ("+this+"): vk="+OS.SHORT2FROMMP (mp2)+" keyup="+keyUp);
     sendKeyEvent (keyUp ? SWT.KeyUp : SWT.KeyDown, OS.WM_CHAR, mp1, mp2);
     return null;
 }
@@ -3086,20 +3087,23 @@ MRESULT WM_COMMAND (int mp1, int mp2) {
     return null;
 }
 
-////@@TODO (dmik): later
-//LRESULT WM_CONTEXTMENU (int wParam, int lParam) {
-//      /*
-//      * Because context menus can be shared between controls
-//      * and the parent of all menus is the shell, the menu may
-//      * have been destroyed but not removed from the control.
-//      */
-//      if (wParam != handle) return null;
+MRESULT WM_CONTEXTMENU (int mp1, int mp2) {
+      /*
+      * Because context menus can be shared between controls
+      * and the parent of all menus is the shell, the menu may
+      * have been destroyed but not removed from the control.
+      */
+//      if (mp2 != handle) return null;
+    //@@TODO(lpino) Remove debug msg
+//      System.out.println("Control:WM_CONTEXTMENU - HANDLE = " + Integer.toHexString (handle));
+      short flOptions = OS.PU_HCONSTRAIN | OS.PU_VCONSTRAIN | OS.PU_MOUSEBUTTON1DOWN | OS.PU_KEYBOARD | OS.PU_MOUSEBUTTON1;
+      boolean rc = OS.WinPopupMenu(handle, handle, menu.handle, 0, OS.SHORT1FROMMP(mp1), OS.SHORT2FROMMP(mp1), flOptions);
 //      if (menu != null && !menu.isDisposed ()) {
 //              menu.setVisible (true);
-//              return LRESULT.ZERO;
+//              return MRESULT.ZERO;
 //      }
-//      return null;
-//}
+      return MRESULT.TRUE;
+}
 
 MRESULT WM_CONTROL (int mp1, int mp2) {
     int hwndChild = OS.WinWindowFromID (handle, OS.SHORT1FROMMP (mp1));
@@ -3226,12 +3230,12 @@ MRESULT WM_HSCROLL (int mp1, int mp2) {
 //      return null;
 //}
 //
-//LRESULT WM_INITMENUPOPUP (int wParam, int lParam) {
-//
-//      /* Ignore WM_INITMENUPOPUP for an accelerator */
-//      Display display = getDisplay ();
-//      if (display.accelKeyHit) return null;
-//
+MRESULT WM_INITMENU (int mp1, int mp2) {
+
+      /* Ignore WM_INITMENU for an accelerator */
+      Display display = getDisplay ();
+      if (display.accelKeyHit) return null;
+      System.out.println("Control:WM_INITMENU " + OS.WinIsWindowVisible(mp2));
 //      /*
 //      * If the high order word of LPARAM is non-zero,
 //      * the menu is the system menu and we can ignore
@@ -3300,8 +3304,8 @@ MRESULT WM_HSCROLL (int mp1, int mp2) {
 //              newMenu.sendEvent (SWT.Show);
 //              // widget could be disposed at this point
 //      }
-//      return null;
-//}
+      return null;
+}
 
 //@@TODO (dmik): later
 //LRESULT WM_LBUTTONDBLCLK (int wParam, int lParam) {
@@ -3460,7 +3464,8 @@ MRESULT WM_HSCROLL (int mp1, int mp2) {
 //      return null;
 //}
 //
-//LRESULT WM_MENUSELECT (int wParam, int lParam) {
+MRESULT WM_MENUSELECT (int mp1, int mp2) {
+    System.out.println("Control:WM_MENUSELECT");
 //      int code = wParam >> 16;
 //      Shell shell = getShell ();
 //      if (code == -1 && lParam == 0) {
@@ -3542,8 +3547,8 @@ MRESULT WM_HSCROLL (int mp1, int mp2) {
 //              }
 //              if (item != null) item.sendEvent (SWT.Arm);
 //      }
-//      return null;
-//}
+      return null;
+}
 //
 //LRESULT WM_MOUSEACTIVATE (int wParam, int lParam) {
 //      return null;
@@ -3797,6 +3802,11 @@ MRESULT WM_SETFOCUS (int mp1, int mp2) {
     }
     
     return MRESULT.ZERO;
+}
+
+MRESULT WM_MENUEND (int mp1, int mp2) {
+    System.out.println("Control:WM_MENUEND");
+      return null;
 }
 
 //@@TODO (dmik): later
