@@ -193,6 +193,8 @@ org\eclipse\swt\internal\pm\SBCDATA.java
 org\eclipse\swt\internal\pm\LBOXINFO.java
 org\eclipse\swt\internal\pm\MENUITEM.java
 org\eclipse\swt\internal\pm\OWNERITEM.java
+org\eclipse\swt\internal\pm\ACCEL.java
+org\eclipse\swt\internal\pm\ACCELTABLE.java
 
 # SWT PI (+)
 
