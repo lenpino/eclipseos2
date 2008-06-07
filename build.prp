@@ -1,7 +1,7 @@
 # build.prp: EclipseOS2 build options
 
 # path to the original Eclipse source distribution
-eclipsedir.orig=F:/eclipse
+eclipsedir.orig=x:/apps/dev/fuentes/eclipse2.0.1
 
 # default part and step number for test (run) target
 # currently the value for part can be 'swt' only
