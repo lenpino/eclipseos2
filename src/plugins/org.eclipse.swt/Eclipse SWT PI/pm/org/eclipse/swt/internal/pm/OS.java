@@ -2265,6 +2265,7 @@ public static final native boolean WinDestroyAccelTable(int haccelAccel);
 public static final native boolean WinSetAccelTable(int hab, int haccelAccel, int hwndFrame);
 public static final native boolean WinTranslateAccel(int hab, int hwnd, int haccelAccel, QMSG qmsg);
 public static final native int WinQueryActiveWindow(int hwndParent);
+public static final native boolean WinGetMsg(int hab, QMSG qmsg, int hwndFilter, int ulFisrt, int ulLast);
 public static final native boolean PrfQueryProfileSize (int hini, PSZ pszApp,
     PSZ pszKey, int[] pulDataLen);
 public static final native int PrfQueryProfileString (int hini, PSZ pszApp,
