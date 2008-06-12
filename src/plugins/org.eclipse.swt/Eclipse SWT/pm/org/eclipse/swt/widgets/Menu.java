@@ -884,5 +884,4 @@ public void setVisible (boolean visible) {
 //		OS.SendMessage (hwndParent, OS.WM_MENUSELECT, 0xFFFF0000, 0);
 //	}
 }
-
 }

@@ -1118,30 +1118,10 @@ MRESULT FRAME_WM_REALIZEPALETTE (int mp1, int mp2) {
 //	return super.WM_CLOSE (wParam, lParam);
 //}
 
-//@@TODO (dmik): later
-//LRESULT WM_COMMAND (int wParam, int lParam) {
-//	if (OS.IsPPC) {
-//		/*
-//		* Note in WinCE PPC:  Close the Shell when the "Done Button" has
-//		* been pressed. lParam is either 0 (PocketPC 2002) or the handle
-//		* to the Shell (PocketPC).
-//		*/
-//		int loWord = wParam & 0xFFFF;
-//		if (loWord == OS.IDOK && (lParam == 0 || lParam == handle)) {
-//			OS.PostMessage (handle, OS.WM_CLOSE, 0, 0);
-//			return LRESULT.ZERO;			
-//		}
-//		/* 
-//		* Note in WinCE PPC.  menu events originate from the
-//		* command bar.
-//		*/
-//		if (hwndCB != 0 && lParam == hwndCB) {
-//			return super.WM_COMMAND (wParam, 0);
-//		}
-//	}
-//	return super.WM_COMMAND (wParam, lParam);
-//}
-//
+MRESULT WM_COMMAND (int mp1, int mp2) {
+	return super.WM_COMMAND (mp1, mp2);
+}
+
 //LRESULT WM_DESTROY (int wParam, int lParam) {
 //	LRESULT result = super.WM_DESTROY (wParam, lParam);
 //	/*
@@ -1269,5 +1249,8 @@ MRESULT FRAME_WM_REALIZEPALETTE (int mp1, int mp2) {
 //	}
 //	return result;
 //}
-
+MRESULT WM_CONTEXTMENU (int mp1, int mp2) {
+    System.out.println("Shell:WM_CONTEXTMENU - HANDLE = " + Integer.toHexString (handle));
+    return MRESULT.TRUE;
+}
 }

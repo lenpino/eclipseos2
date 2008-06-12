@@ -2941,6 +2941,7 @@ abstract int windowProc ();
 int windowProc (int msg, int mp1, int mp2) {
     MRESULT result = null;
     switch (msg) {
+//        case OS.WM_ADJUSTWINDOWPOS: result = WM_ADJUSTWINDOWPOS (mp1, mp2); break;
         case OS.WM_CALCVALIDRECTS: result = WM_CALCVALIDRECTS (mp1, mp2); break;
         case OS.WM_CHAR: result = WM_CHAR (mp1, mp2); break;
 //@@TODO (dmik): later        
@@ -3071,20 +3072,30 @@ MRESULT WM_COMMAND (int mp1, int mp2) {
 //      return control.wmCommandChild (wParam, lParam);
     switch (OS.SHORT1FROMMP (mp2)) {
         //@@TODO(dmik)
-        //case OS.CMDSRC_MENU:
+        case OS.CMDSRC_MENU:
+            System.out.println("Control:WM_COMMAND - CMDSRC_MENU");
+            break;
         //    return null;
+        case OS.CMDSRC_ACCELERATOR:
+            System.out.println("Control:WM_COMMAND - CMDSRC_ACCELERATOR");
+            break;
         case OS.CMDSRC_PUSHBUTTON:
         //@@TODO(lpino)
         case OS.CMDSRC_FONTDLG:
         case OS.CMDSRC_FILEDLG:
         case OS.CMDSRC_COLORDLG:
         //case OS.CMDSRC_PRINTDLG:
-            int hwndChild = OS.WinWindowFromID (handle, OS.SHORT1FROMMP (mp1));
-            Control control = WidgetTable.get (hwndChild);
-            if (control == null) return null;
-            return control.wmCommandChild (mp1, mp2);
     }
-    return null;
+    System.out.println("Control:WM_COMMAND - Calling wmCommandChild");
+    int hwndChild = OS.WinWindowFromID (handle, OS.SHORT1FROMMP (mp1));
+    Control control = WidgetTable.get (hwndChild);
+    System.out.println("Control:WM_COMMAND - Control handle = " + Integer.toHexString (handle));
+    System.out.println("Control:WM_COMMAND - Child handle = " + Integer.toHexString (hwndChild));
+//    System.out.println("Control:WM_COMMAND - Menu handle = " + Integer.toHexString (menu.handle));
+    if (control == null) return null;
+    return control.wmCommandChild (mp1, mp2);
+
+//    return null;
 }
 
 MRESULT WM_CONTEXTMENU (int mp1, int mp2) {
@@ -3094,14 +3105,26 @@ MRESULT WM_CONTEXTMENU (int mp1, int mp2) {
       * have been destroyed but not removed from the control.
       */
 //      if (mp2 != handle) return null;
+      boolean bIsWaiting = true;
+      System.out.println("Control:WM_CONTEXTMENU - PARENT HANDLE = " + Integer.toHexString (handle));
+      int hab = parent.getDisplay ().hab;
     //@@TODO(lpino) Remove debug msg
-//      System.out.println("Control:WM_CONTEXTMENU - HANDLE = " + Integer.toHexString (handle));
+      System.out.println("Control:WM_CONTEXTMENU - MENU HANDLE = " + Integer.toHexString (menu.handle));
       short flOptions = OS.PU_HCONSTRAIN | OS.PU_VCONSTRAIN | OS.PU_MOUSEBUTTON1DOWN | OS.PU_KEYBOARD | OS.PU_MOUSEBUTTON1;
       boolean rc = OS.WinPopupMenu(handle, handle, menu.handle, 0, OS.SHORT1FROMMP(mp1), OS.SHORT2FROMMP(mp1), flOptions);
 //      if (menu != null && !menu.isDisposed ()) {
 //              menu.setVisible (true);
-//              return MRESULT.ZERO;
 //      }
+//       while(bIsWaiting){        
+//            QMSG qmsg = new QMSG ();
+//
+//            OS.WinGetMsg(hab,qmsg, 0, 0, 0);
+//            if (qmsg.msg == OS.WM_COMMAND)
+//                bIsWaiting = false;
+//            OS.WinDispatchMsg(hab, qmsg);
+//          System.out.println("Control:WM_CONTEXTMENU");
+//        }
+      System.out.println("Control:WM_CONTEXTMENU - ABOUT TO RETURN" );
       return MRESULT.TRUE;
 }
 
@@ -3229,13 +3252,13 @@ MRESULT WM_HSCROLL (int mp1, int mp2) {
 //LRESULT WM_IME_COMPOSITION (int wParam, int lParam) {
 //      return null;
 //}
-//
+
 MRESULT WM_INITMENU (int mp1, int mp2) {
 
       /* Ignore WM_INITMENU for an accelerator */
+      System.out.println("Control:WM_INITMENU " + OS.WinIsWindowVisible(mp2));
       Display display = getDisplay ();
       if (display.accelKeyHit) return null;
-      System.out.println("Control:WM_INITMENU " + OS.WinIsWindowVisible(mp2));
 //      /*
 //      * If the high order word of LPARAM is non-zero,
 //      * the menu is the system menu and we can ignore
@@ -3805,7 +3828,7 @@ MRESULT WM_SETFOCUS (int mp1, int mp2) {
 }
 
 MRESULT WM_MENUEND (int mp1, int mp2) {
-    System.out.println("Control:WM_MENUEND");
+    System.out.println("Control:WM_MENUEND - HANDLE = " + Integer.toHexString (mp2));
       return null;
 }
 
@@ -4014,6 +4037,20 @@ MRESULT WM_WINDOWPOSCHANGED (int mp1, int mp2) {
     }
     return new MRESULT (result);
 }
+
+//MRESULT WM_ADJUSTWINDOWPOS (int mp1, int mp2) {
+//    System.out.println("Control:WM_ADJUSTWINDOWPOS");
+//    SWP swp = new SWP ();
+//    OS.objcpy (swp, mp1);
+//    if ((swp.fl & OS.SWP_MINIMIZE) != 0) {
+//		sendEvent (SWT.Iconify);
+//		// widget could be disposed at this point
+//	} else if ((swp.fl & OS.SWP_RESTORE) != 0 && getMinimized ()) {
+//        sendEvent (SWT.Deiconify);
+//        // widget could be disposed at this point
+//    }
+//	return null;
+//}
 
 //@@TODO(dmik): seems we don't need it (presparams replace this)
 //LRESULT wmColorChild (int wParam, int lParam) {
