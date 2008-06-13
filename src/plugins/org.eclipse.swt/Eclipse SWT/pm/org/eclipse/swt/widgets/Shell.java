@@ -679,8 +679,7 @@ void releaseShells () {
 void releaseWidget () {
     releaseShells ();
     super.releaseWidget ();
-//@@TODO(dmik)
-//    activeMenu = null;
+    activeMenu = null;
 //    display.clearModal (this);
     display = null;
 //@@TODO(dmik)
@@ -1249,8 +1248,9 @@ MRESULT WM_COMMAND (int mp1, int mp2) {
 //	}
 //	return result;
 //}
-MRESULT WM_CONTEXTMENU (int mp1, int mp2) {
-    System.out.println("Shell:WM_CONTEXTMENU - HANDLE = " + Integer.toHexString (handle));
-    return MRESULT.TRUE;
-}
+//MRESULT WM_CONTEXTMENU (int mp1, int mp2) {
+//    System.out.println("Shell:WM_CONTEXTMENU - PARENT HANDLE = " + Integer.toHexString (handle));
+//    System.out.println("Control:WM_CONTEXTMENU - MENU HANDLE = " + Integer.toHexString (activeMenu.handle));
+//    return MRESULT.TRUE;
+//}
 }

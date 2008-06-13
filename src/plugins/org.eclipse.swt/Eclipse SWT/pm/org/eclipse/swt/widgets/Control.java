@@ -46,7 +46,6 @@ public abstract class Control extends Widget implements Drawable {
     Composite parent;
     int drawCount, hCursor;
     int foreground, background;
-//@@TODO(dmik)
     Menu menu;
     String toolTipText;
     Object layoutData;
@@ -3264,69 +3263,72 @@ MRESULT WM_INITMENU (int mp1, int mp2) {
 //      * the menu is the system menu and we can ignore
 //      * WPARAM.  Otherwise, use WPARAM to find the menu.
 //      */
-//      Shell shell = getShell ();
-//      Menu oldMenu = shell.activeMenu, newMenu = null;
+      Shell shell = getShell ();
+      Menu oldMenu = shell.activeMenu;
+      Menu newMenu = null;
 //      if ((lParam >> 16) == 0) {
-//              newMenu = menuShell ().findMenu (wParam);
+              newMenu = menuShell ().findMenu (mp2);
 //      }
-//      Menu menu = newMenu;
-//      while (menu != null && menu != oldMenu) {
-//              menu = menu.getParentMenu ();
-//      }
-//      if (menu == null) {
-//              menu = shell.activeMenu;
-//              while (menu != null) {
-//                      /*
-//                      * It is possible (but unlikely), that application
-//                      * code could have disposed the widget in the hide
-//                      * event.  If this happens, stop searching up the
-//                      * ancestor list because there is no longer a link
-//                      * to follow.
-//                      */
-//                      menu.sendEvent (SWT.Hide);
-//                      if (menu.isDisposed ()) break;
-//                      menu = menu.getParentMenu ();
-//                      Menu ancestor = newMenu;
-//                      while (ancestor != null && ancestor != menu) {
-//                              ancestor = ancestor.getParentMenu ();
-//                      }
-//                      if (ancestor != null) break;
-//              }
-//      }
+      Menu menu = newMenu;
+      while (menu != null && menu != oldMenu) {
+              menu = menu.getParentMenu ();
+      }
+      if (menu == null) {
+             menu = shell.activeMenu;
+              while (menu != null) {
+                      /*
+                      * It is possible (but unlikely), that application
+                      * code could have disposed the widget in the hide
+                      * event.  If this happens, stop searching up the
+                      * ancestor list because there is no longer a link
+                      * to follow.
+                      */
+                      menu.sendEvent (SWT.Hide);
+                      if (menu.isDisposed ()) break;
+                      menu = menu.getParentMenu ();
+                      Menu ancestor = newMenu;
+                      while (ancestor != null && ancestor != menu) {
+                              ancestor = ancestor.getParentMenu ();
+                      }
+                      if (ancestor != null) break;
+              }
+      }
+      System.out.println("Control:WM_INITMENU " + menu);
 //
 //      /*
 //      * The shell and the new menu may be disposed because of
 //      * sending the hide event to the ancestor menus but setting
 //      * a field to null in a disposed shell is not harmful.
 //      */
-//      if (newMenu != null && newMenu.isDisposed ()) newMenu = null;
-//      shell.activeMenu = newMenu;
+      if (newMenu != null && newMenu.isDisposed ())
+          newMenu = null;
+      shell.activeMenu = newMenu;
 //
 //      /*
 //      * Send the show event
 //      */
-//      if (newMenu != null && newMenu != oldMenu) {
-//              /*
-//              * SWT.Selection events are posted to allow stepping
-//              * in the VA/Java debugger.  SWT.Show events are
-//              * sent to ensure that application event handler
-//              * code runs before the menu is displayed.  This
-//              * means that SWT.Show events would normally occur
-//              * before SWT.Selection events.  While this is not
-//              * strictly incorrect, applications often use the
-//              * SWT.Selection event to update the state of menu
-//              * items and would like the ordering of events to
-//              * be the other way around.
-//              *
-//              * The fix is to run the deferred events before
-//              * the menu is shown.  This means that stepping
-//              * through a selection event that was caused by
-//              * a popup menu will fail in VA/Java.
-//              */
-//              display.runDeferredEvents ();
-//              newMenu.sendEvent (SWT.Show);
-//              // widget could be disposed at this point
-//      }
+      if (newMenu != null && newMenu != oldMenu) {
+              /*
+              * SWT.Selection events are posted to allow stepping
+              * in the VA/Java debugger.  SWT.Show events are
+              * sent to ensure that application event handler
+              * code runs before the menu is displayed.  This
+              * means that SWT.Show events would normally occur
+              * before SWT.Selection events.  While this is not
+              * strictly incorrect, applications often use the
+              * SWT.Selection event to update the state of menu
+              * items and would like the ordering of events to
+              * be the other way around.
+              *
+              * The fix is to run the deferred events before
+              * the menu is shown.  This means that stepping
+              * through a selection event that was caused by
+              * a popup menu will fail in VA/Java.
+              */
+              display.runDeferredEvents ();
+              newMenu.sendEvent (SWT.Show);
+              // widget could be disposed at this point
+      }
       return null;
 }
 
