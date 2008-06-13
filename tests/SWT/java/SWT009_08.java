@@ -45,26 +45,18 @@ public class SWT009_08 extends SWTTestCase {
             });
             item.setText("Select & All\tCtrl+A");
             item.setAccelerator(SWT.CTRL + 'A');
-//            shell.addListener(SWT.MenuDetect, new Listener() {
-//              public void handleEvent(Event event) {
-//                Menu menu = new Menu(shell, SWT.POP_UP);
-//                MenuItem item = new MenuItem(menu, SWT.PUSH);
-//                item.setText("Menu Item");
-//                item.addListener(SWT.Selection, new Listener() {
-//                  public void handleEvent(Event e) {
-//                    System.out.println("Item Selected");
-//                  }
-//                });
-//                menu.setLocation(event.x, event.y);
-//                menu.setVisible(true);
-//                while (!menu.isDisposed() && menu.isVisible()) {
-//                  if (!display.readAndDispatch())
-//                    display.sleep();
-//                }
-//                menu.dispose();
-//              }
-//            });
-            shell.setSize(200, 200);
+            
+            //POP-UP
+            Composite c1 = new Composite (shell, SWT.BORDER);
+            c1.setSize (300, 300);
+            Menu menu = new Menu (shell, SWT.POP_UP);
+            MenuItem itempu = new MenuItem (menu, SWT.PUSH);
+            itempu.setText ("Popup");
+            c1.setMenu (menu);
+            shell.setMenu (menu);
+
+            
+            shell.setSize(300, 300);
             shell.open();
 //
 //            shell.pack();
