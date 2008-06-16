@@ -1416,7 +1416,21 @@ JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_WinQueryActiveWindow
 
     return (jint)WinQueryActiveWindow((HWND)hwndParent);
 }
+JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_WinGetMsg
+        (JNIEnv *env, jclass that, jint hab, jobject qmsg, jint hwndFilter, jint ulFirst, jint ulLast)
+{
+    QMSG c_qmsg, *c_pqmsg = NULL;
+    jboolean rc;
+    DEBUG_CALL("WinGetMsg\n")
 
+    if (qmsg) c_pqmsg = getQMSGFields(env, qmsg, &c_qmsg, &PGLOB(QMSGFc));
+
+    rc = (jboolean)WinGetMsg((HAB)hab, c_pqmsg, (HWND)hwndFilter, ulFirst, ulLast);
+
+    if (qmsg) setQMSGFields(env, qmsg, c_pqmsg, &PGLOB(QMSGFc));
+
+    return rc;
+}
 
 JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_PrfQueryProfileSize
         (JNIEnv *env, jclass that, jint hini, jobject pszApp, jobject pszKey,
