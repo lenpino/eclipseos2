@@ -101,7 +101,6 @@ import org.eclipse.swt.events.*;
  */
 public class Shell extends Decorations {
     Display display;
-//@@TODO(dmik)
     Menu activeMenu;
 //    int hIMC;
 //    int [] brushes;
@@ -1247,10 +1246,5 @@ MRESULT WM_COMMAND (int mp1, int mp2) {
 //		}
 //	}
 //	return result;
-//}
-//MRESULT WM_CONTEXTMENU (int mp1, int mp2) {
-//    System.out.println("Shell:WM_CONTEXTMENU - PARENT HANDLE = " + Integer.toHexString (handle));
-//    System.out.println("Control:WM_CONTEXTMENU - MENU HANDLE = " + Integer.toHexString (activeMenu.handle));
-//    return MRESULT.TRUE;
 //}
 }

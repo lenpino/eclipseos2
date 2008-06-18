@@ -240,19 +240,17 @@ System.out.println (
     "    style = MS_ACTIONBAR"
 );
 	} else  if ((style & SWT.POP_UP) != 0) {
-//            short flOptions = OS.PU_MOUSEBUTTON1DOWN | OS.PU_KEYBOARD | OS.PU_MOUSEBUTTON1;
-            handle = OS.WinCreateWindow (OS.HWND_DESKTOP,	/* parent window */
+            handle = OS.WinCreateWindow (parent.handle,                     /* parent window */
                                                         PSZ.getAtom (OS.WC_MENU),	/* class name */
-                                                        null,	/* window text */
-                                                        0,	/* window style */
-                                                        0, 0, 0, 0, /* size and position */
-                                                        OS.NULLHANDLE,	/* owner window */
-                                                        OS.HWND_TOP, /* sibling window */
-                                                        0,	/* ID */
-                                                        OS.NULLHANDLE,	/* control data */
-                                                        0		/* presentation parameters */
+                                                        null,                                               /* window text */
+                                                        0,                                                   /* window style */
+                                                        0, 0, 0, 0,                                       /* size and position */
+                                                        parent.handle,                              /* owner window */
+                                                        OS.HWND_TOP,                            /* sibling window */
+                                                        0,                                                  /* ID */
+                                                        OS.NULLHANDLE,                          /* control data */
+                                                        0                                                   /* presentation parameters */
                                                         );
-//          boolean rc = OS.WinPopupMenu(OS.HWND_DESKTOP, OS.HWND_DESKTOP, handle, 0, 0, 0, flOptions);
 System.out.println (
     "Menu.createHandle(): POPUP menu window has been created:\n" +
     "    hwnd = " + Integer.toHexString (handle) + "\n" +

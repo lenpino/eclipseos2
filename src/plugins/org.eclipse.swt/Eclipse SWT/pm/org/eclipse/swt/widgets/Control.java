@@ -12,6 +12,7 @@ package org.eclipse.swt.widgets;
  * http://www.eclipse.org/legal/cpl-v10.html
  */
 
+import java.util.MissingResourceException;
 import org.eclipse.swt.internal.pm.*;
 import org.eclipse.swt.graphics.*;
 import org.eclipse.swt.*;
@@ -2941,6 +2942,7 @@ int windowProc (int msg, int mp1, int mp2) {
     MRESULT result = null;
     switch (msg) {
 //        case OS.WM_ADJUSTWINDOWPOS: result = WM_ADJUSTWINDOWPOS (mp1, mp2); break;
+//        case OS.WM_BUTTON2DBLCLK: result = WM_BUTTON2DBLCLK (mp1, mp2); break;
         case OS.WM_CALCVALIDRECTS: result = WM_CALCVALIDRECTS (mp1, mp2); break;
         case OS.WM_CHAR: result = WM_CHAR (mp1, mp2); break;
 //@@TODO (dmik): later        
@@ -2963,6 +2965,7 @@ int windowProc (int msg, int mp1, int mp2) {
 //        case OS.WM_DRAWITEM: result = WM_DRAWITEM (wParam, lParam); break;
 //        case OS.WM_ENDSESSION: result = WM_ENDSESSION (wParam, lParam); break;
         case OS.WM_ERASEBACKGROUND: result = WM_ERASEBACKGROUND (mp1, mp2); break;
+        case OS.WM_FOCUSCHANGE: result = WM_FOCUSCHANGE (mp1, mp2); break;
         case OS.WM_QUERYDLGCODE: result = WM_QUERYDLGCODE (mp1, mp2); break;
 //        case OS.WM_HELP: result = WM_HELP (wParam, lParam); break;
         case OS.WM_HSCROLL: result = WM_HSCROLL (mp1, mp2); break;
@@ -3027,7 +3030,9 @@ int windowProc (int msg, int mp1, int mp2) {
 PSZ windowTitle() {
     return null;
 }
-
+//MRESULT OS.WM_BUTTON2DBLCLK (int mp1, int mp2) {
+//    return null;
+//}
 MRESULT WM_CALCVALIDRECTS (int mp1, int mp2) {
     return null;
 }
@@ -3050,29 +3055,16 @@ MRESULT WM_CLOSE (int mp1, int mp2) {
 }
 
 MRESULT WM_COMMAND (int mp1, int mp2) {
-//@@TODO(dmik): do we need this?
-//      /*
-//      * When the WM_COMMAND message is sent from a
-//      * menu, the HWND parameter in LPARAM is zero.
-//      */
-//      if (lParam == 0) {
-//              Decorations shell = menuShell ();
-//              if (shell.isEnabled ()) {
-//                      int id = wParam & 0xFFFF;
-//                      MenuItem item = shell.findMenuItem (id);
-//                      if (item != null && item.isEnabled ()) {
-//                              return item.wmCommandChild (wParam, lParam);
-//                      }
-//              }
-//              return null;
-//      }
-//      Control control = WidgetTable.get (lParam);
-//      if (control == null) return null;
-//      return control.wmCommandChild (wParam, lParam);
     switch (OS.SHORT1FROMMP (mp2)) {
-        //@@TODO(dmik)
         case OS.CMDSRC_MENU:
-            System.out.println("Control:WM_COMMAND - CMDSRC_MENU");
+            Decorations shell = menuShell ();
+            if (shell.isEnabled ()) {
+                    int id = mp1;
+                    MenuItem item = shell.findMenuItem (id);
+                    if (item != null && item.isEnabled ()) {
+                            return item.wmCommandChild (mp1, mp2);
+                    }
+            }
             break;
         //    return null;
         case OS.CMDSRC_ACCELERATOR:
@@ -3085,12 +3077,8 @@ MRESULT WM_COMMAND (int mp1, int mp2) {
         case OS.CMDSRC_COLORDLG:
         //case OS.CMDSRC_PRINTDLG:
     }
-    System.out.println("Control:WM_COMMAND - Calling wmCommandChild");
     int hwndChild = OS.WinWindowFromID (handle, OS.SHORT1FROMMP (mp1));
     Control control = WidgetTable.get (hwndChild);
-    System.out.println("Control:WM_COMMAND - Control handle = " + Integer.toHexString (handle));
-    System.out.println("Control:WM_COMMAND - Child handle = " + Integer.toHexString (hwndChild));
-//    System.out.println("Control:WM_COMMAND - Menu handle = " + Integer.toHexString (menu.handle));
     if (control == null) return null;
     return control.wmCommandChild (mp1, mp2);
 
@@ -3104,26 +3092,16 @@ MRESULT WM_CONTEXTMENU (int mp1, int mp2) {
       * have been destroyed but not removed from the control.
       */
 //      if (mp2 != handle) return null;
-      boolean bIsWaiting = true;
-      System.out.println("Control:WM_CONTEXTMENU - PARENT HANDLE = " + Integer.toHexString (handle));
+      int parentHandle = OS.WinQueryWindow(menu.handle, OS.QW_PARENT);
       int hab = parent.getDisplay ().hab;
     //@@TODO(lpino) Remove debug msg
-      System.out.println("Control:WM_CONTEXTMENU - MENU HANDLE = " + Integer.toHexString (menu.handle));
-      short flOptions = OS.PU_HCONSTRAIN | OS.PU_VCONSTRAIN | OS.PU_MOUSEBUTTON1DOWN | OS.PU_KEYBOARD | OS.PU_MOUSEBUTTON1;
-      boolean rc = OS.WinPopupMenu(handle, handle, menu.handle, 0, OS.SHORT1FROMMP(mp1), OS.SHORT2FROMMP(mp1), flOptions);
+//      System.out.println("Control:WM_CONTEXTMENU - PARENT HANDLE = " + Integer.toHexString (parentHandle));
+//      System.out.println("Control:WM_CONTEXTMENU - MENU HANDLE = " + Integer.toHexString (menu.handle));
+      short flOptions = OS.PU_HCONSTRAIN | OS.PU_VCONSTRAIN | OS.PU_KEYBOARD | OS.PU_MOUSEBUTTON1;
+      boolean rc = OS.WinPopupMenu(parentHandle, parentHandle, menu.handle, 0, OS.SHORT1FROMMP(mp1), OS.SHORT2FROMMP(mp1), flOptions);
 //      if (menu != null && !menu.isDisposed ()) {
 //              menu.setVisible (true);
 //      }
-//       while(bIsWaiting){        
-//            QMSG qmsg = new QMSG ();
-//
-//            OS.WinGetMsg(hab,qmsg, 0, 0, 0);
-//            if (qmsg.msg == OS.WM_COMMAND)
-//                bIsWaiting = false;
-//            OS.WinDispatchMsg(hab, qmsg);
-//          System.out.println("Control:WM_CONTEXTMENU");
-//        }
-      System.out.println("Control:WM_CONTEXTMENU - ABOUT TO RETURN" );
       return MRESULT.TRUE;
 }
 
@@ -3255,7 +3233,7 @@ MRESULT WM_HSCROLL (int mp1, int mp2) {
 MRESULT WM_INITMENU (int mp1, int mp2) {
 
       /* Ignore WM_INITMENU for an accelerator */
-      System.out.println("Control:WM_INITMENU " + OS.WinIsWindowVisible(mp2));
+      System.out.println("Control:WM_INITMENU -  MENU HANDLE = " + Integer.toHexString (mp2));
       Display display = getDisplay ();
       if (display.accelKeyHit) return null;
 //      /*
@@ -3293,7 +3271,10 @@ MRESULT WM_INITMENU (int mp1, int mp2) {
                       if (ancestor != null) break;
               }
       }
-      System.out.println("Control:WM_INITMENU " + menu);
+      if(menu == null)
+        System.out.println("Control:WM_INITMENU " + menu);
+      else
+        System.out.println("Control:WM_INITMENU " + Integer.toHexString (menu.handle));   
 //
 //      /*
 //      * The shell and the new menu may be disposed because of
@@ -3490,9 +3471,11 @@ MRESULT WM_INITMENU (int mp1, int mp2) {
 //}
 //
 MRESULT WM_MENUSELECT (int mp1, int mp2) {
-    System.out.println("Control:WM_MENUSELECT");
+    System.out.println("Control:WM_MENUSELECT - MP1 SHORT 1= " + OS.SHORT1FROMMP(mp1));
+    System.out.println("Control:WM_MENUSELECT - MP1 SHORT 2= " + OS.SHORT2FROMMP(mp1));
+    if(OS.SHORT2FROMMP(mp1) == 0) return MRESULT.FALSE;
 //      int code = wParam >> 16;
-//      Shell shell = getShell ();
+      Shell shell = getShell ();
 //      if (code == -1 && lParam == 0) {
 //              Menu menu = shell.activeMenu;
 //              while (menu != null) {
@@ -3572,7 +3555,23 @@ MRESULT WM_MENUSELECT (int mp1, int mp2) {
 //              }
 //              if (item != null) item.sendEvent (SWT.Arm);
 //      }
-      return null;
+//      int parentHandle = OS.WinQueryWindow(menu.handle, OS.QW_PARENT);
+//      boolean bIsWaiting = true;
+//      int hab = 0;
+//      if(parent == null)
+//          hab = getDisplay().hab;
+//      else
+//          hab = parent.getDisplay ().hab;
+//       while(bIsWaiting){        
+//            QMSG qmsg = new QMSG ();
+//
+//            OS.WinGetMsg(hab,qmsg, 0, 0, 0);
+//            if (qmsg.msg == OS.WM_COMMAND || qmsg.msg == OS.WM_MENUSELECT)
+//                bIsWaiting = false;
+//            OS.WinDispatchMsg(hab, qmsg);
+//          System.out.println("Control:WM_CONTEXTMENU");
+//        }
+      return MRESULT.TRUE;
 }
 //
 //LRESULT WM_MOUSEACTIVATE (int wParam, int lParam) {
@@ -4039,7 +4038,11 @@ MRESULT WM_WINDOWPOSCHANGED (int mp1, int mp2) {
     }
     return new MRESULT (result);
 }
-
+MRESULT WM_FOCUSCHANGE (int mp1, int mp2) {
+    System.out.println("Control:WM_FOCUSCHANGE - HANDLE = " + Integer.toHexString (mp1));
+    callWindowProc (OS.WM_FOCUSCHANGE, mp1, mp2);
+    return MRESULT.ZERO;
+}
 //MRESULT WM_ADJUSTWINDOWPOS (int mp1, int mp2) {
 //    System.out.println("Control:WM_ADJUSTWINDOWPOS");
 //    SWP swp = new SWP ();

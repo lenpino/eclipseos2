@@ -632,7 +632,7 @@ public void setMenu (Menu menu) {
         System.out.println("RC = " + rc);
         if(rc == OS.MIT_ERROR || rc == OS.MIT_MEMERROR)
             error (SWT.ERROR_CANNOT_SET_MENU);
-//	parent.destroyAcceleratorTable ();
+	parent.destroyAcceleratorTable ();
 }
 
 /**
@@ -682,7 +682,6 @@ int widgetStyle () {
 }
 
 MRESULT wmCommandChild (int mp1, int mp2) {
-    System.out.println("MenuItem:wmCommandChild");
 	if ((style & (SWT.CHECK | SWT.RADIO)) != 0) {
 		setSelection (!getSelection ());
 	}
