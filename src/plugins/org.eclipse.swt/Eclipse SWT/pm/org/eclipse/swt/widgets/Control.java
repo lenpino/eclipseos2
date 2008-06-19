@@ -471,13 +471,13 @@ void createHandle () {
     OS.WinSetWindowUShort (handle, OS.QWS_ID, (short)(handle & 0xFFFF));
 
 //@@TODO (dmik): debug code, remove when no more necessary 
-System.out.println (
-    "Control.createHandle(): Window has been created:\n" +
-    "    hwnd = " + Integer.toHexString (handle) + "\n" +
-    "    hwnd.parent = hwnd.owner = " + Integer.toHexString (parent.handle) + "\n" +
-    "    class = " + windowClass() + "\n" +
-    "    style = " + Integer.toHexString (widgetStyle())
-);
+//System.out.println (
+//    "Control.createHandle(): Window has been created:\n" +
+//    "    hwnd = " + Integer.toHexString (handle) + "\n" +
+//    "    hwnd.parent = hwnd.owner = " + Integer.toHexString (parent.handle) + "\n" +
+//    "    class = " + windowClass() + "\n" +
+//    "    style = " + Integer.toHexString (widgetStyle())
+//);
 
 //@@TODO(dmik): DBCS handling?
 //    if (OS.IsDBLocale && parent != null) {
@@ -3040,7 +3040,7 @@ MRESULT WM_CALCVALIDRECTS (int mp1, int mp2) {
 MRESULT WM_CHAR (int mp1, int mp2) {
     boolean keyUp = (OS.SHORT1FROMMP (mp1) & OS.KC_KEYUP) != 0;
 //@@TODO (dmik): debug, remove    
-System.out.println("WM_CHAR ("+this+"): vk="+OS.SHORT2FROMMP (mp2)+" keyup="+keyUp);
+//System.out.println("WM_CHAR ("+this+"): vk="+OS.SHORT2FROMMP (mp2)+" keyup="+keyUp);
     sendKeyEvent (keyUp ? SWT.KeyUp : SWT.KeyDown, OS.WM_CHAR, mp1, mp2);
     return null;
 }
@@ -3057,6 +3057,7 @@ MRESULT WM_CLOSE (int mp1, int mp2) {
 MRESULT WM_COMMAND (int mp1, int mp2) {
     switch (OS.SHORT1FROMMP (mp2)) {
         case OS.CMDSRC_MENU:
+//            System.out.println("Control:WM_COMMAND - CMDSRC_MENU");
             Decorations shell = menuShell ();
             if (shell.isEnabled ()) {
                     int id = mp1;
@@ -3071,10 +3072,18 @@ MRESULT WM_COMMAND (int mp1, int mp2) {
             System.out.println("Control:WM_COMMAND - CMDSRC_ACCELERATOR");
             break;
         case OS.CMDSRC_PUSHBUTTON:
+            System.out.println("Control:WM_COMMAND - CMDSRC_PUSHBUTTON");
+            break;
         //@@TODO(lpino)
         case OS.CMDSRC_FONTDLG:
+            System.out.println("Control:WM_COMMAND - CMDSRC_FONTDLG");
+            break;
         case OS.CMDSRC_FILEDLG:
-        case OS.CMDSRC_COLORDLG:
+            System.out.println("Control:WM_COMMAND - CMDSRC_FILEDLG");
+            break;
+        case OS.CMDSRC_OTHER:
+            System.out.println("Control:WM_COMMAND - CMDSRC_OTHER");
+            break;
         //case OS.CMDSRC_PRINTDLG:
     }
     int hwndChild = OS.WinWindowFromID (handle, OS.SHORT1FROMMP (mp1));
@@ -3091,14 +3100,13 @@ MRESULT WM_CONTEXTMENU (int mp1, int mp2) {
       * and the parent of all menus is the shell, the menu may
       * have been destroyed but not removed from the control.
       */
+    //@@TODO(lpino) First check if this validation applies to OS/2 implementation and then validate using the coordinates of the mouse 
 //      if (mp2 != handle) return null;
-      int parentHandle = OS.WinQueryWindow(menu.handle, OS.QW_PARENT);
-      int hab = parent.getDisplay ().hab;
-    //@@TODO(lpino) Remove debug msg
-//      System.out.println("Control:WM_CONTEXTMENU - PARENT HANDLE = " + Integer.toHexString (parentHandle));
-//      System.out.println("Control:WM_CONTEXTMENU - MENU HANDLE = " + Integer.toHexString (menu.handle));
+//      int parentHandle = OS.WinQueryWindow(menu.handle, OS.QW_PARENT);
+//      System.out.println("Control:WM_CONTEXTMENU - PARENTHANDLE = " + Integer.toHexString(parentHandle));
+//      System.out.println("Control:WM_CONTEXTMENU - PARENTHANDLE = " + Integer.toHexString(handle));
       short flOptions = OS.PU_HCONSTRAIN | OS.PU_VCONSTRAIN | OS.PU_KEYBOARD | OS.PU_MOUSEBUTTON1;
-      boolean rc = OS.WinPopupMenu(parentHandle, parentHandle, menu.handle, 0, OS.SHORT1FROMMP(mp1), OS.SHORT2FROMMP(mp1), flOptions);
+      boolean rc = OS.WinPopupMenu(handle, handle, menu.handle, 0, OS.SHORT1FROMMP(mp1), OS.SHORT2FROMMP(mp1), flOptions);
 //      if (menu != null && !menu.isDisposed ()) {
 //              menu.setVisible (true);
 //      }
@@ -3233,26 +3241,18 @@ MRESULT WM_HSCROLL (int mp1, int mp2) {
 MRESULT WM_INITMENU (int mp1, int mp2) {
 
       /* Ignore WM_INITMENU for an accelerator */
-      System.out.println("Control:WM_INITMENU -  MENU HANDLE = " + Integer.toHexString (mp2));
       Display display = getDisplay ();
       if (display.accelKeyHit) return null;
-//      /*
-//      * If the high order word of LPARAM is non-zero,
-//      * the menu is the system menu and we can ignore
-//      * WPARAM.  Otherwise, use WPARAM to find the menu.
-//      */
       Shell shell = getShell ();
       Menu oldMenu = shell.activeMenu;
       Menu newMenu = null;
-//      if ((lParam >> 16) == 0) {
-              newMenu = menuShell ().findMenu (mp2);
-//      }
+      newMenu = menuShell ().findMenu (mp2);
       Menu menu = newMenu;
       while (menu != null && menu != oldMenu) {
               menu = menu.getParentMenu ();
       }
       if (menu == null) {
-             menu = shell.activeMenu;
+              menu = shell.activeMenu;
               while (menu != null) {
                       /*
                       * It is possible (but unlikely), that application
@@ -3271,23 +3271,19 @@ MRESULT WM_INITMENU (int mp1, int mp2) {
                       if (ancestor != null) break;
               }
       }
-      if(menu == null)
-        System.out.println("Control:WM_INITMENU " + menu);
-      else
-        System.out.println("Control:WM_INITMENU " + Integer.toHexString (menu.handle));   
-//
-//      /*
-//      * The shell and the new menu may be disposed because of
-//      * sending the hide event to the ancestor menus but setting
-//      * a field to null in a disposed shell is not harmful.
-//      */
+
+      /*
+      * The shell and the new menu may be disposed because of
+      * sending the hide event to the ancestor menus but setting
+      * a field to null in a disposed shell is not harmful.
+      */
       if (newMenu != null && newMenu.isDisposed ())
           newMenu = null;
       shell.activeMenu = newMenu;
-//
-//      /*
-//      * Send the show event
-//      */
+
+      /*
+      * Send the show event
+      */
       if (newMenu != null && newMenu != oldMenu) {
               /*
               * SWT.Selection events are posted to allow stepping
@@ -3471,8 +3467,7 @@ MRESULT WM_INITMENU (int mp1, int mp2) {
 //}
 //
 MRESULT WM_MENUSELECT (int mp1, int mp2) {
-    System.out.println("Control:WM_MENUSELECT - MP1 SHORT 1= " + OS.SHORT1FROMMP(mp1));
-    System.out.println("Control:WM_MENUSELECT - MP1 SHORT 2= " + OS.SHORT2FROMMP(mp1));
+//    System.out.println("Control:WM_MENUSELECT - MP1 SHORT 1= " + OS.SHORT1FROMMP(mp1));
     if(OS.SHORT2FROMMP(mp1) == 0) return MRESULT.FALSE;
 //      int code = wParam >> 16;
       Shell shell = getShell ();
@@ -3499,78 +3494,65 @@ MRESULT WM_MENUSELECT (int mp1, int mp2) {
 //              return null;
 //      }
 //      if ((code & OS.MF_SYSMENU) != 0) return null;
-//      if ((code & OS.MF_HILITE) != 0) {
-//              MenuItem item = null;
-//              Decorations menuShell = menuShell ();
-//              if ((code & OS.MF_POPUP) != 0) {
+      int sState = OS.WinSendMsg(mp2, OS.MM_QUERYITEMATTR, OS.MPFROM2SHORT(OS.SHORT1FROMMP(mp1), (short)OS.TRUE), OS.MIA_HILITED);
+      if ((sState & OS.MIA_HILITED) != 0) {
+              MenuItem item = null;
+              Decorations menuShell = menuShell ();
+              MENUITEM info = new MENUITEM ();
+              OS.WinSendMsg (mp2, OS.MM_QUERYITEM,  OS.MPFROM2SHORT (OS.SHORT1FROMMP(mp1), (short)OS.TRUE), info);
+              if ((info.afStyle & OS.MIS_SUBMENU) != 0) {
 //                      int index = wParam & 0xFFFF;
 //                      MENUITEMINFO info = new MENUITEMINFO ();
 //                      info.cbSize = MENUITEMINFO.sizeof;
 //                      info.fMask = OS.MIIM_SUBMENU;
 //                      if (OS.GetMenuItemInfo (lParam, index, true, info)) {
-//                              Menu newMenu = menuShell.findMenu (info.hSubMenu);
-//                              if (newMenu != null) item = newMenu.cascade;
+                              Menu newMenu = menuShell.findMenu (info.hwndSubMenu);
+                              if (newMenu != null) item = newMenu.cascade;
 //                      }
-//              } else {
-//                      Menu newMenu = menuShell.findMenu (lParam);
-//                      if (newMenu != null) {
-//                              int id = wParam & 0xFFFF;
-//                              item = menuShell.findMenuItem (id);
-//                      }
-//                      Menu oldMenu = shell.activeMenu;
-//                      if (oldMenu != null) {
-//                              Menu ancestor = oldMenu;
-//                              while (ancestor != null && ancestor != newMenu) {
-//                                      ancestor = ancestor.getParentMenu ();
-//                              }
-//                              if (ancestor == newMenu) {
-//                                      ancestor = oldMenu;
-//                                      while (ancestor != newMenu) {
-//                                              /*
-//                                              * It is possible (but unlikely), that application
-//                                              * code could have disposed the widget in the hide
-//                                              * event or the item about to be armed.  If this
-//                                              * happens, stop searching up the ancestor list
-//                                              * because there is no longer a link to follow.
-//                                              */
-//                                              ancestor.sendEvent (SWT.Hide);
-//                                              if (ancestor.isDisposed ()) break;
-//                                              ancestor = ancestor.getParentMenu ();
-//                                      }
-//                                      /*
-//                                      * The shell and/or the item could be disposed when
-//                                      * processing hide events from above.  If this happens,
-//                                      * ensure that the shell is not accessed and that no
-//                                      * arm event is sent to the item.
-//                                      */
-//                                      if (!shell.isDisposed ()) {
-//                                              if (newMenu != null && newMenu.isDisposed ()) {
-//                                                      newMenu = null;
-//                                              }
-//                                              shell.activeMenu = newMenu;
-//                                      }
-//                                      if (item != null && item.isDisposed ()) item = null;
-//                              }
-//                      }
-//              }
-//              if (item != null) item.sendEvent (SWT.Arm);
-//      }
-//      int parentHandle = OS.WinQueryWindow(menu.handle, OS.QW_PARENT);
-//      boolean bIsWaiting = true;
-//      int hab = 0;
-//      if(parent == null)
-//          hab = getDisplay().hab;
-//      else
-//          hab = parent.getDisplay ().hab;
-//       while(bIsWaiting){        
-//            QMSG qmsg = new QMSG ();
-//
-//            OS.WinGetMsg(hab,qmsg, 0, 0, 0);
-//            if (qmsg.msg == OS.WM_COMMAND || qmsg.msg == OS.WM_MENUSELECT)
-//                bIsWaiting = false;
-//            OS.WinDispatchMsg(hab, qmsg);
-//          System.out.println("Control:WM_CONTEXTMENU");
-//        }
+              } else {
+                      Menu newMenu = menuShell.findMenu (mp2);
+                      if (newMenu != null) {
+                              int id = OS.SHORT1FROMMP(mp1);
+                              item = menuShell.findMenuItem (id);
+                      }
+                      Menu oldMenu = shell.activeMenu;
+                      if (oldMenu != null) {
+                              Menu ancestor = oldMenu;
+                              while (ancestor != null && ancestor != newMenu) {
+                                      ancestor = ancestor.getParentMenu ();
+                              }
+                              if (ancestor == newMenu) {
+                                      ancestor = oldMenu;
+                                      while (ancestor != newMenu) {
+                                              /*
+                                              * It is possible (but unlikely), that application
+                                              * code could have disposed the widget in the hide
+                                              * event or the item about to be armed.  If this
+                                              * happens, stop searching up the ancestor list
+                                              * because there is no longer a link to follow.
+                                              */
+                                              ancestor.sendEvent (SWT.Hide);
+                                              if (ancestor.isDisposed ()) break;
+                                              ancestor = ancestor.getParentMenu ();
+                                      }
+                                      /*
+                                      * The shell and/or the item could be disposed when
+                                      * processing hide events from above.  If this happens,
+                                      * ensure that the shell is not accessed and that no
+                                      * arm event is sent to the item.
+                                      */
+                                      if (!shell.isDisposed ()) {
+                                              if (newMenu != null && newMenu.isDisposed ()) {
+                                                      newMenu = null;
+                                              }
+                                              shell.activeMenu = newMenu;
+                                      }
+                                      if (item != null && item.isDisposed ()) item = null;
+                              }
+                      }
+              }
+              if (item != null) item.sendEvent (SWT.Arm);
+      }
       return MRESULT.TRUE;
 }
 //
@@ -3829,7 +3811,6 @@ MRESULT WM_SETFOCUS (int mp1, int mp2) {
 }
 
 MRESULT WM_MENUEND (int mp1, int mp2) {
-    System.out.println("Control:WM_MENUEND - HANDLE = " + Integer.toHexString (mp2));
       return null;
 }
 
@@ -4039,7 +4020,6 @@ MRESULT WM_WINDOWPOSCHANGED (int mp1, int mp2) {
     return new MRESULT (result);
 }
 MRESULT WM_FOCUSCHANGE (int mp1, int mp2) {
-    System.out.println("Control:WM_FOCUSCHANGE - HANDLE = " + Integer.toHexString (mp1));
     callWindowProc (OS.WM_FOCUSCHANGE, mp1, mp2);
     return MRESULT.ZERO;
 }
