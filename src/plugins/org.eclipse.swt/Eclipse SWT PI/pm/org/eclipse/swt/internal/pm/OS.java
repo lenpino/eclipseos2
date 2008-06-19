@@ -264,7 +264,7 @@ public class OS {
 //    public static final int WM_FLASHWINDOW =        0x0040;
     public static final int WM_FORMATFRAME =        0x0041;
     public static final int WM_UPDATEFRAME =        0x0042;
-//    public static final int WM_FOCUSCHANGE =        0x0043;
+    public static final int WM_FOCUSCHANGE =        0x0043;
 //    public static final int WM_SETBORDERSIZE =      0x0044;
 //    public static final int WM_TRACKFRAME =         0x0045;
 //    public static final int WM_MINMAXFRAME =        0x0046;
