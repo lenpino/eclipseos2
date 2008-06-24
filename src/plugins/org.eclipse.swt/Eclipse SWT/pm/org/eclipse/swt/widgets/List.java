@@ -410,7 +410,7 @@ public String getItem (int index) {
 	int length = OS.WinSendMsg (handle, OS.LM_QUERYITEMTEXTLENGTH, (short)index, 0);
 	if (length != OS.LIT_ERROR) {
 		PSZ buffer = new PSZ(length+1);
-		int result = OS.WinSendMsg (handle, OS.LM_QUERYITEMTEXT, OS.MPFROM2SHORT((short)length,(short)index), buffer);
+		int result = OS.WinSendMsg (handle, OS.LM_QUERYITEMTEXT, OS.MPFROM2SHORT((short)index,(short)length), buffer);
 		if (result != 0) return buffer.toString ();
 	}
 	int count = OS.WinSendMsg (handle, OS.LM_QUERYITEMCOUNT, 0, 0);
