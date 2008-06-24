@@ -2074,6 +2074,38 @@ public class OS {
   public static final int AF_LONEKEY                 = 0x0040;
   public static final int AF_SYSCOMMAND              = 0x0100;
   public static final int AF_HELP                    = 0x0200;
+  
+/* Standard WM_SYSCOMMAND command values */
+  public static final int SC_SIZE                    = 0x8000;
+  public static final int SC_MOVE                    = 0x8001;
+  public static final int SC_MINIMIZE                = 0x8002;
+  public static final int SC_MAXIMIZE                = 0x8003;
+  public static final int SC_CLOSE                   = 0x8004;
+  public static final int SC_NEXT                    = 0x8005;
+  public static final int SC_APPMENU                 = 0x8006;
+  public static final int SC_SYSMENU                 = 0x8007;
+  public static final int SC_RESTORE                 = 0x8008;
+  public static final int SC_NEXTFRAME               = 0x8009;
+  public static final int SC_NEXTWINDOW              = 0x8010;
+  public static final int SC_TASKMANAGER             = 0x8011;
+  public static final int SC_HELPKEYS                = 0x8012;
+  public static final int SC_HELPINDEX               = 0x8013;
+  public static final int SC_HELPEXTENDED            = 0x8014;
+  public static final int SC_SWITCHPANELIDS          = 0x8015;
+  public static final int SC_DBE_FIRST               = 0x8018;
+  public static final int SC_DBE_LAST                = 0x801F;
+
+  public static final int SC_BEGINDRAG               = 0x8020;
+  public static final int SC_ENDDRAG                 = 0x8021;
+  public static final int SC_SELECT                  = 0x8022;
+  public static final int SC_OPEN                    = 0x8023;
+  public static final int SC_CONTEXTMENU             = 0x8024;
+  public static final int SC_CONTEXTHELP             = 0x8025;
+  public static final int SC_TEXTEDIT                = 0x8026;
+  public static final int SC_BEGINSELECT             = 0x8027;
+  public static final int SC_ENDSELECT               = 0x8028;
+  public static final int SC_WINDOW                  = 0x8029;
+  public static final int SC_HIDE                    = 0x802a;
 
 /* PM macros */
 
