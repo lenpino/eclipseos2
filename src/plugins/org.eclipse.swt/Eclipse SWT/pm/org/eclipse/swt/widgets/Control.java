@@ -471,13 +471,13 @@ void createHandle () {
     OS.WinSetWindowUShort (handle, OS.QWS_ID, (short)(handle & 0xFFFF));
 
 //@@TODO (dmik): debug code, remove when no more necessary 
-System.out.println (
-    "Control.createHandle(): Window has been created:\n" +
-    "    hwnd = " + Integer.toHexString (handle) + "\n" +
-    "    hwnd.parent = hwnd.owner = " + Integer.toHexString (parent.handle) + "\n" +
-    "    class = " + windowClass() + "\n" +
-    "    style = " + Integer.toHexString (widgetStyle())
-);
+//System.out.println (
+//    "Control.createHandle(): Window has been created:\n" +
+//    "    hwnd = " + Integer.toHexString (handle) + "\n" +
+//    "    hwnd.parent = hwnd.owner = " + Integer.toHexString (parent.handle) + "\n" +
+//    "    class = " + windowClass() + "\n" +
+//    "    style = " + Integer.toHexString (widgetStyle())
+//);
 
 //@@TODO(dmik): DBCS handling?
 //    if (OS.IsDBLocale && parent != null) {
@@ -3102,12 +3102,8 @@ MRESULT WM_CONTEXTMENU (int mp1, int mp2) {
       */
     //@@TODO(lpino) First check if this validation applies to OS/2 implementation and then validate using the coordinates of the mouse 
 //      if (mp2 != handle) return null;
-//      int parentHandle = OS.WinQueryWindow(menu.handle, OS.QW_PARENT);
-      System.out.println("Control:WM_CONTEXTMENU - PARENTHANDLE = " + Integer.toHexString(handle));
-      System.out.println("Control:WM_CONTEXTMENU - SHORT1FROMMP = " + OS.SHORT1FROMMP(mp1));
-      System.out.println("Control:WM_CONTEXTMENU - SHORT2FROMMP = " + OS.SHORT2FROMMP(mp1));
       short flOptions = OS.PU_HCONSTRAIN | OS.PU_VCONSTRAIN | OS.PU_KEYBOARD | OS.PU_MOUSEBUTTON1;
-      boolean rc = OS.WinPopupMenu(handle, handle, menu.handle, 0, 150, OS.SHORT1FROMMP(mp1), flOptions);
+      boolean rc = OS.WinPopupMenu(handle, handle, menu.handle, OS.SHORT1FROMMP(mp1), OS.SHORT2FROMMP(mp1), 0, flOptions);
       return MRESULT.TRUE;
 }
 
