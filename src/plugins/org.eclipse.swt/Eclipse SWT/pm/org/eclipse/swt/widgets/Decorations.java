@@ -260,20 +260,15 @@ Control computeTabRoot () {
 
 public Rectangle computeTrim (int x, int y, int width, int height) {
 	checkWidget ();
-    
-//@@TEMP(dmik): in the future should take scroll bars into account (and menu)?
-//	/* Get the size of the trimmings */
-//	RECT rect = new RECT ();
-//	OS.SetRect (rect, x, y, x + width, y + height);
-//	int bits = OS.GetWindowLong (handle, OS.GWL_STYLE);
-//	boolean hasMenu = OS.IsWinCE ? false : OS.GetMenu (handle) != 0;
-//	OS.AdjustWindowRectEx (rect, bits, hasMenu, OS.GetWindowLong (handle, OS.GWL_EXSTYLE));
-//
-//	/* Get the size of the scroll bars */
-//	if (horizontalBar != null) rect.bottom += OS.GetSystemMetrics (OS.SM_CYHSCROLL);
-//	if (verticalBar != null) rect.right += OS.GetSystemMetrics (OS.SM_CXVSCROLL);
-//
-//	/* Get the height of the menu bar */
+        RECTL rcl = new RECTL ();
+    rcl.xLeft = x; rcl.yBottom = y;
+     rcl.xRight = x + width; rcl.yTop = y + height;
+     
+     /* Get the size of the scroll bars */
+    if (horizontalBar != null) rcl.xRight += OS.WinQuerySysValue (OS.HWND_DESKTOP, OS.SV_CXVSCROLL);
+    if (verticalBar != null) rcl.yTop += OS.WinQuerySysValue (OS.HWND_DESKTOP, OS.SV_CYHSCROLL);
+    /* Get the height of the menu bar */
+    //@@TEMP(lpino): I'm not sure if we need to calculate the height of the menu using SV_CYMENU'
 //	if (hasMenu) {
 //		RECT testRect = new RECT ();
 //		OS.SetRect (testRect, 0, 0, rect.right - rect.left, rect.bottom - rect.top);
@@ -284,13 +279,8 @@ public Rectangle computeTrim (int x, int y, int width, int height) {
 //			OS.SendMessage (handle, OS.WM_NCCALCSIZE, 0, testRect);
 //		}
 //	}
-//	return new Rectangle (rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top);
-    RECTL rcl = new RECTL ();
-    rcl.xLeft = x; rcl.yBottom = y;
-    rcl.xRight = x + width; rcl.yTop = y + height;
     OS.WinCalcFrameRect (frameHandle, rcl, false);
-    return new Rectangle (rcl.xLeft, rcl.yBottom,
-        rcl.xRight - rcl.xLeft, rcl.yTop - rcl.yBottom);
+    return new Rectangle (rcl.xLeft, rcl.yBottom, rcl.xRight - rcl.xLeft, rcl.yTop - rcl.yBottom);
 }
 
 void createAcceleratorTable () {
@@ -422,13 +412,13 @@ void createHandle () {
     if (handle == 0) error (SWT.ERROR_NO_HANDLES);
     state |= CANVAS;
 //@@TODO (dmik): debug code, remove when no more necessary 
-//System.out.println (
-//    "Decorations.createHandle(): FID_CLIENT window has been created:\n" +
-//    "    hwnd = " + Integer.toHexString (handle) + "\n" +
-//    "    hwnd.parent = hwnd.owner = " + Integer.toHexString (frameHandle) + "\n" +
-//    "    class = " + windowClass() + "\n" +
-//    "    style = " + Integer.toHexString (widgetStyle())
-//);
+System.out.println (
+    "Decorations.createHandle(): FID_CLIENT window has been created:\n" +
+    "    hwnd = " + Integer.toHexString (handle) + "\n" +
+    "    hwnd.parent = hwnd.owner = " + Integer.toHexString (frameHandle) + "\n" +
+    "    class = " + windowClass() + "\n" +
+    "    style = " + Integer.toHexString (widgetStyle())
+);
 //@@TODO(dmik): do something for MDI windows if needed    
 //    if (parent == null) return;
 //    setParent ();
@@ -586,18 +576,18 @@ public boolean getMaximized () {
     return (OS.WinQueryWindowULong (frameHandle, OS.QWL_STYLE) & OS.WS_MAXIMIZED) != 0;
 }
 
-//@@TODO(dmik)    
-///**
-// * Returns the receiver's menu bar if one had previously
-// * been set, otherwise returns null.
-// *
-// * @return the menu bar or null
-// *
-// * @exception SWTException <ul>
-// *    <li>ERROR_WIDGET_DISPOSED - if the receiver has been disposed</li>
-// *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
-// * </ul>
-// */
+   
+/**
+ * Returns the receiver's menu bar if one had previously
+ * been set, otherwise returns null.
+ *
+ * @return the menu bar or null
+ *
+ * @exception SWTException <ul>
+ *    <li>ERROR_WIDGET_DISPOSED - if the receiver has been disposed</li>
+ *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
+ * </ul>
+ */
 public Menu getMenuBar () {
 	checkWidget ();
 	return menuBar;
@@ -1107,24 +1097,16 @@ public void setMinimized (boolean minimized) {
 }
 
 //@@TODO(dmik)
-//void setParent () {
-//	/*
-//	* In order for an MDI child window to support
-//	* a menu bar, setParent () is needed to reset
-//	* the parent.  Otherwise, the MDI child window
-//	* will appear as a separate shell.  This is an
-//	* undocumented and possibly dangerous Windows
-//	* feature.
-//	*/
-//	Display display = getDisplay ();
-//	int hwndParent = parent.handle;
-//	display.lockActiveWindow = true;
-//	OS.SetParent (handle, hwndParent);
-//	if (!OS.IsWindowVisible (hwndParent)) {
-//		OS.ShowWindow (handle, OS.SW_SHOWNA);
-//	}
-//	display.lockActiveWindow = false;
-//}
+void setParent () {
+	Display display = getDisplay ();
+	int hwndParent = parent.handle;
+	display.lockActiveWindow = true;
+	OS.WinSetParent (handle, hwndParent, false);
+	if (!OS.WinIsWindowVisible (hwndParent)) {
+		OS.WinShowWindow (handle, true);
+	}
+	display.lockActiveWindow = false;
+}
 
 public void setRedraw (boolean redraw) {
     checkWidget ();
@@ -1149,8 +1131,11 @@ void setSavedFocus (Control control) {
 	savedFocus = control;
 }
 
-//@@TODO (dmik): later
-//void setSystemMenu () {
+//@@TODO (lpino): Understand and complete
+void setSystemMenu () {
+    int hMenu = OS.WinWindowFromID(frameHandle, OS.FID_SYSMENU);
+    if (hMenu == 0) return;
+    int oldCount = OS.WinSendMsg(hMenu, OS.MM_QUERYITEMCOUNT, 0, 0);
 //	if (OS.IsWinCE) return;
 //	int hMenu = OS.GetSystemMenu (handle, false);
 //	if (hMenu == 0) return;
@@ -1187,7 +1172,7 @@ void setSavedFocus (Control control) {
 //			}
 //		}
 //	}
-//}
+}
 
 /**
  * Sets the receiver's text, which is the string that the
@@ -1452,8 +1437,6 @@ MRESULT FRAME_WM_ACTIVATE (int mp1, int mp2) {
 		*/
 		sendEvent (SWT.Activate);
 		if (isDisposed ()) return MRESULT.ZERO;
-//@@TODO (dmik): remove        
-//		if (restoreFocus ()) return MRESULT.ZERO;
 		restoreFocus ();
 	}
 	return null;

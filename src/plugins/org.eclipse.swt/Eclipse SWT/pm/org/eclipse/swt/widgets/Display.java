@@ -133,7 +133,7 @@ public class Display extends Device {
     /* Keyboard and Mouse State */
 //@@TODO (dmik): not yet sure what do we need from these:    
 //    boolean lastVirtual;
-//    boolean lockActiveWindow;
+    boolean lockActiveWindow;
 //    int lastKey, lastAscii, lastMouse;
 //    byte [] keyboard = new byte [256];
     boolean accelKeyHit, mnemonicKeyHit;

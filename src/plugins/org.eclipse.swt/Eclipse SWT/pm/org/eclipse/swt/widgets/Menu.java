@@ -1,7 +1,7 @@
 package org.eclipse.swt.widgets;
 /*
  * OS/2 version.
- * Copyright (c) 2002, 2007 EclipseOS2 Team.
+ * Copyright (c) 2002, 2008 EclipseOS2 Team.
  */
 
 /*
@@ -241,12 +241,12 @@ void createHandle () {
 //    "    style = MS_ACTIONBAR"
 //);
 	} else  if ((style & SWT.POP_UP) != 0) {
-            handle = OS.WinCreateWindow (parent.handle,                     /* parent window */
+            handle = OS.WinCreateWindow (OS.HWND_DESKTOP,                     /* parent window */
                                                         PSZ.getAtom (OS.WC_MENU),	/* class name */
                                                         null,                                               /* window text */
                                                         0,                                                   /* window style */
                                                         0, 0, 0, 0,                                       /* size and position */
-                                                        parent.handle,                              /* owner window */
+                                                        OS.HWND_DESKTOP,                              /* owner window */
                                                         OS.HWND_TOP,                            /* sibling window */
                                                         0,                                                  /* ID */
                                                         OS.NULLHANDLE,                          /* control data */
@@ -297,7 +297,6 @@ void createItem (MenuItem item, int index) {
         info.afStyle = OS.MIS_TEXT;
         info.afAttribute = 0;
         info.id = (short)item.id;
-        System.out.println("Menu:createItem ID = " + info.id);
         info.hwndSubMenu = OS.NULLHANDLE;
         info.hItem = 0;
         int rc = OS.WinSendMsg (handle, OS.MM_INSERTITEM,  info, new PSZ(" "));

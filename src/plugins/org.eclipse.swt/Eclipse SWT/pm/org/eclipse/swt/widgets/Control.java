@@ -471,13 +471,13 @@ void createHandle () {
     OS.WinSetWindowUShort (handle, OS.QWS_ID, (short)(handle & 0xFFFF));
 
 //@@TODO (dmik): debug code, remove when no more necessary 
-//System.out.println (
-//    "Control.createHandle(): Window has been created:\n" +
-//    "    hwnd = " + Integer.toHexString (handle) + "\n" +
-//    "    hwnd.parent = hwnd.owner = " + Integer.toHexString (parent.handle) + "\n" +
-//    "    class = " + windowClass() + "\n" +
-//    "    style = " + Integer.toHexString (widgetStyle())
-//);
+System.out.println (
+    "Control.createHandle(): Window has been created:\n" +
+    "    hwnd = " + Integer.toHexString (handle) + "\n" +
+    "    hwnd.parent = hwnd.owner = " + Integer.toHexString (parent.handle) + "\n" +
+    "    class = " + windowClass() + "\n" +
+    "    style = " + Integer.toHexString (widgetStyle())
+);
 
 //@@TODO(dmik): DBCS handling?
 //    if (OS.IsDBLocale && parent != null) {
@@ -3103,13 +3103,11 @@ MRESULT WM_CONTEXTMENU (int mp1, int mp2) {
     //@@TODO(lpino) First check if this validation applies to OS/2 implementation and then validate using the coordinates of the mouse 
 //      if (mp2 != handle) return null;
 //      int parentHandle = OS.WinQueryWindow(menu.handle, OS.QW_PARENT);
-//      System.out.println("Control:WM_CONTEXTMENU - PARENTHANDLE = " + Integer.toHexString(parentHandle));
-//      System.out.println("Control:WM_CONTEXTMENU - PARENTHANDLE = " + Integer.toHexString(handle));
+      System.out.println("Control:WM_CONTEXTMENU - PARENTHANDLE = " + Integer.toHexString(handle));
+      System.out.println("Control:WM_CONTEXTMENU - SHORT1FROMMP = " + OS.SHORT1FROMMP(mp1));
+      System.out.println("Control:WM_CONTEXTMENU - SHORT2FROMMP = " + OS.SHORT2FROMMP(mp1));
       short flOptions = OS.PU_HCONSTRAIN | OS.PU_VCONSTRAIN | OS.PU_KEYBOARD | OS.PU_MOUSEBUTTON1;
-      boolean rc = OS.WinPopupMenu(handle, handle, menu.handle, 0, OS.SHORT1FROMMP(mp1), OS.SHORT2FROMMP(mp1), flOptions);
-//      if (menu != null && !menu.isDisposed ()) {
-//              menu.setVisible (true);
-//      }
+      boolean rc = OS.WinPopupMenu(handle, handle, menu.handle, 0, 150, OS.SHORT1FROMMP(mp1), flOptions);
       return MRESULT.TRUE;
 }
 
@@ -3866,7 +3864,7 @@ MRESULT WM_SIZE (int mp1, int mp2) {
 //      return null;
 //}
 //
-//LRESULT WM_SYSCOMMAND (int wParam, int lParam) {
+MRESULT WM_SYSCOMMAND (int mp1, int mp2) {
 //      /*
 //      * Check to see if the command is a system command or
 //      * a user menu item that was added to the System menu.
@@ -3883,13 +3881,13 @@ MRESULT WM_SIZE (int mp1, int mp2) {
 //      }
 //
 //      /* Process the System Command */
-//      int cmd = wParam & 0xFFF0;
-//      switch (cmd) {
-//              case OS.SC_CLOSE:
-//                      int hwndShell = menuShell ().handle;
-//                      int bits = OS.GetWindowLong (hwndShell, OS.GWL_STYLE);
-//                      if ((bits & OS.WS_SYSMENU) == 0) return LRESULT.ZERO;
-//                      break;
+      int cmd = mp1 & 0xFFFF;
+      switch (cmd) {
+              case OS.SC_CLOSE:
+                      int hwndShell = menuShell ().handle;
+//                      int bits =  OS.WinQueryWindowULong (frameHandle, OS.QWL_STYLE);
+//                      if ((bits & OS.WS_SYSMENU) == 0) return MRESULT.ZERO;
+                      break;
 //              case OS.SC_KEYMENU:
 //                      if (hooks (SWT.KeyDown) || hooks (SWT.KeyUp)) {
 //                              Decorations shell = menuShell ();
@@ -3931,10 +3929,10 @@ MRESULT WM_SIZE (int mp1, int mp2) {
 //                      /* Save the focus widget when the shell is minimized */
 //                      menuShell ().saveFocus ();
 //                      break;
-//      }
-//      return null;
-//}
-//
+      }
+      return MRESULT.ZERO;
+}
+
 //LRESULT WM_SYSKEYDOWN (int wParam, int lParam) {
 //      Display display = getDisplay ();
 //
