@@ -198,6 +198,26 @@ JNIEXPORT void JNICALL Java_org_eclipse_swt_internal_pm_OS_objcpy__Lorg_eclipse_
 
     if (swp && pswp) setSWPFields(env, swp, (PSWP)pswp, &PGLOB(SWPFc));
 }
+JNIEXPORT void JNICALL Java_org_eclipse_swt_internal_pm_OS_objcpy__ILorg_eclipse_swt_internal_pm_OWNERITEM_2
+    (JNIEnv *env, jclass that, jint powner, jobject owner)
+{
+    DECL_GLOB(pGlob)
+
+    DEBUG_CALL("objcpy\n")
+    DEBUG_CHECK_NULL(env, (powner && owner))
+
+    if (powner && owner) getOWNERITEMFields(env, owner, (POWNERITEM)powner, &PGLOB(OWNERITEMFc));
+}
+JNIEXPORT void JNICALL Java_org_eclipse_swt_internal_pm_OS_objcpy__Lorg_eclipse_swt_internal_pm_OWNERITEM_2I
+    (JNIEnv *env, jclass that, jobject owner, jint powner)
+{
+    DECL_GLOB(pGlob)
+
+    DEBUG_CALL("objcpy\n")
+    DEBUG_CHECK_NULL(env, (owner && powner))
+
+    if (owner && powner) setOWNERITEMFields(env, owner, (POWNERITEM)powner, &PGLOB(OWNERITEMFc));
+}
 
 /* PM functions */
 
