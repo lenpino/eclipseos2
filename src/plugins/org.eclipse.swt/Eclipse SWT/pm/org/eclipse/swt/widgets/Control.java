@@ -2962,7 +2962,7 @@ int windowProc (int msg, int mp1, int mp2) {
 //        case OS.WM_CTLCOLORSTATIC: result = WM_CTLCOLOR (wParam, lParam); break;
 //        case OS.WM_CUT: result = WM_CUT (wParam, lParam); break;
 //        case OS.WM_DESTROY: result = WM_DESTROY (wParam, lParam); break;
-//        case OS.WM_DRAWITEM: result = WM_DRAWITEM (wParam, lParam); break;
+        case OS.WM_DRAWITEM: result = WM_DRAWITEM (mp1, mp2); break;
 //        case OS.WM_ENDSESSION: result = WM_ENDSESSION (wParam, lParam); break;
         case OS.WM_ERASEBACKGROUND: result = WM_ERASEBACKGROUND (mp1, mp2); break;
         case OS.WM_FOCUSCHANGE: result = WM_FOCUSCHANGE (mp1, mp2); break;
@@ -3148,18 +3148,30 @@ MRESULT WM_CONTROL (int mp1, int mp2) {
 //      if (control == null) return null;
 //      return control.wmDrawChild (wParam, lParam);
 //}
+
+MRESULT WM_DRAWITEM (int mp1, int mp2) {
+    System.out.println("Control:WM_DRAWITEM");
+    OWNERITEM struct = new OWNERITEM();
+//CHAR achClass[256]
 //
-//LRESULT WM_ENDSESSION (int wParam, int lParam) {
-//      return null;
-//}
+//WinQueryClassName(hwnd,sizeof(achClass),achClass);
+//if(WinFindAtom(WinQuerySystemAtomTable(),achClass)
+//   == LOUSHORT(WC_SCROLLBAR))
+//   /* this is a scroll bar */;
+//else
+//   /* this is not a scroll bar */;    if(type == OS.WC_MENU)
+//        System.out.println("IS MENU");
+    OS.objcpy(struct, mp2);
+      return null;
+}
 
 MRESULT WM_ERASEBACKGROUND (int mp1, int mp2) {
     return null;
 }
 
-MRESULT WM_MEASUREITEM (int mp1, int mp2) {
-    return null;
-}
+//MRESULT WM_MEASUREITEM (int mp1, int mp2) {
+//    return null;
+//}
 
 MRESULT WM_QUERYDLGCODE (int mp1, int mp2) {
       return null;
@@ -3426,21 +3438,23 @@ MRESULT WM_INITMENU (int mp1, int mp2) {
 //      }
 //      return new LRESULT (result);
 //}
-//
-//LRESULT WM_MEASUREITEM (int wParam, int lParam) {
+
+MRESULT WM_MEASUREITEM (int mp1, int mp2) {
+    System.out.println("Control:WM_MEASUREITEM");
 //      MEASUREITEMSTRUCT struct = new MEASUREITEMSTRUCT ();
 //      OS.MoveMemory (struct, lParam, MEASUREITEMSTRUCT.sizeof);
 //      if (struct.CtlType == OS.ODT_MENU) {
 //              Decorations shell = menuShell ();
 //              MenuItem item = shell.findMenuItem (struct.itemID);
 //              if (item == null) return null;
-//              return item.wmMeasureChild (wParam, lParam);
+//              return item.wmMeasureChild (mp1, mp2);
 //      }
 //      int hwnd = OS.GetDlgItem (handle, struct.CtlID);
 //      Control control = WidgetTable.get (hwnd);
 //      if (control == null) return null;
 //      return control.wmMeasureChild (wParam, lParam);
-//}
+    return null;
+}
 //
 //LRESULT WM_MENUCHAR (int wParam, int lParam) {
 //      Display display = getDisplay ();
