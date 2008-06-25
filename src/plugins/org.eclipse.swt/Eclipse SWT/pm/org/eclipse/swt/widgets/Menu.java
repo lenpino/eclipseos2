@@ -294,7 +294,7 @@ void createItem (MenuItem item, int index) {
         
         MENUITEM info = new MENUITEM();
         info.iPosition = OS.MIT_END;
-        info.afStyle = OS.MIS_TEXT;
+        info.afStyle = (short)item.widgetStyle();
         info.afAttribute = 0;
         info.id = (short)item.id;
         info.hwndSubMenu = OS.NULLHANDLE;
