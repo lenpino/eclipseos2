@@ -2144,6 +2144,9 @@ public static final native void objcpy (RECTL to, int from);
 public static final native void objcpy (int to, SWP from);    
 public static final native void objcpy (SWP to, int from);
 
+public static final native void objcpy (int to, OWNERITEM from);    
+public static final native void objcpy (OWNERITEM to, int from);
+
 /* PM functions */
 
 public static final native int DevOpenDC (int hab, int lType, PSZ pszToken,
@@ -2298,6 +2301,9 @@ public static final native boolean WinSetAccelTable(int hab, int haccelAccel, in
 public static final native boolean WinTranslateAccel(int hab, int hwnd, int haccelAccel, QMSG qmsg);
 public static final native int WinQueryActiveWindow(int hwndParent);
 public static final native boolean WinGetMsg(int hab, QMSG qmsg, int hwndFilter, int ulFisrt, int ulLast);
+public static final native int WinQuerySystemAtomTable();
+public static final native int WinFindAtom(int hatomtblAtomTbl, PSZ pszAtomName);
+public static final native int WinQueryClassName(int hwnd, int lLength, PSZ PCHBuffer);
 public static final native boolean PrfQueryProfileSize (int hini, PSZ pszApp,
     PSZ pszKey, int[] pulDataLen);
 public static final native int PrfQueryProfileString (int hini, PSZ pszApp,
