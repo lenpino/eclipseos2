@@ -522,7 +522,7 @@ public void setEnabled (boolean enabled) {
         int success = OS.WinSendMsg(hMenu, OS.MM_SETITEMATTR,  OS.MPFROM2SHORT((short)id, (short)OS.FALSE), OS.MPFROM2SHORT((short)OS.MIA_DISABLED, sState));
 //		boolean success = OS.SetMenuItemInfo (hMenu, id, false, info);
 //		if (!success) error (SWT.ERROR_CANNOT_SET_ENABLED);
-//	parent.redraw ();
+	parent.redraw ();
 }
 
 /**
@@ -677,8 +677,8 @@ public void setText (String string) {
 
 int widgetStyle () {
 	if ((style & SWT.SEPARATOR) != 0) return OS.MIS_SEPARATOR;
-//	if ((style & SWT.RADIO) != 0) return OS.MFT_RADIOCHECK;
-	return OS.MIS_TEXT;
+	if ((style & SWT.CASCADE) != 0) return OS.MIS_SUBMENU;
+	return OS.MIS_TEXT | OS.MIS_OWNERDRAW;
 }
 
 MRESULT wmCommandChild (int mp1, int mp2) {
@@ -724,7 +724,8 @@ MRESULT wmCommandChild (int mp1, int mp2) {
 //	return null;
 //}
 
-//LRESULT wmMeasureChild (int wParam, int lParam) {
+MRESULT wmMeasureChild (int mp1, int mp2) {
+    System.out.println("MenuItem:wmMeasureChild");
 //	MEASUREITEMSTRUCT struct = new MEASUREITEMSTRUCT ();
 //	OS.MoveMemory (struct, lParam, MEASUREITEMSTRUCT.sizeof);
 //	if (image != null) {
@@ -733,7 +734,7 @@ MRESULT wmCommandChild (int mp1, int mp2) {
 //		struct.itemHeight = rect.height + 4;
 //	}
 //	OS.MoveMemory (lParam, struct, MEASUREITEMSTRUCT.sizeof);	
-//	return null;
-//}
+	return null;
+}
 
 }
