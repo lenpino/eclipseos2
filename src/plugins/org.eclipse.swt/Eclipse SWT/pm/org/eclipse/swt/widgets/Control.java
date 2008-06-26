@@ -3148,20 +3148,20 @@ MRESULT WM_CONTROL (int mp1, int mp2) {
 //      if (control == null) return null;
 //      return control.wmDrawChild (wParam, lParam);
 //}
-
+//@@TODO(lpino) Finish the implementation of owner draw menu items
 MRESULT WM_DRAWITEM (int mp1, int mp2) {
-    System.out.println("Control:WM_DRAWITEM");
     OWNERITEM struct = new OWNERITEM();
-//CHAR achClass[256]
-//
-//WinQueryClassName(hwnd,sizeof(achClass),achClass);
-//if(WinFindAtom(WinQuerySystemAtomTable(),achClass)
-//   == LOUSHORT(WC_SCROLLBAR))
-//   /* this is a scroll bar */;
-//else
-//   /* this is not a scroll bar */;    if(type == OS.WC_MENU)
-//        System.out.println("IS MENU");
     OS.objcpy(struct, mp2);
+    int length = 16;
+    PSZ buffer = new PSZ (length);
+    OS.WinQueryClassName(struct.hwnd, length+1, buffer);
+    if(buffer.toString().equalsIgnoreCase(PSZ.getAtom (OS.WC_MENU).toString())){
+        Decorations shell = menuShell ();
+        MenuItem item = shell.findMenuItem (struct.idItem);
+        if (item == null) return null;
+        return item.wmDrawChild (mp1, mp2);
+    }    
+//        System.out.println("Control:WM_DRAWITEM - HANDLE ATOM TABLE = " + Integer.toHexString(OS.WinFindAtom(OS.WinQuerySystemAtomTable(), PSZ.getAtom (OS.WC_MENU))));
       return null;
 }
 
