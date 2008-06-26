@@ -1436,7 +1436,7 @@ JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_WinQueryActiveWindow
 
     return (jint)WinQueryActiveWindow((HWND)hwndParent);
 }
-JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_WinGetMsg
+JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinGetMsg
         (JNIEnv *env, jclass that, jint hab, jobject qmsg, jint hwndFilter, jint ulFirst, jint ulLast)
 {
     QMSG c_qmsg, *c_pqmsg = NULL;
@@ -1448,6 +1448,47 @@ JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_WinGetMsg
     rc = (jboolean)WinGetMsg((HAB)hab, c_pqmsg, (HWND)hwndFilter, ulFirst, ulLast);
 
     if (qmsg) setQMSGFields(env, qmsg, c_pqmsg, &PGLOB(QMSGFc));
+
+    return rc;
+}
+JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_WinQuerySystemAtomTable
+        (JNIEnv *env, jclass that)
+{
+    DEBUG_CALL("WinQuerySystemAtomTable\n")
+
+    return (jint)WinQuerySystemAtomTable();
+}
+JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_WinFindAtom
+        (JNIEnv *env, jclass that, jint hatomtblAtomTbl, jobject pszTitle)
+{
+    DECL_GLOB(pGlob)
+    PSZ c_pszTitle = NULL;
+    jint rc;
+
+    DEBUG_CALL("WinFindAtom\n")
+
+    if (pszTitle) c_pszTitle = getPSZBytes(env, pszTitle);
+
+    rc = (jint)WinFindAtom((HATOMTBL)hatomtblAtomTbl, c_pszTitle);
+
+    if (pszTitle) releasePSZBytes(env, pszTitle, c_pszTitle);
+
+    return rc;
+}
+JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_WinQueryClassName
+        (JNIEnv *env, jclass that, jint hwnd, jint lLength, jobject pszBuffer)
+{
+    DECL_GLOB(pGlob)
+    PSZ c_pszBuffer = NULL;
+    jint rc;
+
+    DEBUG_CALL("WinQueryClassName\n")
+
+    if (pszBuffer) c_pszBuffer = getPSZBytes(env, pszBuffer);
+
+    rc = (jint)WinQueryClassName((HWND)hwnd, lLength, c_pszBuffer);
+
+    if (pszBuffer) releasePSZBytes(env, pszBuffer, c_pszBuffer);
 
     return rc;
 }
