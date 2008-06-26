@@ -629,7 +629,6 @@ public void setMenu (Menu menu) {
         OS.WinSendMsg (hMenu, OS.MM_DELETEITEM,  OS.MPFROM2SHORT ((short)idItem, (short)OS.FALSE), 0);
         int rc = OS.WinSendMsg (hMenu, OS.MM_INSERTITEM,  info, buffer);
 //        boolean success = OS.WinSendMsg (hMenu, OS.MM_SETITEM,  OS.MPFROM2SHORT ((short)0, (short)OS.TRUE), info);
-        System.out.println("RC = " + rc);
         if(rc == OS.MIT_ERROR || rc == OS.MIT_MEMERROR)
             error (SWT.ERROR_CANNOT_SET_MENU);
 	parent.destroyAcceleratorTable ();
@@ -678,7 +677,7 @@ public void setText (String string) {
 int widgetStyle () {
 	if ((style & SWT.SEPARATOR) != 0) return OS.MIS_SEPARATOR;
 	if ((style & SWT.CASCADE) != 0) return OS.MIS_SUBMENU;
-	return OS.MIS_TEXT | OS.MIS_OWNERDRAW;
+	return OS.MIS_TEXT;
 }
 
 MRESULT wmCommandChild (int mp1, int mp2) {
@@ -695,8 +694,11 @@ MRESULT wmCommandChild (int mp1, int mp2) {
 	postEvent (SWT.Selection, event);
 	return null;
 }
-
-//LRESULT wmDrawChild (int wParam, int lParam) {
+//@@TODO(lpino) Finish the implementation of owner draw menu items
+MRESULT wmDrawChild (int mp1, int mp2) {
+        System.out.println("MenuItem:wmDrawChild");
+        OWNERITEM struct = new OWNERITEM();
+        OS.objcpy(struct, mp2);
 //	DRAWITEMSTRUCT struct = new DRAWITEMSTRUCT ();
 //	OS.MoveMemory (struct, lParam, DRAWITEMSTRUCT.sizeof);
 //	if (image != null) {
@@ -721,9 +723,9 @@ MRESULT wmCommandChild (int mp1, int mp2) {
 //				break;
 //		}
 //	}
-//	return null;
-//}
-
+	return null;
+}
+//@@TODO(lpino) Finish the implementation of owner draw menu items
 MRESULT wmMeasureChild (int mp1, int mp2) {
     System.out.println("MenuItem:wmMeasureChild");
 //	MEASUREITEMSTRUCT struct = new MEASUREITEMSTRUCT ();
