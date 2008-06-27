@@ -672,13 +672,16 @@ public Rectangle getClientArea () {
  *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
  * </ul>
  */
-//@@TODO (dmik) using WinQueryCursorInfo (lpino):  
-//public Control getCursorControl () {
-//    checkDevice ();
-//    POINT pt = new POINT ();
-//    if (!OS.GetCursorPos (pt)) return null;
-//    return findControl (OS.WindowFromPoint (pt));
-//}
+
+public Control getCursorControl () {
+    checkDevice ();
+    POINTL pt = new POINTL ();
+    CURSORINFO cursor = new CURSORINFO();
+    if (!OS.WinQueryCursorInfo(OS.HWND_DESKTOP, cursor)) return null;
+    pt.x = cursor.x;
+    pt.y = cursor.y;
+    return findControl (OS.WinWindowFromPoint (OS.HWND_DESKTOP, pt, true));
+}
 
 /**
  * Returns the location of the on-screen pointer relative
