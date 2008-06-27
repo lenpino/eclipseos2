@@ -1,6 +1,6 @@
 /*
  * OS/2 version.
- * Copyright (c) 2002, 2004 EclipseOS2 Team.
+ * Copyright (c) 2002, 2008 EclipseOS2 Team.
  */
 
 /*
@@ -532,6 +532,40 @@ void cacheACCELTABLEFids(JNIEnv *env, jobject lpObject, PACCELTABLE_FID_CACHE lp
 PACCELTABLE getACCELTABLEFields(JNIEnv *env, jobject lpObject, PACCELTABLE lpStruct, PACCELTABLE_FID_CACHE lpCache);
 void setACCELTABLEFields(JNIEnv *env, jobject lpObject, PACCELTABLE lpStruct, PACCELTABLE_FID_CACHE lpCache);
 
+/* CURSORINFO struct */
+typedef struct CURSORINFO_FID_CACHE {
+    int cached;
+    jclass clazz;
+    jfieldID
+        hwnd,     
+        x,        
+        y,        
+        cx,       
+        cy,       
+        fs,     
+        rclClip;
+} CURSORINFO_FID_CACHE;
+typedef CURSORINFO_FID_CACHE *PCURSORINFO_FID_CACHE;
+
+void cacheCURSORINFOFids(JNIEnv *env, jobject lpObject, PCURSORINFO_FID_CACHE lpCache);
+PCURSORINFO getCURSORINFOFields(JNIEnv *env, jobject lpObject, PCURSORINFO lpStruct, PCURSORINFO_FID_CACHE lpCache);
+void setCURSORINFOFields(JNIEnv *env, jobject lpObject, PCURSORINFO lpStruct, PCURSORINFO_FID_CACHE lpCache);
+
+/* POINTL struct */
+typedef struct POINTL_FID_CACHE {
+    int cached;
+    jclass clazz;
+    jfieldID
+        x,        
+        y;        
+} POINTL_FID_CACHE;
+typedef POINTL_FID_CACHE *PPOINTL_FID_CACHE;
+
+void cachePOINTLFids(JNIEnv *env, jobject lpObject, PPOINTL_FID_CACHE lpCache);
+PPOINTL getPOINTLFields(JNIEnv *env, jobject lpObject, PPOINTL lpStruct, PPOINTL_FID_CACHE lpCache);
+void setPOINTLFields(JNIEnv *env, jobject lpObject, PPOINTL lpStruct, PPOINTL_FID_CACHE lpCache);
+
+
 /* FACENAMEDESC struct */
 /*@@TODO (dmik): remove!
 typedef struct FACENAMEDESC_FID_CACHE {
@@ -575,6 +609,8 @@ extern MENUITEM_FID_CACHE MENUITEMFc;
 extern OWNERITEM_FID_CACHE OWNERITEMFc;
 extern ACCEL_FID_CACHE ACCELFc;
 extern ACCELTABLE_FID_CACHE ACCELTABLEFc;
+extern CURSORINFO_FID_CACHE CURSORINFOFc;
+extern POINTL_FID_CACHE POINTLFc;
 /*@@TODO (dmik): remove! 
 extern FACENAMEDESC_FID_CACHE FACENAMEDESCFc;
 */

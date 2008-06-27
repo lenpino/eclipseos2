@@ -1492,7 +1492,37 @@ JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_WinQueryClassName
 
     return rc;
 }
+JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_WinQueryCursorInfo
+        (JNIEnv *env, jclass that, jint hwndDeskTop, jobject pcsriCursorInfo)
+{
+    CURSORINFO c_pcsriCursorInfo, *c_ppcsriCursorInfo = NULL;
+    jboolean rc;
+    DEBUG_CALL("WinQueryCursorInfo\n")
 
+    if (pcsriCursorInfo) c_ppcsriCursorInfo = getCURSORINFOFields(env, pcsriCursorInfo, &c_pcsriCursorInfo, &PGLOB(CURSORINFOFc));
+
+    rc = (jboolean)WinQueryCursorInfo((HWND)hwndDeskTop, c_ppcsriCursorInfo);
+
+    if (pcsriCursorInfo) setCURSORINFOFields(env, pcsriCursorInfo, c_ppcsriCursorInfo, &PGLOB(CURSORINFOFc));
+
+    return rc;
+}
+JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinWindowFromPoint
+        (JNIEnv *env, jclass that, jint hab, jint hwndParent, jobject pptlPoint, jboolean fEnumChildren)
+{
+    POINTL c_pptlPoint, *c_ppptlPoint = NULL;
+    jint rc;
+    DEBUG_CALL("WinWindowFromPoint\n")
+
+    if (pptlPoint) c_ppptlPoint = getPOINTLFields(env, pptlPoint, &c_pptlPoint, &PGLOB(POINTLFc));
+
+    rc = (jint)WinWindowFromPoint((HWND)hwndParent, c_ppptlPoint, fEnumChildren);
+
+    if (pptlPoint) setPOINTLFields(env, pptlPoint, c_ppptlPoint, &PGLOB(POINTLFc));
+
+    return rc;
+
+}
 JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_PrfQueryProfileSize
         (JNIEnv *env, jclass that, jint hini, jobject pszApp, jobject pszKey,
         jintArray pulDataLen)
