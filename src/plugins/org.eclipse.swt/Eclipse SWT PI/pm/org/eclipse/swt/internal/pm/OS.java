@@ -2304,6 +2304,8 @@ public static final native boolean WinGetMsg(int hab, QMSG qmsg, int hwndFilter,
 public static final native int WinQuerySystemAtomTable();
 public static final native int WinFindAtom(int hatomtblAtomTbl, PSZ pszAtomName);
 public static final native int WinQueryClassName(int hwnd, int lLength, PSZ PCHBuffer);
+public static final native boolean WinQueryCursorInfo(int hwndDeskTop, CURSORINFO pcsriCursorInfo);
+public static final native int WinWindowFromPoint(int hwndParent, POINTL pptlPoint, boolean fEnumChildren);
 public static final native boolean PrfQueryProfileSize (int hini, PSZ pszApp,
     PSZ pszKey, int[] pulDataLen);
 public static final native int PrfQueryProfileString (int hini, PSZ pszApp,
