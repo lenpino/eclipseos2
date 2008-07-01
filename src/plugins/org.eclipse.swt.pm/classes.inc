@@ -195,6 +195,8 @@ org\eclipse\swt\internal\pm\MENUITEM.java
 org\eclipse\swt\internal\pm\OWNERITEM.java
 org\eclipse\swt\internal\pm\ACCEL.java
 org\eclipse\swt\internal\pm\ACCELTABLE.java
+org\eclipse\swt\internal\pm\POINTL.java
+org\eclipse\swt\internal\pm\CURSORINFO.java
 
 # SWT PI (+)
 
