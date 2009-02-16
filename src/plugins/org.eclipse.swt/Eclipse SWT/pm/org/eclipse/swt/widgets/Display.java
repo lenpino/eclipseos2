@@ -132,10 +132,10 @@ public class Display extends Device {
 
     /* Keyboard and Mouse State */
 //@@TODO (dmik): not yet sure what do we need from these:    
-//    boolean lastVirtual;
+    boolean lastVirtual;
     boolean lockActiveWindow;
-//    int lastKey, lastAscii, lastMouse;
-//    byte [] keyboard = new byte [256];
+    int lastKey, lastAscii, lastMouse;
+    byte [] keyboard = new byte [256];
     boolean accelKeyHit, mnemonicKeyHit;
 
     int hwndShell;
@@ -288,13 +288,15 @@ public Display (DeviceData data) {
     super (data);
 }
 
-//@@TODO (dmik): Do we need it in OS/2? 
+//@@TODO (dmik): Do we need it in OS/2?
+//@@TODO (lpino): Implement WinSetKeyboardStateTable API 
 //int asciiKey (int key) {
 //    if (OS.IsWinCE) return 0;
 //
 //    /* Get the current keyboard. */
 //    for (int i=0; i<keyboard.length; i++) keyboard [i] = 0;
 //    if (!OS.GetKeyboardState (keyboard)) return 0;
+//    if (!OS.WinSetKeyboardStateTable (OS.HWND_DESKTOP, keyboard, OS.FALSE)) return 0;
 //
 //    /* Translate the key to ASCII or UNICODE using the virtual keyboard */
 //    if (OS.IsUnicode) {
@@ -692,14 +694,16 @@ public Control getCursorControl () {
  * @exception SWTException <ul>
  *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
  * </ul>
- */
-//@@TODO (dmik):using WinQueryCursorInfo (lpino):  
-//public Point getCursorLocation () {
-//    checkDevice ();
-//    POINT pt = new POINT ();
-//    OS.GetCursorPos (pt);
-//    return new Point (pt.x, pt.y);
-//}
+ */  
+public Point getCursorLocation () {
+    checkDevice ();
+    POINTL pt = new POINTL ();
+    CURSORINFO cursor = new CURSORINFO();
+    if (!OS.WinQueryCursorInfo(OS.HWND_DESKTOP, cursor)) return null;
+    pt.x = cursor.x;
+    pt.y = cursor.y;
+    return new Point (pt.x, pt.y);
+}
 
 /**
  * Returns the default display. One is created (making the
