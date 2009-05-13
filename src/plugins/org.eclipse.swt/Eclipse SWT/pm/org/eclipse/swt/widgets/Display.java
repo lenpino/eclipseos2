@@ -391,23 +391,22 @@ static synchronized void checkDisplay (Thread thread) {
     }
 }
 
-//@@TODO (dmik): later
-//void clearModal (Shell shell) {
-//    if (ModalWidgets == null) return;
-//    int index = 0, length = ModalWidgets.length;
-//    while (index < length) {
-//        if (ModalWidgets [index] == shell) break;
-//        if (ModalWidgets [index] == null) return;
-//        index++;
-//    }
-//    if (index == length) return;
-//    System.arraycopy (ModalWidgets, index + 1, ModalWidgets, index, --length - index);
-//    ModalWidgets [length] = null;
-//    if (index == 0 && ModalWidgets [0] == null) ModalWidgets = null;
-//    if (!TrimEnabled) return;
-//    Shell [] shells = getShells ();
-//    for (int i=0; i<shells.length; i++) shells [i].updateModal ();
-//}
+void clearModal (Shell shell) {
+    if (ModalWidgets == null) return;
+    int index = 0, length = ModalWidgets.length;
+    while (index < length) {
+        if (ModalWidgets [index] == shell) break;
+        if (ModalWidgets [index] == null) return;
+        index++;
+    }
+    if (index == length) return;
+    System.arraycopy (ModalWidgets, index + 1, ModalWidgets, index, --length - index);
+    ModalWidgets [length] = null;
+    if (index == 0 && ModalWidgets [0] == null) ModalWidgets = null;
+    if (!TrimEnabled) return;
+    Shell [] shells = getShells ();
+    for (int i=0; i<shells.length; i++) shells [i].updateModal ();
+}
 
 //@@TODO (dmik): later (lpino) using WinUpperChar
 //int controlKey (int key) {
@@ -1054,8 +1053,8 @@ public Color getSystemColor (int id) {
     checkDevice ();
     int pixel = 0x02000000;
     switch (id) {
-//        case SWT.COLOR_WIDGET_DARK_SHADOW:      pixel = OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_SHADOW,0);   break;
-//        case SWT.COLOR_WIDGET_NORMAL_SHADOW:    pixel = OS.GetSysColor (OS.COLOR_3DSHADOW);     break;
+        case SWT.COLOR_WIDGET_DARK_SHADOW:      pixel = OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_SHADOW,0);   break;
+        case SWT.COLOR_WIDGET_NORMAL_SHADOW:    pixel = OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_SHADOW,0);   break;
 //        case SWT.COLOR_WIDGET_LIGHT_SHADOW:     pixel = OS.GetSysColor (OS.COLOR_3DLIGHT);      break;
 //        case SWT.COLOR_WIDGET_HIGHLIGHT_SHADOW: pixel = OS.GetSysColor (OS.COLOR_3DHIGHLIGHT);  break;
 //        case SWT.COLOR_WIDGET_BACKGROUND:       pixel = OS.GetSysColor (OS.COLOR_3DFACE);   break;
@@ -1067,14 +1066,14 @@ public Color getSystemColor (int id) {
         case SWT.COLOR_LIST_SELECTION_TEXT:     pixel =OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_MENUHILITE,0);   break;
 //        case SWT.COLOR_INFO_FOREGROUND:     pixel = OS.GetSysColor (OS.COLOR_INFOTEXT); break;
 //        case SWT.COLOR_INFO_BACKGROUND:     pixel = OS.GetSysColor (OS.COLOR_INFOBK);       break;
-//        case SWT.COLOR_TITLE_FOREGROUND:        pixel = OS.GetSysColor (OS.COLOR_CAPTIONTEXT);  break;
-//        case SWT.COLOR_TITLE_BACKGROUND:        pixel = OS.GetSysColor (OS.COLOR_ACTIVECAPTION);        break;
+        case SWT.COLOR_TITLE_FOREGROUND:        pixel =OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_ACTIVETITLETEXT,0);   break;
+        case SWT.COLOR_TITLE_BACKGROUND:        pixel = OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_ACTIVETITLE,0);   break;
 //        case SWT.COLOR_TITLE_BACKGROUND_GRADIENT:
 //            pixel = OS.GetSysColor (OS.COLOR_GRADIENTACTIVECAPTION);
 //            if (pixel == 0) pixel = OS.GetSysColor (OS.COLOR_ACTIVECAPTION);
 //            break;
-//        case SWT.COLOR_TITLE_INACTIVE_FOREGROUND:       pixel = OS.GetSysColor (OS.COLOR_INACTIVECAPTIONTEXT);  break;
-//        case SWT.COLOR_TITLE_INACTIVE_BACKGROUND:           pixel = OS.GetSysColor (OS.COLOR_INACTIVECAPTION);      break;
+        case SWT.COLOR_TITLE_INACTIVE_FOREGROUND:       pixel = OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_INACTIVETITLETEXT,0);   break;
+        case SWT.COLOR_TITLE_INACTIVE_BACKGROUND:           pixel = OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_INACTIVETITLE,0);   break;
 //        case SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT:
 //            pixel = OS.GetSysColor (OS.COLOR_GRADIENTINACTIVECAPTION);
 //            if (pixel == 0) pixel = OS.GetSysColor (OS.COLOR_INACTIVECAPTION);
