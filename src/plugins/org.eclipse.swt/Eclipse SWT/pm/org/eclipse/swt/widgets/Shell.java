@@ -679,7 +679,7 @@ void releaseWidget () {
     releaseShells ();
     super.releaseWidget ();
     activeMenu = null;
-//    display.clearModal (this);
+    display.clearModal (this);
     display = null;
 //@@TODO(dmik)
 //    if (lpstrTip != 0) {
