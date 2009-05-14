@@ -108,7 +108,7 @@ public class Display extends Device {
     int windowProc, windowFrameProc; 
     PSZ windowClass;
     // Two vars below are intentionally commented. See comments inside init().
-//    int threadId, processId;
+    int threadId, processId;
     static int windowClassCount = 0;
     static final String WindowName = "SWT_Window";
     EventTable eventTable;
@@ -140,7 +140,7 @@ public class Display extends Device {
 
     int hwndShell;
     /* System Fonts */
-//    int [] systemFonts;
+    int [] systemFonts;
 
     /* Image list cache */
 //    ImageList[] imageList, toolImageList, toolHotImageList, toolDisabledImageList;
@@ -830,33 +830,16 @@ public Control getFocusControl () {
  * @exception SWTException <ul>
  *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
  * </ul>
- */
-//@@TODO (dmik):  
-//public int getIconDepth () {
-//    checkDevice ();
-//
-//    /* Use the character encoding for the default locale */
-//    TCHAR buffer1 = new TCHAR (0, "Control Panel\\Desktop\\WindowMetrics", true);
-//
-//    int [] phkResult = new int [1];
-//    int result = OS.RegOpenKeyEx (OS.HKEY_CURRENT_USER, buffer1, 0, OS.KEY_READ, phkResult);
-//    if (result != 0) return 4;
-//    int depth = 4;
-//    int [] lpcbData = {128};
-//
-//    /* Use the character encoding for the default locale */
-//    TCHAR lpData = new TCHAR (0, lpcbData [0]);
-//    TCHAR buffer2 = new TCHAR (0, "Shell Icon BPP", true);
-//
-//    result = OS.RegQueryValueEx (phkResult [0], buffer2, 0, null, lpData, lpcbData);
-//    if (result == 0) {
-//        try {
-//            depth = Integer.parseInt (lpData.toString (0, lpData.strlen ()));
-//        } catch (NumberFormatException e) {};
-//    }
-//    OS.RegCloseKey (phkResult [0]);
-//    return depth;
-//}
+ */ 
+public int getIconDepth () {
+    checkDevice ();
+    GCData hpsData = new GCData();
+    int hps = internal_new_GC (hpsData);
+    int colorInfo[] = new int [2];
+    OS.DevQueryCaps (hpsData.hdc, OS.CAPS_COLOR_PLANES, 2, colorInfo);
+    internal_dispose_GC (hps, hpsData);
+    return colorInfo [0] * colorInfo [1];
+}
 //
 //ImageList getImageList (Point size) {
 //    if (imageList == null) imageList = new ImageList [4];
@@ -1057,7 +1040,7 @@ public Color getSystemColor (int id) {
         case SWT.COLOR_WIDGET_NORMAL_SHADOW:    pixel = OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_SHADOW,0);   break;
 //        case SWT.COLOR_WIDGET_LIGHT_SHADOW:     pixel = OS.GetSysColor (OS.COLOR_3DLIGHT);      break;
 //        case SWT.COLOR_WIDGET_HIGHLIGHT_SHADOW: pixel = OS.GetSysColor (OS.COLOR_3DHIGHLIGHT);  break;
-//        case SWT.COLOR_WIDGET_BACKGROUND:       pixel = OS.GetSysColor (OS.COLOR_3DFACE);   break;
+        case SWT.COLOR_WIDGET_BACKGROUND:       pixel = OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_DIALOGBACKGROUND,0);   break;
         case SWT.COLOR_WIDGET_BORDER:       pixel = OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_WINDOWFRAME,0);   break;
 //        case SWT.COLOR_WIDGET_FOREGROUND:
         case SWT.COLOR_LIST_FOREGROUND:         pixel = OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_WINDOWTEXT,0);   break;
@@ -1147,7 +1130,7 @@ protected void init () {
 //    OS.objcpy (tib, ptib[0]);
     OS.objcpy (pib, ppib[0]);
 //    threadId = tib.tib_ptib2.tib2_ultid;
-//    processId = pib.pib_ulpid;
+    processId = pib.pib_ulpid;
     
     /* "Morph" the current process to PM mode if not already in it */
     if( pib.pib_ultype != 3 ) {
@@ -1186,7 +1169,7 @@ protected void init () {
     
 //@@TODO (dmik): 
 //    /* Initialize the system font */
-//    int systemFont = 0;
+    int systemFont = 0;
 //    if (!OS.IsWinCE) {
 //        NONCLIENTMETRICS info = new NONCLIENTMETRICS ();
 //        info.cbSize = NONCLIENTMETRICS.sizeof;
@@ -1196,7 +1179,7 @@ protected void init () {
 //    }
 //    if (systemFont == 0) systemFont = OS.GetStockObject (OS.DEFAULT_GUI_FONT);
 //    if (systemFont == 0) systemFont = OS.GetStockObject (OS.SYSTEM_FONT);
-//    if (systemFont != 0) systemFonts = new int [] {systemFont};
+    if (systemFont != 0) systemFonts = new int [] {systemFont};
 
     /* Create the message only HWND */
     hwndShell = OS.WinCreateWindow (OS.HWND_DESKTOP,
@@ -1437,12 +1420,12 @@ void releaseDisplay () {
 
     /* Release the system fonts */
 //@@TODO (dmik): later    
-//    if (systemFonts != null) {
+    if (systemFonts != null) {
 //        for (int i=0; i<systemFonts.length; i++) {
 //            if (systemFonts [i] != 0) OS.DeleteObject (systemFonts [i]);
 //        }
-//    }
-//    systemFonts = null;
+    }
+    systemFonts = null;
 
     /* Release Custom Colors for ChooseColor */
 //@@TODO (dmik): later    
@@ -1651,7 +1634,7 @@ void sendEvent (int eventType, Event event) {
 //public void setCursorLocation (Point point) {
 //    checkDevice ();
 //    if (point == null) error (SWT.ERROR_NULL_ARGUMENT);
-//    OS.SetCursorPos (point.x, point.y);
+//    OS.SetCursorPos (point.x, point.y); WinSetPointerPos
 //}
 
 /**
