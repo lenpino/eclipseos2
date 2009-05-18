@@ -104,7 +104,7 @@ public class Shell extends Decorations {
     Menu activeMenu;
 //    int hIMC;
 //    int [] brushes;
-//    boolean showWithParent;
+    boolean showWithParent;
 //    int toolTipHandle, lpstrTip;
     Control lastActive;
 
@@ -522,11 +522,11 @@ public void dispose () {
  * @see Shell#open
  * @see Shell#setActive
  */
-//@@TODO(dmik): later
-//public void forceActive () {
-//	checkWidget ();
-//	OS.SetForegroundWindow (handle);
-//}
+
+public void forceActive () {
+	checkWidget ();
+	OS.WinSetFocus (OS.HWND_DESKTOP, frameHandle);
+}
 
 int getBounds (SWP swp)
 {
@@ -1024,16 +1024,16 @@ public void setVisible (boolean visible) {
     }
     super.setVisible (visible);
 //@@TODO(dmik): add modality support
-//    if (showWithParent == visible) return;
-//    showWithParent = visible;
+    if (showWithParent == visible) return;
+    showWithParent = visible;
 //    if (!OS.IsWinCE) OS.ShowOwnedPopups (handle, visible);
-//    int mask = SWT.PRIMARY_MODAL | SWT.APPLICATION_MODAL | SWT.SYSTEM_MODAL;
+    int mask = SWT.PRIMARY_MODAL | SWT.APPLICATION_MODAL | SWT.SYSTEM_MODAL;
 //    if ((style & mask) != 0) {
 //        if (visible) {
 //            display.setModal (this);
 //            Control control = display.getFocusControl ();
 //            if (control != null && !control.isActive ()) bringToTop ();
-//            OS.ReleaseCapture ();
+//            OS.WinSetCapture (OS.HWND_DESKTOP, OS.NULLHANDLE);
 //        } else {
 //            display.clearModal (this);
 //        }

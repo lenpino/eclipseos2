@@ -1631,11 +1631,11 @@ void sendEvent (int eventType, Event event) {
  *    <li>ERROR_NULL_ARGUMENT - if the point is null
  * </ul>
  */
-//public void setCursorLocation (Point point) {
-//    checkDevice ();
-//    if (point == null) error (SWT.ERROR_NULL_ARGUMENT);
-//    OS.SetCursorPos (point.x, point.y); WinSetPointerPos
-//}
+public void setCursorLocation (Point point) {
+    checkDevice ();
+    if (point == null) error (SWT.ERROR_NULL_ARGUMENT);
+    OS.WinSetPointerPos(OS.HWND_DESKTOP, point.x, point.y);
+}
 
 /**
  * Sets the application defined property of the receiver

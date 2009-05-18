@@ -420,17 +420,11 @@ void createHandle () {
 //    "    style = " + Integer.toHexString (widgetStyle())
 //);
 //@@TODO(dmik): do something for MDI windows if needed    
-//    if (parent == null) return;
-//    setParent ();
+    if (parent == null) return;
+    setParent ();
 //    setSystemMenu ();
 }
 
-//@@TODO(dmik): remove/later?
-//void createWidget () {
-//    super.createWidget ();
-//    swFlags = OS.IsWinCE ? OS.SW_SHOWMAXIMIZED : OS.SW_SHOWNOACTIVATE;
-//    hAccel = -1;
-//}
 
 void destroyAcceleratorTable () {
 	if (hAccel != 0 && hAccel != -1) OS.WinDestroyAccelTable (hAccel);
@@ -1096,7 +1090,6 @@ public void setMinimized (boolean minimized) {
     OS.WinSetWindowPos (frameHandle, 0, 0, 0, 0, 0, flags);
 }
 
-//@@TODO(dmik)
 void setParent () {
 	Display display = getDisplay ();
 	int hwndParent = parent.handle;
@@ -1136,25 +1129,26 @@ void setSystemMenu () {
     int hMenu = OS.WinWindowFromID(frameHandle, OS.FID_SYSMENU);
     if (hMenu == 0) return;
     int oldCount = OS.WinSendMsg(hMenu, OS.MM_QUERYITEMCOUNT, 0, 0);
-//	if (OS.IsWinCE) return;
-//	int hMenu = OS.GetSystemMenu (handle, false);
-//	if (hMenu == 0) return;
-//	int oldCount = OS.GetMenuItemCount (hMenu);
-//	if ((style & SWT.RESIZE) == 0) {
-//		OS.DeleteMenu (hMenu, OS.SC_SIZE, OS.MF_BYCOMMAND);
-//	}
-//	if ((style & SWT.MIN) == 0) {
-//		OS.DeleteMenu (hMenu, OS.SC_MINIMIZE, OS.MF_BYCOMMAND);
-//	}
-//	if ((style & SWT.MAX) == 0) {
-//		OS.DeleteMenu (hMenu, OS.SC_MAXIMIZE, OS.MF_BYCOMMAND);
-//	}
-//	if ((style & (SWT.MIN | SWT.MAX)) == 0) {
-//		OS.DeleteMenu (hMenu, OS.SC_RESTORE, OS.MF_BYCOMMAND);
-//	}
-//	int newCount = OS.GetMenuItemCount (hMenu);
-//	if ((style & SWT.CLOSE) == 0 || newCount != oldCount) {	
-//		OS.DeleteMenu (hMenu, OS.SC_TASKLIST, OS.MF_BYCOMMAND);
+    int itemID = OS.WinSendMsg(hMenu, OS.MM_ITEMIDFROMPOSITION, 0, 0);
+    MENUITEM info = new MENUITEM();
+    OS.WinSendMsg (hMenu, OS.MM_QUERYITEM,  OS.MPFROM2SHORT ((short)itemID, (short)OS.TRUE), info);
+    int hSubMenu = info.hwndSubMenu;
+	if ((style & SWT.RESIZE) == 0) {
+            OS.WinSendMsg(hSubMenu, OS.MM_REMOVEITEM, OS.MPFROM2SHORT((short)OS.SC_SIZE, (short)OS.FALSE), 0);
+	}
+	if ((style & SWT.MIN) == 0) {
+		OS.WinSendMsg(hSubMenu, OS.MM_REMOVEITEM, OS.MPFROM2SHORT((short)OS.SC_MINIMIZE , (short)OS.FALSE), 0);
+	}
+	if ((style & SWT.MAX) == 0) {
+		OS.WinSendMsg(hSubMenu, OS.MM_REMOVEITEM, OS.MPFROM2SHORT((short)OS.SC_MAXIMIZE  , (short)OS.FALSE), 0);
+	}
+	if ((style & (SWT.MIN | SWT.MAX)) == 0) {
+		OS.WinSendMsg(hSubMenu, OS.MM_REMOVEITEM, OS.MPFROM2SHORT((short)OS.SC_RESTORE  , (short)OS.FALSE), 0);
+	}
+
+	int newCount = OS.WinSendMsg (hSubMenu, OS.MM_QUERYITEMCOUNT,  0, 0);
+	if ((style & SWT.CLOSE) == 0 || newCount != oldCount) {	
+		OS.WinSendMsg(hSubMenu, OS.MM_REMOVEITEM, OS.MPFROM2SHORT((short)OS.SC_TASKMANAGER  , (short)OS.FALSE), 0);
 //		MENUITEMINFO info = new MENUITEMINFO ();
 //		info.cbSize = MENUITEMINFO.sizeof;
 //		info.fMask = OS.MIIM_ID;
@@ -1171,7 +1165,7 @@ void setSystemMenu () {
 //				OS.DeleteMenu (hMenu, OS.SC_CLOSE, OS.MF_BYCOMMAND);
 //			}
 //		}
-//	}
+	}
 }
 
 /**
@@ -1457,7 +1451,7 @@ MRESULT FRAME_WM_ADJUSTWINDOWPOS (int mp1, int mp2) {
 
 MRESULT FRAME_WM_CHAR (int mp1, int mp2) {
 //@@TODO (dmik): debug, remove    
-//boolean keyUp = (OS.SHORT1FROMMP (mp1) & OS.KC_KEYUP) != 0;
+boolean keyUp = (OS.SHORT1FROMMP (mp1) & OS.KC_KEYUP) != 0;
 //System.out.println("FRAME_WM_CHAR ("+this+"): keyup="+keyUp);
     /*
      *  Wedon't pass WM_CHAR to the WC_FRAME window procedure to disable
