@@ -1523,6 +1523,14 @@ JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinWindowFromPoin
     return rc;
 
 }
+JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinSetPointerPos
+        (JNIEnv *env, jclass that, jint hab, jint hwndDeskTop, jint lx, jint ly)
+{
+    DEBUG_CALL("WinSetPointerPos\n")
+
+    return (jboolean)WinSetPointerPos((HWND)hwndDeskTop, lx, ly);
+
+}
 JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_PrfQueryProfileSize
         (JNIEnv *env, jclass that, jint hini, jobject pszApp, jobject pszKey,
         jintArray pulDataLen)

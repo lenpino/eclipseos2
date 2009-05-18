@@ -2306,6 +2306,7 @@ public static final native int WinFindAtom(int hatomtblAtomTbl, PSZ pszAtomName)
 public static final native int WinQueryClassName(int hwnd, int lLength, PSZ PCHBuffer);
 public static final native boolean WinQueryCursorInfo(int hwndDeskTop, CURSORINFO pcsriCursorInfo);
 public static final native int WinWindowFromPoint(int hwndParent, POINTL pptlPoint, boolean fEnumChildren);
+public static final native boolean WinSetPointerPos(int hwndDeskTop, int lx, int ly);
 public static final native boolean PrfQueryProfileSize (int hini, PSZ pszApp,
     PSZ pszKey, int[] pulDataLen);
 public static final native int PrfQueryProfileString (int hini, PSZ pszApp,
