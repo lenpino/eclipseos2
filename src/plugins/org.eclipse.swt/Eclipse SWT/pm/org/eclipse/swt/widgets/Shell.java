@@ -836,16 +836,16 @@ void setBounds (int x, int y, int width, int height, int flags) {
 }
 
 //@@TODO(dmik): what to do with TrimEnabled?
-//public void setEnabled (boolean enabled) {
-//	checkWidget ();
-//	if (!display.TrimEnabled) {
-//		super.setEnabled (enabled);
-//	} else {
-//		state &= ~DISABLED;
-//		if (!enabled) state |= DISABLED;
-//		if (isActive ()) setItemEnabled (OS.SC_CLOSE, enabled);
-//	}
-//}
+public void setEnabled (boolean enabled) {
+	checkWidget ();
+	if (!display.TrimEnabled) {
+		super.setEnabled (enabled);
+	} else {
+		state &= ~DISABLED;
+		if (!enabled) state |= DISABLED;
+		if (isActive ()) setItemEnabled (OS.SC_CLOSE, enabled);
+	}
+}
 
 /**
  * Sets the input method editor mode to the argument which 
@@ -901,14 +901,11 @@ void setBounds (int x, int y, int width, int height, int flags) {
 //	OS.ImmReleaseContext (handle, hIMC);
 //}
 
-//@@TODO(dmik)
-//void setItemEnabled (int cmd, boolean enabled) {
-//	int hMenu = OS.GetSystemMenu (handle, false);
-//	if (hMenu == 0) return;
-//	int flags = OS.MF_ENABLED;
-//	if (!enabled) flags = OS.MF_DISABLED | OS.MF_GRAYED;
-//	OS.EnableMenuItem (hMenu, cmd, OS.MF_BYCOMMAND | flags);
-//}
+void setItemEnabled (int cmd, boolean enabled) {
+	int hMenu = OS.WinWindowFromID(frameHandle, OS.FID_SYSMENU);
+	if (hMenu == 0) return;
+        OS.WinSendMsg(hMenu, OS.MM_SETITEMATTR, OS.MPFROM2SHORT((short)cmd, (short)OS.TRUE), OS.MPFROM2SHORT((short)OS.MIA_DISABLED, (short)(enabled ? 0 : OS.MIA_DISABLED)));
+}
 
 void setParent () {
 	/* Do nothing.  Not necessary for Shells */
@@ -1049,8 +1046,8 @@ boolean traverseEscape () {
 
 void updateModal () {
 //@@TODO(dmik)
-//	if (!display.TrimEnabled) return;
-//	setItemEnabled (OS.SC_CLOSE, isActive ());
+	if (!display.TrimEnabled) return;
+	setItemEnabled (OS.SC_CLOSE, isActive ());
 }
 
 //@@TODO(dmik)
