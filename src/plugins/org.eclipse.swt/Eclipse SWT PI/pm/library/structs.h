@@ -565,6 +565,23 @@ void cachePOINTLFids(JNIEnv *env, jobject lpObject, PPOINTL_FID_CACHE lpCache);
 PPOINTL getPOINTLFields(JNIEnv *env, jobject lpObject, PPOINTL lpStruct, PPOINTL_FID_CACHE lpCache);
 void setPOINTLFields(JNIEnv *env, jobject lpObject, PPOINTL lpStruct, PPOINTL_FID_CACHE lpCache);
 
+/* SLDCDATA struct */
+typedef struct SLDCDATA_FID_CACHE {
+    int cached;
+    jclass clazz;
+    jfieldID
+        cbSize,
+        usScale1Increments,
+        usScale1Spacing,
+        usScale2Increments,
+        usScale2Spacing;        
+} SLDCDATA_FID_CACHE;
+typedef SLDCDATA_FID_CACHE *PSLDCDATA_FID_CACHE;
+
+void cacheSLDCDATAFids(JNIEnv *env, jobject lpObject, PSLDCDATA_FID_CACHE lpCache);
+PSLDCDATA getSLDCDATAFields(JNIEnv *env, jobject lpObject, PSLDCDATA lpStruct, PSLDCDATA_FID_CACHE lpCache);
+void setSLDCDATAFields(JNIEnv *env, jobject lpObject, PSLDCDATA lpStruct, PSLDCDATA_FID_CACHE lpCache);
+
 
 /* FACENAMEDESC struct */
 /*@@TODO (dmik): remove!
@@ -611,6 +628,7 @@ extern ACCEL_FID_CACHE ACCELFc;
 extern ACCELTABLE_FID_CACHE ACCELTABLEFc;
 extern CURSORINFO_FID_CACHE CURSORINFOFc;
 extern POINTL_FID_CACHE POINTLFc;
+extern SLDCDATA_FID_CACHE SLDCDATAFc;
 /*@@TODO (dmik): remove! 
 extern FACENAMEDESC_FID_CACHE FACENAMEDESCFc;
 */

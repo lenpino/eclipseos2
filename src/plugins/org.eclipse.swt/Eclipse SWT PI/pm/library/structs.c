@@ -173,6 +173,7 @@ ACCEL_FID_CACHE ACCELFc;
 ACCELTABLE_FID_CACHE ACCELTABLEFc;
 CURSORINFO_FID_CACHE CURSORINFOFc;
 POINTL_FID_CACHE POINTLFc;
+SLDCDATA_FID_CACHE SLDCDATAFc;
 
 /*@@TODO (dmik): remove
 FACENAMEDESC_FID_CACHE FACENAMEDESCFc;
@@ -1589,6 +1590,42 @@ void setPOINTLFields(JNIEnv *env, jobject lpObject, PPOINTL lpStruct, PPOINTL_FI
     (*env)->SetIntField(env, lpObject, lpCache->x, lpStruct->x);
     (*env)->SetIntField(env, lpObject, lpCache->y, lpStruct->y);
 }
+
+/***************************************** SLDCDATA struct ********************************************/
+
+void cacheSLDCDATAFids(JNIEnv *env, jobject lpObject, PSLDCDATA_FID_CACHE lpCache)
+{
+    if (lpCache->cached) return;
+    lpCache->clazz = (*env)->GetObjectClass(env, lpObject);
+    lpCache->cbSize = (*env)->GetFieldID(env, lpCache->clazz, "cbSize", "I");
+    lpCache->usScale1Increments = (*env)->GetFieldID(env, lpCache->clazz, "usScale1Increments", "S");
+    lpCache->usScale1Spacing = (*env)->GetFieldID(env, lpCache->clazz, "usScale1Spacing", "S");
+    lpCache->usScale2Increments = (*env)->GetFieldID(env, lpCache->clazz, "usScale2Increments", "S");
+    lpCache->usScale2Spacing = (*env)->GetFieldID(env, lpCache->clazz, "usScale2Spacing", "S");
+    lpCache->cached = 1;
+}
+
+PSLDCDATA getSLDCDATAFields(JNIEnv *env, jobject lpObject, PSLDCDATA lpStruct, PSLDCDATA_FID_CACHE lpCache)
+{
+    if (!lpCache->cached) cacheSLDCDATAFids(env, lpObject, lpCache);
+    lpStruct->cbSize = (*env)->GetIntField(env, lpObject, lpCache->cbSize);
+    lpStruct->usScale1Increments = (*env)->GetShortField(env, lpObject, lpCache->usScale1Increments);
+    lpStruct->usScale1Spacing = (*env)->GetShortField(env, lpObject, lpCache->usScale1Spacing);
+    lpStruct->usScale2Increments = (*env)->GetShortField(env, lpObject, lpCache->usScale2Increments);
+    lpStruct->usScale2Spacing = (*env)->GetShortField(env, lpObject, lpCache->usScale2Spacing);
+    return lpStruct;
+}
+
+void setSLDCDATAFields(JNIEnv *env, jobject lpObject, PSLDCDATA lpStruct, PSLDCDATA_FID_CACHE lpCache)
+{
+    if (!lpCache->cached) cacheSLDCDATAFids(env, lpObject, lpCache);
+    (*env)->SetIntField(env, lpObject, lpCache->cbSize, lpStruct->cbSize);
+    (*env)->SetShortField(env, lpObject, lpCache->usScale1Increments, lpStruct->usScale1Increments);
+    (*env)->SetShortField(env, lpObject, lpCache->usScale1Spacing, lpStruct->usScale1Spacing);
+    (*env)->SetShortField(env, lpObject, lpCache->usScale2Increments, lpStruct->usScale2Increments);
+    (*env)->SetShortField(env, lpObject, lpCache->usScale2Spacing, lpStruct->usScale2Spacing);
+}
+
 
 /***************************************** FACENAMEDESC struct ********************************************/
 /*@@TODO (dmik): don't need, remove!
