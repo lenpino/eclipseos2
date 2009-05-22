@@ -131,7 +131,7 @@ public class OS {
 //    public static final int WC_DBE_KKPOPUP =    0xffff0013;
 //    public static final int WC_SPINBUTTON =     0xffff0020;
 //    public static final int WC_CONTAINER =      0xffff0025;
-//    public static final int WC_SLIDER =         0xffff0026;
+    public static final int WC_SLIDER =         0xffff0026;
 //    public static final int WC_VALUESET =       0xffff0027;
     public static final int WC_NOTEBOOK =       0xffff0028;
 //    public static final int WC_PENFIRST =       0xffff0029;
@@ -2106,6 +2106,75 @@ public class OS {
   public static final int SC_ENDSELECT               = 0x8028;
   public static final int SC_WINDOW                  = 0x8029;
   public static final int SC_HIDE                    = 0x802a;
+   /**********************************************************************/
+   /*                                                                    */
+   /*                            S L I D E R                             */
+   /*                                                                    */
+   /**********************************************************************/
+   
+   /**********************************************************************/
+   /* Define messages for the slider control                             */
+   /**********************************************************************/
+   public static final int SLM_ADDDETENT          = 0x0369;    /* Add detent niche          */
+   public static final int SLM_QUERYDETENTPOS     = 0x036a;    /* Query position of detent  */
+   public static final int SLM_QUERYSCALETEXT     = 0x036b;    /* Query text at tick number */
+   public static final int SLM_QUERYSLIDERINFO    = 0x036c;    /* Query slider information  */
+   public static final int SLM_QUERYTICKPOS       = 0x036d;    /* Query position of tick    */
+   public static final int SLM_QUERYTICKSIZE      = 0x036e;    /* Query size of tick        */
+   public static final int SLM_REMOVEDETENT       = 0x036f;    /* Remove detent niche       */
+   public static final int SLM_SETSCALETEXT       = 0x0370;    /* Set text above tick       */
+   public static final int SLM_SETSLIDERINFO      = 0x0371;    /* Set slider parameters     */
+   public static final int SLM_SETTICKSIZE        = 0x0372;    /* Set size of tick          */
+   public static final int SLN_CHANGE             = 1;         /* Slider position changed   */
+   public static final int SLN_SLIDERTRACK        = 2;         /* Slider dragged by user    */
+   public static final int SLN_SETFOCUS           = 3;         /* Slider gaining focus      */
+   public static final int SLN_KILLFOCUS          = 4;         /* Slider losing focus       */
+   /**********************************************************************/
+   /* Slider control style flag definition                               */
+   /**********************************************************************/
+   public static final int SLS_HORIZONTAL       = 0x00000000; /* Orient slider horizontally*/
+   public static final int SLS_VERTICAL         = 0x00000001; /* Orient slider vertically  */
+   public static final int SLS_CENTER           = 0x00000000; /* Center shaft in window    */
+   public static final int SLS_BOTTOM           = 0x00000002; /* Offset shaft to bottom (H)*/
+   public static final int SLS_TOP              = 0x00000004; /* Offset shaft to top (H)   */
+   public static final int SLS_LEFT             = 0x00000002; /* Offset shaft to left (V)  */
+   public static final int SLS_RIGHT            = 0x00000004; /* Offset shaft to right (V) */
+   public static final int SLS_SNAPTOINCREMENT  = 0x00000008; /* Snap to nearest increment */
+   public static final int SLS_BUTTONSBOTTOM    = 0x00000010; /* Add buttons at shaft bot. */
+   public static final int SLS_BUTTONSTOP       = 0x00000020; /* Add buttons at shaft top  */
+   public static final int SLS_BUTTONSLEFT      = 0x00000010; /* Add buttons left of shaft */
+   public static final int SLS_BUTTONSRIGHT     = 0x00000020; /* Add buttons right of shaft*/
+   public static final int SLS_OWNERDRAW        = 0x00000040; /* Owner draw some fields    */
+   public static final int SLS_READONLY         = 0x00000080; /* Provide a read only slider*/
+   public static final int SLS_RIBBONSTRIP      = 0x00000100; /* Provide a ribbon strip    */
+   public static final int SLS_HOMEBOTTOM       = 0x00000000; /* Set home position at bot. */
+   public static final int SLS_HOMETOP          = 0x00000200; /* Set home position at top  */
+   public static final int SLS_HOMELEFT         = 0x00000000; /* Set home position at left */
+   public static final int SLS_HOMERIGHT        = 0x00000200; /* Set home position at right*/
+   public static final int SLS_PRIMARYSCALE1    = 0x00000000; /* Scale 1 is primary scale  */
+   public static final int SLS_PRIMARYSCALE2    = 0x00000400; /* Scale 2 is primary scale  */
+   
+   /**********************************************************************/
+   /* Message attributes for setting and querying slider components      */
+   /**********************************************************************/
+   public static final int SMA_SCALE1               = 0x0001;
+   public static final int SMA_SCALE2               = 0x0002;
+   public static final int SMA_SHAFTDIMENSIONS      = 0x0000;
+   public static final int SMA_SHAFTPOSITION        = 0x0001;
+   public static final int SMA_SLIDERARMDIMENSIONS  = 0x0002;
+   public static final int SMA_SLIDERARMPOSITION    = 0x0003;
+   public static final int SMA_RANGEVALUE           = 0x0000;
+   public static final int SMA_INCREMENTVALUE       = 0x0001;
+   public static final int SMA_SETALLTICKS          = 0xFFFF;
+   
+   /**********************************************************************/
+   /* Ownerdraw flag definitions                                         */
+   /**********************************************************************/
+   public static final int SDA_RIBBONSTRIP          = 0x0001;
+   public static final int SDA_SLIDERSHAFT          = 0x0002;
+   public static final int SDA_BACKGROUND           = 0x0003;
+   public static final int SDA_SLIDERARM            = 0x0004;
+   
 
 /* PM macros */
 
