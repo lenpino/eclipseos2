@@ -1145,10 +1145,13 @@ void setSystemMenu () {
 	if ((style & (SWT.MIN | SWT.MAX)) == 0) {
 		OS.WinSendMsg(hSubMenu, OS.MM_REMOVEITEM, OS.MPFROM2SHORT((short)OS.SC_RESTORE  , (short)OS.FALSE), 0);
 	}
+	if ((style & SWT.CLOSE) == 0) {
+		OS.WinSendMsg(hSubMenu, OS.MM_REMOVEITEM, OS.MPFROM2SHORT((short)OS.SC_CLOSE  , (short)OS.FALSE), 0);
+	}
 
-	int newCount = OS.WinSendMsg (hSubMenu, OS.MM_QUERYITEMCOUNT,  0, 0);
-	if ((style & SWT.CLOSE) == 0 || newCount != oldCount) {	
-		OS.WinSendMsg(hSubMenu, OS.MM_REMOVEITEM, OS.MPFROM2SHORT((short)OS.SC_TASKMANAGER  , (short)OS.FALSE), 0);
+    int newCount = OS.WinSendMsg (hSubMenu, OS.MM_QUERYITEMCOUNT,  0, 0);
+//    if ((style & SWT.CLOSE) == 0 || newCount != oldCount) {	
+//		OS.WinSendMsg(hSubMenu, OS.MM_REMOVEITEM, OS.MPFROM2SHORT((short)OS.SC_TASKMANAGER  , (short)OS.FALSE), 0);
 //		MENUITEMINFO info = new MENUITEMINFO ();
 //		info.cbSize = MENUITEMINFO.sizeof;
 //		info.fMask = OS.MIIM_ID;
@@ -1165,7 +1168,7 @@ void setSystemMenu () {
 //				OS.DeleteMenu (hMenu, OS.SC_CLOSE, OS.MF_BYCOMMAND);
 //			}
 //		}
-	}
+//	}
 }
 
 /**
@@ -1518,20 +1521,6 @@ MRESULT WM_SETFOCUS (int mp1, int mp2) {
 //	if (wParam == 0) {
 //		Display display = getDisplay ();
 //		if (display.lockActiveWindow) return LRESULT.ZERO;
-//	}
-//	return result;
-//}
-
-//@@TODO (dmik): guess remove
-//LRESULT WM_WINDOWPOSCHANGING (int wParam, int lParam) {
-//	LRESULT result = super.WM_WINDOWPOSCHANGING (wParam,lParam);
-//	if (result != null) return result;
-//	Display display = getDisplay ();
-//	if (display.lockActiveWindow) {
-//		WINDOWPOS lpwp = new WINDOWPOS ();
-//		OS.MoveMemory (lpwp, lParam, WINDOWPOS.sizeof);
-//		lpwp.flags |= OS.SWP_NOZORDER;
-//		OS.MoveMemory (lParam, lpwp, WINDOWPOS.sizeof);
 //	}
 //	return result;
 //}
