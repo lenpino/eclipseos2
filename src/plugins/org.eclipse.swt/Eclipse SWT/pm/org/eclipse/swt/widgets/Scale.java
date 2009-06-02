@@ -1,6 +1,11 @@
 package org.eclipse.swt.widgets;
 
 /*
+ * OS/2 version.
+ * Copyright (c) 2002, 2009 EclipseOS2 Team.
+ */
+
+/*
  * Copyright (c) 2000, 2002 IBM Corp.  All rights reserved.
  * This file is made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,14 +37,13 @@ import org.eclipse.swt.events.*;
  */
 
 public class Scale extends Control {
-	static final int TrackBarProc =0;
-//	static final TCHAR TrackBarClass = new TCHAR (0, OS.TRACKBAR_CLASS, true);
+	static final int TrackBarProc;
         static final PSZ TrackBarClass = PSZ.getAtom (OS.WC_SLIDER);
-//	static {
-//		WNDCLASS lpWndClass = new WNDCLASS ();
-//		OS.GetClassInfo (0, TrackBarClass, lpWndClass);
-//		TrackBarProc = lpWndClass.lpfnWndProc;
-//	}
+	static {
+		CLASSINFO lpWndClass = new CLASSINFO ();
+		OS.WinQueryClassInfo (OS.NULLHANDLE, TrackBarClass, lpWndClass);
+		TrackBarProc = lpWndClass.pfnWindowProc;
+	}
 
 /**
  * Constructs a new instance of this class given its parent
@@ -71,7 +75,7 @@ public class Scale extends Control {
  * @see Widget#getStyle
  */
 public Scale (Composite parent, int style) {
-//	super (parent, checkStyle (style));
+	super (parent, checkStyle (style));
 }
 
 /**
@@ -93,23 +97,23 @@ public Scale (Composite parent, int style) {
  * @see SelectionListener
  * @see #removeSelectionListener
  */
-//public void addSelectionListener(SelectionListener listener) {
-//	checkWidget ();
-//	if (listener == null) error (SWT.ERROR_NULL_ARGUMENT);
-//	TypedListener typedListener = new TypedListener (listener);
-//	addListener (SWT.Selection,typedListener);
-//	addListener (SWT.DefaultSelection,typedListener);
-//}
-//
+public void addSelectionListener(SelectionListener listener) {
+	checkWidget ();
+	if (listener == null) error (SWT.ERROR_NULL_ARGUMENT);
+	TypedListener typedListener = new TypedListener (listener);
+	addListener (SWT.Selection,typedListener);
+	addListener (SWT.DefaultSelection,typedListener);
+}
+
 int callWindowProc (int msg, int mp1, int mp2) {
 	if (handle == 0) return 0;
         return OS.WinCallWindowProc(TrackBarProc, handle, msg, mp1, mp2);
 }
-//
-//static int checkStyle (int style) {
-//	return checkBits (style, SWT.HORIZONTAL, SWT.VERTICAL, 0, 0, 0, 0);
-//}
-//
+
+static int checkStyle (int style) {
+	return checkBits (style, SWT.HORIZONTAL, SWT.VERTICAL, 0, 0, 0, 0);
+}
+
 //public Point computeSize (int wHint, int hHint, boolean changed) {
 //	checkWidget ();
 //	int border = getBorderWidth ();
@@ -129,18 +133,18 @@ int callWindowProc (int msg, int mp1, int mp2) {
 //	if (hHint != SWT.DEFAULT) height = hHint + (border * 2);
 //	return new Point (width, height);
 //}
-//
-//void createHandle () {
-//	super.createHandle ();
+
+void createHandle () {
+	super.createHandle ();
 //	OS.SendMessage (handle, OS.TBM_SETRANGEMAX, 0, 100);
 //	OS.SendMessage (handle, OS.TBM_SETPAGESIZE, 0, 10);
 //	OS.SendMessage (handle, OS.TBM_SETTICFREQ, 10, 0);
-//}
-//
-//int defaultForeground () {
-//	return OS.GetSysColor (OS.COLOR_BTNFACE);
-//}
-//
+}
+
+int defaultForeground () {
+	return OS.WinQuerySysColor(handle, OS.SYSCLR_SCROLLBAR, 0);
+}
+
 ///**
 // * Returns the amount that the receiver's value will be
 // * modified by when the up/down (or right/left) arrows

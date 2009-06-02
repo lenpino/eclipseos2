@@ -379,6 +379,35 @@ JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_WinCreateWindow
     return hwnd;
 }
 
+JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_WinCreateWindow__ILorg_eclipse_swt_internal_pm_PSZ_2Lorg_eclipse_swt_internal_pm_PSZ_2IIIIIIIILorg_eclipse_swt_internal_pm_SLDCDATA_2I
+        (JNIEnv *env, jclass that, jint hwndParent, jobject pszClass,
+            jobject pszName, jint flStyle, jint x, jint y, jint cx, jint cy, jint hwndOwner,
+            jint hwndInsertBehind, jint id, jobject pCtlData, jint pPresParams)
+{
+    PSZ c_pszClass = NULL;
+    PSZ c_pszName = NULL;
+    SLDCDATA c_pCtrlData, *c_ppCtrlData = NULL;
+    jint hwnd;
+
+    DEBUG_CALL("WinCreateWindow\n")
+
+    if (pszClass) c_pszClass = getPSZBytes(env, pszClass);
+    if (pszName) c_pszName = getPSZBytes(env, pszName);
+    if (pCtlData) 
+        c_ppCtrlData = getSLDCDATAFields(env, pCtlData, &c_pCtrlData, &PGLOB(SLDCDATAFc));
+
+
+    hwnd = (jint)WinCreateWindow((HWND)hwndParent, c_pszClass, c_pszName, flStyle,
+        x, y, cx, cy, hwndOwner, hwndInsertBehind, id, (PVOID)c_ppCtrlData, (PVOID)pPresParams);
+
+    if (pszName) releasePSZBytes(env, pszName, c_pszName);
+    if (pszClass) releasePSZBytes(env, pszClass, c_pszClass);
+    if (pCtlData)
+        setSLDCDATAFields(env, pCtlData, c_ppCtrlData, &PGLOB(SLDCDATAFc));    
+
+    return hwnd;
+}
+
 JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinDestroyWindow
         (JNIEnv *env, jclass that, jint hwnd)
 {

@@ -2239,6 +2239,9 @@ public static final native boolean WinRegisterClass (int hab, PSZ pszClassName,
 public static final native int WinCreateWindow (int hwndParent, PSZ pszClass,
     PSZ pszName, int flStyle, int x, int y, int cx, int cy, int hwndOwner,
     int hwndInsertBehind, int id, int pCtlData, int pPresParams);
+public static final native int WinCreateWindow (int hwndParent, PSZ pszClass,
+    PSZ pszName, int flStyle, int x, int y, int cx, int cy, int hwndOwner,
+    int hwndInsertBehind, int id, SLDCDATA pCtlData, int pPresParams);
 public static final native boolean WinDestroyWindow (int hwnd);
 public static final native int WinDefWindowProc (int hwnd, int ulMsgid,
     int mpParam1, int mpParam2);
