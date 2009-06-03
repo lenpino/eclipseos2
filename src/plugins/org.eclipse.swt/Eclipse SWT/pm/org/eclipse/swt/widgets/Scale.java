@@ -75,7 +75,43 @@ public class Scale extends Control {
  * @see Widget#getStyle
  */
 public Scale (Composite parent, int style) {
-	super (parent, checkStyle (style));
+//	super (parent, checkStyle (style));
+    this.parent = parent;
+    this.style = style;
+    SLDCDATA sldcData = new SLDCDATA();
+    handle = OS.WinCreateWindow (
+        parent.handle,
+        windowClass (),
+        windowTitle (),
+        widgetStyle (),
+        0, parent.getHeight (), 0, 0,
+        parent.handle,
+        // to mimic the Windows behavior
+        OS.HWND_BOTTOM, //OS.HWND_TOP,
+        0,
+        0,
+        0
+    );
+// System.out.println("Class = " + windowClass ());
+//@@TODO (lpino): Remove
+//    System.out.println("ERROR = " + OS.WinGetLastError(parent.getDisplay ().hab));
+    if (handle == 0) error (SWT.ERROR_NO_HANDLES);
+    OS.WinSetWindowUShort (handle, OS.QWS_ID, (short)(handle & 0xFFFF));
+
+//@@TODO (dmik): debug code, remove when no more necessary 
+System.out.println (
+    "Scale(parent, style): Scale has been created:\n" +
+    "    hwnd = " + Integer.toHexString (handle) + "\n" +
+    "    hwnd.parent = hwnd.owner = " + Integer.toHexString (parent.handle) + "\n" +
+    "    class = " + windowClass() + "\n" +
+    "    style = " + Integer.toHexString (widgetStyle())
+    );
+    super.register ();
+    super.subclass ();
+    super.setDefaultFont ();
+    super.setForegroundPixel (OS.CLR_DEFAULT);
+    super.setBackgroundPixel (OS.CLR_DEFAULT);
+
 }
 
 /**
@@ -352,11 +388,11 @@ int defaultForeground () {
 //	OS.SendMessage (handle, OS.TBM_SETPOS, 1, value);
 //}
 //
-//int widgetStyle () {
-//	int bits = super.widgetStyle () | OS.WS_TABSTOP | OS.TBS_BOTH | OS.TBS_AUTOTICKS;
-//	if ((style & SWT.HORIZONTAL) != 0) return bits | OS.TBS_HORZ;
-//	return bits | OS.TBS_VERT;
-//}
+int widgetStyle () {
+	int bits = super.widgetStyle () | OS.SLS_CENTER | OS.SLS_HOMELEFT | OS.SLS_PRIMARYSCALE1 | OS.SLS_PRIMARYSCALE2;
+	if ((style & SWT.VERTICAL) != 0) return bits | OS.SLS_VERTICAL;
+	return bits;
+}
 
 PSZ windowClass () {
 	return TrackBarClass;
