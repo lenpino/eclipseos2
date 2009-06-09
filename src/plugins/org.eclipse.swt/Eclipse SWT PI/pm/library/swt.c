@@ -356,7 +356,7 @@ JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinRegisterClass
     return rc;
 }
 
-JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_WinCreateWindow
+JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_WinCreateWindow__ILorg_eclipse_swt_internal_pm_PSZ_2Lorg_eclipse_swt_internal_pm_PSZ_2IIIIIIIIII
         (JNIEnv *env, jclass that, jint hwndParent, jobject pszClass,
             jobject pszName, jint flStyle, jint x, jint y, jint cx, jint cy, jint hwndOwner,
             jint hwndInsertBehind, jint id, jint pCtlData, jint pPresParams)
@@ -395,7 +395,6 @@ JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_WinCreateWindow__ILor
     if (pszName) c_pszName = getPSZBytes(env, pszName);
     if (pCtlData) 
         c_ppCtrlData = getSLDCDATAFields(env, pCtlData, &c_pCtrlData, &PGLOB(SLDCDATAFc));
-
 
     hwnd = (jint)WinCreateWindow((HWND)hwndParent, c_pszClass, c_pszName, flStyle,
         x, y, cx, cy, hwndOwner, hwndInsertBehind, id, (PVOID)c_ppCtrlData, (PVOID)pPresParams);

@@ -79,6 +79,10 @@ public Scale (Composite parent, int style) {
     this.parent = parent;
     this.style = style;
     SLDCDATA sldcData = new SLDCDATA();
+    sldcData.usScale1Increments = 10;
+    //sldcData.usScale2Increments = 10;
+    sldcData.usScale1Spacing = 0;
+    //sldcData.usScale2Spacing = 0;
     handle = OS.WinCreateWindow (
         parent.handle,
         windowClass (),
@@ -89,23 +93,13 @@ public Scale (Composite parent, int style) {
         // to mimic the Windows behavior
         OS.HWND_BOTTOM, //OS.HWND_TOP,
         0,
-        0,
+        sldcData,
         0
     );
-// System.out.println("Class = " + windowClass ());
-//@@TODO (lpino): Remove
-//    System.out.println("ERROR = " + OS.WinGetLastError(parent.getDisplay ().hab));
     if (handle == 0) error (SWT.ERROR_NO_HANDLES);
     OS.WinSetWindowUShort (handle, OS.QWS_ID, (short)(handle & 0xFFFF));
 
-//@@TODO (dmik): debug code, remove when no more necessary 
-System.out.println (
-    "Scale(parent, style): Scale has been created:\n" +
-    "    hwnd = " + Integer.toHexString (handle) + "\n" +
-    "    hwnd.parent = hwnd.owner = " + Integer.toHexString (parent.handle) + "\n" +
-    "    class = " + windowClass() + "\n" +
-    "    style = " + Integer.toHexString (widgetStyle())
-    );
+    OS.WinSendMsg(handle, OS.SLM_SETTICKSIZE, OS.MPFROM2SHORT((short)OS.SMA_SETALLTICKS, (short)2), 0);
     super.register ();
     super.subclass ();
     super.setDefaultFont ();
@@ -171,7 +165,9 @@ static int checkStyle (int style) {
 //}
 
 void createHandle () {
+    System.out.println ("Scale:createHandle");
 	super.createHandle ();
+        OS.WinSendMsg(handle, OS.SLM_SETTICKSIZE, OS.MPFROM2SHORT((short)OS.SMA_SETALLTICKS, (short)10), 0);       
 //	OS.SendMessage (handle, OS.TBM_SETRANGEMAX, 0, 100);
 //	OS.SendMessage (handle, OS.TBM_SETPAGESIZE, 0, 10);
 //	OS.SendMessage (handle, OS.TBM_SETTICFREQ, 10, 0);
@@ -193,11 +189,12 @@ int defaultForeground () {
 // *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
 // * </ul>
 // */
-//public int getIncrement () {
-//	checkWidget ();
+public int getIncrement () {
+	checkWidget ();
+        return OS.WinSendMsg(handle, OS.SLM_QUERYSLIDERINFO, OS.MPFROM2SHORT((short)OS.SMA_SLIDERARMPOSITION, (short)OS.SMA_INCREMENTVALUE), 0);
 //	return OS.SendMessage (handle, OS.TBM_GETLINESIZE, 0, 0);
-//}
-//
+}
+
 ///**
 // * Returns the maximum value which the receiver will allow.
 // *
@@ -277,14 +274,14 @@ int defaultForeground () {
 // * @see SelectionListener
 // * @see #addSelectionListener
 // */
-//public void removeSelectionListener(SelectionListener listener) {
-//	checkWidget ();
-//	if (listener == null) error (SWT.ERROR_NULL_ARGUMENT);
-//	if (eventTable == null) return;
-//	eventTable.unhook (SWT.Selection, listener);
-//	eventTable.unhook (SWT.DefaultSelection,listener);	
-//}
-//
+public void removeSelectionListener(SelectionListener listener) {
+	checkWidget ();
+	if (listener == null) error (SWT.ERROR_NULL_ARGUMENT);
+	if (eventTable == null) return;
+	eventTable.unhook (SWT.Selection, listener);
+	eventTable.unhook (SWT.DefaultSelection,listener);	
+}
+
 ///**
 // * Sets the amount that the receiver's value will be
 // * modified by when the up/down (or right/left) arrows
@@ -389,8 +386,8 @@ int defaultForeground () {
 //}
 //
 int widgetStyle () {
-	int bits = super.widgetStyle () | OS.SLS_CENTER | OS.SLS_HOMELEFT | OS.SLS_PRIMARYSCALE1 | OS.SLS_PRIMARYSCALE2;
-	if ((style & SWT.VERTICAL) != 0) return bits | OS.SLS_VERTICAL;
+	int bits = super.widgetStyle () | OS.SLS_CENTER | OS.SLS_HOMELEFT | OS.SLS_PRIMARYSCALE1;
+	if ((style & SWT.VERTICAL) != 0) return bits | OS.SLS_VERTICAL | OS.SLS_HOMETOP;
 	return bits;
 }
 

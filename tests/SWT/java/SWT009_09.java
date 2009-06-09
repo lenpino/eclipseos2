@@ -31,10 +31,10 @@ public class SWT009_09 extends SWTTestCase {
 
 	void initComponents() {
             Scale scaleH = new Scale(shell, SWT.NULL);
-//            Scale scaleV = new Scale(shell, SWT.VERTICAL);
+            Scale scaleV = new Scale(shell, SWT.VERTICAL);
 //
-//            scaleH.setBounds(0, 0, 100, 50);
-//            scaleV.setBounds(0, 50, 50, 100);
+            scaleH.setBounds(0, 0, 100, 50);
+            scaleV.setBounds(0, 50, 50, 100);
 //
 //            System.out.println("Min: " + scaleH.getMinimum());
 //            System.out.println("Max: " + scaleH.getMaximum());
