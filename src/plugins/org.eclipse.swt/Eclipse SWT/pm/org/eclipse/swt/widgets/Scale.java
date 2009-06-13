@@ -99,7 +99,8 @@ public Scale (Composite parent, int style) {
     if (handle == 0) error (SWT.ERROR_NO_HANDLES);
     OS.WinSetWindowUShort (handle, OS.QWS_ID, (short)(handle & 0xFFFF));
 
-    OS.WinSendMsg(handle, OS.SLM_SETTICKSIZE, OS.MPFROM2SHORT((short)OS.SMA_SETALLTICKS, (short)2), 0);
+    OS.WinSendMsg(handle, OS.SLM_SETTICKSIZE, OS.MPFROM2SHORT((short)OS.SMA_SETALLTICKS, (short)6), 0);
+    System.out.println ("Scale:createHandle " + Integer.toHexString (OS.MPFROM2SHORT((short)OS.SMA_SETALLTICKS, (short)6)));
     super.register ();
     super.subclass ();
     super.setDefaultFont ();
@@ -167,7 +168,7 @@ static int checkStyle (int style) {
 void createHandle () {
     System.out.println ("Scale:createHandle");
 	super.createHandle ();
-        OS.WinSendMsg(handle, OS.SLM_SETTICKSIZE, OS.MPFROM2SHORT((short)OS.SMA_SETALLTICKS, (short)10), 0);       
+//        OS.WinSendMsg(handle, OS.SLM_SETTICKSIZE, OS.MPFROM2SHORT((short)OS.SMA_SETALLTICKS, (short)10), 0);       
 //	OS.SendMessage (handle, OS.TBM_SETRANGEMAX, 0, 100);
 //	OS.SendMessage (handle, OS.TBM_SETPAGESIZE, 0, 10);
 //	OS.SendMessage (handle, OS.TBM_SETTICFREQ, 10, 0);

@@ -2180,8 +2180,8 @@ public class OS {
 
 public static final short SHORT1FROMMP (int mp) { return (short)mp; }    
 public static final short SHORT2FROMMP (int mp) { return (short)(mp >> 16); }
-public static final int MPFROM2SHORT(short s1, short s2){ return (((int)(s1)) | ((int)(s2)) << 16);}
-//public static final int MPFROM2SHORT(short s1, short s2){ return ((s1 << 16) + s2);}
+//public static final int MPFROM2SHORT(short s1, short s2){ return (((int)((short)s1)) | ((int)((short)s2)) << 16);}
+public static final int MPFROM2SHORT(short s1, short s2){ return ((s2 << 16) + s1);}
 //public static final int MAKELONG (short l, short h) {
 //    return ((int)l) | (((int)h) << 16);
 //}
