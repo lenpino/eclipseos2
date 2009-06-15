@@ -37,6 +37,10 @@ import org.eclipse.swt.events.*;
  */
 
 public class Scale extends Control {
+        int MAX_RANGE;
+        int MIN_RANGE;
+        int INCREMENT;
+        int pixelRange;
 	static final int TrackBarProc;
         static final PSZ TrackBarClass = PSZ.getAtom (OS.WC_SLIDER);
 	static {
@@ -78,11 +82,14 @@ public Scale (Composite parent, int style) {
 //	super (parent, checkStyle (style));
     this.parent = parent;
     this.style = style;
+    MAX_RANGE = 100;
+    MIN_RANGE = 0;
+    INCREMENT = 10;
+
     SLDCDATA sldcData = new SLDCDATA();
     sldcData.usScale1Increments = 10;
-    //sldcData.usScale2Increments = 10;
     sldcData.usScale1Spacing = 0;
-    //sldcData.usScale2Spacing = 0;
+
     handle = OS.WinCreateWindow (
         parent.handle,
         windowClass (),
@@ -90,17 +97,16 @@ public Scale (Composite parent, int style) {
         widgetStyle (),
         0, parent.getHeight (), 0, 0,
         parent.handle,
-        // to mimic the Windows behavior
-        OS.HWND_BOTTOM, //OS.HWND_TOP,
+        OS.HWND_BOTTOM,
         0,
         sldcData,
         0
     );
     if (handle == 0) error (SWT.ERROR_NO_HANDLES);
+    
     OS.WinSetWindowUShort (handle, OS.QWS_ID, (short)(handle & 0xFFFF));
-
     OS.WinSendMsg(handle, OS.SLM_SETTICKSIZE, OS.MPFROM2SHORT((short)OS.SMA_SETALLTICKS, (short)6), 0);
-    System.out.println ("Scale:createHandle " + Integer.toHexString (OS.MPFROM2SHORT((short)OS.SMA_SETALLTICKS, (short)6)));
+//    OS.WinSendMsg(handle, OS.SLM_SETSLIDERINFO, OS.MPFROM2SHORT((short)OS.SMA_SLIDERARMPOSITION, (short)OS.SMA_INCREMENTVALUE), 1);
     super.register ();
     super.subclass ();
     super.setDefaultFont ();
@@ -166,12 +172,7 @@ static int checkStyle (int style) {
 //}
 
 void createHandle () {
-    System.out.println ("Scale:createHandle");
 	super.createHandle ();
-//        OS.WinSendMsg(handle, OS.SLM_SETTICKSIZE, OS.MPFROM2SHORT((short)OS.SMA_SETALLTICKS, (short)10), 0);       
-//	OS.SendMessage (handle, OS.TBM_SETRANGEMAX, 0, 100);
-//	OS.SendMessage (handle, OS.TBM_SETPAGESIZE, 0, 10);
-//	OS.SendMessage (handle, OS.TBM_SETTICFREQ, 10, 0);
 }
 
 int defaultForeground () {
@@ -192,7 +193,8 @@ int defaultForeground () {
 // */
 public int getIncrement () {
 	checkWidget ();
-        return OS.WinSendMsg(handle, OS.SLM_QUERYSLIDERINFO, OS.MPFROM2SHORT((short)OS.SMA_SLIDERARMPOSITION, (short)OS.SMA_INCREMENTVALUE), 0);
+        return 1;
+//        return OS.WinSendMsg(handle, OS.SLM_QUERYSLIDERINFO, OS.MPFROM2SHORT((short)OS.SMA_SLIDERARMPOSITION, (short)OS.SMA_INCREMENTVALUE), 0);
 //	return OS.SendMessage (handle, OS.TBM_GETLINESIZE, 0, 0);
 }
 
@@ -206,11 +208,12 @@ public int getIncrement () {
 // *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
 // * </ul>
 // */
-//public int getMaximum () {
-//	checkWidget ();
+public int getMaximum () {
+	checkWidget ();
+        return MAX_RANGE;
 //	return OS.SendMessage (handle, OS.TBM_GETRANGEMAX, 0, 0);
-//}
-//
+}
+
 ///**
 // * Returns the minimum value which the receiver will allow.
 // *
@@ -221,11 +224,11 @@ public int getIncrement () {
 // *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
 // * </ul>
 // */
-//public int getMinimum () {
-//	checkWidget ();
-//	return OS.SendMessage (handle, OS.TBM_GETRANGEMIN, 0, 0);
-//}
-//
+public int getMinimum () {
+	checkWidget ();
+	return MIN_RANGE;
+}
+
 ///**
 // * Returns the amount that the receiver's value will be
 // * modified by when the page increment/decrement areas
@@ -238,11 +241,12 @@ public int getIncrement () {
 // *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
 // * </ul>
 // */
-//public int getPageIncrement () {
-//	checkWidget ();
+public int getPageIncrement () {
+	checkWidget ();
+        return INCREMENT;
 //	return OS.SendMessage (handle, OS.TBM_GETPAGESIZE, 0, 0);
-//}
-//
+}
+
 ///**
 // * Returns the single <em>selection</em> that is the receiver's position.
 // *
@@ -253,11 +257,15 @@ public int getIncrement () {
 // *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
 // * </ul>
 // */
-//public int getSelection () {
-//	checkWidget ();
-//	return OS.SendMessage (handle, OS.TBM_GETPOS, 0, 0);
-//}
-//
+public int getSelection () {
+	checkWidget ();
+        int pixelInfo = OS.WinSendMsg(handle, OS.SLM_QUERYSLIDERINFO, OS.MPFROM2SHORT((short)OS.SMA_SLIDERARMPOSITION, (short)OS.SMA_RANGEVALUE ), 0);
+        int posPixels = OS.SHORT1FROMMP(pixelInfo);
+        int totalPixels = ((pixelInfo & 0xFFFF0000)>>16) & 0xFFFF;
+        int pos = ((MAX_RANGE*posPixels)/totalPixels)+1;
+        return pos;
+}
+
 ///**
 // * Removes the listener from the collection of listeners who will
 // * be notified when the receiver's value changes.
@@ -296,15 +304,15 @@ public void removeSelectionListener(SelectionListener listener) {
 // *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
 // * </ul>
 // */
-//public void setIncrement (int increment) {
-//	checkWidget ();
-//	if (increment < 1) return;
-//	int minimum = OS.SendMessage (handle, OS.TBM_GETRANGEMIN, 0, 0);
-//	int maximum = OS.SendMessage (handle, OS.TBM_GETRANGEMAX, 0, 0);
-//	if (increment > maximum - minimum) return;
-//	OS.SendMessage (handle, OS.TBM_SETLINESIZE, 0, increment);
-//}
-//
+public void setIncrement (int increment) {
+	checkWidget ();
+	if (increment < 1) return;
+	int minimum = MIN_RANGE;
+	int maximum = MAX_RANGE;
+	if (increment > maximum - minimum) return;
+	INCREMENT = increment;
+}
+
 ///**
 // * Sets the maximum value which the receiver will allow
 // * to be the argument which must be greater than or
@@ -317,14 +325,14 @@ public void removeSelectionListener(SelectionListener listener) {
 // *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
 // * </ul>
 // */
-//public void setMaximum (int value) {
-//	checkWidget ();
+public void setMaximum (int value) {
+	checkWidget ();
 //	int minimum = OS.SendMessage (handle, OS.TBM_GETRANGEMIN, 0, 0);
-//	if (0 <= minimum && minimum < value) {
-//		OS.SendMessage (handle, OS.TBM_SETRANGEMAX, 1, value);
-//	}
-//}
-//
+	if (0 <= MIN_RANGE && MIN_RANGE < value) {
+		MAX_RANGE = value;
+	}
+}
+
 ///**
 // * Sets the minimum value which the receiver will allow
 // * to be the argument which must be greater than or
@@ -337,14 +345,14 @@ public void removeSelectionListener(SelectionListener listener) {
 // *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
 // * </ul>
 // */
-//public void setMinimum (int value) {
-//	checkWidget ();
+public void setMinimum (int value) {
+	checkWidget ();
 //	int maximum = OS.SendMessage (handle, OS.TBM_GETRANGEMAX, 0, 0);
-//	if (0 <= value && value < maximum) {
-//		OS.SendMessage (handle, OS.TBM_SETRANGEMIN, 1, value);
-//	}
-//}
-//
+	if (0 <= value && value < MAX_RANGE) {
+		MAX_RANGE = value;
+	}
+}
+
 ///**
 // * Sets the amount that the receiver's value will be
 // * modified by when the page increment/decrement areas
@@ -358,16 +366,17 @@ public void removeSelectionListener(SelectionListener listener) {
 // *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
 // * </ul>
 // */
-//public void setPageIncrement (int pageIncrement) {
-//	checkWidget ();
-//	if (pageIncrement < 1) return;
-//	int minimum = OS.SendMessage (handle, OS.TBM_GETRANGEMIN, 0, 0);
-//	int maximum = OS.SendMessage (handle, OS.TBM_GETRANGEMAX, 0, 0);
-//	if (pageIncrement > maximum - minimum) return;
+public void setPageIncrement (int pageIncrement) {
+	checkWidget ();
+	if (pageIncrement < 1) return;
+	int minimum = MIN_RANGE;
+	int maximum = MAX_RANGE;
+	if (pageIncrement > maximum - minimum) return;
+        INCREMENT = pageIncrement;
 //	OS.SendMessage (handle, OS.TBM_SETPAGESIZE, 0, pageIncrement);
 //	OS.SendMessage (handle, OS.TBM_SETTICFREQ, pageIncrement, 0);
-//}
-//
+}
+
 ///**
 // * Sets the single <em>selection</em> that is the receiver's
 // * value to the argument which must be greater than or equal
@@ -380,12 +389,15 @@ public void removeSelectionListener(SelectionListener listener) {
 // *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
 // * </ul>
 // */
-//public void setSelection (int value) {
-//	checkWidget ();
-//	if (value < 0) return;
-//	OS.SendMessage (handle, OS.TBM_SETPOS, 1, value);
-//}
-//
+public void setSelection (int value) {
+	checkWidget ();
+	if (value < 0) return;
+        int pixels = OS.WinSendMsg(handle, OS.SLM_QUERYSLIDERINFO, OS.MPFROM2SHORT((short)OS.SMA_SLIDERARMPOSITION, (short)OS.SMA_RANGEVALUE ), 0);
+        int totalPixels = ((pixels & 0xFFFF0000)>>16) & 0xFFFF;
+        int pixelPos = (value*totalPixels)/MAX_RANGE;
+        OS.WinSendMsg(handle, OS.SLM_SETSLIDERINFO, OS.MPFROM2SHORT((short)OS.SMA_SLIDERARMPOSITION, (short)OS.SMA_RANGEVALUE), pixelPos);
+}
+
 int widgetStyle () {
 	int bits = super.widgetStyle () | OS.SLS_CENTER | OS.SLS_HOMELEFT | OS.SLS_PRIMARYSCALE1;
 	if ((style & SWT.VERTICAL) != 0) return bits | OS.SLS_VERTICAL | OS.SLS_HOMETOP;

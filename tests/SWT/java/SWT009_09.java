@@ -36,8 +36,9 @@ public class SWT009_09 extends SWTTestCase {
             scaleH.setBounds(0, 0, 100, 50);
             scaleV.setBounds(0, 50, 50, 100);
 //
-//            System.out.println("Min: " + scaleH.getMinimum());
-//            System.out.println("Max: " + scaleH.getMaximum());
+            System.out.println("Increment: " + scaleH.getIncrement());
+            scaleH.setSelection(11);
+            System.out.println("Get Selection: " + scaleH.getSelection());
 
             shell.pack();
             shell.open();
