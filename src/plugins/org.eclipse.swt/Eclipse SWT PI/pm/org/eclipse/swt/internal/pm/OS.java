@@ -2179,7 +2179,8 @@ public class OS {
 /* PM macros */
 
 public static final short SHORT1FROMMP (int mp) { return (short)mp; }    
-public static final short SHORT2FROMMP (int mp) { return (short)(mp >> 16); }
+public static final short SHORT2FROMMP (int mp) { return (short)(((mp & 0xFFFF0000)>>16) & 0xFFFF); }
+//((pixels & 0xFFFF0000)>>16) & 0xFFFF
 //public static final int MPFROM2SHORT(short s1, short s2){ return (((int)((short)s1)) | ((int)((short)s2)) << 16);}
 public static final int MPFROM2SHORT(short s1, short s2){ return ((s2 << 16) + s1);}
 //public static final int MAKELONG (short l, short h) {
