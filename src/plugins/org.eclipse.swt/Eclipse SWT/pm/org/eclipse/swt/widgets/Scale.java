@@ -106,7 +106,7 @@ public Scale (Composite parent, int style) {
     
     OS.WinSetWindowUShort (handle, OS.QWS_ID, (short)(handle & 0xFFFF));
     OS.WinSendMsg(handle, OS.SLM_SETTICKSIZE, OS.MPFROM2SHORT((short)OS.SMA_SETALLTICKS, (short)6), 0);
-//    OS.WinSendMsg(handle, OS.SLM_SETSLIDERINFO, OS.MPFROM2SHORT((short)OS.SMA_SLIDERARMPOSITION, (short)OS.SMA_INCREMENTVALUE), 1);
+
     super.register ();
     super.subclass ();
     super.setDefaultFont ();
@@ -262,7 +262,7 @@ public int getSelection () {
         int pixelInfo = OS.WinSendMsg(handle, OS.SLM_QUERYSLIDERINFO, OS.MPFROM2SHORT((short)OS.SMA_SLIDERARMPOSITION, (short)OS.SMA_RANGEVALUE ), 0);
         int posPixels = OS.SHORT1FROMMP(pixelInfo);
         int totalPixels = ((pixelInfo & 0xFFFF0000)>>16) & 0xFFFF;
-        int pos = ((MAX_RANGE*posPixels)/totalPixels)+1;
+        int pos = ((MAX_RANGE*posPixels)/totalPixels);
         return pos;
 }
 
@@ -394,7 +394,7 @@ public void setSelection (int value) {
 	if (value < 0) return;
         int pixels = OS.WinSendMsg(handle, OS.SLM_QUERYSLIDERINFO, OS.MPFROM2SHORT((short)OS.SMA_SLIDERARMPOSITION, (short)OS.SMA_RANGEVALUE ), 0);
         int totalPixels = ((pixels & 0xFFFF0000)>>16) & 0xFFFF;
-        int pixelPos = (value*totalPixels)/MAX_RANGE;
+        int pixelPos = ((value*totalPixels)/MAX_RANGE);
         OS.WinSendMsg(handle, OS.SLM_SETSLIDERINFO, OS.MPFROM2SHORT((short)OS.SMA_SLIDERARMPOSITION, (short)OS.SMA_RANGEVALUE), pixelPos);
 }
 
@@ -411,34 +411,42 @@ PSZ windowClass () {
 int windowProc () {
 	return TrackBarProc;
 }
-//
-//LRESULT wmScrollChild (int wParam, int lParam) {
+
+MRESULT wmControlChild (int mp1, int mp2) {
+    int code = OS.SHORT2FROMMP(mp1);
+    int pos = mp2;
+    System.out.println("Pos = " + pos);
+    Event event = new Event ();
+//	switch (code) {
+//		/*
+//		* This line is intentionally commented.  Do not set the detail
+//		* field to DRAG to indicate that the dragging has ended when the
+//		* scroll bar is finally positioned in TB_THUMBPOSITION.
+//		*/
+////		case OS.TB_THUMBPOSITION: 	break;
+//		case OS.TB_THUMBTRACK:		event.detail = SWT.DRAG;  break;
+//		case OS.TB_TOP: 			event.detail = SWT.HOME;  break;
+//		case OS.TB_BOTTOM:		event.detail = SWT.END;  break;
+//		case OS.TB_LINEDOWN:		event.detail = SWT.ARROW_DOWN;  break;
+//		case OS.TB_LINEUP: 		event.detail = SWT.ARROW_UP;  break;
+//		case OS.TB_PAGEDOWN: 		event.detail = SWT.PAGE_DOWN;  break;
+//		case OS.TB_PAGEUP: 		event.detail = SWT.PAGE_UP;  break;
+//	}
+    return null;
+}
+
+//MRESULT wmScrollChild (int mp1, int mp2) {
 //	
 //	/* Do nothing when scrolling is ending */
-//	int code = wParam & 0xFFFF;
-//	if (code == OS.TB_ENDTRACK) return null;
-//	
+////	int code = wParam & 0xFFFF;
+////	if (code == OS.TB_ENDTRACK) return null;
+//	System.out.println("test");
 //	/*
 //	* This code is intentionally commented.  The event
 //	* detail field is not currently supported on all
 //	* platforms.
 //	*/
 //	Event event = new Event ();
-////	switch (code) {
-////		/*
-////		* This line is intentionally commented.  Do not set the detail
-////		* field to DRAG to indicate that the dragging has ended when the
-////		* scroll bar is finally positioned in TB_THUMBPOSITION.
-////		*/
-//////		case OS.TB_THUMBPOSITION: 	break;
-////		case OS.TB_THUMBTRACK:		event.detail = SWT.DRAG;  break;
-////		case OS.TB_TOP: 			event.detail = SWT.HOME;  break;
-////		case OS.TB_BOTTOM:		event.detail = SWT.END;  break;
-////		case OS.TB_LINEDOWN:		event.detail = SWT.ARROW_DOWN;  break;
-////		case OS.TB_LINEUP: 		event.detail = SWT.ARROW_UP;  break;
-////		case OS.TB_PAGEDOWN: 		event.detail = SWT.PAGE_DOWN;  break;
-////		case OS.TB_PAGEUP: 		event.detail = SWT.PAGE_UP;  break;
-////	}
 //	
 //	/*
 //	* Send the event because WM_HSCROLL and WM_VSCROLL

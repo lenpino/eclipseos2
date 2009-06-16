@@ -37,8 +37,15 @@ public class SWT009_09 extends SWTTestCase {
             scaleV.setBounds(0, 50, 50, 100);
 //
             System.out.println("Increment: " + scaleH.getIncrement());
-            scaleH.setSelection(11);
+            scaleH.setSelection(10);
             System.out.println("Get Selection: " + scaleH.getSelection());
+            
+            scaleH.addListener(SWT.Selection, new Listener() {
+              public void handleEvent(Event event) {
+                String string = "SWT.NONE";
+                System.out.println("Scroll detail -> " + string);
+              }
+            });
 
             shell.pack();
             shell.open();
