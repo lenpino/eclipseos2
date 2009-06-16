@@ -151,12 +151,15 @@ static int checkStyle (int style) {
 	return checkBits (style, SWT.HORIZONTAL, SWT.VERTICAL, 0, 0, 0, 0);
 }
 
-//public Point computeSize (int wHint, int hHint, boolean changed) {
-//	checkWidget ();
-//	int border = getBorderWidth ();
-//	int width = border * 2, height = border * 2;
+public Point computeSize (int wHint, int hHint, boolean changed) {
+	checkWidget ();
+	int border = getBorderWidth ();
+	int width = border * 2, height = border * 2;
 //	RECT rect = new RECT ();
 //	OS.SendMessage (handle, OS.TBM_GETTHUMBRECT, 0, rect);
+        OS.WinSendMsg(handle, OS.SLM_QUERYSLIDERINFO, OS.MPFROM2SHORT((short)OS.SMA_SHAFTDIMENSIONS, (short)OS.SMA_RANGEVALUE), 0);
+        OS.WinSendMsg(handle, OS.SLM_QUERYSLIDERINFO, OS.MPFROM2SHORT((short)OS.SMA_SLIDERARMDIMENSIONS, (short)OS.SMA_RANGEVALUE), 0);
+        OS.WinSendMsg(handle, OS.SLM_QUERYTICKSIZE, 1, 0);
 //	if ((style & SWT.HORIZONTAL) != 0) {
 //		width += OS.GetSystemMetrics (OS.SM_CXHSCROLL) * 10;
 //		int scrollY = OS.GetSystemMetrics (OS.SM_CYHSCROLL);
@@ -168,8 +171,8 @@ static int checkStyle (int style) {
 //	}
 //	if (wHint != SWT.DEFAULT) width = wHint + (border * 2);
 //	if (hHint != SWT.DEFAULT) height = hHint + (border * 2);
-//	return new Point (width, height);
-//}
+	return new Point (width, height);
+}
 
 void createHandle () {
 	super.createHandle ();
@@ -194,7 +197,6 @@ int defaultForeground () {
 public int getIncrement () {
 	checkWidget ();
         return 1;
-//        return OS.WinSendMsg(handle, OS.SLM_QUERYSLIDERINFO, OS.MPFROM2SHORT((short)OS.SMA_SLIDERARMPOSITION, (short)OS.SMA_INCREMENTVALUE), 0);
 //	return OS.SendMessage (handle, OS.TBM_GETLINESIZE, 0, 0);
 }
 
@@ -415,47 +417,25 @@ int windowProc () {
 MRESULT wmControlChild (int mp1, int mp2) {
     int code = OS.SHORT2FROMMP(mp1);
     int pos = mp2;
-    System.out.println("Pos = " + pos);
+    if (code == OS.SLN_KILLFOCUS || code == OS.SLN_SETFOCUS) return null;
     Event event = new Event ();
-//	switch (code) {
+	switch (code) {
 //		/*
 //		* This line is intentionally commented.  Do not set the detail
 //		* field to DRAG to indicate that the dragging has ended when the
 //		* scroll bar is finally positioned in TB_THUMBPOSITION.
 //		*/
 ////		case OS.TB_THUMBPOSITION: 	break;
-//		case OS.TB_THUMBTRACK:		event.detail = SWT.DRAG;  break;
+		case OS.SLN_SLIDERTRACK:		event.detail = SWT.DRAG;  break;
 //		case OS.TB_TOP: 			event.detail = SWT.HOME;  break;
 //		case OS.TB_BOTTOM:		event.detail = SWT.END;  break;
 //		case OS.TB_LINEDOWN:		event.detail = SWT.ARROW_DOWN;  break;
 //		case OS.TB_LINEUP: 		event.detail = SWT.ARROW_UP;  break;
 //		case OS.TB_PAGEDOWN: 		event.detail = SWT.PAGE_DOWN;  break;
 //		case OS.TB_PAGEUP: 		event.detail = SWT.PAGE_UP;  break;
-//	}
+	}
+    sendEvent (SWT.Selection, event);
     return null;
 }
-
-//MRESULT wmScrollChild (int mp1, int mp2) {
-//	
-//	/* Do nothing when scrolling is ending */
-////	int code = wParam & 0xFFFF;
-////	if (code == OS.TB_ENDTRACK) return null;
-//	System.out.println("test");
-//	/*
-//	* This code is intentionally commented.  The event
-//	* detail field is not currently supported on all
-//	* platforms.
-//	*/
-//	Event event = new Event ();
-//	
-//	/*
-//	* Send the event because WM_HSCROLL and WM_VSCROLL
-//	* are sent from a modal message loop in windows that
-//	* is active when the user is scrolling.
-//	*/
-//	sendEvent (SWT.Selection, event);
-//	// widget could be disposed at this point
-//	return null;
-//}
 
 }

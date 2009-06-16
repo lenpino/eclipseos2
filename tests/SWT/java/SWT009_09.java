@@ -30,7 +30,7 @@ public class SWT009_09 extends SWTTestCase {
 
 
 	void initComponents() {
-            Scale scaleH = new Scale(shell, SWT.NULL);
+            final Scale scaleH = new Scale(shell, SWT.NULL);
             Scale scaleV = new Scale(shell, SWT.VERTICAL);
 //
             scaleH.setBounds(0, 0, 100, 50);
@@ -42,8 +42,7 @@ public class SWT009_09 extends SWTTestCase {
             
             scaleH.addListener(SWT.Selection, new Listener() {
               public void handleEvent(Event event) {
-                String string = "SWT.NONE";
-                System.out.println("Scroll detail -> " + string);
+                System.out.println("Scroll detail -> " + scaleH.getSelection());
               }
             });
 
