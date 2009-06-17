@@ -40,6 +40,11 @@ public class SWT009_09 extends SWTTestCase {
             scaleH.setSelection(10);
             System.out.println("Get Selection: " + scaleH.getSelection());
             
+            Point p = scaleV.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
+            System.out.println("width = " + p.x + " hight = " + p.y);
+            
+            scaleH.setMaximum(800);
+            
             scaleH.addListener(SWT.Selection, new Listener() {
               public void handleEvent(Event event) {
                 System.out.println("Scroll detail -> " + scaleH.getSelection());

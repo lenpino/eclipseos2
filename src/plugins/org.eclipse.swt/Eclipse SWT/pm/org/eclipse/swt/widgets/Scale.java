@@ -37,9 +37,9 @@ import org.eclipse.swt.events.*;
  */
 
 public class Scale extends Control {
-        int MAX_RANGE;
-        int MIN_RANGE;
-        int INCREMENT;
+        int maxRange;
+        int minRange;
+        int increment;
         int pixelRange;
 	static final int TrackBarProc;
         static final PSZ TrackBarClass = PSZ.getAtom (OS.WC_SLIDER);
@@ -82,9 +82,9 @@ public Scale (Composite parent, int style) {
 //	super (parent, checkStyle (style));
     this.parent = parent;
     this.style = style;
-    MAX_RANGE = 100;
-    MIN_RANGE = 0;
-    INCREMENT = 10;
+    maxRange = 100;
+    minRange = 0;
+    increment = 10;
 
     SLDCDATA sldcData = new SLDCDATA();
     sldcData.usScale1Increments = 10;
@@ -155,22 +155,18 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 	checkWidget ();
 	int border = getBorderWidth ();
 	int width = border * 2, height = border * 2;
-//	RECT rect = new RECT ();
-//	OS.SendMessage (handle, OS.TBM_GETTHUMBRECT, 0, rect);
-        OS.WinSendMsg(handle, OS.SLM_QUERYSLIDERINFO, OS.MPFROM2SHORT((short)OS.SMA_SHAFTDIMENSIONS, (short)OS.SMA_RANGEVALUE), 0);
-        OS.WinSendMsg(handle, OS.SLM_QUERYSLIDERINFO, OS.MPFROM2SHORT((short)OS.SMA_SLIDERARMDIMENSIONS, (short)OS.SMA_RANGEVALUE), 0);
-        OS.WinSendMsg(handle, OS.SLM_QUERYTICKSIZE, 1, 0);
-//	if ((style & SWT.HORIZONTAL) != 0) {
-//		width += OS.GetSystemMetrics (OS.SM_CXHSCROLL) * 10;
-//		int scrollY = OS.GetSystemMetrics (OS.SM_CYHSCROLL);
-//		height += (rect.top * 2) + scrollY + (scrollY / 3);
-//	} else {
-//		int scrollX = OS.GetSystemMetrics (OS.SM_CXVSCROLL);
-//		width += (rect.left * 2) + scrollX + (scrollX / 3);
-//		height += OS.GetSystemMetrics (OS.SM_CYVSCROLL) * 10;
-//	}
-//	if (wHint != SWT.DEFAULT) width = wHint + (border * 2);
-//	if (hHint != SWT.DEFAULT) height = hHint + (border * 2);
+        int shaftLength = OS.WinSendMsg(handle, OS.SLM_QUERYSLIDERINFO, OS.MPFROM2SHORT((short)OS.SMA_SHAFTDIMENSIONS, (short)OS.SMA_RANGEVALUE), 0);
+        int arm = OS.WinSendMsg(handle, OS.SLM_QUERYSLIDERINFO, OS.MPFROM2SHORT((short)OS.SMA_SLIDERARMDIMENSIONS, (short)OS.SMA_RANGEVALUE), 0);
+        int tick = OS.WinSendMsg(handle, OS.SLM_QUERYTICKSIZE, 1, 0);
+	if ((style & SWT.HORIZONTAL) != 0) {
+		width += OS.SHORT1FROMMP(shaftLength) + 10;
+		height += OS.SHORT2FROMMP(arm) + tick;
+	} else {
+		width += OS.SHORT2FROMMP(arm) + tick;
+		height += OS.SHORT1FROMMP(shaftLength) + 10;
+	}
+	if (wHint != SWT.DEFAULT) width = wHint + (border * 2);
+	if (hHint != SWT.DEFAULT) height = hHint + (border * 2);
 	return new Point (width, height);
 }
 
@@ -179,7 +175,7 @@ void createHandle () {
 }
 
 int defaultForeground () {
-	return OS.WinQuerySysColor(handle, OS.SYSCLR_SCROLLBAR, 0);
+	return OS.WinQuerySysColor(handle, OS.SYSCLR_WINDOWTEXT, 0);
 }
 
 ///**
@@ -197,7 +193,6 @@ int defaultForeground () {
 public int getIncrement () {
 	checkWidget ();
         return 1;
-//	return OS.SendMessage (handle, OS.TBM_GETLINESIZE, 0, 0);
 }
 
 ///**
@@ -212,8 +207,7 @@ public int getIncrement () {
 // */
 public int getMaximum () {
 	checkWidget ();
-        return MAX_RANGE;
-//	return OS.SendMessage (handle, OS.TBM_GETRANGEMAX, 0, 0);
+        return maxRange;
 }
 
 ///**
@@ -228,7 +222,7 @@ public int getMaximum () {
 // */
 public int getMinimum () {
 	checkWidget ();
-	return MIN_RANGE;
+	return minRange;
 }
 
 ///**
@@ -245,7 +239,7 @@ public int getMinimum () {
 // */
 public int getPageIncrement () {
 	checkWidget ();
-        return INCREMENT;
+        return increment;
 //	return OS.SendMessage (handle, OS.TBM_GETPAGESIZE, 0, 0);
 }
 
@@ -263,8 +257,8 @@ public int getSelection () {
 	checkWidget ();
         int pixelInfo = OS.WinSendMsg(handle, OS.SLM_QUERYSLIDERINFO, OS.MPFROM2SHORT((short)OS.SMA_SLIDERARMPOSITION, (short)OS.SMA_RANGEVALUE ), 0);
         int posPixels = OS.SHORT1FROMMP(pixelInfo);
-        int totalPixels = ((pixelInfo & 0xFFFF0000)>>16) & 0xFFFF;
-        int pos = ((MAX_RANGE*posPixels)/totalPixels);
+        int totalPixels = OS.SHORT2FROMMP(pixelInfo) - 1;
+        int pos = ((maxRange*posPixels)/totalPixels);
         return pos;
 }
 
@@ -309,10 +303,10 @@ public void removeSelectionListener(SelectionListener listener) {
 public void setIncrement (int increment) {
 	checkWidget ();
 	if (increment < 1) return;
-	int minimum = MIN_RANGE;
-	int maximum = MAX_RANGE;
+	int minimum = minRange;
+	int maximum = maxRange;
 	if (increment > maximum - minimum) return;
-	INCREMENT = increment;
+	increment = increment;
 }
 
 ///**
@@ -330,8 +324,8 @@ public void setIncrement (int increment) {
 public void setMaximum (int value) {
 	checkWidget ();
 //	int minimum = OS.SendMessage (handle, OS.TBM_GETRANGEMIN, 0, 0);
-	if (0 <= MIN_RANGE && MIN_RANGE < value) {
-		MAX_RANGE = value;
+	if (0 <= minRange && minRange < value) {
+		maxRange = value;
 	}
 }
 
@@ -350,8 +344,8 @@ public void setMaximum (int value) {
 public void setMinimum (int value) {
 	checkWidget ();
 //	int maximum = OS.SendMessage (handle, OS.TBM_GETRANGEMAX, 0, 0);
-	if (0 <= value && value < MAX_RANGE) {
-		MAX_RANGE = value;
+	if (0 <= value && value < maxRange) {
+		maxRange = value;
 	}
 }
 
@@ -371,12 +365,10 @@ public void setMinimum (int value) {
 public void setPageIncrement (int pageIncrement) {
 	checkWidget ();
 	if (pageIncrement < 1) return;
-	int minimum = MIN_RANGE;
-	int maximum = MAX_RANGE;
+	int minimum = minRange;
+	int maximum = maxRange;
 	if (pageIncrement > maximum - minimum) return;
-        INCREMENT = pageIncrement;
-//	OS.SendMessage (handle, OS.TBM_SETPAGESIZE, 0, pageIncrement);
-//	OS.SendMessage (handle, OS.TBM_SETTICFREQ, pageIncrement, 0);
+        increment = pageIncrement;
 }
 
 ///**
@@ -395,8 +387,8 @@ public void setSelection (int value) {
 	checkWidget ();
 	if (value < 0) return;
         int pixels = OS.WinSendMsg(handle, OS.SLM_QUERYSLIDERINFO, OS.MPFROM2SHORT((short)OS.SMA_SLIDERARMPOSITION, (short)OS.SMA_RANGEVALUE ), 0);
-        int totalPixels = ((pixels & 0xFFFF0000)>>16) & 0xFFFF;
-        int pixelPos = ((value*totalPixels)/MAX_RANGE);
+        int totalPixels = OS.SHORT2FROMMP(pixels) -1;
+        int pixelPos = ((value*totalPixels)/maxRange);
         OS.WinSendMsg(handle, OS.SLM_SETSLIDERINFO, OS.MPFROM2SHORT((short)OS.SMA_SLIDERARMPOSITION, (short)OS.SMA_RANGEVALUE), pixelPos);
 }
 
