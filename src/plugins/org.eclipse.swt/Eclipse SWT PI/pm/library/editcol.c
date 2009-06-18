@@ -31,6 +31,7 @@ LONG _Export APIENTRY WinEditColorDlg(HWND hwndParent,
                                       PSZ pszTitle) {
    PAPPDATA pad;
    ULONG i;
+   int rc;
 
    // allocate storage for application data
    if (DosAllocMem((PPVOID)&pad, sizeof(APPDATA),
@@ -58,7 +59,7 @@ LONG _Export APIENTRY WinEditColorDlg(HWND hwndParent,
    if (NULLHANDLE == (pad->hlib = WinLoadLibrary(pad->hab, "WPCONFIG.DLL")))
       return CLR_ERROR;
    // get the module handle to load the dialog from the DLL
-   if (DosQueryModuleHandle(SZ_MODULE, &pad->hDlgMod))
+   if (rc = DosLoadModule(NULL, 0, SZ_MODULE, &pad->hDlgMod))
       return CLR_ERROR;
    // copy the start color
    pad->clrCurr.lClr = pad->clrUndo.lClr = color;

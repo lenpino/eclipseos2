@@ -41,7 +41,7 @@
 // various constants ------------------------------------------------------
 
 #define MAXTITLESIZE           128     // max length of dialog title
-#define SZ_MODULE     "EDITCOL.DLL"    // DLL name
+#define SZ_MODULE     "SWTP2049.DLL"    // DLL name
 
 
 // application structures -------------------------------------------------

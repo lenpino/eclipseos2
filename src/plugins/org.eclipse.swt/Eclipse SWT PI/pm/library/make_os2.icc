@@ -23,10 +23,10 @@ option ProjectOptions =
     {
         target $SWT_LIB
         {
-                source "E:\\tmp\\inst\\dllsrc\\editcol.c"
-                source "E:\\tmp\\inst\\dllsrc\\editcol.h"
-                source "E:\\tmp\\inst\\dllsrc\\editcol.rc"
-            	source "swt.c", "structs.c", "callback.c"
+ //               source "c:\\apps\\dev\\swt2\\trunk\\src\\plugins\\org.eclipse.swt\\Eclipse SWT PI\\pm\\library\\editcol.c"
+ //               source "c:\\apps\\dev\\swt2\\trunk\\src\\plugins\\org.eclipse.swt\\Eclipse SWT PI\\pm\\library\\editcol.h"
+ //               source "c:\\apps\\dev\\swt2\\trunk\\src\\plugins\\org.eclipse.swt\\Eclipse SWT PI\\pm\\library\\editcol.rc"
+            	source "editcol.c", "editcol.h", "editcol.rc", "swt.c", "structs.c", "callback.c"
         }
     }
 }
