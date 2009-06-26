@@ -38,15 +38,14 @@
 
     <!-- compile SWT dll -->
     <target name="dll">
-		<mkdir dir="src/plugins/org.eclipse.swt.pm/os/os2/x86"/>
-        <exec executable="build.cmd" vmlauncher="false"
-            dir="src/plugins/org.eclipse.swt/Eclipse SWT PI/pm/library">
+	<mkdir dir="src/plugins/org.eclipse.swt.pm/os/os2/x86"/>
+        <exec executable="build.cmd" vmlauncher="false" dir="src/plugins/org.eclipse.swt/Eclipse SWT PI/pm/library">
         </exec>
     </target>
 
     <!-- run the cvs2cl script to generate ChangeLog -->
     <target name="changelog">
-        <exec executable="cvs2cl.pl.cmd" vmlauncher="false" dir=".">
+        <exec executable="cvs2cl.pl.cmd" vmlauncher="false" dir="misc">
             <arg value="--fsf"/>
         </exec>
     </target>
@@ -61,9 +60,8 @@
     <target name="clean" depends="init,build.prp">
         <ant antfile="build.xml" target="clean" dir="src/plugins/org.eclipse.swt.pm" />
         <ant antfile="build.xml" target="clean" dir="tests/SWT" />
-        <exec executable="build.cmd" vmlauncher="false"
-            dir="src/plugins/org.eclipse.swt/Eclipse SWT PI/pm/library">
-            <arg value="clean"/>
+        <exec executable="build.cmd" vmlauncher="false" dir="src/plugins/org.eclipse.swt/Eclipse SWT PI/pm/library">
+        <arg value="clean"/>
         </exec>
     </target>
 
@@ -71,6 +69,12 @@
     <target name="swt.jar" depends="init,build.prp">
         <ant antfile="build.xml" target="clean" dir="src/plugins/org.eclipse.swt.pm" />
         <ant antfile="build.xml" target="build.jars" dir="src/plugins/org.eclipse.swt.pm" />
+    </target>
+
+    <!-- original way of SWT compilation -->
+    <target name="boot.jar" depends="init,build.prp">
+        <ant antfile="build.xml" target="clean" dir="src/plugins/org.eclipse.core.boot" />
+        <ant antfile="build.xml" target="build.jars" dir="src/plugins/org.eclipse.core.boot" />
     </target>
 
     <!-- common point to run SWT testcase -->
@@ -207,6 +211,11 @@
 
     <target name="swt009_08" depends="init,build.prp">
         <property name="test.step" value="009_08" />
+        <antcall target="swt.test" />
+    </target>
+    
+    <target name="swt009_09" depends="init,build.prp">
+        <property name="test.step" value="009_09" />
         <antcall target="swt.test" />
     </target>
 
