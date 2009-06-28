@@ -71,10 +71,16 @@
         <ant antfile="build.xml" target="build.jars" dir="src/plugins/org.eclipse.swt.pm" />
     </target>
 
-    <!-- original way of SWT compilation -->
+    <!-- boot.jar -->
     <target name="boot.jar" depends="init,build.prp">
         <ant antfile="build.xml" target="clean" dir="src/plugins/org.eclipse.core.boot" />
         <ant antfile="build.xml" target="build.jars" dir="src/plugins/org.eclipse.core.boot" />
+    </target>
+
+    <!-- startup.jar -->
+    <target name="startup.jar" depends="init,build.prp">
+        <ant antfile="build.xml" target="clean" dir="src/plugins/org.eclipse.platform" />
+        <ant antfile="build.xml" target="build.jars" dir="src/plugins/org.eclipse.platform" />
     </target>
 
     <!-- common point to run SWT testcase -->
