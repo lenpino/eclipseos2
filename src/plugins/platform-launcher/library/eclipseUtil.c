@@ -3,12 +3,12 @@
  * This file is made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/cpl-v10.html
- * 
- * Contributors: 
+ *
+ * Contributors:
  *    Kevin Cornell (Rational Software Corporation)
  */
- 
- 
+
+
 /* Eclipse Launcher Utility Methods */
 
 #include <string.h>
@@ -26,14 +26,14 @@
 
 
 /* Is the given VM J9 */
-int isJ9VM( char* vm ) 
+int isJ9VM( char* vm )
 {
 	char *ch = strrchr( vm, (int)dirSeparator );
 	if (ch == NULL)
 	    ch = vm;
 	else
 	    ch++;
-	return (strcasecmp( ch, "j9" ) == 0);
+	return (stricmp( ch, "j9" ) == 0);
 }
 
 
@@ -42,7 +42,7 @@ int isJ9VM( char* vm )
 #include <sys/types.h>
 #include <time.h>
 
-/* Return the JVM version in the format x.x.x 
+/* Return the JVM version in the format x.x.x
  */
 char* getVMVersion( char *vmPath )
 {
@@ -61,7 +61,7 @@ char* getVMVersion( char *vmPath )
 
     /* Write java -version output to a temp file */
     (void) sprintf(cmd,"%s -version 2> %s", vmPath, fileName);
-    (void) system(cmd); 
+    (void) system(cmd);
 
     fp = fopen(fileName, "r");
     if (fp != NULL)
@@ -84,17 +84,17 @@ char* getVMVersion( char *vmPath )
     		strncpy(version, firstChar, numChars);
 			version[numChars] = '\0';
 		}
-	}  
+	}
 
     return version;
 }
 
 /* Compare JVM Versions of the form "x.x.x..."
- *     
+ *
  *    Returns -1 if ver1 < ver2
- *    Returns  0 if ver1 = ver2 
+ *    Returns  0 if ver1 = ver2
  *    Returns  1 if ver1 > ver2
- */     
+ */
 int versionCmp(char *ver1, char *ver2)
 {
     char*  dot1;
@@ -119,7 +119,7 @@ int versionCmp(char *ver1, char *ver2)
 
     if (!dot1 && dot2)   /* x < x.y */
         return -1;
-    
+
     if (!dot1 && !dot2)  /* x == x */
         return 0;
 
