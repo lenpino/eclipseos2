@@ -1,5 +1,5 @@
 
-#include "eclipseOS.h"
+#include "..\\eclipseOS.h"
 
 #define INCL_PM
 #define INCL_DOSERRORS

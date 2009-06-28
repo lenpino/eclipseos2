@@ -1,7 +1,7 @@
 
 #define ECLIPSE_ICON 401
 
-ICON ECLIPSE_ICON DISCARDABLE "..\\..\\..\\apps\\dev\\swt!2\\eclipseos2\\src\\plugins\\platform-launcher\\library\\pm\\eclipse.ico"
+ICON ECLIPSE_ICON DISCARDABLE "\\apps\\dev\\swt\\trunk\\src\\plugins\\platform-launcher\\library\\pm\\eclipse.ico"
 // default bitmap for static control
-BITMAP 501 DISCARDABLE "..\\..\\..\\apps\\dev\\swt!2\\eclipseos2\\src\\plugins\\platform-launcher\\library\\icon32_full.bmp"
+BITMAP 501 DISCARDABLE "\\apps\\dev\\swt!2\\eclipseos2\\src\\plugins\\platform-launcher\\library\\icon32_full.bmp"
 
