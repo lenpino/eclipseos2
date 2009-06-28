@@ -82,6 +82,14 @@ public final class BootLoader {
 	 */
 	public static final String OS_MACOSX = "macosx";//$NON-NLS-1$
 
+        /**
+	 * Constant string (value "os2") indicating the platform is running on a
+	 * OS/2 operating system.
+	 * 
+	 * @since 2.0
+	 */
+	public static final String OS_OS2 = "os2";//$NON-NLS-1$
+
 	/**
 	 * Constant string (value "unknown") indicating the platform is running on a
 	 * machine running an unknown operating system.
@@ -148,6 +156,14 @@ public final class BootLoader {
 	 */
 	public static final String WS_CARBON = "carbon";//$NON-NLS-1$
 
+        /**
+	 * Constant string (value "pm") indicating the platform is running on a
+	 * machine using the PM  windowing system (OS/2).
+	 * 
+	 * @since 2.0
+	 */
+	public static final String WS_PM = "pm";//$NON-NLS-1$
+
 	/**
 	 * Constant string (value "unknown") indicating the platform is running on a
 	 * machine running an unknown windowing system.
@@ -167,14 +183,16 @@ public final class BootLoader {
 		OS_MACOSX,
 		OS_QNX,
 		OS_SOLARIS,
-		OS_WIN32
+		OS_WIN32,
+                OS_OS2
 	};
 	private static final String[] WS_LIST = {
 		WS_CARBON,
 		WS_GTK,
 		WS_MOTIF,
 		WS_PHOTON,
-		WS_WIN32
+		WS_WIN32,
+                WS_PM
 	};
 /**
  * Private constructor to block instance creation.
