@@ -30,12 +30,17 @@ public class SWT009_06 extends SWTTestCase {
 
 
 	void initComponents() {
-            shell.setText("Hello World TabFolder");
-            shell.setSize(300, 300);
-            shell.setLayout(new FillLayout());
-            shell.setText("Simple Tabs");
-            TabFolder tabFolder = new TabFolder(shell, SWT.NONE);
-            TabItem tabItem = new TabItem(tabFolder, SWT.NONE);
+            shell.setText("Tab Folder Example");
+            shell.setSize(450, 250);
+            final TabFolder tabFolder = new TabFolder(shell, SWT.BORDER);
+            for (int loopIndex = 0; loopIndex < 10; loopIndex++) {
+                TabItem tabItem = new TabItem(tabFolder, SWT.NULL);
+                tabItem.setText("Tab " + loopIndex);
+                Text text = new Text(tabFolder, SWT.BORDER);
+                text.setText("This is page " + loopIndex);
+                tabItem.setControl(text);
+            }
+            tabFolder.setSize(400, 200);
             shell.open();
                 
 	}
