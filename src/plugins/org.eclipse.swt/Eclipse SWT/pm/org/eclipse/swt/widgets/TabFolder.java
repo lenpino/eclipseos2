@@ -43,6 +43,8 @@ import org.eclipse.swt.events.*;
  */
 public class TabFolder extends Composite {
 	TabItem [] items;
+        int[] itemsID;
+        int iLongestMajText = 0;
 //	ImageList imageList;
 	static final int TabFolderProc;
 	static final PSZ TabFolderClass = PSZ.getAtom (OS.WC_NOTEBOOK);
@@ -164,7 +166,24 @@ protected void checkSubclass () {
 
 //public Point computeSize (int wHint, int hHint, boolean changed) {
 //	checkWidget ();
+//      RECTL rcl = new RECTL ();
+//      RECTL insetRect = new RECTL ();
+//      WinQueryWindowPos(hwndDialog, &swpDialog);
+//      OS.WinQueryWindowPos(handle, rcl);
+//      insetRect.yBottom=insetRect.xLeft=0;
+//      insetRect.xRight=rcl.cx;
+//      insetRect.yTop=rcl.cy;
+//      Return size of notebook page in pixel for given notebook window size (with tab text size set)
+
+//      OS.WinSendMsg(hwndNotebook, BKM_CALCPAGERECT, insetRect, true);
+//      Calculate notebook size so that notebook dialog page fits into the notebook page
+
+//      swpNB.cx-=(rectlNB.xRight-rectlNB.xLeft)-ptlNB.x;
+//      swpNB.cy-=(rectlNB.yTop-rectlNB.yBottom)-ptlNB.y;
+//
+
 //	RECT insetRect = new RECT (), itemRect = new RECT ();
+//      OS.WinSendMsg (handle, OS.BKM_CALCPAGERECT, rcl, false);
 //	OS.SendMessage (handle, OS.TCM_ADJUSTRECT, 0, insetRect);
 //	int width = insetRect.left - insetRect.right, height = 0;
 //	int count = OS.SendMessage (handle, OS.TCM_GETITEMCOUNT, 0, 0);
@@ -207,16 +226,23 @@ void createItem (TabItem item, int index) {
 	if (!(0 <= index && index <= count)) error (SWT.ERROR_INVALID_RANGE);
 	if (count == items.length) {
 		TabItem [] newItems = new TabItem [items.length + 4];
+                int[] newIDs = new int[itemsID.length + 4];
 		System.arraycopy (items, 0, newItems, 0, items.length);
+                System.arraycopy (itemsID, 0, newIDs, 0, itemsID.length);
 		items = newItems;
+                itemsID = newIDs;
 	}
 //        PSZ tabText = new PSZ("Hello");
-         int pageID = OS.WinSendMsg (handle, OS.BKM_INSERTPAGE, 0, OS.MPFROM2SHORT((short)(OS.BKA_AUTOPAGESIZE | OS.BKA_MAJOR | OS.BKA_STATUSTEXTON),(short)OS.BKA_FIRST));
+         int pageID = OS.WinSendMsg (handle, OS.BKM_INSERTPAGE, 0, OS.MPFROM2SHORT((short)(OS.BKA_AUTOPAGESIZE | OS.BKA_MAJOR | OS.BKA_STATUSTEXTON),(short)OS.BKA_LAST));
+         //@@INFO(lpino): All tabs are gray to keep a consistent look with the rests of the platforms
+         OS.WinSendMsg (handle, OS.BKM_SETTABCOLOR, pageID , 0x00C0C0C0);
 //         OS.WinSendMsg (handle, OS.BKM_SETTABTEXT, pageID, tabText);
-//	if (pageID == 0) {
-//		error (SWT.ERROR_ITEM_NOT_ADDED);
-//	}
+	if (pageID == OS.NULLHANDLE) {
+		error (SWT.ERROR_ITEM_NOT_ADDED);
+	}
 	System.arraycopy (items, index, items, index + 1, count - index);
+        System.arraycopy (itemsID, index, itemsID, index + 1, count - index);
+        itemsID[index] = pageID;
 	items [index] = item;
 	
 	/*
@@ -235,42 +261,12 @@ void createItem (TabItem item, int index) {
 void createHandle () {
 	super.createHandle ();
 	state &= ~CANVAS;
-	
-//	/*
-//	* Feature in Windows.  Despite the fact that the
-//	* tool tip text contains \r\n, the tooltip will
-//	* not honour the new line unless TTM_SETMAXTIPWIDTH
-//	* is set.  The fix is to set TTM_SETMAXTIPWIDTH to
-//	* a large value.
-//	*/
-//	int hwndToolTip = OS.SendMessage (handle, OS.TCM_GETTOOLTIPS, 0, 0);
-//	OS.SendMessage (hwndToolTip, OS.TTM_SETMAXTIPWIDTH, 0, 0x7FFF);
-//	
-//	/*
-//	* Feature in Windows.  When the tool tip control is
-//	* created, the parent of the tool tip is the shell.
-//	* If SetParent () is used to reparent the tab folder
-//	* into a new shell, the tool tip is not reparented
-//	* and pops up underneath the new shell.  The fix is
-//	* to make sure the tool tip is a topmost window.
-//	*/
-//	/*
-//	* Bug in Windows 98 and NT.  Setting the tool tip to be the
-//	* top most window using HWND_TOPMOST can result in a parent
-//	* dialog shell being moved behind its parent if the dialog
-//	* has a sibling that is currently on top.  The fix is to lock
-//	* the z-order of the active window.
-//	*/
-//	Display display = getDisplay ();
-//	int flags = OS.SWP_NOACTIVATE | OS.SWP_NOMOVE | OS.SWP_NOSIZE;
-//	display.lockActiveWindow = true;
-//	OS.SetWindowPos (hwndToolTip, OS.HWND_TOPMOST, 0, 0, 0, 0, flags);
-//	display.lockActiveWindow = false;
 }
 
 void createWidget () {
 	super.createWidget ();
 	items = new TabItem [4];
+        itemsID = new int[4];
 }
 
 void destroyItem (TabItem item) {
@@ -281,12 +277,14 @@ void destroyItem (TabItem item) {
 		index++;
 	}
 	if (index == count) return;
-	int selectionIndex = OS.WinSendMsg (handle, OS.BKM_QUERYPAGEID, 0, OS.MPFROM2SHORT((short)OS.BKA_TOP,(short)OS.BKA_MAJOR));
+        int selectionIndex = itemsID[index];
 	if (OS.WinSendMsg (handle, OS.BKM_DELETEPAGE, selectionIndex, (short)OS.BKA_TAB) == 0) {
 		error (SWT.ERROR_ITEM_NOT_REMOVED);
 	}
 	System.arraycopy (items, index + 1, items, index, --count - index);
+        System.arraycopy (itemsID, index + 1, itemsID, index, --count - index);
 	items [count] = null;
+        itemsID[count] = 0;
 	if (count == 0) {
 //		if (imageList != null) {
 //			OS.SendMessage (handle, OS.TCM_SETIMAGELIST, 0, 0);
@@ -295,6 +293,7 @@ void destroyItem (TabItem item) {
 //		}
 //		imageList = null;
 		items = new TabItem [4];
+                itemsID = new int[4];
 	}
 	if (count > 0 && index == selectionIndex) {
 		setSelection (Math.max (0, selectionIndex - 1));
@@ -506,6 +505,7 @@ void releaseWidget () {
 		if (!item.isDisposed ()) item.releaseWidget ();
 	}
 	items = null;
+        itemsID = null;
 //	if (imageList != null) {
 //		OS.SendMessage (handle, OS.TCM_SETIMAGELIST, 0, 0);
 //		Display display = getDisplay ();
@@ -592,7 +592,7 @@ void setSelection (int index, boolean notify) {
 			control.setVisible (false);
 		}
 	}
-	OS.WinSendMsg (handle, OS.BKM_TURNTOPAGE, getPageID(index), 0);
+	OS.WinSendMsg (handle, OS.BKM_TURNTOPAGE, itemsID[index], 0);
 	int newIndex = getSelectionIndex();
 	if (newIndex != -1) {
 		TabItem item = items [newIndex];
@@ -609,9 +609,11 @@ void setSelection (int index, boolean notify) {
 	}
 }
 int getTabIndex(int pageID){
-    int total = OS.WinSendMsg (handle, OS.BKM_QUERYPAGECOUNT, 0, OS.BKA_MAJOR);
-    int diff = OS.WinSendMsg (handle, OS.BKM_QUERYPAGECOUNT, pageID, OS.BKA_END);
-    return total-diff;
+    for(int i=0;i<itemsID.length;i++){
+        if(itemsID[i] == pageID)
+            return i;
+    }
+    return -1;
 }
 
 int getPageID(int index){
@@ -656,13 +658,6 @@ boolean traversePage (boolean next) {
 }
 
 int widgetStyle () {
-	/*
-	* Bug in Windows.  Under certain circumstances,
-	* when TCM_SETITEM is used to change the text
-	* in a tab item, the tab folder draws on top
-	* of the client area.  The fix is ensure that
-	* this cannot happen by setting WS_CLIPCHILDREN.
-	*/
 	int bits = super.widgetStyle () | OS.WS_VISIBLE | OS.WS_CLIPCHILDREN | OS.BKS_TABBEDDIALOG | OS.BKS_MAJORTABTOP | OS.WS_CLIPSIBLINGS;	
 	return bits;
 }
@@ -674,6 +669,41 @@ PSZ windowClass () {
 int windowProc () {
 	return TabFolderProc;
 }
+
+boolean setTabDimensions( PSZ tabText ){
+        int iSize = 0;
+        int hps = this.hps;
+        if (hps == 0) hps = OS.WinGetPS (handle);
+        FONTMETRICS fm = new FONTMETRICS();
+        if(OS.GpiQueryFontMetrics (hps, FONTMETRICS.sizeof, fm))
+            fm.lMaxBaselineExt<<=1;
+        else
+            fm.lMaxBaselineExt = 30;
+
+        iSize = getStringSize( hps, tabText );
+
+        if( iSize > iLongestMajText )
+            iLongestMajText = iSize;
+
+        if (this.hps == 0) OS.WinReleasePS (hps);
+
+        OS.WinSendMsg(handle, OS.BKM_SETDIMENSIONS,
+                  OS.MPFROM2SHORT((short)(iLongestMajText+5), (short)((float)fm.lMaxBaselineExt * 0.8)),
+                  (short)OS.BKA_MAJORTAB);
+
+       OS.WinSendMsg(handle, OS.BKM_SETDIMENSIONS,
+                 OS.MPFROM2SHORT((short)0, (short)0),
+                 (short)OS.BKA_MINORTAB);
+  return true;
+}
+
+int getStringSize( int hps, PSZ szString )
+{
+    int[] pnts = new int [OS.TXTBOX_COUNT * 2];
+    OS.GpiQueryTextBox( hps, szString.getBytes().length, szString.getBytes(), OS.TXTBOX_COUNT, pnts);
+    return pnts[8];
+}
+
 
 //LRESULT WM_GETDLGCODE (int wParam, int lParam) {
 //	LRESULT result = super.WM_GETDLGCODE (wParam, lParam);
@@ -703,30 +733,6 @@ int windowProc () {
 //	*/
 //	int hittest = OS.DefWindowProc (handle, OS.WM_NCHITTEST, wParam, lParam);
 //	return new LRESULT (hittest);
-//}
-//
-//LRESULT WM_NOTIFY (int wParam, int lParam) {
-//	/*
-//	* Feature in Windows.  When the tab folder window
-//	* proc processes WM_NOTIFY, it forwards this
-//	* message to its parent.  This is done so that
-//	* children of this control that send this message 
-//	* type to their parent will notify not only
-//	* this control but also the parent of this control,
-//	* which is typically the application window and
-//	* the window that is looking for the message.
-//	* If the control did not forward the message, 
-//	* applications would have to subclass the control 
-//	* window to see the message. Because the control
-//	* window is subclassed by SWT, the message
-//	* is delivered twice, once by SWT and once when
-//	* the message is forwarded by the window proc.
-//	* The fix is to avoid calling the window proc 
-//	* for this control.
-//	*/
-//	LRESULT result = super.WM_NOTIFY (wParam, lParam);
-//	if (result != null) return result;
-//	return LRESULT.ZERO;
 //}
 //
 //LRESULT WM_SIZE (int wParam, int lParam) {
@@ -817,34 +823,18 @@ MRESULT wmControlChild (int mp1, int mp2) {
 				event.item = item;
 				postEvent (SWT.Selection, event);
 			}
+            case OS.BKN_NEWPAGESIZE:
+         //	if (isDisposed ()) return result;
+        //	int index = OS.SendMessage (handle, OS.TCM_GETCURSEL, 0, 0);
+        //	if (index != -1) {
+        //		TabItem item = items [index];
+        //		Control control = item.control;
+        //		if (control != null && !control.isDisposed ()) {
+        //			control.setBounds (getClientArea ());
+        //		}
+        //	}
+
 	}
 	return super.wmControlChild (mp1, mp2);
 }
-//LRESULT wmNotifyChild (int wParam, int lParam) {
-//	NMHDR hdr = new NMHDR ();
-//	OS.MoveMemory (hdr, lParam, NMHDR.sizeof);
-//	int code = hdr.code;
-//	switch (code) {
-//		case OS.TCN_SELCHANGE: 
-//		case OS.TCN_SELCHANGING:
-//			TabItem item = null;
-//			int index = OS.SendMessage (handle, OS.TCM_GETCURSEL, 0, 0);
-//			if (index != -1) item = items [index];
-//			if (item != null) {
-//				Control control = item.control;
-//				if (control != null && !control.isDisposed ()) {
-//					if (code == OS.TCN_SELCHANGE) {
-//						control.setBounds (getClientArea ());
-//					}
-//					control.setVisible (code == OS.TCN_SELCHANGE);
-//				}
-//			}
-//			if (code == OS.TCN_SELCHANGE) {
-//				Event event = new Event ();
-//				event.item = item;
-//				postEvent (SWT.Selection, event);
-//			}
-//	}
-//	return super.wmNotifyChild (wParam, lParam);
-//}
 }
