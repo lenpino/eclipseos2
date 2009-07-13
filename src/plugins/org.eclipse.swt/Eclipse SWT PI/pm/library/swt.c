@@ -593,6 +593,24 @@ JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinSendMsg__IIILo
     return rc;
 }
 
+JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_WinSendMsg__IILorg_eclipse_swt_internal_pm_RECTL_2Z
+        (JNIEnv *env, jclass that, jint hwnd, jint ulMsgid, jobject mpParam1, jboolean mpParam2)
+{
+    DECL_GLOB(pGlob)
+    RECTL c_mpParam1, *c_pmpParam1 = NULL;
+    jint rc;
+
+    DEBUG_CALL("WinSendMsg\n")
+
+    if (mpParam1) c_pmpParam1 = getRECTLFields(env, mpParam1, &c_mpParam1, &PGLOB(RECTLFc));
+
+    rc = (jint)WinSendMsg((HWND)hwnd, ulMsgid, (MPARAM)c_pmpParam1, (BOOL)mpParam2);
+
+    if (mpParam1) setRECTLFields(env, mpParam1, c_pmpParam1, &PGLOB(RECTLFc));
+
+    return rc;
+}
+
 JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinPostMsg
         (JNIEnv *env, jclass that, jint hwnd, jint ulMsgid, jint mpParam1, jint mpParam2)
 {

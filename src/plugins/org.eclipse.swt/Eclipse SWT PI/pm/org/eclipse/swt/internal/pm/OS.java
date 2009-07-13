@@ -2255,6 +2255,7 @@ public static final native boolean WinPostQueueMsg (int hmq, int msg, int mp1,
 public static final native boolean WinWaitMsg (int hab, int ulFirst, int ulLast);
 public static final native int WinSendMsg (int hwnd, int ulMsgid, int mpParam1, int mpParam2);
 public static final native int WinSendMsg (int hwnd, int ulMsgid, RECTL mpParam1, int mpParam2);
+public static final native int WinSendMsg (int hwnd, int ulMsgid, RECTL mpParam1, boolean mpParam2);
 public static final native int WinSendMsg (int hwnd, int ulMsgid, PSZ mpParam1, int mpParam2);
 public static final native int WinSendMsg (int hwnd, int ulMsgid, int mpParam1, PSZ mpParam2);
 public static final native int WinSendMsg (int hwnd, int ulMsgid, LBOXINFO mpParam1, PSZ[] mpParam2);
