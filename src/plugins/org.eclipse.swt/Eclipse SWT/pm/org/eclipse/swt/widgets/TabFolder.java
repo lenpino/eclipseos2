@@ -183,7 +183,6 @@ protected void checkSubclass () {
 //
 
 //	RECT insetRect = new RECT (), itemRect = new RECT ();
-//      OS.WinSendMsg (handle, OS.BKM_CALCPAGERECT, rcl, false);
 //	OS.SendMessage (handle, OS.TCM_ADJUSTRECT, 0, insetRect);
 //	int width = insetRect.left - insetRect.right, height = 0;
 //	int count = OS.SendMessage (handle, OS.TCM_GETITEMCOUNT, 0, 0);
@@ -191,7 +190,7 @@ protected void checkSubclass () {
 //		OS.SendMessage (handle, OS.TCM_GETITEMRECT, count - 1, itemRect);
 //		width = Math.max (width, itemRect.right - insetRect.right);
 //	}
-//	Point size;
+	Point size;
 //	if (layout != null) {
 //		size = layout.computeSize (this, wHint, hHint, changed);
 //	} else {
@@ -207,7 +206,7 @@ protected void checkSubclass () {
 //	width = trim.width;  height = trim.height;
 //	return new Point (width, height);
 //}
-//
+
 //public Rectangle computeTrim (int x, int y, int width, int height) {
 //	checkWidget ();
 //	RECT rect = new RECT ();
@@ -233,7 +232,7 @@ void createItem (TabItem item, int index) {
                 itemsID = newIDs;
 	}
 //        PSZ tabText = new PSZ("Hello");
-         int pageID = OS.WinSendMsg (handle, OS.BKM_INSERTPAGE, 0, OS.MPFROM2SHORT((short)(OS.BKA_AUTOPAGESIZE | OS.BKA_MAJOR | OS.BKA_STATUSTEXTON),(short)OS.BKA_LAST));
+         int pageID = OS.WinSendMsg (handle, OS.BKM_INSERTPAGE, 0, OS.MPFROM2SHORT((short)(OS.BKA_AUTOPAGESIZE | OS.BKA_MAJOR),(short)OS.BKA_LAST));
          //@@INFO(lpino): All tabs are gray to keep a consistent look with the rests of the platforms
          OS.WinSendMsg (handle, OS.BKM_SETTABCOLOR, pageID , 0x00C0C0C0);
 //         OS.WinSendMsg (handle, OS.BKM_SETTABTEXT, pageID, tabText);
@@ -307,8 +306,8 @@ void destroyItem (TabItem item) {
 	}
 }
 
-//public Rectangle getClientArea () {
-//	checkWidget ();
+public Rectangle getClientArea () {
+	checkWidget ();
 //	if (parent.hdwp != 0) {
 //		int oldHdwp = parent.hdwp;
 //		parent.hdwp = 0;
@@ -316,13 +315,28 @@ void destroyItem (TabItem item) {
 //		int count = parent.getChildrenCount ();
 //		parent.hdwp = OS.BeginDeferWindowPos (count);
 //	}
-//	RECT rect = new RECT ();
-//	OS.GetClientRect (handle, rect);
-//	OS.SendMessage (handle, OS.TCM_ADJUSTRECT, 0, rect);
-//	int width = rect.right - rect.left;
-//	int height = rect.bottom - rect.top;
-//	return new Rectangle (rect.left, rect.top, width, height);
-//}
+	RECTL rect = new RECTL ();
+        
+        SWP swp = new SWP ();
+        OS.WinQueryWindowPos (handle, swp);
+        
+        rect.yBottom = rect.xLeft = 0;
+        rect.xRight = swp.cx;
+        rect.yTop = swp.cy;
+
+        OS.WinSendMsg(handle, OS.BKM_CALCPAGERECT, rect, true);
+        
+	int width = rect.xRight - rect.xLeft;
+	int height = rect.yTop - rect.yBottom;
+//        System.out.println("XLEFT = " + rect.xLeft);
+//        System.out.println("YTOP = " + rect.yTop);
+//        System.out.println("XRIGHT = " + rect.xRight);
+//        System.out.println("YBOTTOM = " + rect.yBottom);
+//        System.out.println("width = " + width);
+//        System.out.println("height = " + height);
+//
+	return new Rectangle (rect.xLeft, rect.yTop, width, height);
+}
 
 /**
  * Returns the item at the given, zero-relative index in the
@@ -691,9 +705,7 @@ boolean setTabDimensions( PSZ tabText ){
                   OS.MPFROM2SHORT((short)(iLongestMajText+5), (short)((float)fm.lMaxBaselineExt * 0.8)),
                   (short)OS.BKA_MAJORTAB);
 
-       OS.WinSendMsg(handle, OS.BKM_SETDIMENSIONS,
-                 OS.MPFROM2SHORT((short)0, (short)0),
-                 (short)OS.BKA_MINORTAB);
+       OS.WinSendMsg(handle, OS.BKM_SETDIMENSIONS, OS.MPFROM2SHORT((short)0, (short)0),(short)OS.BKA_MINORTAB);
   return true;
 }
 
@@ -735,8 +747,8 @@ int getStringSize( int hps, PSZ szString )
 //	return new LRESULT (hittest);
 //}
 //
-//LRESULT WM_SIZE (int wParam, int lParam) {
-//	LRESULT result = super.WM_SIZE (wParam, lParam);
+MRESULT WM_SIZE (int mp1, int mp2) {
+	MRESULT result = super.WM_SIZE (mp1, mp2);
 //	/*
 //	* It is possible (but unlikely), that application
 //	* code could have disposed the widget in the resize
@@ -753,9 +765,9 @@ int getStringSize( int hps, PSZ szString )
 //			control.setBounds (getClientArea ());
 //		}
 //	}
-//	return result;
-//}
-//
+	return result;
+}
+
 //LRESULT WM_WINDOWPOSCHANGING (int wParam, int lParam) {
 //	LRESULT result = super.WM_WINDOWPOSCHANGING (wParam, lParam);
 //	if (result != null) return result;
@@ -803,7 +815,8 @@ int getStringSize( int hps, PSZ szString )
 MRESULT wmControlChild (int mp1, int mp2) {
         int code = mp1 >> 16;
 	switch (code) {
-		case OS.BKN_PAGESELECTED: 
+		case OS.BKN_PAGESELECTED:                    
+//                    break;
 		case OS.BKN_PAGESELECTEDPENDING:
 			TabItem item = null;
 			int pageID = OS.WinSendMsg (handle, OS.BKM_QUERYPAGEID, 0, OS.MPFROM2SHORT((short)OS.BKA_TOP,(short)OS.BKA_MAJOR));
@@ -823,7 +836,10 @@ MRESULT wmControlChild (int mp1, int mp2) {
 				event.item = item;
 				postEvent (SWT.Selection, event);
 			}
+                        break;
             case OS.BKN_NEWPAGESIZE:
+//                System.out.println("resize");
+                break;
          //	if (isDisposed ()) return result;
         //	int index = OS.SendMessage (handle, OS.TCM_GETCURSEL, 0, 0);
         //	if (index != -1) {
