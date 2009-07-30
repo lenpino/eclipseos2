@@ -857,8 +857,8 @@ public class OS {
     public static final int SYSCLR_MENUDISABLEDTEXT =       -46;
     public static final int SYSCLR_MENUHILITE =             -45;
     public static final int SYSCLR_MENUHILITEBGND =         -44;
-//    public static final int SYSCLR_PAGEBACKGROUND =         -43;
-//    public static final int SYSCLR_FIELDBACKGROUND =        -42;
+    public static final int SYSCLR_PAGEBACKGROUND =         -43;
+    public static final int SYSCLR_FIELDBACKGROUND =        -42;
     public static final int SYSCLR_BUTTONLIGHT =            -41;
     public static final int SYSCLR_BUTTONMIDDLE =           -40;
     public static final int SYSCLR_BUTTONDARK =             -39;
