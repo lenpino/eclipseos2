@@ -231,11 +231,11 @@ void createItem (TabItem item, int index) {
 		items = newItems;
                 itemsID = newIDs;
 	}
-//        PSZ tabText = new PSZ("Hello");
-         int pageID = OS.WinSendMsg (handle, OS.BKM_INSERTPAGE, 0, OS.MPFROM2SHORT((short)(OS.BKA_AUTOPAGESIZE | OS.BKA_MAJOR),(short)OS.BKA_LAST));
+         int pageID = OS.WinSendMsg (handle, OS.BKM_INSERTPAGE, 0, OS.MPFROM2SHORT((short)(OS.BKA_MAJOR),(short)OS.BKA_LAST));
          //@@INFO(lpino): All tabs are gray to keep a consistent look with the rests of the platforms
          OS.WinSendMsg (handle, OS.BKM_SETTABCOLOR, pageID , 0x00C0C0C0);
-//         OS.WinSendMsg (handle, OS.BKM_SETTABTEXT, pageID, tabText);
+         //@@INFO(lpino): The background of empty tabs are set to gray
+         OS.WinSendMsg (handle, OS.BKM_SETNOTEBOOKCOLORS, OS.SYSCLR_FIELDBACKGROUND , OS.BKA_BACKGROUNDPAGECOLORINDEX);
 	if (pageID == OS.NULLHANDLE) {
 		error (SWT.ERROR_ITEM_NOT_ADDED);
 	}
@@ -308,18 +308,17 @@ void destroyItem (TabItem item) {
 
 public Rectangle getClientArea () {
 	checkWidget ();
-//	if (parent.hdwp != 0) {
-//		int oldHdwp = parent.hdwp;
-//		parent.hdwp = 0;
-//		OS.EndDeferWindowPos (oldHdwp);
-//		int count = parent.getChildrenCount ();
-//		parent.hdwp = OS.BeginDeferWindowPos (count);
-//	}
+	if (parent != null && parent.pswp != 0) {
+            endDeferWindowPos (parent);
+            int count = parent.getChildrenCount ();
+            beginDeferWindowPos (parent, count);
+        }
+        
 	RECTL rect = new RECTL ();
         
         SWP swp = new SWP ();
         OS.WinQueryWindowPos (handle, swp);
-        
+                
         rect.yBottom = rect.xLeft = 0;
         rect.xRight = swp.cx;
         rect.yTop = swp.cy;
@@ -328,14 +327,17 @@ public Rectangle getClientArea () {
         
 	int width = rect.xRight - rect.xLeft;
 	int height = rect.yTop - rect.yBottom;
+        int y = swp.cy-height;
+        
 //        System.out.println("XLEFT = " + rect.xLeft);
 //        System.out.println("YTOP = " + rect.yTop);
 //        System.out.println("XRIGHT = " + rect.xRight);
 //        System.out.println("YBOTTOM = " + rect.yBottom);
 //        System.out.println("width = " + width);
 //        System.out.println("height = " + height);
-//
-	return new Rectangle (rect.xLeft, rect.yTop, width, height);
+//        System.out.println("Delta = " + swp.y);
+
+	return new Rectangle (0, y, width, height);
 }
 
 /**
@@ -816,7 +818,6 @@ MRESULT wmControlChild (int mp1, int mp2) {
         int code = mp1 >> 16;
 	switch (code) {
 		case OS.BKN_PAGESELECTED:                    
-//                    break;
 		case OS.BKN_PAGESELECTEDPENDING:
 			TabItem item = null;
 			int pageID = OS.WinSendMsg (handle, OS.BKM_QUERYPAGEID, 0, OS.MPFROM2SHORT((short)OS.BKA_TOP,(short)OS.BKA_MAJOR));
@@ -836,10 +837,10 @@ MRESULT wmControlChild (int mp1, int mp2) {
 				event.item = item;
 				postEvent (SWT.Selection, event);
 			}
-                        break;
-            case OS.BKN_NEWPAGESIZE:
+//                        break;
+//            case OS.BKN_NEWPAGESIZE:
 //                System.out.println("resize");
-                break;
+//                break;
          //	if (isDisposed ()) return result;
         //	int index = OS.SendMessage (handle, OS.TCM_GETCURSEL, 0, 0);
         //	if (index != -1) {

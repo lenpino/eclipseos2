@@ -2,7 +2,7 @@ package org.eclipse.swt.widgets;
 
 /*
  * OS/2 version.
- * Copyright (c) 2002, 2004 EclipseOS2 Team.
+ * Copyright (c) 2002, 2009 EclipseOS2 Team.
  */
 
 /*
