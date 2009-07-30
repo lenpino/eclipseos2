@@ -11,7 +11,7 @@ package org.eclipse.swt.widgets;
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/cpl-v10.html
  */
- 
+
 import org.eclipse.swt.internal.*;
 import org.eclipse.swt.internal.pm.*;
 import org.eclipse.swt.*;
@@ -49,7 +49,7 @@ public class TabFolder extends Composite {
 	static final int TabFolderProc;
 	static final PSZ TabFolderClass = PSZ.getAtom (OS.WC_NOTEBOOK);
 	static {
-		
+
 		/*
 		* Feature in Windows.  The tab control window class
 		* uses the CS_HREDRAW and CS_VREDRAW style bits to
@@ -86,7 +86,7 @@ public class TabFolder extends Composite {
  * <p>
  * The style value is either one of the style constants defined in
  * class <code>SWT</code> which is applicable to instances of this
- * class, or must be built by <em>bitwise OR</em>'ing together 
+ * class, or must be built by <em>bitwise OR</em>'ing together
  * (that is, using the <code>int</code> "|" operator) two or more
  * of those <code>SWT</code> style constants. The class description
  * lists the style constants that are applicable to the class.
@@ -243,7 +243,7 @@ void createItem (TabItem item, int index) {
         System.arraycopy (itemsID, index, itemsID, index + 1, count - index);
         itemsID[index] = pageID;
 	items [index] = item;
-	
+
 	/*
 	* Send a selection event when the item that is added becomes
 	* the new selection.  This only happens when the first item
@@ -313,22 +313,22 @@ public Rectangle getClientArea () {
             int count = parent.getChildrenCount ();
             beginDeferWindowPos (parent, count);
         }
-        
+
 	RECTL rect = new RECTL ();
-        
+
         SWP swp = new SWP ();
         OS.WinQueryWindowPos (handle, swp);
-                
+
         rect.yBottom = rect.xLeft = 0;
         rect.xRight = swp.cx;
         rect.yTop = swp.cy;
 
         OS.WinSendMsg(handle, OS.BKM_CALCPAGERECT, rect, true);
-        
+
 	int width = rect.xRight - rect.xLeft;
 	int height = rect.yTop - rect.yBottom;
         int y = swp.cy-height;
-        
+
 //        System.out.println("XLEFT = " + rect.xLeft);
 //        System.out.println("YTOP = " + rect.yTop);
 //        System.out.println("XRIGHT = " + rect.xRight);
@@ -379,11 +379,11 @@ public int getItemCount () {
 
 /**
  * Returns an array of <code>TabItem</code>s which are the items
- * in the receiver. 
+ * in the receiver.
  * <p>
  * Note: This is not the actual structure used by the receiver
  * to maintain its list of items, so modifying the array will
- * not affect the receiver. 
+ * not affect the receiver.
  * </p>
  *
  * @return the items in the receiver
@@ -408,7 +408,7 @@ public TabItem [] getItems () {
  * <p>
  * Note: This is not the actual structure used by the receiver
  * to maintain its selection, so modifying the array will
- * not affect the receiver. 
+ * not affect the receiver.
  * </p>
  * @return an array representing the selection
  *
@@ -460,7 +460,7 @@ public int getSelectionIndex () {
 
 /**
  * Searches the receiver's list starting at the first item
- * (index 0) until an item is found that is equal to the 
+ * (index 0) until an item is found that is equal to the
  * argument, and returns the index of that item. If no item
  * is found, returns -1.
  *
@@ -490,7 +490,7 @@ boolean mnemonicHit (char key) {
 		TabItem item = items [i];
 		if (item != null) {
 			char ch = findMnemonic (item.getText ());
-			if (Character.toUpperCase (key) == Character.toUpperCase (ch)) {		
+			if (Character.toUpperCase (key) == Character.toUpperCase (ch)) {
 				if (setFocus ()) {
 					setSelection (i, true);
 					return true;
@@ -506,7 +506,7 @@ boolean mnemonicMatch (char key) {
 		TabItem item = items [i];
 		if (item != null) {
 			char ch = findMnemonic (item.getText ());
-			if (Character.toUpperCase (key) == Character.toUpperCase (ch)) {		
+			if (Character.toUpperCase (key) == Character.toUpperCase (ch)) {
 				return true;
 			}
 		}
@@ -553,7 +553,7 @@ public void removeSelectionListener (SelectionListener listener) {
 	if (listener == null) error (SWT.ERROR_NULL_ARGUMENT);
 	if (eventTable == null) return;
 	eventTable.unhook (SWT.Selection, listener);
-	eventTable.unhook (SWT.DefaultSelection,listener);	
+	eventTable.unhook (SWT.DefaultSelection,listener);
 }
 
 /**
@@ -582,7 +582,7 @@ public void setSelection (TabItem [] items) {
 }
 
 /**
- * Selects the item at the given zero-relative index in the receiver. 
+ * Selects the item at the given zero-relative index in the receiver.
  * If the item at the index was already selected, it remains selected.
  * The current selected is first cleared, then the new items are
  * selected. Indices that are out of range are ignored.
@@ -674,7 +674,7 @@ boolean traversePage (boolean next) {
 }
 
 int widgetStyle () {
-	int bits = super.widgetStyle () | OS.WS_VISIBLE | OS.WS_CLIPCHILDREN | OS.BKS_TABBEDDIALOG | OS.BKS_MAJORTABTOP | OS.WS_CLIPSIBLINGS;	
+	int bits = super.widgetStyle () | OS.WS_VISIBLE | OS.WS_CLIPCHILDREN | OS.BKS_TABBEDDIALOG | OS.BKS_MAJORTABTOP | OS.WS_CLIPSIBLINGS;
 	return bits;
 }
 
@@ -743,7 +743,7 @@ int getStringSize( int hps, PSZ szString )
 //	* events to be delivered to the window that wants
 //	* to display the tool tip.  The fix is to call the
 //	* default window proc that returns HTCLIENT when
-//	* the mouse is in the client area.	
+//	* the mouse is in the client area.
 //	*/
 //	int hittest = OS.DefWindowProc (handle, OS.WM_NCHITTEST, wParam, lParam);
 //	return new LRESULT (hittest);
@@ -757,16 +757,17 @@ MRESULT WM_SIZE (int mp1, int mp2) {
 //	* event.  If this happens, end the processing of the
 //	* Windows message by returning the result of the
 //	* WM_SIZE message.
-//	*/
-//	if (isDisposed ()) return result;
-//	int index = OS.SendMessage (handle, OS.TCM_GETCURSEL, 0, 0);
-//	if (index != -1) {
-//		TabItem item = items [index];
-//		Control control = item.control;
-//		if (control != null && !control.isDisposed ()) {
-//			control.setBounds (getClientArea ());
-//		}
-//	}
+        //	*/
+	if (isDisposed ()) return result;
+        int pageID = OS.WinSendMsg (handle, OS.BKM_QUERYPAGEID, 0, OS.MPFROM2SHORT((short)OS.BKA_TOP,(short)OS.BKA_MAJOR));
+        int index = getTabIndex(pageID);
+	if (index != -1) {
+		TabItem item = items [index];
+		Control control = item.control;
+		if (control != null && !control.isDisposed ()) {
+			control.setBounds (getClientArea ());
+		}
+	}
 	return result;
 }
 
@@ -817,7 +818,7 @@ MRESULT WM_SIZE (int mp1, int mp2) {
 MRESULT wmControlChild (int mp1, int mp2) {
         int code = mp1 >> 16;
 	switch (code) {
-		case OS.BKN_PAGESELECTED:                    
+		case OS.BKN_PAGESELECTED:
 		case OS.BKN_PAGESELECTEDPENDING:
 			TabItem item = null;
 			int pageID = OS.WinSendMsg (handle, OS.BKM_QUERYPAGEID, 0, OS.MPFROM2SHORT((short)OS.BKA_TOP,(short)OS.BKA_MAJOR));
@@ -841,15 +842,6 @@ MRESULT wmControlChild (int mp1, int mp2) {
 //            case OS.BKN_NEWPAGESIZE:
 //                System.out.println("resize");
 //                break;
-         //	if (isDisposed ()) return result;
-        //	int index = OS.SendMessage (handle, OS.TCM_GETCURSEL, 0, 0);
-        //	if (index != -1) {
-        //		TabItem item = items [index];
-        //		Control control = item.control;
-        //		if (control != null && !control.isDisposed ()) {
-        //			control.setBounds (getClientArea ());
-        //		}
-        //	}
 
 	}
 	return super.wmControlChild (mp1, mp2);
