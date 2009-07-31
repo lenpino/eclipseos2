@@ -470,7 +470,7 @@ void createHandle () {
 //  separate table of unique identifiers.
     OS.WinSetWindowUShort (handle, OS.QWS_ID, (short)(handle & 0xFFFF));
 
-//@@TODO (dmik): debug code, remove when no more necessary 
+//@@TODO (dmik): debug code, remove when no more necessary
 //System.out.println (
 //    "Control.createHandle(): Window has been created:\n" +
 //    "    hwnd = " + Integer.toHexString (handle) + "\n" +
@@ -518,7 +518,7 @@ void destroyWidget () {
     int hwnd = handle;
     releaseHandle ();
     if (hwnd != 0) {
-//@@TODO (dmik): debug code, remove when no more necessary 
+//@@TODO (dmik): debug code, remove when no more necessary
 //System.out.println (
 //    "Control.destroyWidget(): Window is being derstroyed:\n    hwnd = " +
 //    Integer.toHexString (hwnd)
@@ -611,7 +611,7 @@ public boolean forceFocus () {
     if (!isEnabled () || !isVisible () || !isActive ()) return false;
     if (isFocusControl ()) return true;
     shell.bringToTop ();
-//@@TODO (dmik): does it relate to OS/2?    
+//@@TODO (dmik): does it relate to OS/2?
 //    /*
 //    * This code is intentionally commented.
 //    *
@@ -779,7 +779,7 @@ public Font getFont () {
         handle, OS.PP_FONTNAMESIZE, 0, null, fontBytes.length, fontBytes, 0);
     String fontNameSize = len != 0 ? new PSZ (fontBytes).toString() : null;
     Display display = getDisplay ();
-    FATTRS hFont = display.matchFont (fontNameSize); 
+    FATTRS hFont = display.matchFont (fontNameSize);
     return Font.pm_new (display, hFont);
 }
 
@@ -1038,7 +1038,7 @@ public int internal_new_GC (GCData data) {
         int len = OS.WinQueryPresParam (
             hwnd, OS.PP_FONTNAMESIZE, 0, null, fontBytes.length, fontBytes, 0);
         String fontNameSize = len >= 0 ? new PSZ (fontBytes).toString() : null;
-        data.hFont = display.matchFont (fontNameSize); 
+        data.hFont = display.matchFont (fontNameSize);
         data.hwnd = hwnd;
     }
     return hps;
@@ -1207,7 +1207,7 @@ boolean isTabItem () {
     }
     int bits = OS.WinQueryWindowULong (handle, OS.QWL_STYLE);
     if ((bits & OS.WS_TABSTOP) != 0) return false;
-    
+
     int code = OS.WinSendMsg (handle, OS.WM_QUERYDLGCODE, 0, 0);
     if ((code & OS.DLGC_STATIC) != 0) return false;
     if ((code & OS.DLGC_MLE) != 0) return false;
@@ -1478,11 +1478,11 @@ void releaseWidget () {
 //        shell.setToolTipText (handle, null);
 //    }
     toolTipText = null;
-//@@TODO(dmik)
-//    if (menu != null && !menu.isDisposed ()) {
-//            menu.dispose ();
-//    }
-//    menu = null;
+
+    if (menu != null && !menu.isDisposed ()) {
+            menu.dispose ();
+    }
+    menu = null;
     deregister ();
     unsubclass ();
     parent = null;
@@ -1719,13 +1719,13 @@ public void removeTraverseListener(TraverseListener listener) {
 
 boolean sendKeyEvent (int type, int msg, int mp1, int mp2) {
     Event event = new Event ();
-    
+
     switch (msg) {
         case OS.WM_CHAR: {
             short fsflags = OS.SHORT1FROMMP (mp1);
             short usch = OS.SHORT1FROMMP (mp2);
             short usvk = OS.SHORT2FROMMP (mp2);
-            
+
             /* Ignore repeating modifier keys by testing key prev. down state */
             if (
                 (usvk == OS.VK_SHIFT) || (usvk == OS.VK_ALT) ||
@@ -1735,20 +1735,20 @@ boolean sendKeyEvent (int type, int msg, int mp1, int mp2) {
             ) {
                 if ((fsflags & OS.KC_PREVDOWN) != 0) return true;
             }
-//@@TODO (dmik): getting a character for DBCS charsets below will not work...            
-            /* Use the character encoding for the default locale */                
+//@@TODO (dmik): getting a character for DBCS charsets below will not work...
+            /* Use the character encoding for the default locale */
             event.character = new String (new byte[] {(byte) usch}).charAt (0);
-            
+
             if ((fsflags & OS.KC_VIRTUALKEY) != 0) {
                 if (usvk == OS.VK_DELETE) {
-                    /* 
+                    /*
                      * A special case: map VK_DELETE to an ASCII char (127)
                      * instead of treating it as a virtual key.
                      */
                     event.character = 127;
                 } else {
                     event.keyCode = Display.translateKey (usvk);
-                    /* 
+                    /*
                      * Feature in OS/2. The character for cursor move, edit
                      * and some other virtual keys actually equals to
                      * (<scan> << 8) | 0xEO, but we need zero as the character
@@ -1765,7 +1765,7 @@ boolean sendKeyEvent (int type, int msg, int mp1, int mp2) {
         return true;
 
     if (!setInputState (event, type)) return true;
-    
+
     return sendKeyEvent (type, msg, mp1, mp2, event);
 }
 
@@ -2083,7 +2083,7 @@ void setDefaultFont () {
     Display display = getDisplay ();
     String fontName = display.composeFontNameSize (display.systemFont());
     byte[] fontBytes = new PSZ (fontName).getBytes();
-    OS.WinSetPresParam (handle, OS.PP_FONTNAMESIZE, fontBytes.length, fontBytes); 
+    OS.WinSetPresParam (handle, OS.PP_FONTNAMESIZE, fontBytes.length, fontBytes);
 }
 
 /**
@@ -2163,7 +2163,7 @@ public void setFont (Font font) {
     }
     String fontName = display.composeFontNameSize (hFont);
     byte[] fontBytes = new PSZ (fontName).getBytes();
-    OS.WinSetPresParam (handle, OS.PP_FONTNAMESIZE, fontBytes.length, fontBytes); 
+    OS.WinSetPresParam (handle, OS.PP_FONTNAMESIZE, fontBytes.length, fontBytes);
 }
 
 /**
@@ -2352,10 +2352,10 @@ void setPresBackground () {
     //@@TODO (dmik):
     //  this won't be necessary when we will draw these types of buttons
     //  ourselves.
-    if (index == OS.PP_BACKGROUNDCOLORINDEX) 
+    if (index == OS.PP_BACKGROUNDCOLORINDEX)
         OS.WinSetPresParam (handle, OS.PP_BACKGROUNDCOLOR, 4,
             new int[] {OS.WinQuerySysColor (OS.HWND_DESKTOP, value [0], 0)});
-    
+
     index = index == OS.PP_BACKGROUNDCOLORINDEX ?
         OS.PP_DISABLEDBACKGROUNDCOLORINDEX : OS.PP_DISABLEDBACKGROUNDCOLOR;
     OS.WinSetPresParam (handle, index, 4, value);
@@ -2585,6 +2585,7 @@ void subclass () {
 //    if (point == null) error (SWT.ERROR_NULL_ARGUMENT);
 //    POINT pt = new POINT ();
 //    pt.x = point.x;  pt.y = point.y;
+//    WinMapWindowPoints
 //    OS.ScreenToClient (handle, pt);
 //    return new Point (pt.x, pt.y);
 //}
@@ -2642,7 +2643,7 @@ boolean translateMnemonic (QMSG qmsg) {
     Decorations shell = menuShell ();
     if (shell.isVisible () && shell.isEnabled ()) {
         short usch = OS.SHORT1FROMMP (qmsg.mp2);
-        /* Use the character encoding for the default locale */                
+        /* Use the character encoding for the default locale */
         char ch = new String (new byte[] {(byte) usch}).charAt (0);
         return ch != 0 && shell.translateMnemonic (ch);
     }
@@ -2655,7 +2656,7 @@ boolean translateTraversal (QMSG qmsg) {
     int hwnd = qmsg.hwnd;
     int detail = SWT.TRAVERSE_NONE;
     boolean doit = true, all = false;
-    int keyCode = 0; 
+    int keyCode = 0;
     char character = 0;
     int code = OS.WinSendMsg (hwnd, OS.WM_QUERYDLGCODE, 0, 0);
     switch (usvk) {
@@ -2683,7 +2684,7 @@ boolean translateTraversal (QMSG qmsg) {
             * This behavior is currently relied on by StyledText.
             */
             character = '\t';
-            boolean next = (usvk == OS.VK_TAB) && ((fsflags & OS.KC_SHIFT) == 0); 
+            boolean next = (usvk == OS.VK_TAB) && ((fsflags & OS.KC_SHIFT) == 0);
             if ((code & OS.DLGC_MLE) != 0) {
                   if (next && (fsflags & OS.KC_CTRL) == 0)
                         doit = false;
@@ -2945,14 +2946,14 @@ int windowProc (int msg, int mp1, int mp2) {
 //        case OS.WM_BUTTON2DBLCLK: result = WM_BUTTON2DBLCLK (mp1, mp2); break;
         case OS.WM_CALCVALIDRECTS: result = WM_CALCVALIDRECTS (mp1, mp2); break;
         case OS.WM_CHAR: result = WM_CHAR (mp1, mp2); break;
-//@@TODO (dmik): later        
+//@@TODO (dmik): later
 //        case OS.WM_CLEAR: result = WM_CLEAR (wParam, lParam); break;
         case OS.WM_CLOSE: result = WM_CLOSE (mp1, mp2); break;
         case OS.WM_COMMAND: result = WM_COMMAND (mp1, mp2); break;
 //@@TODO (dmik): later
         case OS.WM_CONTEXTMENU: result = WM_CONTEXTMENU (mp1, mp2); break;
         case OS.WM_CONTROL: result = WM_CONTROL (mp1, mp2); break;
-//@@TODO (dmik): later        
+//@@TODO (dmik): later
 //        case OS.WM_CTLCOLORBTN:
 //        case OS.WM_CTLCOLORDLG:
 //        case OS.WM_CTLCOLOREDIT:
@@ -3005,13 +3006,13 @@ int windowProc (int msg, int mp1, int mp2) {
 //        case OS.WM_RBUTTONUP: result = WM_RBUTTONUP (wParam, lParam); break;
 //        case OS.WM_SETCURSOR: result = WM_SETCURSOR (wParam, lParam); break;
         case OS.WM_SETFOCUS: result = WM_SETFOCUS (mp1, mp2); break;
-//@@TODO (dmik): later        
+//@@TODO (dmik): later
 //        case OS.WM_SETFONT: result = WM_SETFONT (wParam, lParam); break;
 //        case OS.WM_SETTINGCHANGE: result = WM_SETTINGCHANGE (wParam, lParam); break;
 //        case OS.WM_SETREDRAW: result = WM_SETREDRAW (wParam, lParam); break;
 //        case OS.WM_SHOWWINDOW: result = WM_SHOWWINDOW (wParam, lParam); break;
         case OS.WM_SIZE: result = WM_SIZE (mp1, mp2); break;
-//@@TODO (dmik): later        
+//@@TODO (dmik): later
 //        case OS.WM_SYSCHAR: result = WM_SYSCHAR (wParam, lParam); break;
 //        case OS.WM_SYSCOLORCHANGE: result = WM_SYSCOLORCHANGE (wParam, lParam); break;
 //        case OS.WM_SYSCOMMAND: result = WM_SYSCOMMAND (wParam, lParam); break;
@@ -3039,7 +3040,7 @@ MRESULT WM_CALCVALIDRECTS (int mp1, int mp2) {
 
 MRESULT WM_CHAR (int mp1, int mp2) {
     boolean keyUp = (OS.SHORT1FROMMP (mp1) & OS.KC_KEYUP) != 0;
-//@@TODO (dmik): debug, remove    
+//@@TODO (dmik): debug, remove
 //System.out.println("WM_CHAR ("+this+"): vk="+OS.SHORT2FROMMP (mp2)+" keyup="+keyUp);
     sendKeyEvent (keyUp ? SWT.KeyUp : SWT.KeyDown, OS.WM_CHAR, mp1, mp2);
     return null;
@@ -3100,7 +3101,7 @@ MRESULT WM_CONTEXTMENU (int mp1, int mp2) {
       * and the parent of all menus is the shell, the menu may
       * have been destroyed but not removed from the control.
       */
-    //@@TODO(lpino) First check if this validation applies to OS/2 implementation and then validate using the coordinates of the mouse 
+    //@@TODO(lpino) First check if this validation applies to OS/2 implementation and then validate using the coordinates of the mouse
 //      if (mp2 != handle) return null;
       short flOptions = OS.PU_HCONSTRAIN | OS.PU_VCONSTRAIN | OS.PU_KEYBOARD | OS.PU_MOUSEBUTTON1;
       boolean rc = OS.WinPopupMenu(handle, handle, menu.handle, OS.SHORT1FROMMP(mp1), OS.SHORT2FROMMP(mp1), 0, flOptions);
@@ -3160,7 +3161,7 @@ MRESULT WM_DRAWITEM (int mp1, int mp2) {
         MenuItem item = shell.findMenuItem (struct.idItem);
         if (item == null) return null;
         return item.wmDrawChild (mp1, mp2);
-    }    
+    }
 //        System.out.println("Control:WM_DRAWITEM - HANDLE ATOM TABLE = " + Integer.toHexString(OS.WinFindAtom(OS.WinQuerySystemAtomTable(), PSZ.getAtom (OS.WC_MENU))));
       return null;
 }
@@ -3671,7 +3672,7 @@ MRESULT WM_PAINT (int mp1, int mp2) {
     /* Get the damage */
     int hrgn = OS.GpiCreateRegion (hps, 0, null);
     OS.WinQueryUpdateRegion (handle, hrgn);
-    
+
     callWindowProc (OS.WM_PAINT, mp1, mp2);
 
     //@@TODO(dmik): is there any solution other than below??
@@ -3689,7 +3690,7 @@ MRESULT WM_PAINT (int mp1, int mp2) {
     data.rcl = new RECTL ();
     data.hps = hps;
     GC gc = GC.pm_new (this, data);
-    
+
     /* Send the paint event */
     Event event = new Event ();
     event.gc = gc;
@@ -3782,9 +3783,9 @@ MRESULT WM_PAINT (int mp1, int mp2) {
 MRESULT WM_SETFOCUS (int mp1, int mp2) {
     callWindowProc (OS.WM_SETFOCUS, mp1, mp2);
     Shell shell = getShell ();
-    
+
     boolean gotFocus = OS.SHORT1FROMMP (mp2) > 0;
-    
+
     /*
     * It is possible (but unlikely), that application
     * code could have disposed the widget in the focus
@@ -3796,7 +3797,7 @@ MRESULT WM_SETFOCUS (int mp1, int mp2) {
     else
         sendEvent (SWT.FocusOut);
     // widget could be disposed at this point
-    
+
     /*
     * It is possible that the shell may be
     * disposed at this point.  If this happens
@@ -3814,7 +3815,7 @@ MRESULT WM_SETFOCUS (int mp1, int mp2) {
             }
         }
     }
-    
+
     return MRESULT.ZERO;
 }
 
@@ -4068,7 +4069,7 @@ MRESULT wmDrawChild (int mp1, int mp2) {
       return null;
 }
 
-//@@TODO (dmik): 
+//@@TODO (dmik):
 //LRESULT wmMeasureChild (int wParam, int lParam) {
 //      return null;
 //}
