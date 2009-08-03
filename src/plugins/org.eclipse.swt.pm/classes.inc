@@ -46,6 +46,7 @@ org\eclipse\swt\widgets\Group.java
 org\eclipse\swt\widgets\Menu.java
 org\eclipse\swt\widgets\MenuItem.java
 org\eclipse\swt\widgets\Scale.java
+
 # SWT Base
 
 org\eclipse\swt\graphics\Drawable.java
@@ -199,6 +200,7 @@ org\eclipse\swt\internal\pm\ACCELTABLE.java
 org\eclipse\swt\internal\pm\POINTL.java
 org\eclipse\swt\internal\pm\CURSORINFO.java
 org\eclipse\swt\internal\pm\SLDCDATA.java
+org\eclipse\swt\internal\pm\POINTS.java
 
 # SWT PI (+)
 

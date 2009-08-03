@@ -1,6 +1,6 @@
 /*
  * OS/2 version.
- * Copyright (c) 2002, 2008 EclipseOS2 Team.
+ * Copyright (c) 2002, 2009 EclipseOS2 Team.
  */
 
 /*
@@ -174,6 +174,7 @@ ACCELTABLE_FID_CACHE ACCELTABLEFc;
 CURSORINFO_FID_CACHE CURSORINFOFc;
 POINTL_FID_CACHE POINTLFc;
 SLDCDATA_FID_CACHE SLDCDATAFc;
+POINTS_FID_CACHE POINTSFc;
 
 /*@@TODO (dmik): remove
 FACENAMEDESC_FID_CACHE FACENAMEDESCFc;
@@ -1626,6 +1627,31 @@ void setSLDCDATAFields(JNIEnv *env, jobject lpObject, PSLDCDATA lpStruct, PSLDCD
     (*env)->SetShortField(env, lpObject, lpCache->usScale2Spacing, lpStruct->usScale2Spacing);
 }
 
+/***************************************** POINTS struct ***************************************/
+
+void cachePOINTSFids(JNIEnv *env, jobject lpObject, PPOINTS_FID_CACHE lpCache)
+{
+    if (lpCache->cached) return;
+    lpCache->clazz = (*env)->GetObjectClass(env, lpObject);
+    lpCache->x = (*env)->GetFieldID(env, lpCache->clazz, "x", "S");
+    lpCache->y = (*env)->GetFieldID(env, lpCache->clazz, "y", "S");
+    lpCache->cached = 1;
+}
+
+PPOINTS getPOINTSFields(JNIEnv *env, jobject lpObject, PPOINTS lpStruct, PPOINTS_FID_CACHE lpCache)
+{
+    if (!lpCache->cached) cachePOINTSFids(env, lpObject, lpCache);
+    lpStruct->x = (*env)->GetShortField(env, lpObject, lpCache->x);
+    lpStruct->y = (*env)->GetShortField(env, lpObject, lpCache->y);
+    return lpStruct;
+}
+
+void setPOINTSFields(JNIEnv *env, jobject lpObject, PPOINTS lpStruct, PPOINTS_FID_CACHE lpCache)
+{
+    if (!lpCache->cached) cachePOINTSFids(env, lpObject, lpCache);
+    (*env)->SetShortField(env, lpObject, lpCache->x, lpStruct->x);
+    (*env)->SetShortField(env, lpObject, lpCache->y, lpStruct->y);
+}
 
 /***************************************** FACENAMEDESC struct ********************************************/
 /*@@TODO (dmik): don't need, remove!

@@ -1,6 +1,6 @@
 /*
  * OS/2 version.
- * Copyright (c) 2002, 2008 EclipseOS2 Team.
+ * Copyright (c) 2002, 2009 EclipseOS2 Team.
  */
 
 /*
@@ -582,6 +582,19 @@ void cacheSLDCDATAFids(JNIEnv *env, jobject lpObject, PSLDCDATA_FID_CACHE lpCach
 PSLDCDATA getSLDCDATAFields(JNIEnv *env, jobject lpObject, PSLDCDATA lpStruct, PSLDCDATA_FID_CACHE lpCache);
 void setSLDCDATAFields(JNIEnv *env, jobject lpObject, PSLDCDATA lpStruct, PSLDCDATA_FID_CACHE lpCache);
 
+/* POINTS struct */
+typedef struct POINTS_FID_CACHE {
+    int cached;
+    jclass clazz;
+    jfieldID
+        x,        
+        y;        
+} POINTS_FID_CACHE;
+typedef POINTS_FID_CACHE *PPOINTS_FID_CACHE;
+
+void cachePOINTSFids(JNIEnv *env, jobject lpObject, PPOINTS_FID_CACHE lpCache);
+PPOINTS getPOINTSFields(JNIEnv *env, jobject lpObject, PPOINTS lpStruct, PPOINTS_FID_CACHE lpCache);
+void setPOINTSFields(JNIEnv *env, jobject lpObject, PPOINTS lpStruct, PPOINTS_FID_CACHE lpCache);
 
 /* FACENAMEDESC struct */
 /*@@TODO (dmik): remove!
@@ -629,6 +642,7 @@ extern ACCELTABLE_FID_CACHE ACCELTABLEFc;
 extern CURSORINFO_FID_CACHE CURSORINFOFc;
 extern POINTL_FID_CACHE POINTLFc;
 extern SLDCDATA_FID_CACHE SLDCDATAFc;
+extern POINTS_FID_CACHE POINTSFc;
 /*@@TODO (dmik): remove! 
 extern FACENAMEDESC_FID_CACHE FACENAMEDESCFc;
 */
