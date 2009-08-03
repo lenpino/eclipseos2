@@ -3101,11 +3101,14 @@ MRESULT WM_CONTEXTMENU (int mp1, int mp2) {
       * and the parent of all menus is the shell, the menu may
       * have been destroyed but not removed from the control.
       */
-    //@@TODO(lpino) First check if this validation applies to OS/2 implementation and then validate using the coordinates of the mouse
+    //@@TODO(lpino) Validate using the coordinates of the mouse
 //      if (mp2 != handle) return null;
-      short flOptions = OS.PU_HCONSTRAIN | OS.PU_VCONSTRAIN | OS.PU_KEYBOARD | OS.PU_MOUSEBUTTON1;
-      boolean rc = OS.WinPopupMenu(handle, handle, menu.handle, OS.SHORT1FROMMP(mp1), OS.SHORT2FROMMP(mp1), 0, flOptions);
-      return MRESULT.TRUE;
+      if(menu == null) return MRESULT.FALSE;
+      else{
+          short flOptions = OS.PU_HCONSTRAIN | OS.PU_VCONSTRAIN | OS.PU_KEYBOARD | OS.PU_MOUSEBUTTON1;
+          boolean rc = OS.WinPopupMenu(handle, handle, menu.handle, OS.SHORT1FROMMP(mp1), OS.SHORT2FROMMP(mp1), 0, flOptions);
+          return MRESULT.TRUE;
+      }
 }
 
 MRESULT WM_CONTROL (int mp1, int mp2) {
