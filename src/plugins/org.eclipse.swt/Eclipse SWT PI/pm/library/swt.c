@@ -1577,6 +1577,30 @@ JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinSetPointerPos
     return (jboolean)WinSetPointerPos((HWND)hwndDeskTop, lx, ly);
 
 }
+JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinSetCapture
+        (JNIEnv *env, jclass that, jint hab, jint hwndDeskTop, jint hwnd)
+{
+    DEBUG_CALL("WinSetCapture\n")
+
+    return (jboolean)WinSetCapture((HWND)hwndDeskTop, (HWND)hwnd);
+
+}
+JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_WinQueryCapture
+        (JNIEnv *env, jclass that, jint hab, jint hwndDeskTop)
+{
+    DEBUG_CALL("WinQueryCapture\n")
+
+    return (jboolean)WinQueryCapture((HWND)hwndDeskTop);
+
+}
+JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinSetActiveWindow
+        (JNIEnv *env, jclass that, jint hab, jint hwndDeskTop, jint hwnd)
+{
+    DEBUG_CALL("WinSetActiveWindow\n")
+
+    return (jboolean)WinSetActiveWindow((HWND)hwndDeskTop, (HWND)hwnd);
+
+}
 JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_PrfQueryProfileSize
         (JNIEnv *env, jclass that, jint hini, jobject pszApp, jobject pszKey,
         jintArray pulDataLen)
