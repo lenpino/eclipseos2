@@ -160,6 +160,7 @@ public class OS {
 //    public static final int WS_GROUP =          0x00010000;
     public static final int WS_TABSTOP =        0x00020000;
 //    public static final int WS_MULTISELECT =    0x00040000;
+    public static final int WS_SYSMENU =          0x00080000;
 
     /* Button control styles */
     public static final int BS_PUSHBUTTON         = 0;
@@ -298,6 +299,15 @@ public class OS {
     /* Key/Character input messages */
     public static final int WM_CHAR =       0x007a;
 //    public static final int WM_VIOCHAR =    0x007b;
+    
+/*** Mouse input messages ***********************************************/
+   public static final int WM_MOUSEMOVE               = 0x0070; 
+   public static final int WM_BUTTON1DOWN             = 0x0071; 
+   public static final int WM_BUTTON1UP               = 0x0072;
+   public static final int WM_BUTTON1DBLCLK           = 0x0073;
+   public static final int WM_BUTTON2DOWN             = 0x0074;
+   public static final int WM_BUTTON2UP               = 0x0075;
+   public static final int WM_BUTTON2DBLCLK           = 0x0076;
 
     /* WM_CHAR fs field bits */
 //    public static final int KC_NONE =           0x0000;
@@ -2381,6 +2391,9 @@ public static final native int WinQueryClassName(int hwnd, int lLength, PSZ PCHB
 public static final native boolean WinQueryCursorInfo(int hwndDeskTop, CURSORINFO pcsriCursorInfo);
 public static final native int WinWindowFromPoint(int hwndParent, POINTL pptlPoint, boolean fEnumChildren);
 public static final native boolean WinSetPointerPos(int hwndDeskTop, int lx, int ly);
+public static final native boolean WinSetCapture(int hwndDeskTop, int hwnd);
+public static final native int WinQueryCapture(int hwndDeskTop);
+public static final native boolean WinSetActiveWindow(int hwndDeskTop, int hwnd);
 public static final native boolean PrfQueryProfileSize (int hini, PSZ pszApp,
     PSZ pszKey, int[] pulDataLen);
 public static final native int PrfQueryProfileString (int hini, PSZ pszApp,
