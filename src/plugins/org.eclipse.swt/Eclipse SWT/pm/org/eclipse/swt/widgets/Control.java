@@ -2948,7 +2948,7 @@ int windowProc (int msg, int mp1, int mp2) {
 //        case OS.WM_ADJUSTWINDOWPOS: result = WM_ADJUSTWINDOWPOS (mp1, mp2); break;
 //        case OS.WM_BUTTON2DBLCLK: result = WM_BUTTON2DBLCLK (mp1, mp2); break;
         case OS.WM_BUTTON1DOWN: result = WM_BUTTON1DOWN (mp1, mp2); break;
-//        case OS.WM_BUTTON1UP: result = WM_BUTTON1UP (mp1, mp2); break;
+        case OS.WM_BUTTON1UP: result = WM_BUTTON1UP (mp1, mp2); break;
 //        case OS.WM_BUTTON1CLICK: result = WM_BUTTON1CLICK (mp1, mp2); break;
         case OS.WM_CALCVALIDRECTS: result = WM_CALCVALIDRECTS (mp1, mp2); break;
         case OS.WM_CHAR: result = WM_CHAR (mp1, mp2); break;
@@ -3340,7 +3340,6 @@ MRESULT WM_BUTTON1DBLCLK (int mp1, int mp2) {
       * pairs will not see the second mouse down.  The
       * fix is to send a mouse down event.
       */
-//      sendMouseEvent (SWT.MouseDown, 1, OS.WM_LBUTTONDOWN, wParam, lParam);
       sendMouseEvent (SWT.MouseDoubleClick, 1, OS.WM_BUTTON1DBLCLK, mp1, mp2);
       int result = callWindowProc (OS.WM_BUTTON1DBLCLK, mp1, mp2);
       if (OS.WinQueryCapture (OS.HWND_DESKTOP) != handle) OS.WinSetCapture (OS.HWND_DESKTOP, handle);
@@ -3367,8 +3366,8 @@ MRESULT WM_BUTTON1DOWN (int mp1, int mp2) {
 //              }
 //      }
       sendMouseEvent (SWT.MouseDown, 1, OS.WM_BUTTON1DOWN, mp1, mp2);
-//      int result = callWindowProc (OS.WM_BUTTON1DOWN, mp1, mp2);
-      int result = 0;
+      int result = callWindowProc (OS.WM_BUTTON1DOWN, mp1, mp2);
+//      int result = 0;
       if (mouseDown) {
           int hwnd = OS.WinQueryCapture (OS.HWND_DESKTOP);
           int hwnd2 = OS.WinQueryWindow(handle, OS.QW_PARENT);
@@ -3380,7 +3379,7 @@ MRESULT WM_BUTTON1DOWN (int mp1, int mp2) {
               if(OS.WinQueryWindow(handle, OS.QW_PARENT) == OS.WinQueryActiveWindow(OS.HWND_DESKTOP)){
                   System.out.println("Control::WM_BUTTON1DOWN");
               }
-//              OS.WinSetActiveWindow (OS.HWND_DESKTOP, handle);
+              OS.WinSetActiveWindow (OS.HWND_DESKTOP, handle);
       }
 //      if (dragging) {
 //              postEvent (SWT.DragDetect);
@@ -3414,15 +3413,15 @@ MRESULT WM_BUTTON1DOWN (int mp1, int mp2) {
       return new MRESULT (result);
 }
 
-//LRESULT WM_LBUTTONUP (int wParam, int lParam) {
-//      sendMouseEvent (SWT.MouseUp, 1, OS.WM_LBUTTONUP, wParam, lParam);
-//      int result = callWindowProc (OS.WM_LBUTTONUP, wParam, lParam);
+MRESULT WM_BUTTON1UP (int mp1, int mp2) {
+      sendMouseEvent (SWT.MouseUp, 1, OS.WM_BUTTON1UP, mp1, mp2);
+      int result = callWindowProc (OS.WM_BUTTON1UP, mp1, mp2);
 //      if ((wParam & (OS.MK_LBUTTON | OS.MK_MBUTTON | OS.MK_RBUTTON)) == 0) {
-//              if (OS.WinQueryCapture () == handle) OS.ReleaseCapture ();
+              if (OS.WinQueryCapture (OS.HWND_DESKTOP) == handle) OS.WinSetCapture (OS.HWND_DESKTOP, OS.NULLHANDLE);
 //      }
-//      return new LRESULT (result);
-//}
-//
+      return new MRESULT (result);
+}
+
 //LRESULT WM_MBUTTONDBLCLK (int wParam, int lParam) {
 //      /*
 //      * Feature in Windows. Windows sends the following
