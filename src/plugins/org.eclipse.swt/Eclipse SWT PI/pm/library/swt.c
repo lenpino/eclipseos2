@@ -1554,7 +1554,7 @@ JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_WinQueryCursorInfo
     return rc;
 }
 JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinWindowFromPoint
-        (JNIEnv *env, jclass that, jint hab, jint hwndParent, jobject pptlPoint, jboolean fEnumChildren)
+        (JNIEnv *env, jclass that, jint hwndParent, jobject pptlPoint, jboolean fEnumChildren)
 {
     POINTL c_pptlPoint, *c_ppptlPoint = NULL;
     jint rc;
@@ -1570,7 +1570,7 @@ JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinWindowFromPoin
 
 }
 JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinSetPointerPos
-        (JNIEnv *env, jclass that, jint hab, jint hwndDeskTop, jint lx, jint ly)
+        (JNIEnv *env, jclass that, jint hwndDeskTop, jint lx, jint ly)
 {
     DEBUG_CALL("WinSetPointerPos\n")
 
@@ -1578,7 +1578,7 @@ JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinSetPointerPos
 
 }
 JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinSetCapture
-        (JNIEnv *env, jclass that, jint hab, jint hwndDeskTop, jint hwnd)
+        (JNIEnv *env, jclass that, jint hwndDeskTop, jint hwnd)
 {
     DEBUG_CALL("WinSetCapture\n")
 
@@ -1586,15 +1586,15 @@ JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinSetCapture
 
 }
 JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_WinQueryCapture
-        (JNIEnv *env, jclass that, jint hab, jint hwndDeskTop)
+        (JNIEnv *env, jclass that, jint hwndDeskTop)
 {
     DEBUG_CALL("WinQueryCapture\n")
 
-    return (jboolean)WinQueryCapture((HWND)hwndDeskTop);
+    return (jint)WinQueryCapture((HWND)hwndDeskTop);
 
 }
 JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinSetActiveWindow
-        (JNIEnv *env, jclass that, jint hab, jint hwndDeskTop, jint hwnd)
+        (JNIEnv *env, jclass that, jint hwndDeskTop, jint hwnd)
 {
     DEBUG_CALL("WinSetActiveWindow\n")
 
