@@ -471,13 +471,13 @@ void createHandle () {
     OS.WinSetWindowUShort (handle, OS.QWS_ID, (short)(handle & 0xFFFF));
 
 //@@TODO (dmik): debug code, remove when no more necessary
-System.out.println (
-    "Control.createHandle(): Window has been created:\n" +
-    "    hwnd = " + Integer.toHexString (handle) + "\n" +
-    "    hwnd.parent = hwnd.owner = " + Integer.toHexString (parent.handle) + "\n" +
-    "    class = " + windowClass() + "\n" +
-    "    style = " + Integer.toHexString (widgetStyle())
-);
+//System.out.println (
+//    "Control.createHandle(): Window has been created:\n" +
+//    "    hwnd = " + Integer.toHexString (handle) + "\n" +
+//    "    hwnd.parent = hwnd.owner = " + Integer.toHexString (parent.handle) + "\n" +
+//    "    class = " + windowClass() + "\n" +
+//    "    style = " + Integer.toHexString (widgetStyle())
+//);
 
 //@@TODO(dmik): DBCS handling?
 //    if (OS.IsDBLocale && parent != null) {
@@ -1781,8 +1781,8 @@ boolean sendMouseEvent (int type, int button, int msg, int mp1, int mp2) {
     event.y = (short) (mp1 >> 16);
     int keyState = mp2 >> 16;
     //@@TODO(lpino): Remove debug
-    System.out.println("Control::sendMouseEvent -> X= " + event.x + " Y= " + event.y);
-    System.out.println("Control::sendMouseEvent -> MP2= " + Integer.toHexString(keyState));
+//    System.out.println("Control::sendMouseEvent -> X= " + event.x + " Y= " + event.y);
+//    System.out.println("Control::sendMouseEvent -> MP2= " + Integer.toHexString(keyState));
 //    if (OS.GetKeyState (OS.VK_MENU) < 0) event.stateMask |= SWT.ALT;
     if ((keyState & OS.KC_SHIFT) != 0) event.stateMask |= SWT.SHIFT;
     if ((keyState & OS.KC_CTRL) != 0) event.stateMask |= SWT.CONTROL;
@@ -2996,11 +2996,11 @@ int windowProc (int msg, int mp1, int mp2) {
 //        case OS.WM_MOUSEACTIVATE: result = WM_MOUSEACTIVATE (wParam, lParam); break;
 //        case OS.WM_MOUSEHOVER: result = WM_MOUSEHOVER (wParam, lParam); break;
 //        case OS.WM_MOUSELEAVE: result = WM_MOUSELEAVE (wParam, lParam); break;
-//        case OS.WM_MOUSEMOVE: result = WM_MOUSEMOVE (wParam, lParam); break;
+//        case OS.WM_MOUSEMOVE: result = WM_MOUSEMOVE (mp1, mp2); break;
 //        case OS.WM_MOUSEWHEEL: result = WM_MOUSEWHEEL (wParam, lParam); break;
 //        case OS.WM_NCACTIVATE: result = WM_NCACTIVATE (wParam, lParam); break;
 //        case OS.WM_NCCALCSIZE: result = WM_NCCALCSIZE (wParam, lParam); break;
-//        case OS.WM_NCHITTEST: result = WM_NCHITTEST (wParam, lParam); break;
+        case OS.WM_HITTEST: result = WM_HITTEST (mp1, mp2); break;
 //        case OS.WM_NOTIFY: result = WM_NOTIFY (wParam, lParam); break;
         case OS.WM_PAINT: result = WM_PAINT (mp1, mp2); break;
 //@@TODO (dmik): later
@@ -3325,7 +3325,6 @@ MRESULT WM_INITMENU (int mp1, int mp2) {
       return null;
 }
 
-//@@TODO (dmik): later
 MRESULT WM_BUTTON1DBLCLK (int mp1, int mp2) {
       /*
       * Feature in Windows. Windows sends the following
@@ -3372,12 +3371,12 @@ MRESULT WM_BUTTON1DOWN (int mp1, int mp2) {
           int hwnd = OS.WinQueryCapture (OS.HWND_DESKTOP);
           int hwnd2 = OS.WinQueryWindow(handle, OS.QW_PARENT);
           int hwnd3 = OS.WinQueryActiveWindow(OS.HWND_DESKTOP);
-          System.out.println("Control::WM_BUTTON1DOWN -> Window = " + Integer.toHexString(handle) + " Window Activa = " + Integer.toHexString(hwnd) + " Padre = " + Integer.toHexString(hwnd2));
+//          System.out.println("Control::WM_BUTTON1DOWN -> Window = " + Integer.toHexString(handle) + " Window Activa = " + Integer.toHexString(hwnd) + " Padre = " + Integer.toHexString(hwnd2));
               if (OS.WinQueryCapture (OS.HWND_DESKTOP) != handle){
                   OS.WinSetCapture (OS.HWND_DESKTOP, handle);
               }
               if(OS.WinQueryWindow(handle, OS.QW_PARENT) == OS.WinQueryActiveWindow(OS.HWND_DESKTOP)){
-                  System.out.println("Control::WM_BUTTON1DOWN");
+//                  System.out.println("Control::WM_BUTTON1DOWN");
               }
               OS.WinSetActiveWindow (OS.HWND_DESKTOP, handle);
       }
@@ -3614,7 +3613,7 @@ MRESULT WM_MENUSELECT (int mp1, int mp2) {
 //      return null;
 //}
 //
-//LRESULT WM_MOUSEMOVE (int wParam, int lParam) {
+//MRESULT WM_MOUSEMOVE (int mp1, int mp2) {
 //      if (!OS.IsWinCE) {
 //              boolean hooksEnter = hooks (SWT.MouseEnter);
 //              if (hooksEnter || hooks (SWT.MouseExit) || hooks (SWT.MouseHover)) {
@@ -3660,12 +3659,12 @@ MRESULT WM_MENUSELECT (int mp1, int mp2) {
 //LRESULT WM_NCCALCSIZE (int wParam, int lParam) {
 //      return null;
 //}
-//
-//LRESULT WM_NCHITTEST (int wParam, int lParam) {
-//      if (!isActive ()) return new LRESULT (OS.HTTRANSPARENT);
-//      return null;
-//}
-//
+
+MRESULT WM_HITTEST (int mp1, int mp2) {
+      if (!isActive ()) return new MRESULT (OS.HT_TRANSPARENT );
+      return null;
+}
+
 //LRESULT WM_NOTIFY (int wParam, int lParam) {
 //      NMHDR hdr = new NMHDR ();
 //      OS.MoveMemory (hdr, lParam, NMHDR.sizeof);

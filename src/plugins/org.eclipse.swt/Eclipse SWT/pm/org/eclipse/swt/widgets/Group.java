@@ -205,6 +205,11 @@ void createHandle () {
 
 public Rectangle getClientArea () {
 	checkWidget ();
+	if (parent != null && parent.pswp != 0) {
+            endDeferWindowPos (parent);
+            int count = parent.getChildrenCount ();
+            beginDeferWindowPos (parent, count);
+        }
 //@@TODO (lpino): What to do about this?
 //	if (parent.hdwp != 0) {
 //		int oldHdwp = parent.hdwp;
@@ -286,7 +291,7 @@ public void setText (String string) {
 }
 
 int widgetStyle () {
-	return super.widgetStyle () | OS.SS_GROUPBOX;// | OS.WS_CLIPCHILDREN | OS.WS_CLIPSIBLINGS;
+	return super.widgetStyle () | OS.SS_GROUPBOX | OS.WS_TABSTOP;// | OS.WS_CLIPCHILDREN | OS.WS_CLIPSIBLINGS;
 }
 
 PSZ windowClass () {
@@ -319,21 +324,24 @@ int windowProc () {
 //	return result;
 //}
 
-//LRESULT WM_NCHITTEST (int wParam, int lParam) {
-//	LRESULT result = super.WM_NCHITTEST (wParam, lParam);
-//	if (result != null) return result;
+MRESULT WM_HITTEST (int mp1, int mp2) {
+	MRESULT result = super.WM_HITTEST (mp1, mp2);
+	if (result != null) return result;
 //	/*
 //	* Feature in Windows.  The window proc for the group box
-//	* returns HTTRANSPARENT indicating that mouse messages
+//	* returns HT_TRANSPARENT indicating that mouse messages
 //	* should not be delivered to the receiver and any children.
-//	* Normally, group boxes in Windows do not have children and
+//	* Normally, group boxes in OS/2 do not have children and
 //	* this is the correct behavior for this case.  Because we
-//	* allow children, answer HTCLIENT to allow mouse messages
+//	* allow children, answer HT_NORMAL to allow mouse messages
 //	* to be delivered to the children.
 //	*/
-//	int code = callWindowProc (OS.WM_NCHITTEST, wParam, lParam);
-//	if (code == OS.HTTRANSPARENT) code = OS.HTCLIENT;
-//	return new LRESULT (code);
-//}
-
+	int code = callWindowProc (OS.WM_HITTEST, mp1, mp2);
+	if (code == OS.HT_TRANSPARENT) code = OS.HT_NORMAL;
+	return new MRESULT (code);
+}
+MRESULT WM_MOUSEMOVE (int mp1, int mp2) {
+    System.out.println("Group::WM_MOUSEMOVE");
+    return null;
+}
 }

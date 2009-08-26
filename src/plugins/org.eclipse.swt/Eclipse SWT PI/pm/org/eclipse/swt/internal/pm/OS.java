@@ -105,7 +105,7 @@ public class OS {
     /* Class styles */
 //    public static final int CS_MOVENOTIFY =     0x00000001;
 //    public static final int CS_SIZEREDRAW =     0x00000004;
-//    public static final int CS_HITTEST =        0x00000008;
+    public static final int CS_HITTEST =        0x00000008;
 //    public static final int CS_PUBLIC =         0x00000010;
 //    public static final int CS_FRAME =          0x00000020;
 //    public static final int CS_CLIPCHILDREN =   0x20000000;
@@ -2185,6 +2185,12 @@ public class OS {
    public static final int SDA_BACKGROUND           = 0x0003;
    public static final int SDA_SLIDERARM            = 0x0004;
    
+   /*** WM_HITTEST return codes ********************************************/
+   public static final int HT_NORMAL                   = 0;
+   public static final int HT_TRANSPARENT          = -1;
+   public static final int HT_DISCARD                  =-2;
+   public static final int HT_ERROR                      =-3;
+
 
 /* PM macros */
 
