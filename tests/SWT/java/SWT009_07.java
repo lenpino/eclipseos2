@@ -31,25 +31,25 @@ public class SWT009_07 extends SWTTestCase {
 
 	void initComponents() {
             shell.setText("Hello World Group");
-            shell.setSize(200, 200);    
+            shell.setSize(290, 200);    
             shell.setText("A Group Example");
             final Group g = new Group(shell, SWT.SHADOW_ETCHED_IN);
-            g.setSize(110, 75);
+            g.setBounds(5,5,260,90);
             g.setText("Options Group");
             final Button b1;
             final Button b2;
             final Button b3;
             b1 = new Button(g, SWT.RADIO);
-            b1.setBounds(10, 20, 75, 15);
-            b1.setText("Option One");
+            b1.setBounds(10, 25, 240, 15);
+            b1.setText("Option One, Opcion Uno");
             b2 = new Button(g, SWT.RADIO);
-            b2.setBounds(10, 35, 75, 15);
-            b2.setText("Option Two");
+            b2.setBounds(10,45, 240, 15);
+            b2.setText("Option Two, Opcion Dos");
             b3 = new Button(g, SWT.RADIO);
-            b3.setBounds(10, 50, 80, 15);
-            b3.setText("Option Three");
-            g.pack();
-            g.setLocation(20, 20);
+            b3.setBounds(10, 65, 240, 15);
+            b3.setText("Option Three, Opcion Tres");
+            //g.pack();
+            //g.setLocation(20, 20);
             shell.open();
                 
 	}
