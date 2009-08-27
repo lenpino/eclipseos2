@@ -35,7 +35,7 @@ public class SWT009_07 extends SWTTestCase {
             shell.setText("A Group Example");
             final Group g = new Group(shell, SWT.SHADOW_ETCHED_IN);
             g.setBounds(5,5,260,90);
-            g.setText("Options Group");
+            g.setText("Options Group A");
             final Button b1;
             final Button b2;
             final Button b3;
@@ -50,6 +50,25 @@ public class SWT009_07 extends SWTTestCase {
             b3.setText("Option Three, Opcion Tres");
             //g.pack();
             //g.setLocation(20, 20);
+            
+            //
+             final Group g2 = new Group(shell, SWT.SHADOW_ETCHED_IN);
+            g2.setBounds(5,105,260,90);
+            g2.setText("Options Group B");
+            final Button optionGrupoB_1;
+            final Button optionGrupoB_2;
+            final Button optionGrupoB_3;
+            optionGrupoB_1 = new Button(g2, SWT.RADIO);
+            optionGrupoB_1.setBounds(10, 25, 240, 15);
+            optionGrupoB_1.setText("Option B One, Opcion Uno");
+            optionGrupoB_2= new Button(g2, SWT.RADIO);
+            optionGrupoB_2.setBounds(10,45, 240, 15);
+            optionGrupoB_2.setText("Option B Two, Opcion Dos");
+            optionGrupoB_3 = new Button(g2, SWT.RADIO);
+            optionGrupoB_3.setBounds(10, 65, 240, 15);
+            optionGrupoB_3.setText("Option B Three, Opcion Tres");
+            //
+            
             shell.open();
                 
 	}
