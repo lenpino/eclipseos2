@@ -504,7 +504,7 @@ boolean translateMnemonic (char key) {
 
 int widgetStyle () {
 	/* Temporary code to force SWT.CLIP_SIBLINGS */
-	return super.widgetStyle ();// | OS.WS_CLIPCHILDREN;
+	return super.widgetStyle (); // | OS.WS_CLIPCHILDREN;
 }
 
 MRESULT WM_CALCVALIDRECTS (int mp1, int mp2) {
@@ -522,13 +522,18 @@ MRESULT WM_CALCVALIDRECTS (int mp1, int mp2) {
 //@@TODO(dmik): think of it, not sure that it is processed in the right way here...
 //  And may be better to move this code to Decorations class...
 MRESULT WM_ERASEBACKGROUND (int mp1, int mp2) {
+//    System.out.println("Composite::WM_ERASEBACKGROUND -> HANDLE = " + Integer.toHexString(handle));
     if ((state & CANVAS) != 0) {
+        //@@TODO(lpino): This invalidation forces a whole window repaint to prevent clipping errors when window is partially obscure
+        //it has a negative impact on performance. As my understanding improves maybe this problem can be solved 
+        OS.WinInvalidateRect(handle, null, true);
+//        OS.WinUpdateWindow(handle);
         return super.WM_ERASEBACKGROUND (mp1, mp2);
     }
     RECTL rcl = new RECTL();
     OS.objcpy (rcl, mp2);
     drawBackground (mp1, rcl);
-    return MRESULT.FALSE;
+    return MRESULT.TRUE;
 }
 
 MRESULT WM_QUERYDLGCODE (int mp1, int mp2) {
@@ -555,18 +560,18 @@ MRESULT WM_QUERYDLGCODE (int mp1, int mp2) {
 //	if (font == 0) font = defaultFont ();
 //	return new LRESULT (font);
 //}
-//
-//LRESULT WM_LBUTTONDOWN (int wParam, int lParam) {
-//	LRESULT result = super.WM_LBUTTONDOWN (wParam, lParam);
-//
-//	/* Set focus for a canvas with no children */
-//	if ((state & CANVAS) != 0) {
-//		if ((style & SWT.NO_FOCUS) != 0) return result;
-//		if (OS.GetWindow (handle, OS.GW_CHILD) == 0) setFocus ();
-//	}
-//	return result;
-//}
-//
+
+MRESULT WM_BUTTON1DOWN (int mp1, int mp2) {
+	MRESULT result = super.WM_BUTTON1DOWN (mp1, mp2);
+
+	/* Set focus for a canvas with no children */
+	if ((state & CANVAS) != 0) {
+		if ((style & SWT.NO_FOCUS) != 0) return result;
+		if (OS.WinQueryWindow (handle, OS.QW_TOP) == 0) setFocus ();
+	}
+	return result;
+}
+
 //LRESULT WM_NOTIFY (int wParam, int lParam) {
 //	if (!OS.IsWinCE) {
 //		NMHDR hdr = new NMHDR ();
@@ -626,8 +631,7 @@ MRESULT WM_QUERYDLGCODE (int mp1, int mp2) {
 MRESULT WM_PAINT (int mp1, int mp2) {
     if ((state & CANVAS) == 0) {
 		return super.WM_PAINT (mp1, mp2);
-	}
-
+    }
     /*
 	* This code is intentionally commented.  Don't exit
 	* early because the background must still be painted,
@@ -638,41 +642,41 @@ MRESULT WM_PAINT (int mp1, int mp2) {
 	*/
 //	if (!hooks (SWT.Paint)) return null;
     /* lazily obtain a long-term cached micro presentation space */
-	GCData data = new GCData ();
+//    System.out.println("Composite::WM_PAINT -> HANDLE  =  " + Integer.toHexString(handle));
+    GCData data = new GCData ();
     if (hps == 0) {
         hps = internal_new_GC (data);
         if (hps == 0) SWT.error(SWT.ERROR_NO_HANDLES);
         data.doInit = true;
     }
-
-	/* Get the damage */
-    int [] rgnRects = null;
+//	/* Get the damage */
+        int [] rgnRects = null;
 	boolean isComplex = false;
 	boolean exposeRegion = false;
 	if ((style & SWT.NO_MERGE_PAINTS) != 0) {
-        int hrgn = OS.GpiCreateRegion (hps, 0, null);
-        isComplex = OS.WinQueryUpdateRegion (handle, hrgn) == OS.RGN_COMPLEX;
-        if (isComplex) {
-            RGNRECT rgnctl = new RGNRECT();
-            rgnctl.ircStart = 1;
-            rgnctl.ulDirection = OS.RECTDIR_LFRT_TOPBOT;
-            exposeRegion = OS.GpiQueryRegionRects (hps, hrgn, null, rgnctl, null);
-            if (exposeRegion) {
-                rgnRects = new int [rgnctl.crcReturned * 4];
-                rgnctl.crc = rgnctl.crcReturned;
-                exposeRegion = OS.GpiQueryRegionRects (hps, hrgn, null, rgnctl, rgnRects);
+            int hrgn = OS.GpiCreateRegion (hps, 0, null);
+            isComplex = OS.WinQueryUpdateRegion (handle, hrgn) == OS.RGN_COMPLEX;
+            if (isComplex) {
+                RGNRECT rgnctl = new RGNRECT();
+                rgnctl.ircStart = 1;
+                rgnctl.ulDirection = OS.RECTDIR_LFRT_TOPBOT;
+                exposeRegion = OS.GpiQueryRegionRects (hps, hrgn, null, rgnctl, null);
+                if (exposeRegion) {
+                    rgnRects = new int [rgnctl.crcReturned * 4];
+                    rgnctl.crc = rgnctl.crcReturned;
+                    exposeRegion = OS.GpiQueryRegionRects (hps, hrgn, null, rgnctl, rgnRects);
+                }
             }
+            OS.GpiDestroyRegion (hps, hrgn);
         }
-        OS.GpiDestroyRegion (hps, hrgn);
-    }
 
-	/* Set the clipping bits */
-	int oldBits = 0;
+//	/* Set the clipping bits */
+    int oldBits = 0;
     oldBits = OS.WinQueryWindowULong (handle, OS.QWL_STYLE);
     int newBits = oldBits | OS.WS_CLIPSIBLINGS | OS.WS_CLIPCHILDREN;	
     OS.WinSetWindowULong (handle, OS.QWL_STYLE, newBits);
 
-	/* Create the paint GC */
+//	/* Create the paint GC */
     data.rcl = new RECTL ();
     data.hps = hps;
     GC gc = GC.pm_new (this, data);
@@ -680,17 +684,13 @@ MRESULT WM_PAINT (int mp1, int mp2) {
 //  as passed to it if this hps is not null and valid.
 //    int ahps = gc.handle;
     int height = getHeight ();
-	
     /*
      *  Feature in OS/2. When resizing a window that doesn't have the
      *  CS_SIZEREDRAW flag, it receives WM_PAINT messages even when getting
      *  smaller, with its update rectangle being empty. So, detect this
      *  situation and don't send an SWT.Paint event.
      */
-    if ((style & SWT.NO_REDRAW_RESIZE) == 0 ||
-        (data.rcl.xRight != data.rcl.xLeft) ||
-        (data.rcl.yTop != data.rcl.yBottom))
-    {
+    if ((style & SWT.NO_REDRAW_RESIZE) == 0 || (data.rcl.xRight != data.rcl.xLeft) || (data.rcl.yTop != data.rcl.yBottom)) {
         /* Send the paint event */
         Event event = new Event ();
         event.gc = gc;
@@ -710,12 +710,16 @@ MRESULT WM_PAINT (int mp1, int mp2) {
                 rcl.yBottom = rgnRects [(i << 2) + 1];
                 rcl.xRight = rgnRects [(i << 2) + 2];
                 rcl.yTop = rgnRects [(i << 2) + 3];
-                drawBackground (0, rcl);
+//     System.out.println("Control::drawBackground -> xLeft = " + rcl.xLeft);
+//     System.out.println("Control::drawBackground -> xRight = " + rcl.xRight);
+//     System.out.println("Control::drawBackground -> yBottom = " + rcl.yBottom);
+//     System.out.println("Control::drawBackground -> yTop = " + rcl.yTop);
+               drawBackground (0, rcl);
                 event.x = rcl.xLeft;
                 event.y = height - rcl.yTop;
                 event.width = rcl.xRight - rcl.xLeft;
                 event.height = rcl.yTop - rcl.yBottom;
-    			event.count = nCount - 1 - i;
+    		  event.count = nCount - 1 - i;
                 /*
                  *  Restore the clip region if was set by the last paint listener.
                  *  Although preserving the custom region between to pseudo
@@ -764,7 +768,7 @@ MRESULT WM_PAINT (int mp1, int mp2) {
     if (!isDisposed ()) {
         OS.WinSetWindowULong (handle, OS.QWL_STYLE, oldBits);
     }
-	return MRESULT.ZERO;
+    return MRESULT.ZERO;
 }
 
 //@@TODO(dmik)
