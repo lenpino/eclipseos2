@@ -160,8 +160,8 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
         FONTMETRICS fm = new FONTMETRICS();
         OS.GpiQueryFontMetrics (hps, FONTMETRICS.sizeof, fm);
         computeWindowTextSize (hps, fm, sizeRect);
-         if (this.hps == 0) OS.WinReleasePS (hps);
-
+         if (this.hps == 0) 
+             OS.WinReleasePS (hps);
 	Point size;
 	if (layout != null) {
 		size = layout.computeSize (this, wHint, hHint, changed);
@@ -210,14 +210,6 @@ public Rectangle getClientArea () {
             int count = parent.getChildrenCount ();
             beginDeferWindowPos (parent, count);
         }
-//@@TODO (lpino): What to do about this?
-//	if (parent.hdwp != 0) {
-//		int oldHdwp = parent.hdwp;
-//		parent.hdwp = 0;
-//		OS.EndDeferWindowPos (oldHdwp);
-//		int count = parent.getChildrenCount ();
-//		parent.hdwp = OS.BeginDeferWindowPos (count);
-//	}
         RECTL rcl = new RECTL();
         OS.WinQueryWindowRect (handle, rcl);
         int hps = this.hps;
@@ -291,9 +283,8 @@ public void setText (String string) {
 }
 
 int widgetStyle () {
-	return super.widgetStyle () | OS.SS_GROUPBOX | OS.WS_TABSTOP;// | OS.WS_CLIPCHILDREN | OS.WS_CLIPSIBLINGS;
+	return super.widgetStyle () | OS.SS_GROUPBOX | OS.WS_TABSTOP | OS.SS_AUTOSIZE;
 }
-
 PSZ windowClass () {
 	return GroupClass;
 }
@@ -328,7 +319,7 @@ MRESULT WM_HITTEST (int mp1, int mp2) {
 	MRESULT result = super.WM_HITTEST (mp1, mp2);
 	if (result != null) return result;
 //	/*
-//	* Feature in Windows.  The window proc for the group box
+//	* Feature in OS/2.  The window proc for the group box
 //	* returns HT_TRANSPARENT indicating that mouse messages
 //	* should not be delivered to the receiver and any children.
 //	* Normally, group boxes in OS/2 do not have children and
@@ -340,8 +331,5 @@ MRESULT WM_HITTEST (int mp1, int mp2) {
 	if (code == OS.HT_TRANSPARENT) code = OS.HT_NORMAL;
 	return new MRESULT (code);
 }
-MRESULT WM_MOUSEMOVE (int mp1, int mp2) {
-    System.out.println("Group::WM_MOUSEMOVE");
-    return null;
-}
+
 }
