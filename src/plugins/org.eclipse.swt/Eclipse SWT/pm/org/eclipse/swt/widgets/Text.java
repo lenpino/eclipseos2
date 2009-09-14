@@ -698,8 +698,8 @@ public String getLineDelimiter () {
  *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
  * </ul>
  */
-//public int getLineHeight () {
-//	checkWidget ();
+public int getLineHeight () {
+	checkWidget ();
 //	int newFont, oldFont = 0;
 //	int hDC = OS.GetDC (handle);
 //	newFont = OS.SendMessage (handle, OS.WM_GETFONT, 0, 0);
@@ -709,7 +709,20 @@ public String getLineDelimiter () {
 //	if (newFont != 0) OS.SelectObject (hDC, oldFont);
 //	OS.ReleaseDC (handle, hDC);
 //	return tm.tmHeight;
-//}
+        
+        //@@TODO(lpino): Implement MLM_QUERYFONT
+//        if ((style & SWT.MULTI) != 0){
+//            FATTRS hFont;
+//            OS.WinSendMsg (handle, OS.MLM_QUERYFONT, hFont, 0);
+//        }else{
+            int hps = this.hps;
+            if (hps == 0) hps = OS.WinGetPS (handle);
+            FONTMETRICS fm = new FONTMETRICS();
+            OS.GpiQueryFontMetrics (hps, FONTMETRICS.sizeof, fm);
+            return fm.lEmHeight;
+//        }
+//        return 0;
+}
 
 /**
  * Gets the position of the selected text.
