@@ -1025,16 +1025,16 @@ public void setVisible (boolean visible) {
     showWithParent = visible;
 //    if (!OS.IsWinCE) OS.ShowOwnedPopups (handle, visible);
     int mask = SWT.PRIMARY_MODAL | SWT.APPLICATION_MODAL | SWT.SYSTEM_MODAL;
-//    if ((style & mask) != 0) {
-//        if (visible) {
-//            display.setModal (this);
-//            Control control = display.getFocusControl ();
-//            if (control != null && !control.isActive ()) bringToTop ();
-//            OS.WinSetCapture (OS.HWND_DESKTOP, OS.NULLHANDLE);
-//        } else {
-//            display.clearModal (this);
-//        }
-//    }
+    if ((style & mask) != 0) {
+        if (visible) {
+            display.setModal (this);
+            Control control = display.getFocusControl ();
+            if (control != null && !control.isActive ()) bringToTop ();
+            OS.WinSetCapture (OS.HWND_DESKTOP, OS.NULLHANDLE);
+        } else {
+            display.clearModal (this);
+        }
+    }
 }
 
 boolean traverseEscape () {
@@ -1045,7 +1045,6 @@ boolean traverseEscape () {
 }
 
 void updateModal () {
-//@@TODO(dmik)
 	if (!display.TrimEnabled) return;
 	setItemEnabled (OS.SC_CLOSE, isActive ());
 }
