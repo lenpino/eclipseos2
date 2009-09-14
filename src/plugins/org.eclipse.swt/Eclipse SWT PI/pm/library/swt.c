@@ -1601,6 +1601,24 @@ JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinSetActiveWindo
     return (jboolean)WinSetActiveWindow((HWND)hwndDeskTop, (HWND)hwnd);
 
 }
+JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinQueryUpdateRect
+        (JNIEnv *env, jclass that, jint hwnd, jobject prcl)
+{
+    DECL_GLOB(pGlob)
+    RECTL c_rcl, *c_prcl = NULL;
+    jboolean rc;
+
+    DEBUG_CALL("WinQueryUpdateRect\n")
+
+    if (prcl) c_prcl = getRECTLFields(env, prcl, &c_rcl, &PGLOB(RECTLFc));
+
+    rc = (jboolean)WinQueryUpdateRect((HWND)hwnd, c_prcl);
+
+    if (prcl) setRECTLFields(env, prcl, c_prcl, &PGLOB(RECTLFc));
+
+    return rc;
+}
+
 JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_PrfQueryProfileSize
         (JNIEnv *env, jclass that, jint hini, jobject pszApp, jobject pszKey,
         jintArray pulDataLen)

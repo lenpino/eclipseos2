@@ -648,9 +648,9 @@ public class OS {
     //public static final int GPI_ALTERROR =  (-1);
     
     /* return code to indicate type of region for GpiCombineRegion and others */
-//    public static final int RGN_ERROR =     0;
+    public static final int RGN_ERROR =     0;
     public static final int RGN_NULL =      1;
-//    public static final int RGN_RECT =      2;
+    public static final int RGN_RECT =      2;
     public static final int RGN_COMPLEX =   3;
 
     /* fill options for GpiBox/GpiFullArc/GpiOval */
@@ -2400,6 +2400,7 @@ public static final native boolean WinSetPointerPos(int hwndDeskTop, int lx, int
 public static final native boolean WinSetCapture(int hwndDeskTop, int hwnd);
 public static final native int WinQueryCapture(int hwndDeskTop);
 public static final native boolean WinSetActiveWindow(int hwndDeskTop, int hwnd);
+public static final native boolean WinQueryUpdateRect(int hwnd, RECTL prclPrc);
 public static final native boolean PrfQueryProfileSize (int hini, PSZ pszApp,
     PSZ pszKey, int[] pulDataLen);
 public static final native int PrfQueryProfileString (int hini, PSZ pszApp,
