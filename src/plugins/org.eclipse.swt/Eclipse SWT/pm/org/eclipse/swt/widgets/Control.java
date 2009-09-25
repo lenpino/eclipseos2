@@ -554,6 +554,10 @@ void drawBackground (int hps, RECTL rcl) {
     else {
         hps = this.hps;
     }
+//     System.out.println("Control::drawBackground -> xLeft = " + rcl.xLeft);
+//     System.out.println("Control::drawBackground -> xRight = " + rcl.xRight);
+//     System.out.println("Control::drawBackground -> yBottom = " + rcl.yBottom);
+//     System.out.println("Control::drawBackground -> yTop = " + rcl.yTop);
     OS.WinFillRect (hps, rcl, getBackgroundPixel ());
 }
 
@@ -2893,7 +2897,9 @@ void updateFont (Font oldFont, Font newFont) {
 
 int widgetStyle () {
     /* Force strict clipping by setting WS_CLIPSIBLINGS */
-    return OS.WS_VISIBLE | OS.WS_CLIPSIBLINGS;
+    //@@TODO (lpino): Remove log
+//    System.out.println("Control::widgetStyle");
+    return OS.WS_VISIBLE;// | OS.WS_CLIPSIBLINGS;
 
     /*
     * This code is intentionally commented.  When strict
@@ -3677,8 +3683,10 @@ MRESULT WM_HITTEST (int mp1, int mp2) {
 
 MRESULT WM_PAINT (int mp1, int mp2) {
     /* Exit early - don't draw the background */
-    if (!hooks (SWT.Paint)) return null;
-
+    if (!hooks (SWT.Paint)) {
+        return null;
+    }
+//    System.out.println("Control::WM_PAINT -> HANDLE  =  " + Integer.toHexString(handle));
     /* lazily obtain a long-term cached micro presentation space */
     GCData data = new GCData ();
     if (hps == 0) {
@@ -3686,7 +3694,6 @@ MRESULT WM_PAINT (int mp1, int mp2) {
         if (hps == 0) SWT.error(SWT.ERROR_NO_HANDLES);
         data.doInit = true;
     }
-
     /* Get the damage */
     int hrgn = OS.GpiCreateRegion (hps, 0, null);
     OS.WinQueryUpdateRegion (handle, hrgn);
