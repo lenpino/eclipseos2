@@ -93,7 +93,7 @@ import org.eclipse.swt.events.*;
 
 public class Decorations extends Canvas {
 //@@TODO(dmik)    
-//	Image image;
+	Image image;
 	Menu menuBar;
 	Menu [] menus;
 	MenuItem [] items;
@@ -261,20 +261,20 @@ Control computeTabRoot () {
 public Rectangle computeTrim (int x, int y, int width, int height) {
 	checkWidget ();
         RECTL rcl = new RECTL ();
-    rcl.xLeft = x; rcl.yBottom = y;
-     rcl.xRight = x + width; rcl.yTop = y + height;
+        rcl.xLeft = x; rcl.yBottom = y;
+        rcl.xRight = x + width; rcl.yTop = y + height;
      
      /* Get the size of the scroll bars */
-    if (horizontalBar != null) rcl.xRight += OS.WinQuerySysValue (OS.HWND_DESKTOP, OS.SV_CXVSCROLL);
-    if (verticalBar != null) rcl.yTop += OS.WinQuerySysValue (OS.HWND_DESKTOP, OS.SV_CYHSCROLL);
+    if (horizontalBar != null) rcl.yTop += OS.WinQuerySysValue (OS.HWND_DESKTOP, OS.SV_CYHSCROLL);
+    if (verticalBar != null) rcl.xRight += OS.WinQuerySysValue (OS.HWND_DESKTOP, OS.SV_CXVSCROLL);
     /* Get the height of the menu bar */
     //@@TEMP(lpino): I'm not sure if we need to calculate the height of the menu using SV_CYMENU'
 //	if (hasMenu) {
-//		RECT testRect = new RECT ();
-//		OS.SetRect (testRect, 0, 0, rect.right - rect.left, rect.bottom - rect.top);
+//		RECTL testRect = new RECTL ();
+//		OS.WinSetRect (testRect, 0, 0, rcl.xRight - rcl.xLeft, rcl.yTop - rcl.yBottom);
 //		OS.SendMessage (handle, OS.WM_NCCALCSIZE, 0, testRect);
 //		while ((testRect.bottom - testRect.top) < height) {
-//			rect.top -= OS.GetSystemMetrics (OS.SM_CYMENU) - OS.GetSystemMetrics (OS.SM_CYBORDER);
+//			rect.top -= OS.WinQuerySysValue (handleFrame, OS.SV_CYMENU) - OS.WinQuerySysValue (handleFrame, OS.SV_CYBORDER);
 //			OS.SetRect(testRect, 0, 0, rect.right - rect.left, rect.bottom - rect.top);
 //			OS.SendMessage (handle, OS.WM_NCCALCSIZE, 0, testRect);
 //		}
@@ -395,7 +395,7 @@ void createHandle () {
     OS.WinCreateFrameControls (frameHandle, fcdata, null);
     OS.WinSendMsg (frameHandle, OS.WM_UPDATEFRAME, fcdata.flCreateFlags, 0);
     /*
-     *  Create a cliend window.
+     *  Create a client window.
      */
     handle = OS.WinCreateWindow (
         frameHandle,
@@ -422,7 +422,7 @@ void createHandle () {
 //@@TODO(dmik): do something for MDI windows if needed    
     if (parent == null) return;
     setParent ();
-//    setSystemMenu ();
+    setSystemMenu ();
 }
 
 
@@ -1025,7 +1025,6 @@ public void setMaximized (boolean maximized) {
     OS.WinSetWindowPos (frameHandle, 0, 0, 0, 0, 0, flags);
 }
 
-//@@TODO (dmik): later
 ///**
 // * Sets the receiver's menu bar to the argument, which
 // * may be null.
@@ -1280,9 +1279,7 @@ boolean traverseReturn () {
 }
 
 int windowProc (int msg, int mp1, int mp2) {
-//@@TODO (dmik): remove
     switch (msg) {
-//@@TODO(dmik)
         case OS.WM_USER:
         case OS.WM_USER+1:
             if (hAccel == -1) createAcceleratorTable ();
@@ -1502,6 +1499,17 @@ MRESULT WM_CLOSE (int mp1, int mp2) {
     if (event.doit && !isDisposed ()) dispose ();
     return MRESULT.ZERO;
 }
+
+//MRESULT WM_ERASEBACKGROUND (int mp1, int mp2) {
+//    System.out.println("Decorations::WM_ERASEBACKGROUND -> HANDLE = " + Integer.toHexString(handle));
+//    if ((state & CANVAS) != 0) {
+//        return super.WM_ERASEBACKGROUND (mp1, mp2);
+//    }
+//    RECTL rcl = new RECTL();
+//    OS.objcpy (rcl, mp2);
+//    drawBackground (mp1, rcl);
+//    return MRESULT.FALSE;
+//}
 
 MRESULT WM_SETFOCUS (int mp1, int mp2) {
     MRESULT result  = super.WM_SETFOCUS (mp1, mp2);

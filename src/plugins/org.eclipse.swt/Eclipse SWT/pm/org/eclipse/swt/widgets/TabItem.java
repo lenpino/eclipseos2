@@ -205,7 +205,7 @@ public void setControl (Control control) {
 	Control oldControl = this.control, newControl = control;
 	this.control = control;
 	int index = parent.indexOf (this);
-        OS.WinSendMsg (parent.handle, OS.BKM_SETPAGEWINDOWHWND, this.parent.itemsID[index], control.handle);        
+        OS.WinSendMsg (parent.handle, OS.BKM_SETPAGEWINDOWHWND, this.parent.itemsID[index], control.handle);
 	if (index != parent.getSelectionIndex ()) {
 		if (newControl != null) newControl.setVisible (false);
 		return;

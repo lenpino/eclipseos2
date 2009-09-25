@@ -307,18 +307,10 @@ public void layout (boolean changed) {
 	if (layout == null) return;
 	int count = getChildrenCount ();
 	if (count == 0) return;
-//@@TODO(dmik): remove    
-//	if (count > 1 && hdwp == 0) {
-//		hdwp = OS.BeginDeferWindowPos (count);
-//	}
     if (count > 1 && pswp == 0) {
         beginDeferWindowPos (this, count);
 	}
 	layout.layout (this, changed);
-//@@TODO(dmik): remove
-//	int oldHdwp = hdwp;
-//	hdwp = 0;
-//	if (oldHdwp != 0) OS.EndDeferWindowPos (oldHdwp);
     if (pswp != 0) {
         endDeferWindowPos (this);
     }
@@ -347,10 +339,6 @@ void releaseChildren () {
 }
 
 void releaseWidget () {
-//@@TODO (dmik): remove    
-//	int oldHdwp = hdwp;
-//	hdwp = 0;
-//	if (oldHdwp != 0) OS.EndDeferWindowPos (oldHdwp);
     if (pswp != 0) {
         endDeferWindowPos (this);
     }
@@ -504,7 +492,7 @@ boolean translateMnemonic (char key) {
 
 int widgetStyle () {
 	/* Temporary code to force SWT.CLIP_SIBLINGS */
-	return super.widgetStyle (); // | OS.WS_CLIPCHILDREN;
+	return super.widgetStyle ();// | OS.WS_CLIPCHILDREN | OS.WS_CLIPSIBLINGS;
 }
 
 MRESULT WM_CALCVALIDRECTS (int mp1, int mp2) {
@@ -512,7 +500,7 @@ MRESULT WM_CALCVALIDRECTS (int mp1, int mp2) {
     if ((state & CANVAS) != 0) {
 		if ((style & SWT.NO_REDRAW_RESIZE) == 0) {
 			if (hooks (SWT.Paint)) {
-                OS.WinInvalidateRect (handle, null, false);
+                            OS.WinInvalidateRect (handle, null, false);
 			}
 		}
 	}
@@ -522,13 +510,11 @@ MRESULT WM_CALCVALIDRECTS (int mp1, int mp2) {
 //@@TODO(dmik): think of it, not sure that it is processed in the right way here...
 //  And may be better to move this code to Decorations class...
 MRESULT WM_ERASEBACKGROUND (int mp1, int mp2) {
+//@@TODO (lpino): Remove log
 //    System.out.println("Composite::WM_ERASEBACKGROUND -> HANDLE = " + Integer.toHexString(handle));
     if ((state & CANVAS) != 0) {
-        //@@TODO(lpino): This invalidation forces a whole window repaint to prevent clipping errors when window is partially obscure
-        //it has a negative impact on performance. As my understanding improves maybe this problem can be solved 
-        OS.WinInvalidateRect(handle, null, true);
-//        OS.WinUpdateWindow(handle);
-        return super.WM_ERASEBACKGROUND (mp1, mp2);
+        return MRESULT.FALSE;
+//        return super.WM_ERASEBACKGROUND (mp1, mp2);
     }
     RECTL rcl = new RECTL();
     OS.objcpy (rcl, mp2);
@@ -632,6 +618,7 @@ MRESULT WM_PAINT (int mp1, int mp2) {
     if ((state & CANVAS) == 0) {
 		return super.WM_PAINT (mp1, mp2);
     }
+
     /*
 	* This code is intentionally commented.  Don't exit
 	* early because the background must still be painted,
@@ -642,13 +629,14 @@ MRESULT WM_PAINT (int mp1, int mp2) {
 	*/
 //	if (!hooks (SWT.Paint)) return null;
     /* lazily obtain a long-term cached micro presentation space */
-//    System.out.println("Composite::WM_PAINT -> HANDLE  =  " + Integer.toHexString(handle));
+    
     GCData data = new GCData ();
     if (hps == 0) {
         hps = internal_new_GC (data);
         if (hps == 0) SWT.error(SWT.ERROR_NO_HANDLES);
         data.doInit = true;
     }
+
 //	/* Get the damage */
         int [] rgnRects = null;
 	boolean isComplex = false;
@@ -670,13 +658,15 @@ MRESULT WM_PAINT (int mp1, int mp2) {
             OS.GpiDestroyRegion (hps, hrgn);
         }
 
-//	/* Set the clipping bits */
+    	/* Set the clipping bits */
+//@@TODO (lpino): Remove log
+//    System.out.println("Composite::WM_PAINT -> HANDLE  =  " + Integer.toHexString(handle));
     int oldBits = 0;
     oldBits = OS.WinQueryWindowULong (handle, OS.QWL_STYLE);
     int newBits = oldBits | OS.WS_CLIPSIBLINGS | OS.WS_CLIPCHILDREN;	
     OS.WinSetWindowULong (handle, OS.QWL_STYLE, newBits);
 
-//	/* Create the paint GC */
+	/* Create the paint GC */
     data.rcl = new RECTL ();
     data.hps = hps;
     GC gc = GC.pm_new (this, data);
@@ -710,10 +700,6 @@ MRESULT WM_PAINT (int mp1, int mp2) {
                 rcl.yBottom = rgnRects [(i << 2) + 1];
                 rcl.xRight = rgnRects [(i << 2) + 2];
                 rcl.yTop = rgnRects [(i << 2) + 3];
-//     System.out.println("Control::drawBackground -> xLeft = " + rcl.xLeft);
-//     System.out.println("Control::drawBackground -> xRight = " + rcl.xRight);
-//     System.out.println("Control::drawBackground -> yBottom = " + rcl.yBottom);
-//     System.out.println("Control::drawBackground -> yTop = " + rcl.yTop);
                drawBackground (0, rcl);
                 event.x = rcl.xLeft;
                 event.y = height - rcl.yTop;

@@ -149,7 +149,7 @@ public class OS {
 //    public static final int WS_DISABLED =       0x40000000;
     public static final int WS_CLIPCHILDREN =   0x20000000;
     public static final int WS_CLIPSIBLINGS =   0x10000000;
-//    public static final int WS_PARENTCLIP =     0x08000000;
+    public static final int WS_PARENTCLIP =     0x08000000;
 //    public static final int WS_SAVEBITS =       0x04000000;
     public static final int WS_SYNCPAINT =      0x02000000;
     public static final int WS_MINIMIZED =      0x01000000;

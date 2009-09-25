@@ -293,26 +293,21 @@ int windowProc () {
 	return GroupProc;
 }
 
-//LRESULT WM_PRINTCLIENT (int wParam, int lParam) {
-//	LRESULT result = super.WM_PRINTCLIENT (wParam, lParam);
-//	if (result != null) return result;
-//	/*
-//	* Feature in Windows.  In version 6.00 of COMCTL32.DLL,
-//	* when WM_PRINTCLIENT is sent from a child BS_GROUP
-//	* control to a parent BS_GROUP, the parent BS_GROUP
-//	* clears the font from the HDC.  Normally, group boxes
-//	* in Windows do not have children so this behavior is
-//	* undefined.  When the parent of a BS_GROUP is not a
-//	* BS_GROUP, there is no problem.  The fix is to save
-//	* and restore the current font.
-//	*/
-//	if (COMCTL32_MAJOR >= 6) {
-//		int hFont = OS.GetCurrentObject (wParam, OS.OBJ_FONT);
-//		int code = callWindowProc (OS.WM_PRINTCLIENT, wParam, lParam);
-//		OS.SelectObject (wParam, hFont);
-//		return new LRESULT (code);
-//	}
-//	return result;
+//MRESULT WM_ERASEBACKGROUND (int mp1, int mp2) {
+//    System.out.println("Group::WM_ERASEBACKGROUND -> HANDLE = " + Integer.toHexString(handle));
+////    if ((state & CANVAS) != 0) {
+////        //@@TODO(lpino): This invalidation forces a whole window repaint to prevent clipping errors when window is partially obscure
+////        //it has a negative impact on performance. As my understanding improves maybe this problem can be solved 
+//////        OS.WinInvalidateRect(handle, null, true);
+//////        OS.WinUpdateWindow(handle);
+//////        OS.WinFillRect(mp1, mp2, getBackgroundPixel ());
+////        return MRESULT.TRUE;
+//////        return super.WM_ERASEBACKGROUND (mp1, mp2);
+////    }
+////    RECTL rcl = new RECTL();
+////    OS.objcpy (rcl, mp2);
+////    drawBackground (mp1, rcl);
+//    return MRESULT.TRUE;
 //}
 
 MRESULT WM_HITTEST (int mp1, int mp2) {
@@ -331,5 +326,23 @@ MRESULT WM_HITTEST (int mp1, int mp2) {
 	if (code == OS.HT_TRANSPARENT) code = OS.HT_NORMAL;
 	return new MRESULT (code);
 }
-
+//MRESULT WM_PAINT (int mp1, int mp2) {
+//    System.out.println("Group::WM_PAINT -> HANDLE  =  " + Integer.toHexString(handle));
+//    GCData data = new GCData ();
+//    if (hps == 0) {
+//        hps = internal_new_GC (data);
+//        if (hps == 0) SWT.error(SWT.ERROR_NO_HANDLES);
+//        data.doInit = true;
+//    }
+//    
+//    /* Create the paint GC */
+//    data.rcl = new RECTL ();
+//    data.hps = hps;
+// 
+//    drawBackground(hps);
+//    /* Dispose the paint GC */
+//    System.out.println("Group::WM_PAINT -> HPS = " + Integer.toHexString(hps));
+//    callWindowProc(OS.WM_PAINT, mp1, mp2);
+//    return MRESULT.ZERO;
+//}
 }
