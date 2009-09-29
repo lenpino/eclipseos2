@@ -382,6 +382,44 @@ public boolean isEnabled () {
 	return getEnabled () && parent.isEnabled ();
 }
 
+/* convert all Eclipse mnemonic prefixes to OS/2 mnemonic prefixes */
+String patchMnemonics (String string) {
+    StringBuffer buf = new StringBuffer (string);
+    /* the last mnemonic char takes precedence over others if any */
+    int mnemonicIdx = string.lastIndexOf (Mnemonic);
+    boolean lastIsMnemonic = false;
+    for (int i = 0; i < buf.length(); i++) {
+        boolean isMnemonic = buf.charAt (i) == Mnemonic;
+        if (lastIsMnemonic) {
+            if (isMnemonic) {
+                buf.deleteCharAt (i--);
+                if (mnemonicIdx >= 0) mnemonicIdx --;
+                lastIsMnemonic = false;
+                continue;
+            } else {
+                if ((i - 1) == mnemonicIdx) {
+                    buf.replace (i - 1, i, "~");
+                    mnemonicIdx = -1;
+                } else {
+                    buf.deleteCharAt ((i--) - 1);
+                    if (mnemonicIdx >= 0) mnemonicIdx --;
+                }
+            }
+        }
+        if (!isMnemonic) {
+            if (buf.charAt (i) == '~') {
+                buf.insert (i++, '~');
+                if (mnemonicIdx >= 0) mnemonicIdx ++;
+            }
+        }
+        lastIsMnemonic = isMnemonic;
+    }
+    if (lastIsMnemonic) {
+        buf.setLength (buf.length() - 1);
+    }
+    return buf.toString();
+}
+
 void releaseChild () {
 	super.releaseChild ();
 	if (menu != null) menu.dispose ();
@@ -667,6 +705,7 @@ public void setText (String string) {
 	if ((style & SWT.SEPARATOR) != 0) return;
 	super.setText (string);
 	int hMenu = parent.handle;
+        string = patchMnemonics (string);
         PSZ buffer = new PSZ(string);
         int rc = OS.WinSendMsg (hMenu, OS.MM_SETITEMTEXT,  (short)id, buffer);
 	if (rc != 1) 
