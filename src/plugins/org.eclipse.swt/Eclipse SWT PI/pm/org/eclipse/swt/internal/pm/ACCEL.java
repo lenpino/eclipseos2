@@ -12,5 +12,5 @@ public class ACCEL
     public short fs;
     public short key;
     public short cmd;
-//    public public static final int sizeof = 6*4;
+    public static final int sizeof = 3*2;
 }
