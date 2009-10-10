@@ -503,7 +503,7 @@ public int getCaretLineNumber () {
 //	* If EM_POSFROMCHAR fails for any other reason, return
 //	* pixel coordinates (0,0). 
 //	*/
-//	int [] start = new int [1];
+//	int start = 0;
 //	OS.SendMessage (handle, OS.EM_GETSEL, start, (int []) null);
 //	int pos = OS.SendMessage (handle, OS.EM_POSFROMCHAR, start [0], 0);
 //	if (pos == -1) {
@@ -578,9 +578,10 @@ public int getCharCount () {
 	return length;
 }
 //
-//String getClipboardText () {
-//	String string = "";
-//	if (OS.OpenClipboard (0)) {
+String getClipboardText () {
+	String string = "";
+	int hab = parent.getDisplay ().hab;
+	if (OS.WinOpenClipbrd (hab)) {
 //		int hMem = OS.GetClipboardData (OS.IsUnicode ? OS.CF_UNICODETEXT : OS.CF_TEXT);
 //		if (hMem != 0) {
 //			int byteCount = OS.GlobalSize (hMem);
@@ -593,10 +594,10 @@ public int getCharCount () {
 //				OS.GlobalUnlock (hMem);
 //			}
 //		}
-//		OS.CloseClipboard ();
-//	}
-//	return string;
-//}
+		OS.WinCloseClipbr (hab);
+	}
+	return string;
+}
 
 /**
  * Gets the double click enabled flag.
@@ -1145,100 +1146,116 @@ public void selectAll () {
 	OS.WinSendMsg (handle, OS.EM_SETSEL, OS.MPFROM2SHORT((short)0,textLimit), 0);
 }
 
-//boolean sendKeyEvent (int type, int msg, int wParam, int lParam, Event event) {
-//	if (!super.sendKeyEvent (type, msg, wParam, lParam, event)) {
-//		return false;
-//	}
-//	if (ignoreVerify) return true;
-//	if (type != SWT.KeyDown) return true;
-//	if (msg != OS.WM_CHAR && msg != OS.WM_KEYDOWN && msg != OS.WM_IME_CHAR) {
-//		return true;
-//	}
-//	if (event.character == 0) return true;
-//	if (!hooks (SWT.Verify)) return true;
-//	char key = event.character;
-//	int stateMask = event.stateMask;
-//	
-//	/* Disable all magic keys that could modify the text */
-//	switch (msg) {
-//		case OS.WM_CHAR:
-//			if (key != 0x08 && key != 0x7F && key != '\r' && key != '\t' && key != '\n') break;
-//			// FALL THROUGH
+boolean sendKeyEvent (int type, int msg, int mp1, int mp2, Event event) {
+	if (!super.sendKeyEvent (type, msg, mp1, mp2, event)) {
+		return false;
+	}
+	if (ignoreVerify) return true;
+	if (type != SWT.KeyDown) return true;
+	if (msg != OS.WM_CHAR /*&& msg != OS.WM_KEYDOWN && msg != OS.WM_IME_CHAR*/) {
+		return true;
+	}
+	if (event.character == 0) return true;
+	if (!hooks (SWT.Verify)) return true;
+	char key = event.character;
+	int stateMask = event.stateMask;
+	
+	/* Disable all magic keys that could modify the text */
+	switch (msg) {
+		case OS.WM_CHAR:{
+			if (key != 0x08 && key != 0x7F && key != '\r' && key != '\t' && key != '\n') 
+				break;
+			else{
+				if ((stateMask & (SWT.CTRL | SWT.SHIFT | SWT.ALT)) != 0) return false;
+				break;
+			}
+		}
+			// FALL THROUGH
 //		case OS.WM_KEYDOWN:
 //			if ((stateMask & (SWT.CTRL | SWT.SHIFT | SWT.ALT)) != 0) return false;
 //			break;
-//	}
-//
-//	/*
-//	* If the left button is down, the text widget
-//	* refuses the character.
-//	*/
-//	if (OS.GetKeyState (OS.VK_LBUTTON) < 0) {
-//		return true;
-//	}
-//
-//	/* Verify the character */
-//	String oldText = "";
-//	int [] start = new int [1], end = new int [1];
-//	OS.SendMessage (handle, OS.EM_GETSEL, start, end);
-//	switch (key) {
-//		case 0x08:	/* Bs */
-//			if (start [0] == end [0]) {
-//				if (start [0] == 0) return true;
-//				int lineStart = OS.SendMessage (handle, OS.EM_LINEINDEX, -1, 0);
-//				if (start [0] == lineStart) {
-//					start [0] = start [0] - DELIMITER.length ();
-//				} else {
-//					start [0] = start [0] - 1;
+	}
+
+	/*
+	* If the left button is down, the text widget
+	* refuses the character.
+	*/
+	if (OS.WinGetKeyState (OS.HWND_DESKTOP, OS.VK_BUTTON1) < 0) {
+		return true;
+	}
+
+	/* Verify the character */
+	String oldText = "";
+	int  start = 0, end = 0;
+	int pos = ((style & SWT.MULTI) != 0)?OS.WinSendMsg(handle, OS.MLM_QUERYSEL, OS.MLFQS_MINMAXSEL, 0):OS.WinSendMsg (handle, OS.EM_QUERYSEL, 0, 0);
+	start = OS.SHORT1FROMMP(pos);
+	end = OS.SHORT2FROMMP(pos);
+	switch (key) {
+		case 0x08:	/* Bs */
+			if (start == end ) {
+				if (start == 0) return true;
+				int lineStart = ((style & SWT.MULTI) != 0)?OS.WinSendMsg (handle, OS.MLM_CHARFROMLINE, -1, 0):OS.WinSendMsg(handle, OS.EM_QUERYFIRSTCHAR, 0, 0);
+				if (start == lineStart) {
+					start = start - DELIMITER.length ();
+				} else {
+					start = start - 1;
 //					if (OS.IsDBLocale) {
 //						int [] newStart = new int [1], newEnd = new int [1];
 //						OS.SendMessage (handle, OS.EM_SETSEL, start [0], end [0]);
 //						OS.SendMessage (handle, OS.EM_GETSEL, newStart, newEnd);
 //						if (start [0] != newStart [0]) start [0] = start [0] - 1;
 //					}
-//				}
-//				start [0] = Math.max (start [0], 0);
-//			}
-//			break;
-//		case 0x7F:	/* Del */
-//			if (start [0] == end [0]) {
-//				int length = OS.GetWindowTextLength (handle);
-//				if (start [0] == length) return true;
-//				int line = OS.SendMessage (handle, OS.EM_LINEFROMCHAR, end [0], 0);
-//				int lineStart = OS.SendMessage (handle, OS.EM_LINEINDEX, line + 1, 0);
-//				if (end [0] == lineStart - DELIMITER.length ()) {
-//					end [0] = end [0] + DELIMITER.length ();
-//				} else {
-//					end [0] = end [0] + 1;
+				}
+				start = Math.max (start, 0);
+			}
+			break;
+		case 0x7F:	/* Del */
+			if (start == end) {
+				int length = OS.WinQueryWindowTextLength (handle);
+				if (start == length) return true;
+				int line = ((style & SWT.MULTI) != 0)?OS.WinSendMsg(handle, OS.MLM_LINEFROMCHAR, end, 0):1;
+				int lineStart = ((style & SWT.MULTI) != 0)?OS.WinSendMsg (handle, OS.MLM_CHARFROMLINE, line + 1, 0):OS.WinSendMsg(handle, OS.EM_QUERYFIRSTCHAR, 0, 0);
+				if (end == lineStart - DELIMITER.length ()) {
+					end = end + DELIMITER.length ();
+				} else {
+					end = end + 1;
 //					if (OS.IsDBLocale) {
 //						int [] newStart = new int [1], newEnd = new int [1];
 //						OS.SendMessage (handle, OS.EM_SETSEL, start [0], end [0]);
 //						OS.SendMessage (handle, OS.EM_GETSEL, newStart, newEnd);
 //						if (end [0] != newEnd [0]) end [0] = end [0] + 1;
 //					}
-//				}
-//				end [0] = Math.min (end [0], length);
-//			}
-//			break;
-//		case '\r':	/* Return */
-//			int bits = OS.GetWindowLong (handle, OS.GWL_STYLE); 
-//			if ((bits & OS.ES_MULTILINE) == 0) return true;
-//			oldText = DELIMITER;
-//			break;
-//		default:	/* Tab and other characters */
-//			if (key != '\t' && key < 0x20) return true;
-//			oldText = new String (new char [] {key});
-//			break;
-//	}
-//	String newText = verifyText (oldText, start [0], end [0], event);
-//	if (newText == null) return false;
-//	if (newText == oldText) return true;
-//	newText = Display.withCrLf (newText);
-//	TCHAR buffer = new TCHAR (getCodePage (), newText, true);
-//	OS.SendMessage (handle, OS.EM_SETSEL, start [0], end [0]);
-//	OS.SendMessage (handle, OS.EM_REPLACESEL, 0, buffer);
-//	return false;
-//}
+				}
+				end = Math.min (end, length);
+			}
+			break;
+		case '\r':	/* Return */
+			if ((style & SWT.MULTI) == 0) return true;
+			oldText = DELIMITER;
+			break;
+		default:	/* Tab and other characters */
+			if (key != '\t' && key < 0x20) return true;
+			oldText = new String (new char [] {key});
+			break;
+	}
+	String newText = verifyText (oldText, start, end, event);
+	if (newText == null) return false;
+	if (newText == oldText) return true;
+	newText = Display.withCrLf (newText);
+	PSZ buffer = new PSZ(newText);
+	if ((style & SWT.MULTI) != 0){ 
+		OS.WinSendMsg (handle, OS.MLM_SETSEL, start, end);
+		OS.WinSendMsg (handle, OS.MLM_INSERT, buffer, 0);
+	}
+	else{
+		int length = OS.WinQueryWindowTextLength (handle);
+		int newlength = length + buffer.toString().length();
+		OS.WinSendMsg (handle, OS.EM_SETSEL, OS.MPFROM2SHORT((short)start, (short)end), 0);
+		OS.WinSetWindowText(handle, buffer);
+		OS.WinSendMsg(handle, OS.EM_SETFIRSTCHAR, (short)(newlength), 0);
+	}
+	return false;
+}
 
 /**
  * Sets the double click enabled flag.
