@@ -293,23 +293,6 @@ int windowProc () {
 	return GroupProc;
 }
 
-//MRESULT WM_ERASEBACKGROUND (int mp1, int mp2) {
-//    System.out.println("Group::WM_ERASEBACKGROUND -> HANDLE = " + Integer.toHexString(handle));
-////    if ((state & CANVAS) != 0) {
-////        //@@TODO(lpino): This invalidation forces a whole window repaint to prevent clipping errors when window is partially obscure
-////        //it has a negative impact on performance. As my understanding improves maybe this problem can be solved 
-//////        OS.WinInvalidateRect(handle, null, true);
-//////        OS.WinUpdateWindow(handle);
-//////        OS.WinFillRect(mp1, mp2, getBackgroundPixel ());
-////        return MRESULT.TRUE;
-//////        return super.WM_ERASEBACKGROUND (mp1, mp2);
-////    }
-////    RECTL rcl = new RECTL();
-////    OS.objcpy (rcl, mp2);
-////    drawBackground (mp1, rcl);
-//    return MRESULT.TRUE;
-//}
-
 MRESULT WM_HITTEST (int mp1, int mp2) {
 	MRESULT result = super.WM_HITTEST (mp1, mp2);
 	if (result != null) return result;
