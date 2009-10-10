@@ -220,7 +220,8 @@ static int checkStyle (int style) {
 
 void createHandle () {
 	if ((style & SWT.BAR) != 0) {
-            System.out.println("Menu:createHandle:  Menu Bar");
+//@@TODO (lpino): debug code, remove when no more necessary
+//            System.out.println("Menu:createHandle:  Menu Bar");
             handle = OS.WinCreateWindow (parent.frameHandle,	/* parent window */
                                                         PSZ.getAtom (OS.WC_MENU),	/* class name */
                                                         null,	/* window text */
@@ -262,7 +263,8 @@ void createHandle () {
 //);
               
 	} else if ((style & SWT.DROP_DOWN) != 0) {
-            System.out.println("Menu:createHandle:  Menu DropDown");
+ //@@TODO (lpino): debug code, remove when no more necessary
+//           System.out.println("Menu:createHandle:  Menu DropDown");
             handle = OS.WinCreateWindow (OS.HWND_DESKTOP,	/* parent window */
                                                         PSZ.getAtom (OS.WC_MENU),	/* class name */
                                                         null,	/* window text */
@@ -365,7 +367,6 @@ public MenuItem getDefaultItem () {
 	MENUITEM info = new MENUITEM();
         if(OS.WinSendMsg (handle, OS.MM_QUERYITEM,  OS.MPFROM2SHORT ((short)id, (short)OS.TRUE), info))
             return parent.findMenuItem (info.id);
-        
 	return null;
 }
 

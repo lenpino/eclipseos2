@@ -1069,41 +1069,6 @@ MRESULT FRAME_WM_REALIZEPALETTE (int mp1, int mp2) {
 	return super.FRAME_WM_REALIZEPALETTE (mp1, mp2);
 }
 
-//@@TODO(dmik): remove
-//LRESULT WM_ACTIVATE (int wParam, int lParam) {
-//	if (OS.IsPPC) {
-//		/*
-//		* Note: this does not work when we get WM_ACTIVATE prior
-//		* to adding a listener.
-//		*/
-//		if (hooks (SWT.HardKeyDown) || hooks (SWT.HardKeyUp)) {
-//			int fActive = wParam & 0xFFFF;
-//			int hwnd = fActive != 0 ? handle : 0;
-//			for (int bVk=OS.VK_APP1; bVk<=OS.VK_APP6; bVk++) {
-//				OS.SHSetAppKeyWndAssoc ((byte) bVk, hwnd);
-//			}
-//		}
-//	}
-//	/*
-//	* Bug in Windows XP.  When a Shell is deactivated, the
-//	* IME composition window does not go away. This causes
-//	* repaint issues.  The fix is to close the IME ourselves
-//	* when the Shell is deactivated.
-//	* 
-//	* Note.  When the Shell is reactivated, the text in the
-//	* composition window has been lost.
-//	*/
-//	if ((OS.WIN32_MAJOR << 16 | OS.WIN32_MINOR) >= (5 << 16 | 1)) {
-//		if ((wParam & 0xFFFF) == 0 && OS.IsDBLocale && hIMC != 0) {
-//			OS.ImmSetOpenStatus (hIMC, false);
-//		}
-//	}
-//	
-//	LRESULT result = super.WM_ACTIVATE (wParam, lParam);
-//	if (parent != null) return LRESULT.ZERO;
-//	return result;
-//}
-
 //@@TODO (dmik): need?
 //LRESULT WM_CLOSE (int wParam, int lParam) {
 //	if ((display.TrimEnabled && !isEnabled ()) || !isActive ()) {
