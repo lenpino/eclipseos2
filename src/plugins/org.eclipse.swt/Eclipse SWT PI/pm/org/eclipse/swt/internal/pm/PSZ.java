@@ -70,4 +70,8 @@ public boolean equals (Object obj) {
     return (obj == this || java.util.Arrays.equals (((PSZ)obj).bytes, bytes));
 }
 
+public int length(){
+	return this.bytes.length;
+}
+
 }
