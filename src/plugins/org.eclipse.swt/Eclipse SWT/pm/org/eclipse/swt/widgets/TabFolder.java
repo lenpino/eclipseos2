@@ -59,7 +59,6 @@ public class TabFolder extends Composite {
 		* implement special code that damages only the exposed
 		* area.
 		*/
-//		WNDCLASS lpWndClass = new WNDCLASS ();
 		CLASSINFO pclsiClassInfo = new CLASSINFO ();
 		OS.WinQueryClassInfo (OS.NULLHANDLE, TabFolderClass, pclsiClassInfo);
 		TabFolderProc = pclsiClassInfo.pfnWindowProc;
@@ -233,7 +232,7 @@ void createItem (TabItem item, int index) {
 	}
          int pageID = OS.WinSendMsg (handle, OS.BKM_INSERTPAGE, 0, OS.MPFROM2SHORT((short)(OS.BKA_MAJOR),(short)OS.BKA_LAST));
          //@@INFO(lpino): All tabs are gray to keep a consistent look with the rests of the platforms
-         OS.WinSendMsg (handle, OS.BKM_SETTABCOLOR, pageID , 0x00C0C0C0);
+         OS.WinSendMsg (handle, OS.BKM_SETTABCOLOR, pageID , 0x00CCCCCC);
          //@@INFO(lpino): The background of empty tabs are set to gray
          OS.WinSendMsg (handle, OS.BKM_SETNOTEBOOKCOLORS, OS.SYSCLR_FIELDBACKGROUND , OS.BKA_BACKGROUNDPAGECOLORINDEX);
 	if (pageID == OS.NULLHANDLE) {
@@ -328,14 +327,6 @@ public Rectangle getClientArea () {
 	int width = rect.xRight - rect.xLeft;
 	int height = rect.yTop - rect.yBottom;
         int y = swp.cy-height;
-
-//        System.out.println("XLEFT = " + rect.xLeft);
-//        System.out.println("YTOP = " + rect.yTop);
-//        System.out.println("XRIGHT = " + rect.xRight);
-//        System.out.println("YBOTTOM = " + rect.yBottom);
-//        System.out.println("width = " + width);
-//        System.out.println("height = " + height);
-//        System.out.println("Delta = " + swp.y);
 
 	return new Rectangle (0, y, width, height);
 }
