@@ -1443,7 +1443,7 @@ JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_WinCreateAccelTable
     haccelhAccel = (jint)WinCreateAccelTable((HAB)hab, c_ppacctAccelTable);
 
     if (pacctAccelTable) setACCELTABLEFields(env, pacctAccelTable, c_ppacctAccelTable, &PGLOB(ACCELTABLEFc));
-
+    printf("WinCreateAccelTable = %d\n", haccelhAccel);
     return haccelhAccel;
 }
 JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinDestroyAccelTable
@@ -1617,6 +1617,22 @@ JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinQueryUpdateRec
     if (prcl) setRECTLFields(env, prcl, c_prcl, &PGLOB(RECTLFc));
 
     return rc;
+}
+
+JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinOpenClipbrd
+        (JNIEnv *env, jclass that, jint hab)
+{
+    DEBUG_CALL("WinOpenClipbrd\n")
+
+    return (jboolean)WinOpenClipbrd((HAB)hab);
+}
+
+JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinCloseClipbrd
+        (JNIEnv *env, jclass that, jint hab)
+{
+    DEBUG_CALL("WinCloseClipbrd\n")
+
+    return (jboolean)WinCloseClipbrd((HAB)hab);
 }
 
 JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_PrfQueryProfileSize
