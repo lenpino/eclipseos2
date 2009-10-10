@@ -308,6 +308,9 @@ public class OS {
    public static final int WM_BUTTON2DOWN             = 0x0074;
    public static final int WM_BUTTON2UP               = 0x0075;
    public static final int WM_BUTTON2DBLCLK           = 0x0076;
+   public static final int WM_BUTTON3DOWN          = 0x0077;
+   public static final int WM_BUTTON3UP            = 0x0078;
+   public static final int WM_BUTTON3DBLCLK        = 0x0079;
 
     /* WM_CHAR fs field bits */
 //    public static final int KC_NONE =           0x0000;
@@ -2401,6 +2404,9 @@ public static final native boolean WinSetCapture(int hwndDeskTop, int hwnd);
 public static final native int WinQueryCapture(int hwndDeskTop);
 public static final native boolean WinSetActiveWindow(int hwndDeskTop, int hwnd);
 public static final native boolean WinQueryUpdateRect(int hwnd, RECTL prclPrc);
+public static final native boolean WinOpenClipbrd(int hab);
+public static final native boolean WinCloseClipbr(int hab);
+public static final native int WinQueryClipbrdData(int hab, int fmt);
 public static final native boolean PrfQueryProfileSize (int hini, PSZ pszApp,
     PSZ pszKey, int[] pulDataLen);
 public static final native int PrfQueryProfileString (int hini, PSZ pszApp,
