@@ -434,9 +434,9 @@ void releaseWidget () {
 	}
 	menu = null;
 	super.releaseWidget ();
-//	if (accelerator != 0) {
-//		parent.destroyAcceleratorTable ();
-//	}
+	if (accelerator != 0) {
+		parent.destroyAcceleratorTable ();
+	}
 	accelerator = 0;
 	Decorations shell = parent.parent;
 	shell.remove (this);
@@ -554,7 +554,7 @@ public void setEnabled (boolean enabled) {
 //		info.fMask = OS.MIIM_STATE;
         short sState = (short) OS.WinSendMsg(hMenu, OS.MM_QUERYITEMATTR,  OS.MPFROM2SHORT((short)id, (short)OS.FALSE), OS.MIA_DISABLED);
 //		boolean success = OS.GetMenuItemInfo (hMenu, id, false, info);
-//		if (!success) error (SWT.ERROR_CANNOT_SET_ENABLED);
+//	if ((boolean)sState) error (SWT.ERROR_CANNOT_SET_ENABLED);
 	sState &= ~(OS.MIA_DISABLED);
 	if (!enabled) sState |= (OS.MIA_DISABLED);
         int success = OS.WinSendMsg(hMenu, OS.MM_SETITEMATTR,  OS.MPFROM2SHORT((short)id, (short)OS.FALSE), OS.MPFROM2SHORT((short)OS.MIA_DISABLED, sState));
