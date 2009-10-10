@@ -315,14 +315,15 @@ void createAcceleratorTable () {
 			}
 		}
                 pacctAccelTable.cAccel = (short)nAccel;
-                //@@TEMP(lpino): in the future we should get this value from somewhere
+                //@@TEMP(lpino): in the future we should get this value from somewhere(WinQueryCp)
                 pacctAccelTable.codepage = (short)437;
                 pacctAccelTable.aaccel = new ACCEL[nAccel];
                 for(int i= 0;i < nAccel;i++)
                     pacctAccelTable.aaccel[i] = accelList[i];
 	}
-        hAccel = OS.WinCreateAccelTable(getDisplay().hab, pacctAccelTable);
-        System.out.println("Decorations:createAcceleratorTable - Handle of accelerator table = " + hAccel);
+ 	System.out.println("Decorations:createAcceleratorTable ");
+       if (nAccel != 0) hAccel = OS.WinCreateAccelTable(getDisplay().hab, pacctAccelTable);
+       System.out.println("Decorations:createAcceleratorTable - Handle of accelerator table = " + hAccel);
         if(!OS.WinSetAccelTable(getDisplay().hab, hAccel, frameHandle)){
             System.out.println("Decorations:createAcceleratorTable - Thread did not attach accelerator table to the frame");
             if(!OS.WinDestroyAccelTable(hAccel))
@@ -546,10 +547,10 @@ public Button getDefaultButton () {
 // *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
 // * </ul>
 // */
-//public Image getImage () {
-//	checkWidget ();
-//	return image;
-//}
+public Image getImage () {
+	checkWidget ();
+	return image;
+}
 
 /**
  * Returns <code>true</code> if the receiver is currently
@@ -1369,7 +1370,9 @@ int windowFrameProc (int msg, int mp1, int mp2) {
         case OS.WM_REALIZEPALETTE: result = FRAME_WM_REALIZEPALETTE (mp1, mp2); break;
         case OS.WM_WINDOWPOSCHANGED: result = FRAME_WM_WINDOWPOSCHANGED (mp1, mp2); break;
         case OS.WM_CHAR: result = FRAME_WM_CHAR (mp1, mp2); break;
-    }
+	case OS.WM_ERASEBACKGROUND: result = FRAME_WM_ERASEBACKGROUND (mp1, mp2); break;
+ 	case OS.WM_INITMENU: result = FRAME_WM_INITMENU (mp1, mp2); break;
+   }
     
     if (result != null) return result.value;
     return callWindowFrameProc (msg, mp1, mp2);
@@ -1500,17 +1503,21 @@ MRESULT WM_CLOSE (int mp1, int mp2) {
     return MRESULT.ZERO;
 }
 
-//MRESULT WM_ERASEBACKGROUND (int mp1, int mp2) {
+MRESULT FRAME_WM_ERASEBACKGROUND (int mp1, int mp2) {
+//@@TODO (lpino): Remove debug
 //    System.out.println("Decorations::WM_ERASEBACKGROUND -> HANDLE = " + Integer.toHexString(handle));
-//    if ((state & CANVAS) != 0) {
-//        return super.WM_ERASEBACKGROUND (mp1, mp2);
-//    }
-//    RECTL rcl = new RECTL();
-//    OS.objcpy (rcl, mp2);
-//    drawBackground (mp1, rcl);
-//    return MRESULT.FALSE;
-//}
+    if ((state & CANVAS) != 0) {
+        return super.WM_ERASEBACKGROUND (mp1, mp2);
+    }
+    RECTL rcl = new RECTL();
+    OS.objcpy (rcl, mp2);
+    drawBackground (mp1, rcl);
+    return MRESULT.FALSE;
+}
 
+MRESULT FRAME_WM_INITMENU (int mp1, int mp2) {
+	return MRESULT.FALSE;
+}
 MRESULT WM_SETFOCUS (int mp1, int mp2) {
     MRESULT result  = super.WM_SETFOCUS (mp1, mp2);
     boolean gotFocus = OS.SHORT1FROMMP (mp2) > 0;
