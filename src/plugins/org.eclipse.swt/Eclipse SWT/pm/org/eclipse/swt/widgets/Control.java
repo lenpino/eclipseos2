@@ -554,10 +554,6 @@ void drawBackground (int hps, RECTL rcl) {
     else {
         hps = this.hps;
     }
-//     System.out.println("Control::drawBackground -> xLeft = " + rcl.xLeft);
-//     System.out.println("Control::drawBackground -> xRight = " + rcl.xRight);
-//     System.out.println("Control::drawBackground -> yBottom = " + rcl.yBottom);
-//     System.out.println("Control::drawBackground -> yTop = " + rcl.yTop);
     OS.WinFillRect (hps, rcl, getBackgroundPixel ());
 }
 
@@ -862,10 +858,10 @@ public Point getLocation () {
  * </ul>
  */
 //@@TODO(dmik)
-//public Menu getMenu () {
-//      checkWidget ();
-//      return menu;
-//}
+public Menu getMenu () {
+      checkWidget ();
+      return menu;
+}
 
 /**
  * Returns the receiver's parent, which must be a <code>Composite</code>
@@ -2952,9 +2948,14 @@ int windowProc (int msg, int mp1, int mp2) {
     MRESULT result = null;
     switch (msg) {
 //        case OS.WM_ADJUSTWINDOWPOS: result = WM_ADJUSTWINDOWPOS (mp1, mp2); break;
-//        case OS.WM_BUTTON2DBLCLK: result = WM_BUTTON2DBLCLK (mp1, mp2); break;
         case OS.WM_BUTTON1DOWN: result = WM_BUTTON1DOWN (mp1, mp2); break;
         case OS.WM_BUTTON1UP: result = WM_BUTTON1UP (mp1, mp2); break;
+        case OS.WM_BUTTON2DBLCLK: result = WM_BUTTON2DBLCLK (mp1, mp2); break;
+        case OS.WM_BUTTON2DOWN: result = WM_BUTTON2DOWN (mp1, mp2); break;
+        case OS.WM_BUTTON2UP: result = WM_BUTTON2UP (mp1, mp2); break;
+        case OS.WM_BUTTON3DBLCLK: result = WM_BUTTON3DBLCLK (mp1, mp2); break;
+        case OS.WM_BUTTON3DOWN: result = WM_BUTTON3DOWN (mp1, mp2); break;
+        case OS.WM_BUTTON3UP: result = WM_BUTTON3UP (mp1, mp2); break;
 //        case OS.WM_BUTTON1CLICK: result = WM_BUTTON1CLICK (mp1, mp2); break;
         case OS.WM_CALCVALIDRECTS: result = WM_CALCVALIDRECTS (mp1, mp2); break;
         case OS.WM_CHAR: result = WM_CHAR (mp1, mp2); break;
@@ -2990,11 +2991,6 @@ int windowProc (int msg, int mp1, int mp2) {
 //        case OS.WM_KEYDOWN: result = WM_KEYDOWN (wParam, lParam); break;
 //        case OS.WM_KEYUP: result = WM_KEYUP (wParam, lParam); break;
         case OS.WM_BUTTON1DBLCLK: result = WM_BUTTON1DBLCLK (mp1, mp2); break;
-//        case OS.WM_LBUTTONDOWN: result = WM_LBUTTONDOWN (wParam, lParam); break;
-//        case OS.WM_LBUTTONUP: result = WM_LBUTTONUP (wParam, lParam); break;
-//        case OS.WM_MBUTTONDBLCLK: result = WM_MBUTTONDBLCLK (wParam, lParam); break;
-//        case OS.WM_MBUTTONDOWN: result = WM_MBUTTONDOWN (wParam, lParam); break;
-//        case OS.WM_MBUTTONUP: result = WM_MBUTTONUP (wParam, lParam); break;
         case OS.WM_MEASUREITEM: result = WM_MEASUREITEM (mp1, mp2); break;
 //        case OS.WM_MENUCHAR: result = WM_MENUCHAR (wParam, lParam); break;
         case OS.WM_MENUEND: result = WM_MENUEND (mp1, mp2); break;
@@ -3013,9 +3009,6 @@ int windowProc (int msg, int mp1, int mp2) {
 //        case OS.WM_PASTE: result = WM_PASTE (wParam, lParam); break;
 //        case OS.WM_PRINTCLIENT: result = WM_PRINTCLIENT (wParam, lParam); break;
 //        case OS.WM_QUERYENDSESSION: result = WM_QUERYENDSESSION (wParam, lParam); break;
-//        case OS.WM_RBUTTONDBLCLK: result = WM_RBUTTONDBLCLK (wParam, lParam); break;
-//        case OS.WM_RBUTTONDOWN: result = WM_RBUTTONDOWN (wParam, lParam); break;
-//        case OS.WM_RBUTTONUP: result = WM_RBUTTONUP (wParam, lParam); break;
 //        case OS.WM_SETCURSOR: result = WM_SETCURSOR (wParam, lParam); break;
         case OS.WM_SETFOCUS: result = WM_SETFOCUS (mp1, mp2); break;
 //@@TODO (dmik): later
@@ -3333,20 +3326,63 @@ MRESULT WM_INITMENU (int mp1, int mp2) {
 
 MRESULT WM_BUTTON1DBLCLK (int mp1, int mp2) {
       /*
-      * Feature in Windows. Windows sends the following
+      * Feature in OS/2. OS/2 sends the following
       * messages when the user double clicks the mouse:
       *
-      *       WM_LBUTTONDOWN          - mouse down
-      *       WM_LBUTTONUP            - mouse up
-      *       WM_LBUTTONDBLCLK        - double click
-      *       WM_LBUTTONUP            - mouse up
+      *       WM_BUTTON1DOWN          - mouse down
+      *       WM_BUTTON1UP            - mouse up
+      *       WM_BUTTON1DBLCLK        - double click
+      *       WM_BUTTON1UP            - mouse up
       *
       * Applications that expect matching mouse down/up
       * pairs will not see the second mouse down.  The
       * fix is to send a mouse down event.
       */
+      sendMouseEvent (SWT.MouseDown, 1, OS.WM_BUTTON1DOWN, mp1, mp2);
       sendMouseEvent (SWT.MouseDoubleClick, 1, OS.WM_BUTTON1DBLCLK, mp1, mp2);
       int result = callWindowProc (OS.WM_BUTTON1DBLCLK, mp1, mp2);
+      if (OS.WinQueryCapture (OS.HWND_DESKTOP) != handle) OS.WinSetCapture (OS.HWND_DESKTOP, handle);
+      return new MRESULT (result);
+}
+//
+MRESULT WM_BUTTON2DBLCLK (int mp1, int mp2) {
+      /*
+      * Feature in OS/2. OS/2 sends the following
+      * messages when the user double clicks the mouse:
+      *
+      *       WM_BUTTON2DOWN          - mouse down
+      *       WM_BUTTON2UP            - mouse up
+      *       WM_BUTTON2DBLCLK        - double click
+      *       WM_BUTTON2UP            - mouse up
+      *
+      * Applications that expect matching mouse down/up
+      * pairs will not see the second mouse down.  The
+      * fix is to send a mouse down event.
+      */
+      sendMouseEvent (SWT.MouseDown, 3, OS.WM_BUTTON2DOWN, mp1, mp2);
+      sendMouseEvent (SWT.MouseDoubleClick, 3, OS.WM_BUTTON2DBLCLK, mp1, mp2);
+      int result = callWindowProc (OS.WM_BUTTON2DBLCLK, mp1, mp2);
+      if (OS.WinQueryCapture (OS.HWND_DESKTOP) != handle) OS.WinSetCapture (OS.HWND_DESKTOP, handle);
+      return new MRESULT (result);
+}
+
+MRESULT WM_BUTTON3DBLCLK (int mp1, int mp2) {
+      /*
+      * Feature in OS/2. OS/2 sends the following
+      * messages when the user double clicks the mouse:
+      *
+      *       WM_BUTTON3DOWN          - mouse down
+      *       WM_BUTTON3UP            - mouse up
+      *       WM_BUTTON3DBLCLK        - double click
+      *       WM_BUTTON3UP            - mouse up
+      *
+      * Applications that expect matching mouse down/up
+      * pairs will not see the second mouse down.  The
+      * fix is to send a mouse down event.
+      */
+      sendMouseEvent (SWT.MouseDown, 2, OS.WM_BUTTON3DOWN, mp1, mp2);
+      sendMouseEvent (SWT.MouseDoubleClick, 2, OS.WM_BUTTON3DBLCLK, mp1, mp2);
+      int result = callWindowProc (OS.WM_BUTTON3DBLCLK, mp1, mp2);
       if (OS.WinQueryCapture (OS.HWND_DESKTOP) != handle) OS.WinSetCapture (OS.HWND_DESKTOP, handle);
       return new MRESULT (result);
 }
@@ -3374,17 +3410,16 @@ MRESULT WM_BUTTON1DOWN (int mp1, int mp2) {
       int result = callWindowProc (OS.WM_BUTTON1DOWN, mp1, mp2);
 //      int result = 0;
       if (mouseDown) {
-          int hwnd = OS.WinQueryCapture (OS.HWND_DESKTOP);
-          int hwnd2 = OS.WinQueryWindow(handle, OS.QW_PARENT);
-          int hwnd3 = OS.WinQueryActiveWindow(OS.HWND_DESKTOP);
+//          int hwnd = OS.WinQueryCapture (OS.HWND_DESKTOP);
+//          int hwnd2 = OS.WinQueryWindow(handle, OS.QW_PARENT);
+//          int hwnd3 = OS.WinQueryActiveWindow(OS.HWND_DESKTOP);
 //          System.out.println("Control::WM_BUTTON1DOWN -> Window = " + Integer.toHexString(handle) + " Window Activa = " + Integer.toHexString(hwnd) + " Padre = " + Integer.toHexString(hwnd2));
-              if (OS.WinQueryCapture (OS.HWND_DESKTOP) != handle){
+              if (OS.WinQueryCapture (OS.HWND_DESKTOP) != handle)
                   OS.WinSetCapture (OS.HWND_DESKTOP, handle);
-              }
-              if(OS.WinQueryWindow(handle, OS.QW_PARENT) == OS.WinQueryActiveWindow(OS.HWND_DESKTOP)){
+//              if(OS.WinQueryWindow(handle, OS.QW_PARENT) == OS.WinQueryActiveWindow(OS.HWND_DESKTOP)){
 //                  System.out.println("Control::WM_BUTTON1DOWN");
-              }
-              OS.WinSetActiveWindow (OS.HWND_DESKTOP, handle);
+//              }
+//              OS.WinSetActiveWindow (OS.HWND_DESKTOP, handle);
       }
 //      if (dragging) {
 //              postEvent (SWT.DragDetect);
@@ -3418,6 +3453,20 @@ MRESULT WM_BUTTON1DOWN (int mp1, int mp2) {
       return new MRESULT (result);
 }
 
+MRESULT WM_BUTTON2DOWN (int mp1, int mp2) {
+      sendMouseEvent (SWT.MouseDown, 3, OS.WM_BUTTON2DOWN, mp1, mp2);
+      int result = callWindowProc (OS.WM_BUTTON2DOWN, mp1, mp2);
+      if (OS.WinQueryCapture (OS.HWND_DESKTOP) != handle) OS.WinSetCapture (OS.HWND_DESKTOP, handle);
+      return new MRESULT (result);
+}
+
+MRESULT WM_BUTTON3DOWN (int mp1, int mp2) {
+      sendMouseEvent (SWT.MouseDown, 2, OS.WM_BUTTON3DOWN, mp1, mp2);
+      int result = callWindowProc (OS.WM_BUTTON3DOWN, mp1, mp2);
+      if (OS.WinQueryCapture (OS.HWND_DESKTOP) != handle) OS.WinSetCapture (OS.HWND_DESKTOP, handle);
+      return new MRESULT (result);
+}
+
 MRESULT WM_BUTTON1UP (int mp1, int mp2) {
       sendMouseEvent (SWT.MouseUp, 1, OS.WM_BUTTON1UP, mp1, mp2);
       int result = callWindowProc (OS.WM_BUTTON1UP, mp1, mp2);
@@ -3427,45 +3476,24 @@ MRESULT WM_BUTTON1UP (int mp1, int mp2) {
       return new MRESULT (result);
 }
 
-//LRESULT WM_MBUTTONDBLCLK (int wParam, int lParam) {
-//      /*
-//      * Feature in Windows. Windows sends the following
-//      * messages when the user double clicks the mouse:
-//      *
-//      *       WM_MBUTTONDOWN          - mouse down
-//      *       WM_MBUTTONUP            - mouse up
-//      *       WM_MLBUTTONDBLCLK       - double click
-//      *       WM_MBUTTONUP            - mouse up
-//      *
-//      * Applications that expect matching mouse down/up
-//      * pairs will not see the second mouse down.  The
-//      * fix is to send a mouse down event.
-//      */
-//      sendMouseEvent (SWT.MouseDown, 2, OS.WM_MBUTTONDOWN, wParam, lParam);
-//      sendMouseEvent (SWT.MouseDoubleClick, 2, OS.WM_MBUTTONDBLCLK, wParam, lParam);
-//      int result = callWindowProc (OS.WM_MBUTTONDBLCLK, wParam, lParam);
-//      if (OS.GetCapture () != handle) OS.SetCapture (handle);
-//      return new LRESULT (result);
-//}
-//
-//LRESULT WM_MBUTTONDOWN (int wParam, int lParam) {
-//      sendMouseEvent (SWT.MouseDown, 2, OS.WM_MBUTTONDOWN, wParam, lParam);
-//      int result = callWindowProc (OS.WM_MBUTTONDOWN, wParam, lParam);
-//      if (OS.GetCapture () != handle) OS.SetCapture(handle);
-//      return new LRESULT (result);
-//}
-//
-//LRESULT WM_MBUTTONUP (int wParam, int lParam) {
-//      sendMouseEvent (SWT.MouseUp, 2, OS.WM_MBUTTONUP, wParam, lParam);
-//      int result = callWindowProc (OS.WM_MBUTTONUP, wParam, lParam);
+MRESULT WM_BUTTON2UP (int mp1, int mp2) {
+      sendMouseEvent (SWT.MouseUp, 3, OS.WM_BUTTON2UP, mp1, mp2);
+      int result = callWindowProc (OS.WM_BUTTON2UP, mp1, mp2);
 //      if ((wParam & (OS.MK_LBUTTON | OS.MK_MBUTTON | OS.MK_RBUTTON)) == 0) {
-//              if (OS.GetCapture () == handle) OS.ReleaseCapture ();
+              if (OS.WinQueryCapture (OS.HWND_DESKTOP) == handle) OS.WinSetCapture (OS.HWND_DESKTOP, OS.NULLHANDLE);
 //      }
-//      return new LRESULT (result);
-//}
+      return new MRESULT (result);
+}
+
+MRESULT WM_BUTTON3UP (int mp1, int mp2) {
+      sendMouseEvent (SWT.MouseUp, 2, OS.WM_BUTTON3UP, mp1, mp2);
+      int result = callWindowProc (OS.WM_BUTTON3UP, mp1, mp2);
+      if (OS.WinQueryCapture (OS.HWND_DESKTOP) == handle) OS.WinSetCapture (OS.HWND_DESKTOP, OS.NULLHANDLE);
+      return new MRESULT (result);
+}
 
 MRESULT WM_MEASUREITEM (int mp1, int mp2) {
-    System.out.println("Control:WM_MEASUREITEM");
+    System.out.println("Control:WM_MEASUREITEM -> sListBox" + mp1);
 //      MEASUREITEMSTRUCT struct = new MEASUREITEMSTRUCT ();
 //      OS.MoveMemory (struct, lParam, MEASUREITEMSTRUCT.sizeof);
 //      if (struct.CtlType == OS.ODT_MENU) {
@@ -3475,12 +3503,12 @@ MRESULT WM_MEASUREITEM (int mp1, int mp2) {
 //              return item.wmMeasureChild (mp1, mp2);
 //      }
 //      int hwnd = OS.GetDlgItem (handle, struct.CtlID);
-//      Control control = WidgetTable.get (hwnd);
-//      if (control == null) return null;
-//      return control.wmMeasureChild (wParam, lParam);
-    return null;
+      Control control = WidgetTable.get (mp1);
+      if (control == null) return null;
+      return control.wmMeasureChild (mp1, mp2);
+//    return null;
 }
-//
+
 //LRESULT WM_MENUCHAR (int wParam, int lParam) {
 //      Display display = getDisplay ();
 //      display.mnemonicKeyHit = false;
@@ -3498,10 +3526,9 @@ MRESULT WM_MEASUREITEM (int mp1, int mp2) {
 //      }
 //      return null;
 //}
-//
+
 MRESULT WM_MENUSELECT (int mp1, int mp2) {
-//    System.out.println("Control:WM_MENUSELECT - MP1 SHORT 1= " + OS.SHORT1FROMMP(mp1));
-    if(OS.SHORT2FROMMP(mp1) == 0) return MRESULT.FALSE;
+    if(OS.SHORT2FROMMP(mp1) == 0) return MRESULT.TRUE;
 //      int code = wParam >> 16;
       Shell shell = getShell ();
 //      if (code == -1 && lParam == 0) {
@@ -3526,7 +3553,7 @@ MRESULT WM_MENUSELECT (int mp1, int mp2) {
 //              shell.activeMenu = null;
 //              return null;
 //      }
-//      if ((code & OS.MF_SYSMENU) != 0) return null;
+      if ((OS.SHORT1FROMMP(mp1) & OS.FID_SYSMENU) != 0) return MRESULT.TRUE;
       int sState = OS.WinSendMsg(mp2, OS.MM_QUERYITEMATTR, OS.MPFROM2SHORT(OS.SHORT1FROMMP(mp1), (short)OS.TRUE), OS.MIA_HILITED);
       if ((sState & OS.MIA_HILITED) != 0) {
               MenuItem item = null;
@@ -3618,41 +3645,20 @@ MRESULT WM_MENUSELECT (int mp1, int mp2) {
 //      postEvent (SWT.MouseExit, event);
 //      return null;
 //}
-//
-//MRESULT WM_MOUSEMOVE (int mp1, int mp2) {
-//      if (!OS.IsWinCE) {
-//              boolean hooksEnter = hooks (SWT.MouseEnter);
-//              if (hooksEnter || hooks (SWT.MouseExit) || hooks (SWT.MouseHover)) {
-//                      TRACKMOUSEEVENT lpEventTrack = new TRACKMOUSEEVENT ();
-//                      lpEventTrack.cbSize = TRACKMOUSEEVENT.sizeof;
-//                      lpEventTrack.dwFlags = OS.TME_QUERY;
-//                      lpEventTrack.hwndTrack = handle;
-//                      OS.TrackMouseEvent (lpEventTrack);
-//                      if (lpEventTrack.dwFlags == 0) {
-//                              lpEventTrack.dwFlags = OS.TME_LEAVE | OS.TME_HOVER;
-//                              lpEventTrack.hwndTrack = handle;
-//                              OS.TrackMouseEvent (lpEventTrack);
-//                              if (hooksEnter) {
-//                                      Event event = new Event ();
-//                                      event.x = (short) (lParam & 0xFFFF);
-//                                      event.y = (short) (lParam >> 16);
-//                                      postEvent (SWT.MouseEnter, event);
-//                              }
-//                      } else {
-//                              lpEventTrack.dwFlags = OS.TME_HOVER;
-//                              OS.TrackMouseEvent (lpEventTrack);
-//                      }
-//              }
-//      }
-//      Display display = getDisplay ();
-//      int pos = OS.GetMessagePos ();
-//      if (pos != display.lastMouse) {
-//              display.lastMouse = pos;
-//              sendMouseEvent (SWT.MouseMove, 0, OS.WM_MOUSEMOVE, wParam, lParam);
-//      }
-//      return null;
-//}
-//
+
+MRESULT WM_MOUSEMOVE (int mp1, int mp2) {
+      Display display = getDisplay ();
+      int[] pnt = new int [] {0, 0};
+      OS.WinQueryMsgPos (0, pnt);
+      //@@TODO(dmik): Mapping coordinates to use lastMouse variable (x low order, y high order like windows)
+      int pos = (pnt[1] << 16) + pnt[0];
+      if (pos != display.lastMouse) {
+              display.lastMouse = pos;
+              sendMouseEvent (SWT.MouseMove, 0, OS.WM_MOUSEMOVE, mp1, mp2);
+      }
+      return MRESULT.FALSE;
+}
+
 //LRESULT WM_MOUSEWHEEL (int wParam, int lParam) {
 //      return null;
 //}
@@ -3686,7 +3692,6 @@ MRESULT WM_PAINT (int mp1, int mp2) {
     if (!hooks (SWT.Paint)) {
         return null;
     }
-//    System.out.println("Control::WM_PAINT -> HANDLE  =  " + Integer.toHexString(handle));
     /* lazily obtain a long-term cached micro presentation space */
     GCData data = new GCData ();
     if (hps == 0) {
@@ -3751,43 +3756,6 @@ MRESULT WM_PAINT (int mp1, int mp2) {
 //
 //LRESULT WM_QUERYENDSESSION (int wParam, int lParam) {
 //      return null;
-//}
-//
-//LRESULT WM_RBUTTONDBLCLK (int wParam, int lParam) {
-//      /*
-//      * Feature in Windows. Windows sends the following
-//      * messages when the user double clicks the mouse:
-//      *
-//      *       WM_RBUTTONDOWN          - mouse down
-//      *       WM_RBUTTONUP            - mouse up
-//      *       WM_RBUTTONDBLCLK        - double click
-//      *       WM_LBUTTONUP            - mouse up
-//      *
-//      * Applications that expect matching mouse down/up
-//      * pairs will not see the second mouse down.  The
-//      * fix is to send a mouse down event.
-//      */
-//      sendMouseEvent (SWT.MouseDown, 3, OS.WM_RBUTTONDOWN, wParam, lParam);
-//      sendMouseEvent (SWT.MouseDoubleClick, 3, OS.WM_RBUTTONDBLCLK, wParam, lParam);
-//      int result = callWindowProc (OS.WM_RBUTTONDBLCLK, wParam, lParam);
-//      if (OS.GetCapture () != handle) OS.SetCapture (handle);
-//       return new LRESULT (result);
-//}
-//
-//LRESULT WM_RBUTTONDOWN (int wParam, int lParam) {
-//      sendMouseEvent (SWT.MouseDown, 3, OS.WM_RBUTTONDOWN, wParam, lParam);
-//      int result = callWindowProc (OS.WM_RBUTTONDOWN, wParam, lParam);
-//      if (OS.GetCapture () != handle) OS.SetCapture (handle);
-//      return new LRESULT (result);
-//}
-//
-//LRESULT WM_RBUTTONUP (int wParam, int lParam) {
-//      sendMouseEvent (SWT.MouseUp, 3, OS.WM_RBUTTONUP, wParam, lParam);
-//      int result = callWindowProc (OS.WM_RBUTTONUP, wParam, lParam);
-//      if ((wParam & (OS.MK_LBUTTON | OS.MK_MBUTTON | OS.MK_RBUTTON)) == 0) {
-//              if (OS.GetCapture () == handle) OS.ReleaseCapture ();
-//      }
-//      return new LRESULT (result);
 //}
 
 //@@TODO(dmik)
@@ -4022,10 +3990,6 @@ MRESULT WM_SYSCOMMAND (int mp1, int mp2) {
       if (control == null) return null;
       return control.wmScrollChild (mp1, mp2);
   }
-//
-//LRESULT WM_WINDOWPOSCHANGING (int wParam, int lParam) {
-//      return null;
-//}
 
 MRESULT WM_WINDOWPOSCHANGED (int mp1, int mp2) {
     int result = callWindowProc (OS.WM_WINDOWPOSCHANGED, mp1, mp2);
@@ -4095,9 +4059,10 @@ MRESULT wmDrawChild (int mp1, int mp2) {
 }
 
 //@@TODO (dmik):
-//LRESULT wmMeasureChild (int wParam, int lParam) {
-//      return null;
-//}
+MRESULT wmMeasureChild (int mp1, int mp2) {
+	System.out.println("Control:wmMeasureChild");
+      return null;
+}
 //
 //LRESULT wmNotifyChild (int wParam, int lParam) {
 //      return null;
