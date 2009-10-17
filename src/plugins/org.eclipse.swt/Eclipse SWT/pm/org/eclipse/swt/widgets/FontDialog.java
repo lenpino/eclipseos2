@@ -118,14 +118,22 @@ public FontData open () {
 	 //Set cbsize (mandatory)
 	 fontDlg.cbSize = FONTDLG.sizeof;
 	 //Init from FATTRS
-	 fontDlg.fl = OS.FNTS_CENTER|OS.FNTS_INITFROMFATTRS;
+	 fontDlg.fl = OS.FNTS_CENTER;
 	 //Size fontname buffer
 	 fontDlg.usFamilyBufLen = OS.FACESIZE;
+	 
 	 //Fontname buffer
          byte[] szCurrentFont = new byte[OS.FACESIZE];
-         byte[] buffer = fontData.getName().getBytes();
-         for(int i=0;i<buffer.length&&i<szCurrentFont.length;i++)
-             szCurrentFont[i] = buffer[i];
+	 
+	 if (fontData != null) {
+		 fontDlg.fl |= OS.FNTS_INITFROMFATTRS;
+		 byte[] buffer = fontData.getName().getBytes();
+		 for(int i=0;i<buffer.length&&i<szCurrentFont.length;i++)
+		     szCurrentFont[i] = buffer[i];
+		 fontDlg.fAttrs = fontData.getFAttrs();
+	 } else {
+		 szCurrentFont[0] = ' ';
+	 }
 	 fontDlg.pszFamilyname = new PSZ(szCurrentFont);
 	 //Foreground color
 	 fontDlg.clrFore = OS.CLR_BLACK;
@@ -135,9 +143,6 @@ public FontData open () {
          fontDlg.pszTitle = new PSZ("Fonts");
          //Text shown in the preview area
          fontDlg.pszPreview = new PSZ("Eclipse/2");
-	 if (fontData != null) {
-		 fontDlg.fAttrs = fontData.getFAttrs();
-	 }
 	 int rc = OS.WinFontDlg(OS.HWND_DESKTOP, hwndOwner, fontDlg);
 	 if(fontDlg.lReturn == OS.DID_OK){
                 fontDlg.fAttrs.height = fontDlg.fxPointSize;
