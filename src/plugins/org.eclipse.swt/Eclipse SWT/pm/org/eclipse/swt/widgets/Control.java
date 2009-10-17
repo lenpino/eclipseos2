@@ -457,7 +457,6 @@ void createHandle () {
         0,
         0
     );
-// System.out.println("Class = " + windowClass ());
 //@@TODO (lpino): Remove
 //    System.out.println("ERROR = " + OS.WinGetLastError(parent.getDisplay ().hab));
     if (handle == 0) error (SWT.ERROR_NO_HANDLES);
@@ -500,11 +499,10 @@ int defaultBackground () {
     return OS.SYSCLR_DIALOGBACKGROUND;
 }
 
-//@@TODO(dmik)
-//int defaultFont () {
-//      Display display = getDisplay ();
-//      return display.systemFont ();
-//}
+FATTRS defaultFont () {
+      Display display = getDisplay ();
+      return display.systemFont ();
+}
 
 int defaultForeground () {
     return OS.SYSCLR_WINDOWTEXT;
@@ -519,11 +517,8 @@ void destroyWidget () {
     releaseHandle ();
     if (hwnd != 0) {
 //@@TODO (dmik): debug code, remove when no more necessary
-//System.out.println (
-//    "Control.destroyWidget(): Window is being derstroyed:\n    hwnd = " +
-//    Integer.toHexString (hwnd)
-//);
-        OS.WinDestroyWindow (hwnd);
+//System.out.println ("Control.destroyWidget(): Window is being derstroyed:\n    hwnd = " + Integer.toHexString (hwnd));
+    OS.WinDestroyWindow (hwnd);
     }
 }
 
@@ -612,21 +607,21 @@ public boolean forceFocus () {
     if (isFocusControl ()) return true;
     shell.bringToTop ();
 //@@TODO (dmik): does it relate to OS/2?
-//    /*
-//    * This code is intentionally commented.
-//    *
-//    * When setting focus to a control, it is
-//    * possible that application code can set
-//    * the focus to another control inside of
-//    * WM_SETFOCUS.  In this case, the original
-//    * control will no longer have the focus
-//    * and the call to setFocus() will return
-//    * false indicating failure.
-//    *
-//    * We are still working on a solution at
-//    * this time.
-//    */
-////    if (OS.GetFocus () != OS.SetFocus (handle)) return false;
+    /*
+    * This code is intentionally commented.
+    *
+    * When setting focus to a control, it is
+    * possible that application code can set
+    * the focus to another control inside of
+    * WM_SETFOCUS.  In this case, the original
+    * control will no longer have the focus
+    * and the call to setFocus() will return
+    * false indicating failure.
+    *
+    * We are still working on a solution at
+    * this time.
+    */
+//    if (OS.GetFocus () != OS.SetFocus (handle)) return false;
     OS.WinSetFocus (OS.HWND_DESKTOP, handle);
     return isFocusControl ();
 }
@@ -686,6 +681,9 @@ int getBackgroundPixel () {
  */
 public int getBorderWidth () {
     checkWidget ();
+    int width = OS.WinQuerySysValue(OS.HWND_DESKTOP, OS.SV_CXBORDER);
+    if(width != 0)
+	    return width;
     // Individual controls will use OS.CV_CXBORDER (or other) when appropriate
     return 0;
 }
@@ -775,8 +773,7 @@ public boolean getEnabled () {
 public Font getFont () {
     checkWidget ();
     byte[] fontBytes = new byte [OS.FACESIZE];
-    int len = OS.WinQueryPresParam (
-        handle, OS.PP_FONTNAMESIZE, 0, null, fontBytes.length, fontBytes, 0);
+    int len = OS.WinQueryPresParam (handle, OS.PP_FONTNAMESIZE, 0, null, fontBytes.length, fontBytes, 0);
     String fontNameSize = len != 0 ? new PSZ (fontBytes).toString() : null;
     Display display = getDisplay ();
     FATTRS hFont = display.matchFont (fontNameSize);
@@ -857,7 +854,6 @@ public Point getLocation () {
  *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
  * </ul>
  */
-//@@TODO(dmik)
 public Menu getMenu () {
       checkWidget ();
       return menu;
@@ -1035,8 +1031,7 @@ public int internal_new_GC (GCData data) {
         data.foreground = getForegroundPixel ();
         data.background = getBackgroundPixel ();
         byte[] fontBytes = new byte [OS.FACESIZE];
-        int len = OS.WinQueryPresParam (
-            hwnd, OS.PP_FONTNAMESIZE, 0, null, fontBytes.length, fontBytes, 0);
+        int len = OS.WinQueryPresParam (hwnd, OS.PP_FONTNAMESIZE, 0, null, fontBytes.length, fontBytes, 0);
         String fontNameSize = len >= 0 ? new PSZ (fontBytes).toString() : null;
         data.hFont = display.matchFont (fontNameSize);
         data.hwnd = hwnd;
@@ -1131,16 +1126,14 @@ public boolean isFocusControl () {
     return hasFocus ();
 }
 
-//@@TODO(dmik): guess we don't need this on OS/2 since
-//  disabling the focus window or hidihg it doesn't take the focus away.
-//boolean isFocusAncestor () {
-//    Display display = getDisplay ();
-//    Control control = display.getFocusControl ();
-//    while (control != null && control != this) {
-//        control = control.parent;
-//    }
-//    return control == this;
-//}
+boolean isFocusAncestor () {
+    Display display = getDisplay ();
+    Control control = display.getFocusControl ();
+    while (control != null && control != this) {
+        control = control.parent;
+    }
+    return control == this;
+}
 
 /**
  * Returns <code>true</code> if the underlying operating
@@ -1153,38 +1146,14 @@ public boolean isFocusControl () {
  *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
  * </ul>
  */
-//@@TODO(dmik)
-//public boolean isReparentable () {
-//    checkWidget ();
-//    return true;
-//}
+
+public boolean isReparentable () {
+    checkWidget ();
+    return true;
+}
 
 boolean isShowing () {
     return OS.WinIsWindowShowing (handle);
-//@@TODO(dmik): what to do with this:
-//    /*
-//    * This is not complete.  Need to check if the
-//    * widget is obscurred by a parent or sibling.
-//    */
-//    if (!isVisible ()) return false;
-//    Control control = this;
-//    while (control != null) {
-//        Point size = control.getSize ();
-//        if (size.x == 0 || size.y == 0) {
-//            return false;
-//        }
-//        control = control.parent;
-//    }
-//    return true;
-//    /*
-//    * Check to see if current damage is included.
-//    */
-//    if (!OS.IsWindowVisible (handle)) return false;
-//    int flags = OS.DCX_CACHE | OS.DCX_CLIPCHILDREN | OS.DCX_CLIPSIBLINGS;
-//    int hDC = OS.GetDCEx (handle, 0, flags);
-//    int result = OS.GetClipBox (hDC, new RECT ());
-//    OS.ReleaseDC (handle, hDC);
-//    return result != OS.NULLREGION;
 }
 
 boolean isTabGroup () {
@@ -1262,30 +1231,34 @@ boolean mnemonicMatch (char key) {
  *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
  * </ul>
  */
-//@@TODO(dmik)
-//public void moveAbove (Control control) {
-//    checkWidget ();
-//    int hwndAbove = OS.HWND_TOP;
-//    if (control != null) {
-//        if (control.isDisposed ()) error(SWT.ERROR_INVALID_ARGUMENT);
-//        if (parent != control.parent) return;
-//        int hwnd = control.handle;
-//        if (hwnd == 0 || hwnd == handle) return;
-//        hwndAbove = OS.GetWindow (hwnd, OS.GW_HWNDPREV);
-//        /*
-//        * Bug in Windows.  For some reason, when GetWindow ()
-//        * with GW_HWNDPREV is used to query the previous window
-//        * in the z-order with the first child, Windows returns
-//        * the first child instead of NULL.  The fix is to detect
-//        * this case and move the control to the top.
-//        */
-//        if (hwndAbove == 0 || hwndAbove == hwnd) {
-//            hwndAbove = OS.HWND_TOP;
-//        }
-//    }
-//    int flags = OS.SWP_NOSIZE | OS.SWP_NOMOVE | OS.SWP_NOACTIVATE;
-//    OS.SetWindowPos (handle, hwndAbove, 0, 0, 0, 0, flags);
-//}
+
+public void moveAbove (Control control) {
+    checkWidget ();
+    int hwndAbove = getPreviousSibling(control);
+    if (hwndAbove == 0) return;
+    OS.WinSetWindowPos (handle, hwndAbove, 0, 0, 0, 0, OS.SWP_ZORDER);
+}
+
+int getPreviousSibling(Control control){
+	int previous = 0;
+	if (control != null) {
+		int next = 0;
+		if (control.isDisposed ()) error(SWT.ERROR_INVALID_ARGUMENT);
+		if (parent != control.parent) return previous;
+		int hwnd = control.handle;
+		if (hwnd == 0 || hwnd == handle) return previous;
+		int henum = OS.WinBeginEnumWindows(parent.handle);
+		while((next = OS.WinGetNextWindow(henum)) != OS.NULLHANDLE){
+			if(next == control.handle){
+				if(previous == 0) return OS.HWND_TOP;
+				return previous;
+			}
+			previous = next;
+		}
+		OS.WinEndEnumWindows(henum);
+	}
+	return previous;
+}
 
 /**
  * Moves the receiver below the specified control in the
@@ -1304,19 +1277,18 @@ boolean mnemonicMatch (char key) {
  *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
  * </ul>
  */
-//@@TODO(dmik)
-//public void moveBelow (Control control) {
-//    checkWidget ();
-//    int hwndAbove = OS.HWND_BOTTOM;
-//    if (control != null) {
-//        if (control.isDisposed ()) error(SWT.ERROR_INVALID_ARGUMENT);
-//        if (parent != control.parent) return;
-//        hwndAbove = control.handle;
-//    }
-//    if (hwndAbove == 0 || hwndAbove == handle) return;
-//    int flags = OS.SWP_NOSIZE | OS.SWP_NOMOVE | OS.SWP_NOACTIVATE;
-//    OS.SetWindowPos (handle, hwndAbove, 0, 0, 0, 0, flags);
-//}
+
+public void moveBelow (Control control) {
+    checkWidget ();
+    int hwndAbove = OS.HWND_BOTTOM;
+    if (control != null) {
+        if (control.isDisposed ()) error(SWT.ERROR_INVALID_ARGUMENT);
+        if (parent != control.parent) return;
+        hwndAbove = control.handle;
+    }
+    if (hwndAbove == 0 || hwndAbove == handle) return;
+    OS.WinSetWindowPos (handle, hwndAbove, 0, 0, 0, 0, OS.SWP_ZORDER);
+}
 
 Accessible new_Accessible (Control control) {
     return Accessible.internal_new_Accessible (this);
@@ -1778,17 +1750,19 @@ boolean sendMouseEvent (int type, int button, int msg, int mp1, int mp2) {
     Event event = new Event ();
     event.button = button;
     event.x = (short) (mp1 & 0xFFFF);
-    event.y = (short) (mp1 >> 16);
+    SWP swp = new SWP ();
+    OS.WinQueryWindowPos (handle, swp);    
+    event.y = swp.cy - (short) (mp1 >> 16);
     int keyState = mp2 >> 16;
     //@@TODO(lpino): Remove debug
 //    System.out.println("Control::sendMouseEvent -> X= " + event.x + " Y= " + event.y);
 //    System.out.println("Control::sendMouseEvent -> MP2= " + Integer.toHexString(keyState));
-//    if (OS.GetKeyState (OS.VK_MENU) < 0) event.stateMask |= SWT.ALT;
+    if ((keyState & OS.KC_ALT) != 0) event.stateMask |= SWT.ALT;
     if ((keyState & OS.KC_SHIFT) != 0) event.stateMask |= SWT.SHIFT;
     if ((keyState & OS.KC_CTRL) != 0) event.stateMask |= SWT.CONTROL;
     if (button == 1) event.stateMask |= SWT.BUTTON1;
-//    if ((wParam & OS.MK_MBUTTON) != 0) event.stateMask |= SWT.BUTTON2;
-//    if ((wParam & OS.MK_RBUTTON) != 0) event.stateMask |= SWT.BUTTON3;
+    if (button == 3) event.stateMask |= SWT.BUTTON2;
+    if (button == 2) event.stateMask |= SWT.BUTTON3;
     switch (type) {
         case SWT.MouseDown:
         case SWT.MouseDoubleClick:
@@ -1971,12 +1945,10 @@ void setBounds (int x, int y, int width, int height, int flags) {
     swp.fl = flags;
     int count = parent.getChildrenCount ();
     if (parent.pswp == 0) {
-//@@TODO(dmik)
 //        if (count > 1) {
-//            int bits = OS.GetWindowLong (handle, OS.GWL_STYLE);
-//            if ((bits & OS.WS_CLIPSIBLINGS) == 0) flags |= OS.SWP_NOCOPYBITS;
+//            int bits = OS.WinQueryWindowULong (handle, OS.QWL_STYLE);
+//            if ((bits & OS.WS_CLIPSIBLINGS) == 0) flags |= ~(OS.WS_SAVEBITS | OS.CS_SAVEBITS);
 //        }
-//        OS.SetWindowPos (handle, 0, x, y, width, height, flags);
         OS.WinSetWindowPos (handle, 0, swp.x, swp.y, swp.cx, swp.cy, flags);
         return;
     }
@@ -2029,46 +2001,46 @@ public void setBounds (Rectangle rect) {
  *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
  * </ul>
  */
-//@@TODO(dmik)
-//public void setCapture (boolean capture) {
-//    checkWidget ();
-//    if (capture) {
-//        OS.SetCapture (handle);
-//    } else {
-//        if (OS.GetCapture () == handle) {
-//                OS.ReleaseCapture ();
-//        }
-//    }
-//}
+
+public void setCapture (boolean capture) {
+	checkWidget ();
+	if (capture) {
+		OS.WinSetCapture (OS.HWND_DESKTOP, handle);
+	 } else {
+		if (OS.WinQueryCapture (OS.HWND_DESKTOP) == handle) {
+			OS.WinSetCapture (OS.HWND_DESKTOP, OS.NULLHANDLE);
+		}
+	 }
+}
 
 //@@TODO(dmik)
-///**
-// * Sets the receiver's cursor to the cursor specified by the
-// * argument, or to the default cursor for that kind of control
-// * if the argument is null.
-// * <p>
-// * When the mouse pointer passes over a control its appearance
-// * is changed to match the control's cursor.
-// * </p>
-// *
-// * @param cursor the new cursor (or null)
-// *
-// * @exception IllegalArgumentException <ul>
-// *    <li>ERROR_INVALID_ARGUMENT - if the argument has been disposed</li>
-// * </ul>
-// * @exception SWTException <ul>
-// *    <li>ERROR_WIDGET_DISPOSED - if the receiver has been disposed</li>
-// *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
-// * </ul>
-// */
-//public void setCursor (Cursor cursor) {
-//    checkWidget ();
-//    hCursor = 0;
-//    if (cursor != null) {
-//        if (cursor.isDisposed()) SWT.error(SWT.ERROR_INVALID_ARGUMENT);
-//        hCursor = cursor.handle;
-//    }
-//    int hwndCursor = OS.GetCapture ();
+/**
+ * Sets the receiver's cursor to the cursor specified by the
+ * argument, or to the default cursor for that kind of control
+ * if the argument is null.
+ * <p>
+ * When the mouse pointer passes over a control its appearance
+ * is changed to match the control's cursor.
+ * </p>
+ *
+ * @param cursor the new cursor (or null)
+ *
+ * @exception IllegalArgumentException <ul>
+ *    <li>ERROR_INVALID_ARGUMENT - if the argument has been disposed</li>
+ * </ul>
+ * @exception SWTException <ul>
+ *    <li>ERROR_WIDGET_DISPOSED - if the receiver has been disposed</li>
+ *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
+ * </ul>
+ */
+/* public void setCursor (Cursor cursor) {
+    checkWidget ();
+    hCursor = 0;
+    if (cursor != null) {
+        if (cursor.isDisposed()) SWT.error(SWT.ERROR_INVALID_ARGUMENT);
+        hCursor = cursor.handle;
+    }
+ *///    int hwndCursor = OS.GetCapture ();
 //    if (hwndCursor == 0) {
 //        POINT pt = new POINT ();
 //        if (!OS.GetCursorPos (pt)) return;
@@ -2582,16 +2554,16 @@ void subclass () {
  *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
  * </ul>
  */
-//@@TODO(dmik)
-//public Point toControl (Point point) {
-//    checkWidget ();
-//    if (point == null) error (SWT.ERROR_NULL_ARGUMENT);
-//    POINT pt = new POINT ();
-//    pt.x = point.x;  pt.y = point.y;
-//    WinMapWindowPoints
+
+public Point toControl (Point point) {
+    checkWidget ();
+    if (point == null) error (SWT.ERROR_NULL_ARGUMENT);
+    int[] pnt = new int [] {0, 0};
+    pnt[0] = point.x;  pnt[1] = point.y;
+    OS.WinMapWindowPoints (OS.HWND_DESKTOP, handle, pnt, 1);
 //    OS.ScreenToClient (handle, pt);
-//    return new Point (pt.x, pt.y);
-//}
+    return new Point (pnt[0], pnt[1]);
+}
 
 /**
  * Returns a point which is the result of converting the
@@ -2608,15 +2580,15 @@ void subclass () {
  *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
  * </ul>
  */
-//@@TODO(dmik)
-//public Point toDisplay (Point point) {
-//    checkWidget ();
-//    if (point == null) error (SWT.ERROR_NULL_ARGUMENT);
-//    POINT pt = new POINT ();
-//    pt.x = point.x;  pt.y = point.y;
-//    OS.ClientToScreen (handle, pt);
-//    return new Point (pt.x, pt.y);
-//}
+
+public Point toDisplay (Point point) {
+    checkWidget ();
+    if (point == null) error (SWT.ERROR_NULL_ARGUMENT);
+    int[] pnt = new int [] {0, 0};
+    pnt[0] = point.x;  pnt[1] = point.y;
+    OS.WinMapWindowPoints (handle, OS.HWND_DESKTOP, pnt, 1);
+    return new Point (pnt[0], pnt[1]);
+}
 
 boolean translateAccelerator (QMSG qmsg) {
     return menuShell ().translateAccelerator (qmsg);
@@ -2950,6 +2922,7 @@ int windowProc (int msg, int mp1, int mp2) {
 //        case OS.WM_ADJUSTWINDOWPOS: result = WM_ADJUSTWINDOWPOS (mp1, mp2); break;
         case OS.WM_BUTTON1DOWN: result = WM_BUTTON1DOWN (mp1, mp2); break;
         case OS.WM_BUTTON1UP: result = WM_BUTTON1UP (mp1, mp2); break;
+        case OS.WM_BUTTON1DBLCLK: result = WM_BUTTON1DBLCLK (mp1, mp2); break;
         case OS.WM_BUTTON2DBLCLK: result = WM_BUTTON2DBLCLK (mp1, mp2); break;
         case OS.WM_BUTTON2DOWN: result = WM_BUTTON2DOWN (mp1, mp2); break;
         case OS.WM_BUTTON2UP: result = WM_BUTTON2UP (mp1, mp2); break;
@@ -2990,7 +2963,6 @@ int windowProc (int msg, int mp1, int mp2) {
 //        case OS.WM_GETOBJECT: result = WM_GETOBJECT (wParam, lParam); break;
 //        case OS.WM_KEYDOWN: result = WM_KEYDOWN (wParam, lParam); break;
 //        case OS.WM_KEYUP: result = WM_KEYUP (wParam, lParam); break;
-        case OS.WM_BUTTON1DBLCLK: result = WM_BUTTON1DBLCLK (mp1, mp2); break;
         case OS.WM_MEASUREITEM: result = WM_MEASUREITEM (mp1, mp2); break;
 //        case OS.WM_MENUCHAR: result = WM_MENUCHAR (wParam, lParam); break;
         case OS.WM_MENUEND: result = WM_MENUEND (mp1, mp2); break;
@@ -3023,7 +2995,7 @@ int windowProc (int msg, int mp1, int mp2) {
 //        case OS.WM_SYSCOMMAND: result = WM_SYSCOMMAND (wParam, lParam); break;
 //        case OS.WM_SYSKEYDOWN: result = WM_SYSKEYDOWN (wParam, lParam); break;
 //        case OS.WM_SYSKEYUP: result = WM_SYSKEYUP (wParam, lParam); break;
-//        case OS.WM_TIMER: result = WM_TIMER (wParam, lParam); break;
+        case OS.WM_TIMER: result = WM_TIMER (mp1, mp2); break;
 //        case OS.WM_UNDO: result = WM_UNDO (wParam, lParam); break;
         case OS.WM_VSCROLL: result = WM_VSCROLL (mp1, mp2); break;
 //        case OS.WM_WINDOWPOSCHANGING: result = WM_WINDOWPOSCHANGING (wParam, lParam); break;
@@ -3036,9 +3008,7 @@ int windowProc (int msg, int mp1, int mp2) {
 PSZ windowTitle() {
     return null;
 }
-//MRESULT OS.WM_BUTTON2DBLCLK (int mp1, int mp2) {
-//    return null;
-//}
+
 MRESULT WM_CALCVALIDRECTS (int mp1, int mp2) {
     return null;
 }
@@ -3344,7 +3314,7 @@ MRESULT WM_BUTTON1DBLCLK (int mp1, int mp2) {
       if (OS.WinQueryCapture (OS.HWND_DESKTOP) != handle) OS.WinSetCapture (OS.HWND_DESKTOP, handle);
       return new MRESULT (result);
 }
-//
+
 MRESULT WM_BUTTON2DBLCLK (int mp1, int mp2) {
       /*
       * Feature in OS/2. OS/2 sends the following
@@ -3976,9 +3946,9 @@ MRESULT WM_SYSCOMMAND (int mp1, int mp2) {
 //      return WM_KEYUP (wParam, lParam);
 //}
 //
-//LRESULT WM_TIMER (int wParam, int lParam) {
-//      return null;
-//}
+MRESULT WM_TIMER (int mp1, int mp2) {
+      return MRESULT.ZERO;
+}
 //
 //LRESULT WM_UNDO (int wParam, int lParam) {
 //      return null;

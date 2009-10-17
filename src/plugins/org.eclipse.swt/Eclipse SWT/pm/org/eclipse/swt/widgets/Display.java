@@ -163,9 +163,9 @@ public class Display extends Device {
         {OS.VK_CTRL,    SWT.CTRL},
 
         /* NOT CURRENTLY USED */
-//      {OS.VK_LBUTTON, SWT.BUTTON1},
-//      {OS.VK_MBUTTON, SWT.BUTTON3},
-//      {OS.VK_RBUTTON, SWT.BUTTON2},
+        {OS.VK_BUTTON1, SWT.BUTTON1},
+        {OS.VK_BUTTON3, SWT.BUTTON3},
+        {OS.VK_BUTTON2, SWT.BUTTON2},
 
         /* Non-Numeric Keypad Constants */
         {OS.VK_UP,      SWT.ARROW_UP},
@@ -179,7 +179,7 @@ public class Display extends Device {
         {OS.VK_INSERT,  SWT.INSERT},
 
         /* NOT CURRENTLY USED */
-//      {OS.VK_DELETE,  SWT.DELETE},
+ //       {OS.VK_DELETE,  SWT.DELETE},
 
         /* Functions Keys */
         {OS.VK_F1,  SWT.F1},
@@ -408,12 +408,12 @@ void clearModal (Shell shell) {
     for (int i=0; i<shells.length; i++) shells [i].updateModal ();
 }
 
-//@@TODO (dmik): later (lpino) using WinUpperChar
-//int controlKey (int key) {
-//    int upper = OS.WinUpperChar ((short) key);
-//    if (64 <= upper && upper <= 95) return upper & 0xBF;
-//    return key;
-//}
+//@@TODO (lpino): Check if it works as expected
+int controlKey (int key) {
+    int upper = OS.WinUpperChar (hab, 0, 0, (short) key);
+    if (64 <= upper && upper <= 95) return upper & 0xBF;
+    return key;
+}
 
 /**
  * Requests that the connection between SWT and the underlying
@@ -1037,30 +1037,24 @@ public Color getSystemColor (int id) {
     int pixel = 0x02000000;
     switch (id) {
         case SWT.COLOR_WIDGET_DARK_SHADOW:      pixel = OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_SHADOW,0);   break;
-        case SWT.COLOR_WIDGET_NORMAL_SHADOW:    pixel = OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_SHADOW,0);   break;
-//        case SWT.COLOR_WIDGET_LIGHT_SHADOW:     pixel = OS.GetSysColor (OS.COLOR_3DLIGHT);      break;
-//        case SWT.COLOR_WIDGET_HIGHLIGHT_SHADOW: pixel = OS.GetSysColor (OS.COLOR_3DHIGHLIGHT);  break;
+        case SWT.COLOR_WIDGET_NORMAL_SHADOW:    pixel = OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_SCROLLBAR,0);   break;
+        case SWT.COLOR_WIDGET_LIGHT_SHADOW:     pixel = OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_MENUHILITEBGND,0);      break;
+        case SWT.COLOR_WIDGET_HIGHLIGHT_SHADOW:	pixel = OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_BUTTONLIGHT,0);      break;
         case SWT.COLOR_WIDGET_BACKGROUND:       pixel = OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_DIALOGBACKGROUND,0);   break;
         case SWT.COLOR_WIDGET_BORDER:       pixel = OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_WINDOWFRAME,0);   break;
-//        case SWT.COLOR_WIDGET_FOREGROUND:
+        case SWT.COLOR_WIDGET_FOREGROUND:
         case SWT.COLOR_LIST_FOREGROUND:         pixel = OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_WINDOWTEXT,0);   break;
         case SWT.COLOR_LIST_BACKGROUND:         pixel = OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_WINDOW,0);   break;
         case SWT.COLOR_LIST_SELECTION:      pixel = OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_MENUHILITEBGND,0);   break;
         case SWT.COLOR_LIST_SELECTION_TEXT:     pixel =OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_MENUHILITE,0);   break;
-//        case SWT.COLOR_INFO_FOREGROUND:     pixel = OS.GetSysColor (OS.COLOR_INFOTEXT); break;
-//        case SWT.COLOR_INFO_BACKGROUND:     pixel = OS.GetSysColor (OS.COLOR_INFOBK);       break;
+        case SWT.COLOR_INFO_FOREGROUND:     pixel = OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_WINDOWTEXT,0);   break;
+         case SWT.COLOR_INFO_BACKGROUND:     pixel = OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_BACKGROUND,0);   break;
         case SWT.COLOR_TITLE_FOREGROUND:        pixel =OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_ACTIVETITLETEXT,0);   break;
         case SWT.COLOR_TITLE_BACKGROUND:        pixel = OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_ACTIVETITLE,0);   break;
-//        case SWT.COLOR_TITLE_BACKGROUND_GRADIENT:
-//            pixel = OS.GetSysColor (OS.COLOR_GRADIENTACTIVECAPTION);
-//            if (pixel == 0) pixel = OS.GetSysColor (OS.COLOR_ACTIVECAPTION);
-//            break;
+        case SWT.COLOR_TITLE_BACKGROUND_GRADIENT:	pixel = OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_ACTIVETITLE,0);   break;
         case SWT.COLOR_TITLE_INACTIVE_FOREGROUND:       pixel = OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_INACTIVETITLETEXT,0);   break;
         case SWT.COLOR_TITLE_INACTIVE_BACKGROUND:           pixel = OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_INACTIVETITLE,0);   break;
-//        case SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT:
-//            pixel = OS.GetSysColor (OS.COLOR_GRADIENTINACTIVECAPTION);
-//            if (pixel == 0) pixel = OS.GetSysColor (OS.COLOR_INACTIVECAPTION);
-//            break;
+        case SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT:	pixel = OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_INACTIVETITLETEXT,0);   break;
         default:
             return super.getSystemColor (id);
     }
@@ -1169,7 +1163,7 @@ protected void init () {
     
 //@@TODO (dmik): 
 //    /* Initialize the system font */
-    int systemFont = 0;
+    FATTRS systemFont = systemFont();
 //    if (!OS.IsWinCE) {
 //        NONCLIENTMETRICS info = new NONCLIENTMETRICS ();
 //        info.cbSize = NONCLIENTMETRICS.sizeof;
@@ -1179,7 +1173,7 @@ protected void init () {
 //    }
 //    if (systemFont == 0) systemFont = OS.GetStockObject (OS.DEFAULT_GUI_FONT);
 //    if (systemFont == 0) systemFont = OS.GetStockObject (OS.SYSTEM_FONT);
-    if (systemFont != 0) systemFonts = new int [] {systemFont};
+//    if (systemFont != 0) systemFonts = new int [] {systemFont};
 
     /* Create the message only HWND */
     hwndShell = OS.WinCreateWindow (OS.HWND_DESKTOP,
@@ -1418,25 +1412,12 @@ void releaseDisplay () {
     windowCallback.dispose ();
     windowCallback = null;
 
-    /* Release the system fonts */
-//@@TODO (dmik): later    
-    if (systemFonts != null) {
-//        for (int i=0; i<systemFonts.length; i++) {
-//            if (systemFonts [i] != 0) OS.DeleteObject (systemFonts [i]);
-//        }
-    }
-    systemFonts = null;
-
-    /* Release Custom Colors for ChooseColor */
-//@@TODO (dmik): later    
-//    if (lpCustColors != 0) OS.HeapFree (hHeap, 0, lpCustColors);
-//    lpCustColors = 0;
+    /* Release the system fonts */  
+    if (systemFonts != null) systemFonts = null;
 
     /* Release references */
     thread = null;
     qmsg = null;
-//@@TODO (dmik): remove, guess we don't need this    
-//    keyboard = null;
 //@@TODO (dmik): later    
 //    ModalWidgets = null;
     data = null;
@@ -1591,22 +1572,22 @@ boolean runDeferredEvents () {
     return true;
 }
 
-//void runTimer (int id) {
-//    if (timerList != null && timerIds != null) {
-//        int index = 0;
-//        while (index <timerIds.length) {
-//            if (timerIds [index] == id) {
-//                OS.KillTimer (hwndShell, timerIds [index]);
-//                timerIds [index] = 0;
-//                Runnable runnable = timerList [index];
-//                timerList [index] = null;
-//                if (runnable != null) runnable.run ();
-//                break;
-//            }
-//            index++;
-//        }
-//    }
-//}
+void runTimer (int id) {
+    if (timerList != null && timerIds != null) {
+        int index = 0;
+        while (index <timerIds.length) {
+            if (timerIds [index] == id) {
+                OS.WinStopTimer (hab, hwndShell, timerIds [index]);
+                timerIds [index] = 0;
+                Runnable runnable = timerList [index];
+                timerList [index] = null;
+                if (runnable != null) runnable.run ();
+                break;
+            }
+            index++;
+        }
+    }
+}
 
 void sendEvent (int eventType, Event event) {
     if (eventTable == null) return;
@@ -1788,23 +1769,21 @@ public void setSynchronizer (Synchronizer synchronizer) {
     this.synchronizer = synchronizer;
 }
 
-//int shiftedKey (int key) {
-//    if (OS.IsWinCE) return 0;
-//
-//    /* Clear the virtual keyboard and press the shift key */
-//    for (int i=0; i<keyboard.length; i++) keyboard [i] = 0;
-//    keyboard [OS.VK_SHIFT] |= 0x80;
-//
-//    /* Translate the key to ASCII or UNICODE using the virtual keyboard */
+//@@TODO (lpino):
+int shiftedKey (int key) {
+    /* Clear the virtual keyboard and press the shift key */
+    for (int i=0; i<keyboard.length; i++) keyboard [i] = 0;
+	    keyboard [OS.VK_SHIFT] |= 0x80;
+    /* Translate the key to ASCII or UNICODE using the virtual keyboard */
 //    if (OS.IsUnicode) {
 //        char [] result = new char [1];
 //        if (OS.ToUnicode (key, key, keyboard, result, 1, 0) == 1) return result [0];
 //    } else {
-//        short [] result = new short [1];
+        short [] result = new short [1];
 //        if (OS.ToAscii (key, key, keyboard, result, 0) == 1) return result [0];
 //    }
-//    return 0;
-//}
+    return 0;
+}
 
 /**
  * Causes the user-interface thread to <em>sleep</em> (that is,
@@ -1847,7 +1826,6 @@ protected FATTRS systemFont() {
     return super.systemFont();
 }
 
-//@@TODO (dmik): 
 ///**
 // * Causes the <code>run()</code> method of the runnable to
 // * be invoked by the user-interface thread after the specified
@@ -1866,48 +1844,48 @@ protected FATTRS systemFont() {
 // *
 // * @see #asyncExec
 // */
-//public void timerExec (int milliseconds, Runnable runnable) {
-//    checkDevice ();
-//    if (runnable == null) error (SWT.ERROR_NULL_ARGUMENT);
-//    if (timerList == null) timerList = new Runnable [4];
-//    if (timerIds == null) timerIds = new int [4];
-//    int index = 0;
-//    while (index < timerList.length) {
-//        if (timerList [index] == runnable) break;
-//        index++;
-//    }
-//    int timerId = 0;
-//    if (index != timerList.length) {
-//        timerId = timerIds [index];
-//        if (milliseconds < 0) {
-//            OS.KillTimer (hwndShell, timerId);
-//            timerList [index] = null;
-//            timerIds [index] = 0;
-//            return;
-//        }
-//    } else {
-//        index = 0;
-//        while (index < timerList.length) {
-//            if (timerList [index] == null) break;
-//            index++;
-//        }
-//        timerCount++;
-//        timerId = timerCount;
-//        if (index == timerList.length) {
-//            Runnable [] newTimerList = new Runnable [timerList.length + 4];
-//            System.arraycopy (timerList, 0, newTimerList, 0, timerList.length);
-//            timerList = newTimerList;
-//            int [] newTimerIds = new int [timerIds.length + 4];
-//            System.arraycopy (timerIds, 0, newTimerIds, 0, timerIds.length);
-//            timerIds = newTimerIds;
-//        }
-//    }
-//    int newTimerID = OS.SetTimer (hwndShell, timerId, milliseconds, 0);
-//    if (newTimerID != 0) {
-//        timerList [index] = runnable;
-//        timerIds [index] = newTimerID;
-//    }
-//}
+public void timerExec (int milliseconds, Runnable runnable) {
+    checkDevice ();
+    if (runnable == null) error (SWT.ERROR_NULL_ARGUMENT);
+    if (timerList == null) timerList = new Runnable [4];
+    if (timerIds == null) timerIds = new int [4];
+    int index = 0;
+    while (index < timerList.length) {
+        if (timerList [index] == runnable) break;
+        index++;
+    }
+    int timerId = 0;
+    if (index != timerList.length) {
+        timerId = timerIds [index];
+        if (milliseconds < 0) {
+            OS.WinStopTimer (hab, hwndShell, timerId);
+            timerList [index] = null;
+            timerIds [index] = 0;
+            return;
+        }
+    } else {
+        index = 0;
+        while (index < timerList.length) {
+            if (timerList [index] == null) break;
+            index++;
+        }
+        timerCount++;
+        timerId = timerCount;
+        if (index == timerList.length) {
+            Runnable [] newTimerList = new Runnable [timerList.length + 4];
+            System.arraycopy (timerList, 0, newTimerList, 0, timerList.length);
+            timerList = newTimerList;
+            int [] newTimerIds = new int [timerIds.length + 4];
+            System.arraycopy (timerIds, 0, newTimerIds, 0, timerIds.length);
+            timerIds = newTimerIds;
+        }
+    }
+    int newTimerID = OS.WinStartTimer (hab, hwndShell, timerId, milliseconds);
+    if (newTimerID != 0) {
+        timerList [index] = runnable;
+        timerIds [index] = newTimerID;
+    }
+}
 
 boolean translateAccelerator (QMSG qmsg, Control control) {
     accelKeyHit = true;
@@ -1977,10 +1955,9 @@ public void update() {
         }
     }
 }
-
-//void updateFont () {
-//    if (OS.IsWinCE) return;
-//    Font oldFont = getSystemFont ();
+//@@TODO (lpino): 
+void updateFont () {
+    Font oldFont = getSystemFont ();
 //    int systemFont = 0;
 //    NONCLIENTMETRICS info = new NONCLIENTMETRICS ();
 //    info.cbSize = NONCLIENTMETRICS.sizeof;
@@ -2005,7 +1982,7 @@ public void update() {
 //            shell.updateFont (oldFont, newFont);
 //        }
 //    }
-//}
+}
 
 /**
  * If the receiver's user-interface thread was <code>sleep</code>'ing,
@@ -2048,9 +2025,9 @@ int windowProc (int hwnd, int msg, int mp1, int mp2) {
 //            case OS.WM_SETTINGCHANGE: // WM_SYSVALUECHANGED ?
 //                updateFont ();
 //                break;
-//            case OS.WM_TIMER:
-//                runTimer (mp1);
-//                break;
+            case OS.WM_TIMER:
+                runTimer (mp1);
+                break;
         }
     }
     
