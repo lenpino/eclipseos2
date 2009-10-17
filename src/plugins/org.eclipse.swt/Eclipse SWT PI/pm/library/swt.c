@@ -1635,6 +1635,52 @@ JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinCloseClipbrd
     return (jboolean)WinCloseClipbrd((HAB)hab);
 }
 
+JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_WinUpperChar
+        (JNIEnv *env, jclass that, jint hab, jint ulCodepage, jint ulCountry, jint ulInchar)
+{
+    DEBUG_CALL("WinUpperChar\n")
+
+    return (jint)WinUpperChar((HAB)hab, ulCodepage, ulCountry, ulInchar);
+}
+
+JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_WinStartTimer
+        (JNIEnv *env, jclass that, jint hab, jint hwnd, jint idTimer, jint dtTimeout)
+{
+    DEBUG_CALL("WinStartTimer\n")
+
+    return (jint)WinStartTimer((HAB)hab, (HWND)hwnd, idTimer, dtTimeout);
+}
+
+JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinStopTimer
+        (JNIEnv *env, jclass that, jint hab, jint hwnd, jint idTimer)
+{
+    DEBUG_CALL("WinStopTimer\n")
+
+    return (jboolean)WinStopTimer((HAB)hab, (HWND)hwnd, idTimer);
+}
+
+JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinBeginEnumWindows
+        (JNIEnv *env, jclass that, jint hwnd)
+{
+    DEBUG_CALL("WinBeginEnumWindows\n")
+
+    return (jint)WinBeginEnumWindows((HWND)hwnd);
+}
+JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinEndEnumWindows
+        (JNIEnv *env, jclass that, jint henum)
+{
+    DEBUG_CALL("WinEndEnumWindows\n")
+
+    return (jboolean)WinEndEnumWindows((HENUM)henum);
+}
+JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinGetNextWindow
+        (JNIEnv *env, jclass that, jint henum)
+{
+    DEBUG_CALL("WinGetNextWindow\n")
+
+    return (jint)WinGetNextWindow((HENUM)henum);
+}
+
 JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_PrfQueryProfileSize
         (JNIEnv *env, jclass that, jint hini, jobject pszApp, jobject pszKey,
         jintArray pulDataLen)
