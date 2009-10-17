@@ -111,7 +111,7 @@ public class OS {
 //    public static final int CS_CLIPCHILDREN =   0x20000000;
 //    public static final int CS_CLIPSIBLINGS =   0x10000000;
 //    public static final int CS_PARENTCLIP =     0x08000000;
-//    public static final int CS_SAVEBITS =       0x04000000;
+    public static final int CS_SAVEBITS =       0x04000000;
 //    public static final int CS_SYNCPAINT =      0x02000000;
 
     /* Standard Window Classes */
@@ -150,7 +150,7 @@ public class OS {
     public static final int WS_CLIPCHILDREN =   0x20000000;
     public static final int WS_CLIPSIBLINGS =   0x10000000;
     public static final int WS_PARENTCLIP =     0x08000000;
-//    public static final int WS_SAVEBITS =       0x04000000;
+    public static final int WS_SAVEBITS =       0x04000000;
     public static final int WS_SYNCPAINT =      0x02000000;
     public static final int WS_MINIMIZED =      0x01000000;
     public static final int WS_MAXIMIZED =      0x00800000;
@@ -863,9 +863,9 @@ public class OS {
 //    public static final int PATSYM_DIAGHATCH =              19;
     public static final int PATSYM_BLANK =                  64;
 
-//    public static final int SYSCLR_SHADOWHILITEBGND =       -50;
-//    public static final int SYSCLR_SHADOWHILITEFGND =       -49;
-//    public static final int SYSCLR_SHADOWTEXT =             -48;
+    public static final int SYSCLR_SHADOWHILITEBGND =       -50;
+    public static final int SYSCLR_SHADOWHILITEFGND =       -49;
+    public static final int SYSCLR_SHADOWTEXT =             -48;
     public static final int SYSCLR_ENTRYFIELD =             -47;
     public static final int SYSCLR_MENUDISABLEDTEXT =       -46;
     public static final int SYSCLR_MENUHILITE =             -45;
@@ -889,7 +889,7 @@ public class OS {
 //    public static final int SYSCLR_OUTPUTTEXT =             -27;
 //    public static final int SYSCLR_WINDOWSTATICTEXT =       -26;
     public static final int SYSCLR_SCROLLBAR =              -25;
-//    public static final int SYSCLR_BACKGROUND =             -24;
+    public static final int SYSCLR_BACKGROUND =             -24;
     public static final int SYSCLR_ACTIVETITLE =            -23;
     public static final int SYSCLR_INACTIVETITLE =          -22;
     public static final int SYSCLR_MENU =                   -21;
@@ -2194,6 +2194,31 @@ public class OS {
    public static final int HT_DISCARD                  =-2;
    public static final int HT_ERROR                      =-3;
 
+   public static final int SPTR_ARROW                  = 1;
+   public static final int SPTR_TEXT                  = 2;
+   public static final int SPTR_WAIT                  = 3;
+   public static final int SPTR_SIZE                  = 4;
+   public static final int SPTR_MOVE                  = 5;
+   public static final int SPTR_SIZENWSE              = 6;
+   public static final int SPTR_SIZENESW              = 7;
+   public static final int SPTR_SIZEWE                = 8;
+   public static final int SPTR_SIZENS                = 9;
+   public static final int SPTR_APPICON               = 10;
+   
+   public static final int SPTR_ICONINFORMATION       = 11;
+   public static final int SPTR_ICONQUESTION          = 12;
+   public static final int SPTR_ICONERROR             = 13;
+   public static final int SPTR_ICONWARNING           = 14;
+   
+   public static final int SPTR_ILLEGAL               = 18;
+   public static final int SPTR_FILE                  = 19;
+   public static final int SPTR_FOLDER                = 20;
+   public static final int SPTR_MULTFILE              = 21;
+   public static final int SPTR_PROGRAM               = 22;
+   public static final int SPTR_DISPLAY_PTRS          = 22;
+   public static final int SPTR_PENFIRST              = 23;
+   public static final int SPTR_PENLAST               = 39;
+
 
 /* PM macros */
 
@@ -2407,6 +2432,12 @@ public static final native boolean WinQueryUpdateRect(int hwnd, RECTL prclPrc);
 public static final native boolean WinOpenClipbrd(int hab);
 public static final native boolean WinCloseClipbr(int hab);
 public static final native int WinQueryClipbrdData(int hab, int fmt);
+public static final native int WinUpperChar(int hab, int ulCodepage, int ulCountry, int ulInchar);
+public static final native int WinStartTimer(int hab, int hwnd, int idTimer, int dtTimeout);
+public static final native boolean WinStopTimer(int hab, int hwnd, int ulTimer);
+public static final native int WinBeginEnumWindows(int hwnd);
+public static final native boolean WinEndEnumWindows(int henum);
+public static final native int WinGetNextWindow(int henum);
 public static final native boolean PrfQueryProfileSize (int hini, PSZ pszApp,
     PSZ pszKey, int[] pulDataLen);
 public static final native int PrfQueryProfileString (int hini, PSZ pszApp,
