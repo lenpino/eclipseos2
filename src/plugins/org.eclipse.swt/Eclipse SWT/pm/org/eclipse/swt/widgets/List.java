@@ -187,17 +187,11 @@ static int checkStyle (int style) {
 public Point computeSize (int wHint, int hHint, boolean changed) {
 	checkWidget ();
 	int count = OS.WinSendMsg (handle, OS.LM_QUERYITEMCOUNT, 0, 0);
-        //@@TODO(lpino): Implement 
-//        int rc = wmMeasureItem(OS.WM_MEASUREITEM, handle, 0);
-//        System.out.println("Alto = " + OS.SHORT1FROMMP (rc));
-//        System.out.println("Ancho = " + OS.SHORT2FROMMP (rc));
-        
+        //@@TODO(lpino): Implement WM_MEASUREITEM when necessary
 	int itemHeight = getItemHeight();
 	int width = 0, height = count * itemHeight;
 	int hps = this.hps;
         if (hps == 0) hps = OS.WinGetPS (handle);
-	RECTL rcl = new RECTL();
-	int flags = OS.DT_QUERYEXTENT | OS.DT_TEXTATTRS;
 	PSZ buffer = new PSZ(64+1);
 	int[] pnts = new int [OS.TXTBOX_COUNT * 2];
 	for (int i=0; i<count; i++) {
@@ -210,10 +204,6 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 			if (result != 0) {
 				OS.GpiQueryTextBox (hps, length, buffer.getBytes(), OS.TXTBOX_COUNT, pnts);
 				width = Math.max (width, pnts[4] - pnts[0]);
-//				System.out.println("List::computeSize -> pto 1 = " + pnts[0] + "," + pnts[1]);
-//				System.out.println("List::computeSize -> pto 2 = " + pnts[2] + "," + pnts[3]);
-//				System.out.println("List::computeSize -> pto 3 = " + pnts[4] + "," + pnts[5]);
-//				System.out.println("List::computeSize -> pto 4 = " + pnts[6] + "," + pnts[7]);
 
 			}
 		}
@@ -226,13 +216,12 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 	int border = getBorderWidth ();
 	width += border * 2 + 3;
 	height += border * 2;
-	if ((style & SWT.V_SCROLL) != 0) {
-	System.out.println("List::computeSize -> width antes de = " + width);
-		width += OS.WinQuerySysValue (handle, OS.SV_CXVSCROLL);
-	System.out.println("List::computeSize -> width despues de = " + width);
-	}
+	//
+//	if ((style & SWT.V_SCROLL) != 0) {
+		width += OS.WinQuerySysValue (OS.HWND_DESKTOP, OS.SV_CXVSCROLL);
+//	}
 	if ((style & SWT.H_SCROLL) != 0) {
-		height += OS.WinQuerySysValue (handle, OS.SV_CYHSCROLL);
+		height += OS.WinQuerySysValue (OS.HWND_DESKTOP, OS.SV_CYHSCROLL);
 	}
 	return new Point (width, height);
 }
@@ -753,8 +742,6 @@ public void remove (int [] indices) {
 	int newWidth = 0;
 	int hps = this.hps;
 	RECTL rcl = null;
-//	RECT rect = null;
-//	int hDC = 0, oldFont = 0, newFont = 0, newWidth = 0;
 	if ((style & SWT.H_SCROLL) != 0) {
 		rcl = new RECTL ();
 		if (hps == 0) hps = OS.WinGetPS (handle);
@@ -776,7 +763,6 @@ public void remove (int [] indices) {
 				if (result == 0) break;
 			}
 			int result =  OS.WinSendMsg (handle, OS.LM_DELETEITEM, index, 0);
-//			if (result == OS.LB_ERR) break;
 			if ((style & SWT.H_SCROLL) != 0) {
 				int flags = OS.DT_QUERYEXTENT | OS.DT_TEXTATTRS;
 				OS.WinDrawText (hps, -1, buffer.getBytes(), rcl, 0, 0, flags);
@@ -788,7 +774,6 @@ public void remove (int [] indices) {
 		i++;
 	}
 	if ((style & SWT.H_SCROLL) != 0) {
-//		if (newFont != 0) OS.SelectObject (hDC, oldFont);
 		if (this.hps == 0) OS.WinReleasePS (hps);
 		setScrollWidth (newWidth, false);
 	}
@@ -1129,7 +1114,6 @@ void setFocusIndex (int index) {
 public void setFont (Font font) {
 	checkWidget ();
 	super.setFont (font);
-//@@TODO(lpino): Implement setScrollWidth ()
         if ((style & SWT.H_SCROLL) != 0) setScrollWidth ();
 }
 
@@ -1250,63 +1234,31 @@ void setScrollWidth () {
 	int newWidth = 0;
 	int hps = this.hps;
         if (hps == 0) hps = OS.WinGetPS (handle);
-	RECTL rcl = new RECTL();
 	int count = OS.WinSendMsg (handle, OS.LM_QUERYITEMCOUNT, 0, 0);
-	int flags = OS.DT_QUERYEXTENT | OS.DT_TEXTATTRS;
+	int[] pnts = new int [OS.TXTBOX_COUNT * 2];
 	for (int i=0; i<count; i++) {
 		int length = OS.WinSendMsg (handle, OS.LM_QUERYITEMTEXTLENGTH,(short)i, 0);
 		if (length != OS.LIT_ERROR) {
 			PSZ buffer = new PSZ( length + 1);
 			int result = OS.WinSendMsg (handle, OS.LM_QUERYITEMTEXT, OS.MPFROM2SHORT((short)i,(short)length), buffer);
 			if (result != 0) {
-				OS.WinDrawText (hps, -1, buffer.getBytes(), rcl, 0, 0, flags);
-				newWidth = Math.max (newWidth, rcl.xRight - rcl.xLeft);
+				OS.GpiQueryTextBox (hps, length, buffer.getBytes(), OS.TXTBOX_COUNT, pnts);
+				newWidth = Math.max (newWidth, pnts[4] - pnts[0]);
 			}
 		}
 	}	
 	if (this.hps == 0) OS.WinReleasePS (hps);
 	OS.WinSendMsg (handle, OS.LM_SETITEMWIDTH, newWidth, 0);
-
-//	RECT rect = new RECT ();
-//	int newFont, oldFont = 0;
-//	int hDC = OS.GetDC (handle);
-//	newFont = OS.SendMessage (handle, OS.WM_GETFONT, 0, 0);
-//	if (newFont != 0) oldFont = OS.SelectObject (hDC, newFont);
-//	int cp = getCodePage ();
-//	int count = OS.SendMessage (handle, OS.LB_GETCOUNT, 0, 0);
-//	int flags = OS.DT_CALCRECT | OS.DT_SINGLELINE | OS.DT_NOPREFIX;
-//	for (int i=0; i<count; i++) {
-//		int length = OS.SendMessage (handle, OS.LB_GETTEXTLEN, i, 0);
-//		if (length != OS.LB_ERR) {
-//			TCHAR buffer = new TCHAR (cp, length + 1);
-//			int result = OS.SendMessage (handle, OS.LB_GETTEXT, i, buffer);
-//			if (result != OS.LB_ERR) {
-//				OS.DrawText (hDC, buffer, -1, rect, flags);
-//				newWidth = Math.max (newWidth, rect.right - rect.left);
-//			}
-//		}
-//	}
-//	if (newFont != 0) OS.SelectObject (hDC, oldFont);
-//	OS.ReleaseDC (handle, hDC);
 //	OS.SendMessage (handle, OS.LB_SETHORIZONTALEXTENT, newWidth + 3, 0);
 }
-//@@TODO(lpino): Implement ?
+
 void setScrollWidth (PSZ buffer, boolean grow) {
-	RECTL rcl = new RECTL ();
-//	int newFont, oldFont = 0;
-//	int hDC = OS.GetDC (handle);
 	int hps = this.hps;
         if (hps == 0) hps = OS.WinGetPS (handle);
-//	newFont = OS.SendMessage (handle, OS.WM_GETFONT, 0, 0);
-//	if (newFont != 0) oldFont = OS.SelectObject (hDC, newFont);
-//	int flags = OS.DT_CALCRECT | OS.DT_SINGLELINE | OS.DT_NOPREFIX;
-	int flags = OS.DT_QUERYEXTENT | OS.DT_TEXTATTRS;
-	OS.WinDrawText (hps, -1, buffer.getBytes(), rcl, 0, 0, flags);
+	int[] pnts = new int [OS.TXTBOX_COUNT * 2];
+	OS.GpiQueryTextBox (hps, buffer.length(), buffer.getBytes(), OS.TXTBOX_COUNT, pnts);
 	if (this.hps == 0) OS.WinReleasePS (hps);
-//	OS.DrawText (hDC, buffer, -1, rect, flags);
-//	if (newFont != 0) OS.SelectObject (hDC, oldFont);
-//	OS.ReleaseDC (handle, hDC);
-	setScrollWidth (rcl.xRight - rcl.xLeft, grow);
+	setScrollWidth (pnts[4] - pnts[0], grow);
 }
 
 void setScrollWidth (int newWidth, boolean grow) {
@@ -1505,12 +1457,14 @@ public void showSelection () {
 }
 
 int widgetStyle () {
-	int bits = super.widgetStyle ();
-	if ((style & SWT.SINGLE) != 0) return bits;
+	//@@INFO(lpino): LS_NOADJUSTPOS doesn't honor the sizes as are calculated
+	int bits = super.widgetStyle ();// | OS.LS_NOADJUSTPOS;
+//	if ((style & SWT.SINGLE) != 0) return bits;
 	if ((style & SWT.MULTI) != 0) {
 		if ((style & SWT.SIMPLE) != 0)
-                    return bits |= OS.LS_MULTIPLESEL;
-                return bits |= OS.LS_EXTENDEDSEL | OS.LS_EXTENDEDSEL;
+			bits |= OS.LS_MULTIPLESEL;
+		else
+			bits |= OS.LS_EXTENDEDSEL | OS.LS_EXTENDEDSEL;
 	}
         if ((style & SWT.H_SCROLL) != 0)
             bits |= OS.LS_HORZSCROLL;

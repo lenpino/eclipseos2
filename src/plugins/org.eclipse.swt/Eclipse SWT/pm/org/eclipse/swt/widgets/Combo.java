@@ -273,9 +273,9 @@ static int checkStyle (int style) {
 	 * widget's client area.  The fix is to clear
 	 * the SWT style.
 	 */
-//	style &= ~(SWT.H_SCROLL | SWT.V_SCROLL);
-//	style = checkBits (style, SWT.DROP_DOWN, SWT.SIMPLE, 0, 0, 0, 0);
-//	if ((style & SWT.SIMPLE) != 0) return style & ~SWT.READ_ONLY;
+	style &= ~(SWT.H_SCROLL | SWT.V_SCROLL);
+	style = checkBits (style, SWT.DROP_DOWN, SWT.SIMPLE, 0, 0, 0, 0);
+	if ((style & SWT.SIMPLE) != 0) return style & ~SWT.READ_ONLY;
 	return style;
 }
 
@@ -301,50 +301,45 @@ public void clearSelection () {
 	OS.WinSendMsg(handle, OS.EM_SETSEL, 0, 0);
 }
 
-//public Point computeSize (int wHint, int hHint, boolean changed) {
-//	checkWidget ();
-//	int count = OS.SendMessage (handle, OS.CB_GETCOUNT, 0, 0);
-//	int itemHeight = OS.SendMessage (handle, OS.CB_GETITEMHEIGHT, 0, 0);
-//	int width = 0, height = 0;
-//	if ((style & SWT.SIMPLE) != 0) height = count * itemHeight;
-//	int newFont, oldFont = 0;
-//	int hDC = OS.GetDC (handle);
-//	newFont = OS.SendMessage (handle, OS.WM_GETFONT, 0, 0);
-//	if (newFont != 0) oldFont = OS.SelectObject (hDC, newFont);
-//	RECT rect = new RECT ();
-//	int flags = OS.DT_CALCRECT | OS.DT_NOPREFIX;
-//	int length = OS.GetWindowTextLength (handle);
-//	int cp = getCodePage ();
-//	TCHAR buffer = new TCHAR (cp, length + 1);
-//	OS.GetWindowText (handle, buffer, length);
-//	OS.DrawText (hDC, buffer, length, rect, flags);
-//	width = Math.max (width, rect.right - rect.left);
-//	for (int i=0; i<count; i++) {
-//		length = OS.SendMessage (handle, OS.CB_GETLBTEXTLEN, i, 0);
-//		if (length != OS.CB_ERR) {
-//			if (length + 1 > buffer.length ()) buffer = new TCHAR (cp, length + 1);
-//			int result = OS.SendMessage (handle, OS.CB_GETLBTEXT, i, buffer);
-//			if (result != OS.CB_ERR) {
-//				OS.DrawText (hDC, buffer, length, rect, flags);
-//				width = Math.max (width, rect.right - rect.left);
-//			}
-//		}
-//	}	
-//	if (newFont != 0) OS.SelectObject (hDC, oldFont);
-//	OS.ReleaseDC (handle, hDC);
-//	if (width == 0) width = DEFAULT_WIDTH;
-//	if (height == 0) height = DEFAULT_HEIGHT;
-//	if (wHint != SWT.DEFAULT) width = wHint;
-//	if (hHint != SWT.DEFAULT) height = hHint;
-//	int textHeight = OS.SendMessage (handle, OS.CB_GETITEMHEIGHT, -1, 0);
+public Point computeSize (int wHint, int hHint, boolean changed) {
+	checkWidget ();
+	int count = OS.WinSendMsg (handle, OS.LM_QUERYITEMCOUNT, 0, 0);
+	int itemHeight = getItemHeight();
+	int width = 0, height = 0;
+	if ((style & SWT.SIMPLE) != 0) height = count * itemHeight;
+	int hps = this.hps;
+        if (hps == 0) hps = OS.WinGetPS (handle);
+	PSZ buffer = new PSZ(64+1);
+	int[] pnts = new int [OS.TXTBOX_COUNT * 2];
+	for (int i=0; i<count; i++) {
+		int length = OS.WinSendMsg (handle, OS.LM_QUERYITEMTEXTLENGTH,(short)i, 0);
+		if (length != OS.LIT_ERROR) {
+			if (length + 1 > buffer.length()) {
+				buffer = new PSZ( length + 1);
+			}
+			int result = OS.WinSendMsg (handle, OS.LM_QUERYITEMTEXT, OS.MPFROM2SHORT((short)i,(short)length), buffer);
+			if (result != 0) {
+				OS.GpiQueryTextBox (hps, length, buffer.getBytes(), OS.TXTBOX_COUNT, pnts);
+				width = Math.max (width, pnts[4] - pnts[0]);
+
+			}
+		}
+	}	
+	if (this.hps == 0) OS.WinReleasePS (hps);
+	if (width == 0) width = DEFAULT_WIDTH;
+	if (height == 0) height = DEFAULT_HEIGHT;
+	if (wHint != SWT.DEFAULT) width = wHint;
+	if (hHint != SWT.DEFAULT) height = hHint;
+	int textHeight = getItemHeight();
+	width += OS.WinQuerySysValue (OS.HWND_DESKTOP, OS.SV_CXVSCROLL) + 8;
 //	width += OS.GetSystemMetrics (OS.SM_CXVSCROLL) + 8;
-//	if ((style & SWT.DROP_DOWN) != 0) {
-//		height = textHeight + 6;
-//	} else {
-//		height += textHeight + 10;
-//	}
-//	return new Point (width, height);
-//}
+	if ((style & SWT.DROP_DOWN) != 0) {
+		height = textHeight + 6;
+	} else {
+		height += textHeight + 10;
+	}
+	return new Point (width, height);
+}
 
 void createHandle () {
 	super.createHandle ();
@@ -403,10 +398,12 @@ public void deselectAll () {
 	// widget could be disposed at this point
 }
 
-//boolean getEditable () {
-//	int bits = OS.GetWindowLong (handle, OS.GWL_STYLE);
-//	return (bits & 0x0F) == OS.CBS_DROPDOWNLIST;
-//}
+boolean getEditable () {
+	int bits = OS.WinQueryWindowULong (handle, OS.QWL_STYLE);
+	if ((bits & OS.CBS_DROPDOWNLIST ) != 0)
+		return false;
+	return true;
+}
 
 /**
  * Returns the item at the given, zero-relative index in the
@@ -740,27 +737,36 @@ public int indexOf (String string, int start) {
  */
 public void remove (int index) {
 	checkWidget ();
-	PSZ buffer = null;
-	if ((style & SWT.H_SCROLL) != 0) {
-		int length = OS.WinSendMsg (handle, OS.LM_QUERYITEMTEXTLENGTH,(short)index, 0);
-		if (length == OS.LIT_ERROR) error (SWT.ERROR_ITEM_NOT_REMOVED);
-		buffer = new PSZ (length + 1);
-		int result = OS.WinSendMsg (handle, OS.LM_QUERYITEMTEXT, OS.MPFROM2SHORT((short)length,(short)index), buffer);
-		if (result <= 0) error (SWT.ERROR_ITEM_NOT_REMOVED);
-	}
-	int topIndex = OS.WinSendMsg (handle, OS.LM_QUERYTOPINDEX, 0, 0);
-	int result = OS.WinSendMsg (handle, OS.LM_DELETEITEM,(short) index, 0);
-	if (result <= 0) {
-		int count = OS.WinSendMsg (handle, OS.LM_QUERYITEMCOUNT, 0, 0);
-		if (0 <= index && index < count) error (SWT.ERROR_ITEM_NOT_REMOVED);
-		error (SWT.ERROR_INVALID_RANGE);
-	}
-//@@TODO(lpino): 
-//	if ((style & SWT.H_SCROLL) != 0) setScrollWidth (buffer, false);
-	if (index < topIndex) {
-		OS.WinSendMsg (handle, OS.LM_SETTOPINDEX, (short)(topIndex-1), 0);
-	}
+
+	int length = OS.WinSendMsg (handle, OS.LM_QUERYITEMTEXTLENGTH,(short)index, 0);
+	if (length == OS.LIT_ERROR) error (SWT.ERROR_ITEM_NOT_REMOVED);
+	
+	int count = OS.WinSendMsg (handle, OS.LM_QUERYITEMCOUNT, 0, 0);
+	if (index <0 || index > count) error (SWT.ERROR_INVALID_RANGE);
+	
+	int leftCount = OS.WinSendMsg (handle, OS.LM_DELETEITEM,(short) index, 0);
+
+	if (leftCount == count) error (SWT.ERROR_ITEM_NOT_REMOVED);
+	
+	/*
+	* It is possible (but unlikely), that application
+	* code could have disposed the widget in the modify
+	* event.  If this happens, just return.
+	*/
         sendEvent (SWT.Modify);
+	if (isDisposed ()) return;
+	/*
+	* Bug in Windows.  When the combo box is read only
+	* with exactly one item that is currently selected
+	* and that item is removed, the combo box does not
+	* redraw to clear the text area.  The fix is to
+	* force a redraw.
+	*/
+	//@@TODO(lpino): Do we need to consider this case in OS/2
+//	if ((style & SWT.READ_ONLY) != 0) {		
+//		int count = OS.SendMessage (handle, OS.CB_GETCOUNT, 0, 0);
+//		if (count == 0) OS.InvalidateRect (handle, null, false);
+//	}
 }
 
 /**
