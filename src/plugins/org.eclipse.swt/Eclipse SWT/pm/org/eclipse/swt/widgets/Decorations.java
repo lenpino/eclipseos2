@@ -1205,6 +1205,8 @@ public void setVisible (boolean visible) {
         */
         sendEvent (SWT.Show);
         if (isDisposed ()) return;
+//			OS.DrawMenuBar (handle);
+//			OS.ShowWindow (handle, swFlags);
     }
 
     OS.WinShowWindow (frameHandle, visible);
@@ -1366,11 +1368,12 @@ int windowFrameProc (int msg, int mp1, int mp2) {
     MRESULT result = null;
     switch (msg) {
         case OS.WM_ACTIVATE: result = FRAME_WM_ACTIVATE (mp1, mp2); break;
+//	case OS.WM_CLOSE: result = FRAME_WM_CLOSE (mp1, mp2); break;
         case OS.WM_ADJUSTWINDOWPOS: result = FRAME_WM_ADJUSTWINDOWPOS (mp1, mp2); break;
         case OS.WM_REALIZEPALETTE: result = FRAME_WM_REALIZEPALETTE (mp1, mp2); break;
         case OS.WM_WINDOWPOSCHANGED: result = FRAME_WM_WINDOWPOSCHANGED (mp1, mp2); break;
         case OS.WM_CHAR: result = FRAME_WM_CHAR (mp1, mp2); break;
-	case OS.WM_ERASEBACKGROUND: result = FRAME_WM_ERASEBACKGROUND (mp1, mp2); break;
+//	case OS.WM_ERASEBACKGROUND: result = FRAME_WM_ERASEBACKGROUND (mp1, mp2); break;
  	case OS.WM_INITMENU: result = FRAME_WM_INITMENU (mp1, mp2); break;
    }
     
@@ -1434,7 +1437,7 @@ MRESULT FRAME_WM_ACTIVATE (int mp1, int mp2) {
 		*/
 		sendEvent (SWT.Activate);
 		if (isDisposed ()) return MRESULT.ZERO;
-		restoreFocus ();
+		if(restoreFocus ()) return MRESULT.ZERO;;
 	}
 	return null;
 }
@@ -1503,20 +1506,20 @@ MRESULT WM_CLOSE (int mp1, int mp2) {
     return MRESULT.ZERO;
 }
 
-MRESULT FRAME_WM_ERASEBACKGROUND (int mp1, int mp2) {
-//@@TODO (lpino): Remove debug
-//    System.out.println("Decorations::WM_ERASEBACKGROUND -> HANDLE = " + Integer.toHexString(handle));
-    if ((state & CANVAS) != 0) {
-        return super.WM_ERASEBACKGROUND (mp1, mp2);
-    }
-    RECTL rcl = new RECTL();
-    OS.objcpy (rcl, mp2);
-    drawBackground (mp1, rcl);
-    return MRESULT.FALSE;
-}
-
-MRESULT FRAME_WM_INITMENU (int mp1, int mp2) {
-	return MRESULT.FALSE;
+// // MRESULT WM_ERASEBACKGROUND (int mp1, int mp2) {
+// // //@@TODO (lpino): Remove debug
+    // // System.out.println("Decorations::WM_ERASEBACKGROUND -> HANDLE = " + Integer.toHexString(handle));
+    // // if ((state & CANVAS) != 0) {
+        // // return super.WM_ERASEBACKGROUND (mp1, mp2);
+    // // }
+    // // RECTL rcl = new RECTL();
+    // // OS.objcpy (rcl, mp2);
+    // // drawBackground (mp1, rcl);
+    // // return MRESULT.FALSE;
+// // }
+// // 
+ MRESULT FRAME_WM_INITMENU (int mp1, int mp2) {
+	 return MRESULT.FALSE;
 }
 MRESULT WM_SETFOCUS (int mp1, int mp2) {
     MRESULT result  = super.WM_SETFOCUS (mp1, mp2);

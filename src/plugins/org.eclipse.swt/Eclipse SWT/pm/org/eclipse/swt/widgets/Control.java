@@ -3479,24 +3479,6 @@ MRESULT WM_MEASUREITEM (int mp1, int mp2) {
 //    return null;
 }
 
-//LRESULT WM_MENUCHAR (int wParam, int lParam) {
-//      Display display = getDisplay ();
-//      display.mnemonicKeyHit = false;
-//      /*
-//      * Feature in Windows.  When the user types Alt+<key>
-//      * and <key> does not match a mnemonic in the System
-//      * menu or the menu bar, Windows beeps.  This beep is
-//      * unexpected and unwanted by applications that look
-//      * for Alt+<key>.  The fix is to detect the case and
-//      * stop Windows from beeping by closing the menu.
-//      */
-//      int type = wParam >> 16;
-//      if (type == 0 || type == OS.MF_SYSMENU) {
-//              return new LRESULT (OS.MNC_CLOSE << 16);
-//      }
-//      return null;
-//}
-
 MRESULT WM_MENUSELECT (int mp1, int mp2) {
     if(OS.SHORT2FROMMP(mp1) == 0) return MRESULT.TRUE;
 //      int code = wParam >> 16;
@@ -3658,6 +3640,7 @@ MRESULT WM_HITTEST (int mp1, int mp2) {
 //}
 
 MRESULT WM_PAINT (int mp1, int mp2) {
+//	System.out.println("Control::WM_PAINT -> HANDLE  =  " + Integer.toHexString(handle));
     /* Exit early - don't draw the background */
     if (!hooks (SWT.Paint)) {
         return null;
@@ -3744,6 +3727,8 @@ MRESULT WM_PAINT (int mp1, int mp2) {
 //}
 
 MRESULT WM_SETFOCUS (int mp1, int mp2) {
+    // System.out.println("Control::WM_SETFOCUS -> handle = " + Integer.toHexString(mp1));
+    // System.out.println("Control::WM_SETFOCUS -> mp2 = " + OS.SHORT1FROMMP (mp2));
     callWindowProc (OS.WM_SETFOCUS, mp1, mp2);
     Shell shell = getShell ();
 
@@ -3837,7 +3822,7 @@ MRESULT WM_SIZE (int mp1, int mp2) {
 //LRESULT WM_SYSCOLORCHANGE (int wParam, int lParam) {
 //      return null;
 //}
-//
+//@@TODO (lpino): Complete including differences with Win32 (WM_SYSCHAR + WM_SYSKEYDOWN)
 MRESULT WM_SYSCOMMAND (int mp1, int mp2) {
 //      /*
 //      * Check to see if the command is a system command or
@@ -3858,6 +3843,7 @@ MRESULT WM_SYSCOMMAND (int mp1, int mp2) {
       int cmd = mp1 & 0xFFFF;
       switch (cmd) {
               case OS.SC_CLOSE:
+	      	System.out.println("Control::WM_SYSCOMMAND -> SC_CLOSE"); 
                       int hwndShell = menuShell ().handle;
 //                      int bits =  OS.WinQueryWindowULong (frameHandle, OS.QWL_STYLE);
 //                      if ((bits & OS.WS_SYSMENU) == 0) return MRESULT.ZERO;
@@ -3987,10 +3973,13 @@ MRESULT WM_WINDOWPOSCHANGED (int mp1, int mp2) {
     }
     return new MRESULT (result);
 }
+
 MRESULT WM_FOCUSCHANGE (int mp1, int mp2) {
     callWindowProc (OS.WM_FOCUSCHANGE, mp1, mp2);
     return MRESULT.ZERO;
 }
+
+//@@TODO(lpino): Consider the process in Menu controls and ListBoxes
 //MRESULT WM_ADJUSTWINDOWPOS (int mp1, int mp2) {
 //    System.out.println("Control:WM_ADJUSTWINDOWPOS");
 //    SWP swp = new SWP ();
@@ -4033,10 +4022,6 @@ MRESULT wmMeasureChild (int mp1, int mp2) {
 	System.out.println("Control:wmMeasureChild");
       return null;
 }
-//
-//LRESULT wmNotifyChild (int wParam, int lParam) {
-//      return null;
-//}
 
 MRESULT wmScrollChild (int mp1, int mp2) {
       return null;

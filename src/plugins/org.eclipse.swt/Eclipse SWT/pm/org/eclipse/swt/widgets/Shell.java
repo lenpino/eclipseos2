@@ -460,10 +460,10 @@ public void dispose () {
     * away when a dialog window exits.  This behavior
     * is currently unspecified.
     */
-//    /*
-//    * Note:  It is valid to attempt to dispose a widget
-//    * more than once.  If this happens, fail silently.
-//    */
+    /*
+    * Note:  It is valid to attempt to dispose a widget
+    * more than once.  If this happens, fail silently.
+    */
 //    if (!isValidWidget ()) return;
 //    if (!isValidThread ()) error (SWT.ERROR_THREAD_INVALID_ACCESS);
 //    Display oldDisplay = display;
@@ -472,7 +472,7 @@ public void dispose () {
 //    if (oldDisplay != null) oldDisplay.update ();
 }
 
-//@@TODO(dmik)
+//@@TODO(lpino): Use GpiSetPattern
 //int findBrush (int pixel) {
 //	if (pixel == OS.GetSysColor (OS.COLOR_BTNFACE)) {
 //		return OS.GetSysColorBrush (OS.COLOR_BTNFACE);
@@ -545,11 +545,11 @@ public Display getDisplay () {
 }
 
 //@@TODO(dmik): what to do with TrimEnabled?
-//public boolean getEnabled () {
-//    checkWidget ();
-//    if (!display.TrimEnabled) return super.getEnabled ();
-//    return (state & DISABLED) == 0;
-//}
+public boolean getEnabled () {
+    checkWidget ();
+    if (!display.TrimEnabled) return super.getEnabled ();
+    return (state & DISABLED) == 0;
+}
 
 /**
  * Returns the receiver's input method editor mode. This
