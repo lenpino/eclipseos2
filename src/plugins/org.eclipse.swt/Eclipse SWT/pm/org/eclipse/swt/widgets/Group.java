@@ -157,6 +157,9 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
         Point sizeRect = new Point (0, 0);
         int hps = this.hps;
         if (hps == 0) hps = OS.WinGetPS (handle);
+	int[] pnts = new int [OS.TXTBOX_COUNT * 2];
+	
+	
         FONTMETRICS fm = new FONTMETRICS();
         OS.GpiQueryFontMetrics (hps, FONTMETRICS.sizeof, fm);
         computeWindowTextSize (hps, fm, sizeRect);
@@ -309,23 +312,39 @@ MRESULT WM_HITTEST (int mp1, int mp2) {
 	if (code == OS.HT_TRANSPARENT) code = OS.HT_NORMAL;
 	return new MRESULT (code);
 }
-//MRESULT WM_PAINT (int mp1, int mp2) {
-//    System.out.println("Group::WM_PAINT -> HANDLE  =  " + Integer.toHexString(handle));
-//    GCData data = new GCData ();
-//    if (hps == 0) {
-//        hps = internal_new_GC (data);
-//        if (hps == 0) SWT.error(SWT.ERROR_NO_HANDLES);
-//        data.doInit = true;
-//    }
-//    
-//    /* Create the paint GC */
-//    data.rcl = new RECTL ();
-//    data.hps = hps;
-// 
-//    drawBackground(hps);
-//    /* Dispose the paint GC */
-//    System.out.println("Group::WM_PAINT -> HPS = " + Integer.toHexString(hps));
-//    callWindowProc(OS.WM_PAINT, mp1, mp2);
-//    return MRESULT.ZERO;
-//}
+
+ // MRESULT WM_SIZE (int mp1, int mp2) {
+	 // System.out.println("Group::WM_SIZE -> HANDLE  =  " + Integer.toHexString(handle));
+	// //MRESULT result = super.WM_SIZE (mp1, mp2);
+	 // return super.WM_SIZE (mp1, mp2);
+ // }
+
+// MRESULT WM_WINDOWPOSCHANGED (int mp1, int mp2) {
+//	 System.out.println("Group::WM_WINDOWPOSCHANGED -> HANDLE  =  " + Integer.toHexString(handle));
+	    // GCData data = new GCData ();
+	    // if (hps == 0) {
+		// hps = internal_new_GC (data);
+		// if (hps == 0) SWT.error(SWT.ERROR_NO_HANDLES);
+		// data.doInit = true;
+	    // }
+	    // drawBackground(hps);
+//	 return super.WM_WINDOWPOSCHANGED (mp1, mp2);
+ //}
+
+MRESULT WM_PAINT (int mp1, int mp2) {
+	//@@TODO (lpino): Remove debug
+//	System.out.println("Group::WM_PAINT -> Handle  =  " + Integer.toHexString(handle));
+     GCData data = new GCData ();
+     if (hps == 0) {
+         hps = internal_new_GC (data);
+         if (hps == 0) SWT.error(SWT.ERROR_NO_HANDLES);
+         data.doInit = true;
+     }
+    
+    RECTL rcl = new RECTL ();
+    OS.WinQueryUpdateRect (handle, rcl);
+//    GC gc = GC.pm_new (this, data);
+   drawBackground(hps, rcl);
+    return null;
+}
 }
