@@ -509,18 +509,20 @@ MRESULT WM_CALCVALIDRECTS (int mp1, int mp2) {
 
 //@@TODO(dmik): think of it, not sure that it is processed in the right way here...
 //  And may be better to move this code to Decorations class...
-MRESULT WM_ERASEBACKGROUND (int mp1, int mp2) {
-//@@TODO (lpino): Remove log
-//    System.out.println("Composite::WM_ERASEBACKGROUND -> HANDLE = " + Integer.toHexString(handle));
-    if ((state & CANVAS) != 0) {
-        return MRESULT.FALSE;
-//        return super.WM_ERASEBACKGROUND (mp1, mp2);
-    }
-    RECTL rcl = new RECTL();
-    OS.objcpy (rcl, mp2);
-    drawBackground (mp1, rcl);
-    return MRESULT.TRUE;
-}
+ // MRESULT WM_ERASEBACKGROUND (int mp1, int mp2) {
+ // //@@TODO (lpino): Remove log
+ // System.out.println("Composite::WM_ERASEBACKGROUND -> HANDLE = " + Integer.toHexString(handle));
+     // if ((state & CANVAS) != 0) {
+	// // System.out.println("Composite::WM_ERASEBACKGROUND -> HANDLE = " + Integer.toHexString(handle));
+         // return MRESULT.FALSE;
+ // //        return super.WM_ERASEBACKGROUND (mp1, mp2);
+    // }
+    // System.out.println("Composite::WM_ERASEBACKGROUND -> HANDLE = " + Integer.toHexString(handle));
+    // RECTL rcl = new RECTL();
+    // OS.objcpy (rcl, mp2);
+    // drawBackground (mp1, rcl);
+    // return MRESULT.FALSE;
+// }
 
 MRESULT WM_QUERYDLGCODE (int mp1, int mp2) {
 	MRESULT result = super.WM_QUERYDLGCODE (mp1, mp2);
@@ -615,8 +617,9 @@ MRESULT WM_BUTTON1DOWN (int mp1, int mp2) {
 //}
 
 MRESULT WM_PAINT (int mp1, int mp2) {
+//    System.out.println("Composite::WM_PAINT -> HANDLE  =  " + Integer.toHexString(handle));
     if ((state & CANVAS) == 0) {
-		return super.WM_PAINT (mp1, mp2);
+	    return super.WM_PAINT (mp1, mp2);
     }
 
     /*
@@ -802,6 +805,11 @@ MRESULT WM_SIZE (int mp1, int mp2) {
 //		}
 //	}
 	return result;
+}
+
+MRESULT WM_ADJUSTWINDOWPOS (int mp1, int mp2) {
+	System.out.println("Composite::WM_ADJUSTWINDOWPOS -> HANDLE  =  " + Integer.toHexString(handle));
+	return null;
 }
 
 //LRESULT WM_SYSCOLORCHANGE (int wParam, int lParam) {
