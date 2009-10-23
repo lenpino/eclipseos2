@@ -158,11 +158,11 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 	int border = getBorderWidth ();
 	int width = border * 2, height = border * 2;
 	if ((style & SWT.HORIZONTAL) != 0) {
-		width += OS.WinQuerySysValue (handle, OS.SV_CXHSCROLLARROW ) * 10;
-		height += OS.WinQuerySysValue (handle, OS.SV_CYHSCROLL);
+		width += OS.WinQuerySysValue (OS.HWND_DESKTOP, OS.SV_CXHSCROLLARROW ) * 10;
+		height += OS.WinQuerySysValue (OS.HWND_DESKTOP, OS.SV_CYHSCROLL);
 	} else {
-		width += OS.WinQuerySysValue (handle, OS.SV_CXVSCROLL);
-		height += OS.WinQuerySysValue (handle, OS.SV_CYVSCROLLARROW ) * 10;
+		width += OS.WinQuerySysValue (OS.HWND_DESKTOP, OS.SV_CXVSCROLL);
+		height += OS.WinQuerySysValue (OS.HWND_DESKTOP, OS.SV_CYVSCROLLARROW ) * 10;
 	}
 	if (wHint != SWT.DEFAULT) width = wHint + (border * 2);
 	if (hHint != SWT.DEFAULT) height = hHint + (border * 2);
