@@ -79,9 +79,8 @@ public class Scale extends Control {
  * @see Widget#getStyle
  */
 public Scale (Composite parent, int style) {
-//	super (parent, checkStyle (style));
     this.parent = parent;
-    this.style = style;
+    this.style = checkStyle (style);
     maxRange = 100;
     minRange = 0;
     increment = 10;
@@ -89,6 +88,8 @@ public Scale (Composite parent, int style) {
     SLDCDATA sldcData = new SLDCDATA();
     sldcData.usScale1Increments = 10;
     sldcData.usScale1Spacing = 0;
+//    sldcData.usScale2Increments = 10;
+//    sldcData.usScale2Spacing = 0;
 
     handle = OS.WinCreateWindow (
         parent.handle,
@@ -106,7 +107,8 @@ public Scale (Composite parent, int style) {
     
     OS.WinSetWindowUShort (handle, OS.QWS_ID, (short)(handle & 0xFFFF));
     OS.WinSendMsg(handle, OS.SLM_SETTICKSIZE, OS.MPFROM2SHORT((short)OS.SMA_SETALLTICKS, (short)6), 0);
-
+//    OS.WinSendMsg(handle, OS.SLM_SETSLIDERINFO, OS.MPFROM2SHORT((short)OS.SMA_SHAFTDIMENSIONS, (short)0), 3);
+//    OS.WinSendMsg(handle, OS.SLM_SETSLIDERINFO, OS.MPFROM2SHORT((short)OS.SMA_SLIDERARMDIMENSIONS, (short)0), 3);
     super.register ();
     super.subclass ();
     super.setDefaultFont ();
@@ -159,11 +161,11 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
         int arm = OS.WinSendMsg(handle, OS.SLM_QUERYSLIDERINFO, OS.MPFROM2SHORT((short)OS.SMA_SLIDERARMDIMENSIONS, (short)OS.SMA_RANGEVALUE), 0);
         int tick = OS.WinSendMsg(handle, OS.SLM_QUERYTICKSIZE, 1, 0);
 	if ((style & SWT.HORIZONTAL) != 0) {
-		width += OS.SHORT1FROMMP(shaftLength) + 10;
-		height += OS.SHORT2FROMMP(arm) + tick;
+		width += OS.WinQuerySysValue (OS.HWND_DESKTOP, OS.SV_CXHSCROLLARROW ) * 10;
+		height += OS.WinQuerySysValue (OS.HWND_DESKTOP, OS.SV_CYHSCROLL) + tick + OS.SHORT2FROMMP(arm);
 	} else {
-		width += OS.SHORT2FROMMP(arm) + tick;
-		height += OS.SHORT1FROMMP(shaftLength) + 10;
+		width += OS.WinQuerySysValue (OS.HWND_DESKTOP, OS.SV_CXVSCROLL) + tick + OS.SHORT2FROMMP(arm);
+		height += OS.WinQuerySysValue (OS.HWND_DESKTOP, OS.SV_CYVSCROLLARROW ) * 10;
 	}
 	if (wHint != SWT.DEFAULT) width = wHint + (border * 2);
 	if (hHint != SWT.DEFAULT) height = hHint + (border * 2);
@@ -178,33 +180,33 @@ int defaultForeground () {
 	return OS.WinQuerySysColor(handle, OS.SYSCLR_WINDOWTEXT, 0);
 }
 
-///**
-// * Returns the amount that the receiver's value will be
-// * modified by when the up/down (or right/left) arrows
-// * are pressed.
-// *
-// * @return the increment
-// *
-// * @exception SWTException <ul>
-// *    <li>ERROR_WIDGET_DISPOSED - if the receiver has been disposed</li>
-// *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
-// * </ul>
-// */
+/**
+ * Returns the amount that the receiver's value will be
+ * modified by when the up/down (or right/left) arrows
+ * are pressed.
+ *
+ * @return the increment
+ *
+ * @exception SWTException <ul>
+ *    <li>ERROR_WIDGET_DISPOSED - if the receiver has been disposed</li>
+ *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
+ * </ul>
+ */
 public int getIncrement () {
 	checkWidget ();
         return 1;
 }
 
-///**
-// * Returns the maximum value which the receiver will allow.
-// *
-// * @return the maximum
-// *
-// * @exception SWTException <ul>
-// *    <li>ERROR_WIDGET_DISPOSED - if the receiver has been disposed</li>
-// *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
-// * </ul>
-// */
+/**
+ * Returns the maximum value which the receiver will allow.
+ *
+ * @return the maximum
+ *
+ * @exception SWTException <ul>
+ *    <li>ERROR_WIDGET_DISPOSED - if the receiver has been disposed</li>
+ *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
+ * </ul>
+ */
 public int getMaximum () {
 	checkWidget ();
         return maxRange;
@@ -393,9 +395,9 @@ public void setSelection (int value) {
 }
 
 int widgetStyle () {
-	int bits = super.widgetStyle () | OS.SLS_CENTER | OS.SLS_HOMELEFT | OS.SLS_PRIMARYSCALE1;
-	if ((style & SWT.VERTICAL) != 0) return bits | OS.SLS_VERTICAL | OS.SLS_HOMETOP;
-	return bits;
+	int bits = super.widgetStyle () | OS.SLS_CENTER | OS.SLS_PRIMARYSCALE1 | OS.WS_TABSTOP;// | OS.SLS_PRIMARYSCALE2;
+	if ((style & SWT.HORIZONTAL) != 0) return bits | OS.SLS_HORIZONTAL | OS.SLS_HOMELEFT; 
+	return bits | OS.SLS_VERTICAL | OS.SLS_HOMETOP;
 }
 
 PSZ windowClass () {
@@ -409,7 +411,7 @@ int windowProc () {
 MRESULT wmControlChild (int mp1, int mp2) {
     int code = OS.SHORT2FROMMP(mp1);
     int pos = mp2;
-    if (code == OS.SLN_KILLFOCUS || code == OS.SLN_SETFOCUS) return null;
+//    if (code == OS.SLN_KILLFOCUS || code == OS.SLN_SETFOCUS) return null;
     Event event = new Event ();
 	switch (code) {
 //		/*
@@ -425,6 +427,11 @@ MRESULT wmControlChild (int mp1, int mp2) {
 //		case OS.TB_LINEUP: 		event.detail = SWT.ARROW_UP;  break;
 //		case OS.TB_PAGEDOWN: 		event.detail = SWT.PAGE_DOWN;  break;
 //		case OS.TB_PAGEUP: 		event.detail = SWT.PAGE_UP;  break;
+		case OS.SLN_SETFOCUS:
+		case OS.SLN_KILLFOCUS:
+			sendEvent(code == OS.SLN_SETFOCUS ? SWT.FocusIn : SWT.FocusOut);
+			if(isDisposed()) return MRESULT.ZERO;
+			break;
 	}
     sendEvent (SWT.Selection, event);
     return null;
