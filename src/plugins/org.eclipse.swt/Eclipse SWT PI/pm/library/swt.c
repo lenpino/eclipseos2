@@ -17,6 +17,7 @@
 #include "swt.h"
 #include "structs.h"
 #include "editcol.h"
+#include "ft2lib.h"
 #include <malloc.h>
 #include <memory.h>
 
@@ -1679,6 +1680,14 @@ JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinGetNextWindow
     DEBUG_CALL("WinGetNextWindow\n")
 
     return (jint)WinGetNextWindow((HENUM)henum);
+}
+
+JNIEXPORT void JNICALL Java_org_eclipse_swt_internal_pm_OS_Ft2EnableFontEngine
+        (JNIEnv *env, jclass that, jboolean fEnable)
+{
+    DEBUG_CALL("Ft2EnableFontEngine\n")
+
+    Ft2EnableFontEngine((BOOL)fEnable);
 }
 
 JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_PrfQueryProfileSize
