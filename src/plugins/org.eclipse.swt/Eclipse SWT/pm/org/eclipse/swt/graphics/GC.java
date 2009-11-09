@@ -86,7 +86,7 @@ GC() {
 public GC(Drawable drawable) {
 	if (drawable == null) SWT.error(SWT.ERROR_NULL_ARGUMENT);
 	GCData data = new GCData ();
-    data.doInit = true;
+	data.doInit = true;
 	int hps = drawable.internal_new_GC (data);
 	Device device = data.device;
 	if (device == null) device = Device.getDevice();
@@ -490,7 +490,7 @@ void drawIcon(Image srcImage, int srcX, int srcY, int srcWidth, int srcHeight, i
 	int hBitmap = hbmColor;
 	if (hBitmap == 0) hBitmap = hbmPointer;
 	BITMAPINFOHEADER2 bm = new BITMAPINFOHEADER2();
-    OS.GpiQueryBitmapInfoHeader (hBitmap, bm);
+	OS.GpiQueryBitmapInfoHeader (hBitmap, bm);
 	int iconWidth = bm.cx, iconHeight = bm.cy;
 	if (hBitmap == hbmPointer) iconHeight /= 2;
 
