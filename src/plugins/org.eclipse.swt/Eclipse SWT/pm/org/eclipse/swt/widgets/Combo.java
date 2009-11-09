@@ -429,7 +429,7 @@ public String getItem (int index) {
 	int length = OS.WinSendMsg (handle, OS.LM_QUERYITEMTEXTLENGTH, (short)index, 0);
 	if (length != OS.LIT_ERROR) {
 		PSZ buffer = new PSZ(length+1);
-		int result = OS.WinSendMsg (handle, OS.LM_QUERYITEMTEXT, OS.MPFROM2SHORT((short)length,(short)index), buffer);
+		int result = OS.WinSendMsg (handle, OS.LM_QUERYITEMTEXT, OS.MPFROM2SHORT((short)index,(short)length), buffer);
 		if (result != 0) return buffer.toString ();
 	}
 	int count = OS.WinSendMsg (handle, OS.LM_QUERYITEMCOUNT, 0, 0);
@@ -578,10 +578,11 @@ public int getSelectionIndex () {
  */
 public String getText () {
 	checkWidget ();
-	int length = OS.WinQueryWindowTextLength (handle);
+	int index = OS.WinSendMsg (handle, OS.LM_QUERYSELECTION, (short)OS.LIT_CURSOR, 0);
+	int length = OS.WinSendMsg (handle, OS.LM_QUERYITEMTEXTLENGTH, (short)index, 0);
 	if (length == 0) return "";
         PSZ buffer = new PSZ(length);
-	OS.WinQueryWindowText (handle, length + 1, buffer);
+	OS.WinSendMsg (handle, OS.LM_QUERYITEMTEXT, OS.MPFROM2SHORT((short)index,(short)length), buffer);
 	return buffer.toString ();
 }
 
@@ -708,12 +709,12 @@ public int indexOf (String string, int start) {
 		return -1;
 	}
 
-//	/* Use LM_SEARCHSTRING to search for the item */
+	/* Use LM_SEARCHSTRING to search for the item */
 	int count = OS.WinSendMsg (handle, OS.LM_QUERYITEMCOUNT, 0, 0);
 	if (!((0 <= start) && (start < count))) return -1;
-	int index = 0;
+	int index = start - 1;
         PSZ buffer = new PSZ(string);
-        index = OS.WinSendMsg (handle, OS.LM_SEARCHSTRING, OS.MPFROM2SHORT((short)OS.LSS_CASESENSITIVE,(short)(start)), buffer);
+        index = OS.WinSendMsg (handle, OS.LM_SEARCHSTRING, OS.MPFROM2SHORT((short)OS.LSS_CASESENSITIVE,(short)(index)), buffer);
         if (index == OS.LIT_ERROR || index < start) return -1;
         return index;
 }
@@ -810,7 +811,7 @@ public void remove (int start, int end) {
 			int length =OS.WinSendMsg (handle, OS.LM_QUERYITEMTEXTLENGTH,(short)start, 0);
 			if (length == OS.LIT_ERROR) break;
 			buffer = new PSZ (length + 1);
-			int result = OS.WinSendMsg (handle, OS.LM_QUERYITEMTEXT, OS.MPFROM2SHORT((short)length,(short)start), buffer);
+			int result = OS.WinSendMsg (handle, OS.LM_QUERYITEMTEXT, OS.MPFROM2SHORT((short)start,(short)length), buffer);
 			if (result <= 0) break;
 		}
 		int result =OS.WinSendMsg (handle, OS.LM_DELETEITEM,(short) start, 0);
@@ -938,9 +939,13 @@ public void removeSelectionListener (SelectionListener listener) {
 public void select (int index) {
 	checkWidget ();
 	if (index == -1) return;
-	int rc = OS.WinSendMsg (handle, OS.LM_SELECTITEM, (short)index, OS.TRUE);
-        if(rc != OS.FALSE)
-            sendEvent (SWT.Modify);
+	int count = OS.WinSendMsg (handle, OS.LM_QUERYITEMCOUNT, 0, 0);
+	if(0 <= index && index < count){
+		int selection =  OS.WinSendMsg (handle, OS.LM_QUERYSELECTION, (short)OS.LIT_CURSOR, 0);
+		int rc = OS.WinSendMsg (handle, OS.LM_SELECTITEM, (short)index, OS.TRUE);
+		if(rc != OS.FALSE && rc != selection)
+		    sendEvent (SWT.Modify);
+	}
 }
 
 //void setBackgroundPixel (int pixel) {
