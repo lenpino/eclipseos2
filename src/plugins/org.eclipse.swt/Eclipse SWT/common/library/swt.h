@@ -48,4 +48,7 @@
 #define DECL_GLOB(pSym)
 #define PGLOB(x) x
 
+#define WM_MOUSEENTER      0x041e
+#define WM_MOUSEEXIT       0x041f
+
 #endif /* ifndef INC_swt_H */
