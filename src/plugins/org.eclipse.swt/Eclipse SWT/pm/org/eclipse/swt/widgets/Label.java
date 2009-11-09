@@ -11,9 +11,6 @@ package org.eclipse.swt.widgets;
  * http://www.eclipse.org/legal/cpl-v10.html
  */
 
-//import org.eclipse.swt.internal.*;
-//import org.eclipse.swt.internal.win32.*;
-//import org.eclipse.swt.*;
 import org.eclipse.swt.graphics.*;
 import org.eclipse.swt.internal.*;
 import org.eclipse.swt.internal.pm.*;
@@ -459,6 +456,7 @@ int windowProc () {
 	return LabelProc;
 }
 
+
 //MRESULT WM_ERASEBKGND (int mp1, int mp2) {
 //	LRESULT result = super.WM_ERASEBKGND (wParam, lParam);
 //	if (result != null) return result;
@@ -482,48 +480,22 @@ int windowProc () {
 //	return null;
 //}
 //
-//MRESULT WM_GETFONT (int mp1, int mp2) {
-//	LRESULT result = super.WM_GETFONT (wParam, lParam);
-//	if (result != null) return result;
-//	/*
-//	* Bug in Windows.  When the style of a label is SS_BITMAP
-//	* or SS_ICON, the label does not remember the font that is
-//	* set in WM_SETFONT.  The fix is to remember the font and
-//	* return the font in WM_GETFONT.
-//	*/
-//	if (font == 0) font = defaultFont ();
-//	return new LRESULT (font);
-//        System.out.println("WM_GETFONT");
-//        return null;
-//}
-//
-//MRESULT WM_SETFONT (int mp1, int mp2) {
-//	/*
-//	* Bug in Windows.  When the style of a label is SS_BITMAP
-//	* or SS_ICON, the label does not remember the font that is
-//	* set in WM_SETFONT.  The fix is to remember the font and
-//	* return the font in WM_GETFONT.
-//	*/
-//	return super.WM_SETFONT (font = wParam, lParam);
-//        System.out.println("WM_SETFONT");
-//        return null;
-//}
-//
-//MRESULT WM_SIZE (int mp1, int mp2) {
-//	LRESULT result = super.WM_SIZE (wParam, lParam);
-//	/*
-//	* It is possible (but unlikely), that application
-//	* code could have disposed the widget in the resize
-//	* event.  If this happens, end the processing of the
-//	* Windows message by returning the result of the
-//	* WM_SIZE message.
-//	*/
-//	if (isDisposed ()) return result;
+
+MRESULT WM_SIZE (int mp1, int mp2) {
+	MRESULT result = super.WM_SIZE (mp1, mp2);
+	/*
+	* It is possible (but unlikely), that application
+	* code could have disposed the widget in the resize
+	* event.  If this happens, end the processing of the
+	* Windows message by returning the result of the
+	* WM_SIZE message.
+	*/
+	if (isDisposed ()) return result;
 //	if ((style & SWT.SEPARATOR) != 0) {
 //		OS.InvalidateRect (handle, null, true);
 //		return result;
 //	}
-//	
+	
 //	/*
 //	* Bug in Windows.  For some reason, a label with
 //	* style SS_LEFT, SS_CENTER or SS_RIGHT does not
@@ -534,11 +506,10 @@ int windowProc () {
 //	if ((style & (SWT.WRAP | SWT.CENTER | SWT.RIGHT)) != 0) {
 //		OS.InvalidateRect (handle, null, true);
 //	}
-//        System.out.println("WM_SIZE");
-//	return null;
-//}
-//
-//MRESULT wmDrawChild (int mp1, int mp2) {
+	return result;
+}
+
+MRESULT WM_PAINT (int mp1, int mp2) {
 //	DRAWITEMSTRUCT struct = new DRAWITEMSTRUCT ();
 //	OS.MoveMemory (struct, lParam, DRAWITEMSTRUCT.sizeof);
 //	drawBackground (struct.hDC);
@@ -556,8 +527,60 @@ int windowProc () {
 //		OS.SetRect (rect, struct.left, struct.top, right, struct.bottom);
 //		OS.DrawEdge (struct.hDC, rect, flags, OS.BF_RIGHT);
 //	}
-//        System.out.println("wmDrawChild");
-//	return MRESULT.ZERO;
-//}
+	if (this.image == null) return null;
+	if(this.image.getImageData().width != 16 && this.image.getImageData().width != 20) return null;
+
+        // hps is unitialized here, do some initializations
+	if (hps == 0) hps = OS.WinGetPS (handle);
+	
+        OS.GpiSetMix (hps, OS.FM_OVERPAINT);
+        OS.GpiSetBackMix (hps, OS.BM_OVERPAINT);
+        OS.GpiSetPattern (hps, OS.PATSYM_BLANK);
+        int hPalette = getDisplay ().hPalette;
+        if (hPalette == 0)
+            OS.GpiCreateLogColorTable (hps, 0, OS.LCOLF_RGB, 0, 0, null);
+        else
+            OS.GpiSelectPalette (hps, hPalette);
+	
+            Rectangle bounds = image.getBounds();
+            int x = 0;
+            int y = 0;
+	    if (image.type == SWT.ICON) {
+                int hbmColor = image.handle;
+                int hbmPointer = image.maskHandle;
+                if (hbmPointer == 0) {
+                    OS.WinDrawPointer (hps, x, y, hbmColor, OS.DP_NORMAL);
+                } else {
+                    OS.GpiSetColor (hps, (hPalette != 0) ? 15 : 0xFFFFFF);
+                    OS.GpiSetBackColor (hps, 0);
+                    /* draw AND mask */
+                    OS.GpiWCBitBlt (hps, hbmPointer, 4,
+                        new int[] {
+                            x, y, x + bounds.width - 1, y + bounds.height - 1,
+                            0, bounds.height, bounds.width, bounds.height << 1
+                        },
+                        OS.ROP_SRCAND, OS.BBO_IGNORE
+                    );
+                    /* draw icon */
+                    OS.GpiWCBitBlt (hps, hbmColor, 4,
+                        new int[] {
+                            x, y, x + bounds.width - 1, y + bounds.height - 1,
+                            0, 0, bounds.width, bounds.height
+                        },
+                        OS.ROP_SRCINVERT, OS.BBO_IGNORE
+                    );
+                    /* draw XOR mask */
+                    OS.GpiWCBitBlt (hps, hbmPointer, 4,
+                        new int[] {
+                            x, y, x + bounds.width - 1, y + bounds.height - 1,
+                            0, 0, bounds.width, bounds.height
+                        },
+                        OS.ROP_SRCINVERT, OS.BBO_IGNORE
+                    );
+                }
+            }
+	if (this.hps == 0) OS.WinReleasePS (hps);    
+	return null;
+}
 
 }
