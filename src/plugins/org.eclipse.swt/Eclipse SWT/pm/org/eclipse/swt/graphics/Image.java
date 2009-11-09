@@ -2,7 +2,7 @@ package org.eclipse.swt.graphics;
 
 /*
  * OS/2 version.
- * Copyright (c) 2002, 2004 EclipseOS2 Team.
+ * Copyright (c) 2002, 2009 EclipseOS2 Team.
  */
  
 /*
@@ -736,6 +736,7 @@ public Image(Device device, ImageData source, ImageData mask) {
 	int[] maskPixels = new int[mask.width];
 	for (int y = 0; y < mask.height; y++) {
 		mask.getPixels(0, y, mask.width, maskPixels, 0);
+//		System.out.println(getBits(maskPixels[0]) + getBits(maskPixels[1]) + getBits(maskPixels[2]) + getBits(maskPixels[3]));
 		newMask.setPixels(0, y, newMask.width, maskPixels, 0);
 	}
 	/* Set the fields and create the icon */
@@ -1429,12 +1430,11 @@ static int[] init(Device device, Image image, ImageData i) {
 	 */
 	if (i.depth == 2) {
 		ImageData img = new ImageData(i.width, i.height, 4, i.palette);
-		ImageData.blit(ImageData.BLIT_SRC, 
-			i.data, i.depth, i.bytesPerLine, i.getByteOrder(),
-            0, 0, i.width, i.height, null, null, null,
+		ImageData.blit(ImageData.BLIT_SRC, i.data, i.depth, i.bytesPerLine, i.getByteOrder(), 
+			0, 0, i.width, i.height, null, null, null,
 			ImageData.ALPHA_OPAQUE, null, 0,
 			img.data, img.depth, img.bytesPerLine, i.getByteOrder(),
-            0, 0, img.width, img.height, null, null, null, 
+			0, 0, img.width, img.height, null, null, null, 
 			false, false);
 		img.transparentPixel = i.transparentPixel;
 		img.maskPad = i.maskPad;
@@ -1445,54 +1445,50 @@ static int[] init(Device device, Image image, ImageData i) {
 	}
 	if (i.palette.isDirect) {
 		final PaletteData palette = i.palette;
-        boolean convert = false;
-
-        switch (i.depth) {
-            case 24:
-                if (
-                    palette.redMask == 0xFF &&
-                    palette.greenMask == 0xFF00 &&
-                    palette.blueMask == 0xFF0000
-                ) {
-                    break;
-                }
-            case 8:
-            case 16:
-            case 32:
-                convert = true;
-                break;
-            default:
-                SWT.error(SWT.ERROR_UNSUPPORTED_DEPTH);
-        }
-                
-        if (convert || i.getByteOrder() != ImageData.MSB_FIRST) {
-    		PaletteData newPalette = new PaletteData (0xFF, 0xFF00, 0xFF0000);
-            ImageData img = new ImageData (i.width, i.height, 24, newPalette);
+		boolean convert = false;	
+		switch (i.depth) {
+		    case 24:
+			if (palette.redMask == 0xFF &&
+			    palette.greenMask == 0xFF00 &&
+			    palette.blueMask == 0xFF0000)
+			{
+			    break;
+			}
+		    case 8:
+		    case 16:
+		    case 32:
+			convert = true;
+			break;
+		    default:
+			SWT.error(SWT.ERROR_UNSUPPORTED_DEPTH);
+		}
+			
+		if (convert || i.getByteOrder() != ImageData.MSB_FIRST) {
+			PaletteData newPalette = new PaletteData (0xFF, 0xFF00, 0xFF0000);
+			ImageData img = new ImageData (i.width, i.height, 24, newPalette);
 			ImageData.blit (ImageData.BLIT_SRC, 
-                i.data, i.depth, i.bytesPerLine, i.getByteOrder(),
-                0, 0, i.width, i.height,
-                palette.redMask, palette.greenMask, palette.blueMask,
-                ImageData.ALPHA_OPAQUE, null, 0,
-                img.data, img.depth, img.bytesPerLine, ImageData.MSB_FIRST,
-                0, 0, img.width, img.height,
-                newPalette.redMask, newPalette.greenMask, newPalette.blueMask,
-                false, false);
+			i.data, i.depth, i.bytesPerLine, i.getByteOrder(),
+			0, 0, i.width, i.height,
+			palette.redMask, palette.greenMask, palette.blueMask,
+			ImageData.ALPHA_OPAQUE, null, 0,
+			img.data, img.depth, img.bytesPerLine, ImageData.MSB_FIRST,
+			0, 0, img.width, img.height,
+			newPalette.redMask, newPalette.greenMask, newPalette.blueMask,
+			false, false);
 			if (i.transparentPixel != -1) {
-				img.transparentPixel =
-                    newPalette.getPixel(palette.getRGB(i.transparentPixel));
+				img.transparentPixel = newPalette.getPixel(palette.getRGB(i.transparentPixel));
 			}
 			img.maskPad = i.maskPad;
 			img.maskData = i.maskData;
 			img.alpha = i.alpha;
 			img.alphaData = i.alphaData;
 			i = img;
-        }
+		}
     }
 
     /* Construct bitmap info header by hand */
-	RGB[] rgbs = i.palette.getRGBs();
-    int[] bmi = new int [BITMAPINFOHEADER2.int_sizeof +
-        (i.palette.isDirect ? 0 : rgbs.length)];
+    RGB[] rgbs = i.palette.getRGBs();
+    int[] bmi = new int [BITMAPINFOHEADER2.int_sizeof +(i.palette.isDirect ? 0 : rgbs.length)];
     // cbFix
     bmi [0] = BITMAPINFOHEADER2.sizeof;
     // cx
@@ -1526,13 +1522,13 @@ static int[] init(Device device, Image image, ImageData i) {
     // ulIdentifier
     bmi [15] = 0;
     
-	/* Set the rgb colors into the bitmap info */
+    /* Set the rgb colors into the bitmap info */
     int offset = BITMAPINFOHEADER2.int_sizeof;
     if (!i.palette.isDirect) {
-		for (int j = 0; j < rgbs.length; j++) {
+	for (int j = 0; j < rgbs.length; j++) {
             bmi[offset] = (rgbs[j].red << 16) | (rgbs[j].green << 8) | rgbs[j].blue;
-			offset++;
-		}
+	    offset++;
+	}
     }
     
     /*
@@ -1541,10 +1537,8 @@ static int[] init(Device device, Image image, ImageData i) {
      *  to this value.
      */
     int bpl = i.bytesPerLine;
-	byte[] data = i.data;
-    int newBpl = (i.scanlinePad != 4 && (bpl % 4 != 0)) ?
-        bpl + (4 - (bpl % 4)) :
-        bpl;
+    byte[] data = i.data;
+    int newBpl = (i.scanlinePad != 4 && (bpl % 4 != 0)) ? bpl + (4 - (bpl % 4)) : bpl;
     byte[] newData = new byte[i.height * newBpl];
     int srcPtr = 0;
     int destPtr = newData.length - newBpl;
@@ -1555,13 +1549,11 @@ static int[] init(Device device, Image image, ImageData i) {
     }
     data = newData;
 
-	/* Do the same for the mask if it is an icon */
-    byte[] maskData = i.maskData; 
+    /* Do the same for the mask if it is an icon */
+    byte[] maskData = i.maskData;
     if (i.getTransparencyType() == SWT.TRANSPARENCY_MASK) {
         bpl = ((i.width + 7) / 8 + (i.maskPad - 1)) / i.maskPad * i.maskPad;
-        newBpl = (i.maskPad != 4 && (bpl % 4 != 0)) ?
-            bpl + (4 - (bpl % 4)) :
-            bpl;
+        newBpl = (i.maskPad != 4 && (bpl % 4 != 0)) ? bpl + (4 - (bpl % 4)) : bpl;
         /* in OS/2 the mask always has double height (for XOR and AND patterns) */   
         newData = new byte[i.height * newBpl * 2];
         srcPtr = 0;
@@ -1575,110 +1567,119 @@ static int[] init(Device device, Image image, ImageData i) {
     }
 
     int[] bitmapPS = new int [1];
-    int hBitmap = image.createBitmap (
-        i.width, i.height, 0, 0, data, bmi, bitmapPS, 0);
+    int hBitmap = image.createBitmap (i.width, i.height, 0, 0, data, bmi, bitmapPS, 0);
     int bmpPS = bitmapPS [0];
     
-	int[] result = null;
-	if (i.getTransparencyType() == SWT.TRANSPARENCY_MASK) {
+    int[] result = null;
+    if (i.getTransparencyType() == SWT.TRANSPARENCY_MASK) {
 		/* Create the mask */
-        bmi [2] *= 2;
-        bmi [3] = 0x00010001;
-        bmi [8] = 0;
-        int hMask = image.createBitmap (
-            i.width, i.height * 2, 1, 1, maskData, bmi, bitmapPS, 0);
-        OS.GpiSetBitmap (bmpPS, hMask);
-        /* invert icon mask to get AND mask */
-        OS.GpiBitBlt (bmpPS, 0, 2,
-            new int[] {0, i.height, i.width, i.height * 2}, OS.ROP_DSTINVERT, 0);
-        /* determine black and white colors */
-        int cWhite = OS.CLR_WHITE;
-        int cBlack = OS.CLR_BLACK;
-        if (device.hPalette != 0) {
-            cWhite = 15;
-            cBlack = 0; 
-        }
-        /*
-         *  Make the XOR mask by extracting non-zero icon pixels that are out of
-         *  the non-transparent area.
-         */
-        OS.GpiSetColor (bmpPS, cWhite);
-        OS.GpiSetBackColor (bmpPS, cBlack);
-        OS.GpiWCBitBlt (bmpPS, hBitmap, 4,
-            new int[] {0, 0, i.width - 1, i.height - 1, 0, 0, i.width, i.height},
-            OS.ROP_SRCCOPY, OS.BBO_IGNORE);
-        OS.GpiBitBlt (bmpPS, bmpPS, 4,
-            new int[] {0, 0, i.width, i.height, 0, i.height, i.width, i.height * 2},
-            OS.ROP_SRCAND, OS.BBO_IGNORE);
-        /*
-         *  In OS/2 "inverted" icon pixels (those that invert colors of the
-         *  underlying screen area/bitmap) should be actually in black color
-         *  (not in white like in Windows) because OS/2 uses the separate
-         *  XOR mask (as defined above) which is applied after the AND mask is
-         *  applied and the icon is drawn using OR operation (in Windows the
-         *  AND mask is applied and then the icon is just drawn using XOR
-         *  operation). We should meet this requirement in order to create an
-         *  icon compatible with PM routines and having the same look like in
-         *  Windows -- so we simply invert these pixels. Inverting them also
-         *  gives the identical to Windows look for pixels in the
-         *  transparent area other than black, which can happen if the icon
-         *  has been created manually, not by the standard; however this only
-         *  works when the icon is drawn by SWT (for instance, when it has
-         *  non-standard size or when scaling), when drawn by standard PM
-         *  routines the result is different because of OR operation mentioned
-         *  above. 
-         */
-        OS.GpiSetBitmap (bmpPS, hBitmap);
-        OS.GpiWCBitBlt (bmpPS, hMask, 4,
-            new int [] {0, 0, i.width - 1, i.height - 1, 0, 0, i.width, i.height},
-            OS.ROP_SRCINVERT, OS.BBO_IGNORE);
-        OS.GpiSetBitmap (bmpPS, 0);
-
+		bmi [2] *= 2;
+		bmi [3] = 0x00010001;
+		bmi [8] = 2;
+		int hMask = image.createBitmap (i.width, i.height * 2, 1, 1, maskData, bmi, bitmapPS, 0);
+		OS.GpiSetBitmap (bmpPS, hMask);
+		/* invert icon mask to get AND mask */
+		OS.GpiBitBlt (bmpPS, 0, 2, new int[] {0, i.height, i.width, i.height * 2}, OS.ROP_DSTINVERT, 0);
+		/* determine black and white colors */
+		int cWhite = OS.CLR_WHITE;
+		int cBlack = OS.CLR_BLACK;
+		if (device.hPalette != 0) {
+			cWhite = 15;
+			cBlack = 0; 
+		}
+		/*
+		 *  Make the XOR mask by extracting non-zero icon pixels that are out of
+		 *  the non-transparent area.
+		 */
+		OS.GpiSetColor (bmpPS, cWhite);
+		OS.GpiSetBackColor (bmpPS, cBlack);
+		OS.GpiWCBitBlt (bmpPS, hBitmap, 4, new int[] {0, 0, i.width - 1, i.height - 1, 0, 0, i.width, i.height}, OS.ROP_SRCCOPY, OS.BBO_IGNORE);
+		OS.GpiBitBlt (bmpPS, bmpPS, 4, new int[] {0, 0, i.width, i.height, 0, i.height, i.width, i.height * 2}, OS.ROP_SRCAND, OS.BBO_IGNORE);
+		/*
+		 *  In OS/2 "inverted" icon pixels (those that invert colors of the
+		 *  underlying screen area/bitmap) should be actually in black color
+		 *  (not in white like in Windows) because OS/2 uses the separate
+		 *  XOR mask (as defined above) which is applied after the AND mask is
+		 *  applied and the icon is drawn using OR operation (in Windows the
+		 *  AND mask is applied and then the icon is just drawn using XOR
+		 *  operation). We should meet this requirement in order to create an
+		 *  icon compatible with PM routines and having the same look like in
+		 *  Windows -- so we simply invert these pixels. Inverting them also
+		 *  gives the identical to Windows look for pixels in the
+		 *  transparent area other than black, which can happen if the icon
+		 *  has been created manually, not by the standard; however this only
+		 *  works when the icon is drawn by SWT (for instance, when it has
+		 *  non-standard size or when scaling), when drawn by standard PM
+		 *  routines the result is different because of OR operation mentioned
+		 *  above. 
+		 */
+		OS.GpiSetBitmap (bmpPS, hBitmap);
+		OS.GpiWCBitBlt (bmpPS, hMask, 4, new int [] {0, 0, i.width - 1, i.height - 1, 0, 0, i.width, i.height}, OS.ROP_SRCINVERT, OS.BBO_IGNORE);
+		OS.GpiSetBitmap (bmpPS, 0);
 		if (image == null) {
 			result = new int[] {hBitmap, hMask}; 
 		} else {
 			/* Create the icon */
-            int sysIconWidth = OS.WinQuerySysValue (OS.HWND_DESKTOP, OS.SV_CXICON);
-            int sysIconHeight = OS.WinQuerySysValue (OS.HWND_DESKTOP, OS.SV_CYICON);
-            int sysPtrWidth = OS.WinQuerySysValue (OS.HWND_DESKTOP, OS.SV_CXPOINTER);
-            int sysPtrHeight = OS.WinQuerySysValue (OS.HWND_DESKTOP, OS.SV_CYPOINTER);
-            int fPointer = -1;
-            /*
-             *  Bug in OS/2. When we query bitmap data from the bitmap handle that
-             *  is a part of an icon or pointer (i.e. it is obtained via the
-             *  WinQueryPointerInfo() call) OS/2 always returns the bitmap converted
-             *  to match the default system palette corresponding the icon's color
-             *  depth (so the "true" bitmap palette and bits used to create the icon
-             *  are lost). As a temporary solution the code below is commented
-             *  which prevents usage of OS/2 icons (pointers) at all -- every icon
-             *  in SWT just becomes a pair of bitmaps that are handled manually
-             *  by SWT drawing routines.
-             *
-             *  @@TODO (dmik): make it permanent? 
-             */
-//            if (i.width == sysIconWidth && i.height == sysIconHeight) fPointer = 0;
-//            else if (i.width == sysPtrWidth && i.height == sysPtrHeight) fPointer = 1;
-            if (fPointer >= 0) {
-                POINTERINFO info = new POINTERINFO();
-                info.fPointer = fPointer;
-                info.hbmColor = hBitmap;
-                info.hbmPointer = hMask;
-                int hIcon = OS.WinCreatePointerIndirect (OS.HWND_DESKTOP, info);
-                if (hIcon == 0) SWT.error(SWT.ERROR_NO_HANDLES);
-                OS.GpiDeleteBitmap (hBitmap);
-                OS.GpiDeleteBitmap (hMask);
-                image.handle = hIcon;
-            } else {
-                image.handle = hBitmap;
-                image.maskHandle = hMask;
-            }
-            image.type = SWT.ICON;
+		    int sysIconWidth = OS.WinQuerySysValue (OS.HWND_DESKTOP, OS.SV_CXICON);
+		    int sysIconHeight = OS.WinQuerySysValue (OS.HWND_DESKTOP, OS.SV_CYICON);
+		    int sysPtrWidth = OS.WinQuerySysValue (OS.HWND_DESKTOP, OS.SV_CXPOINTER);
+		    int sysPtrHeight = OS.WinQuerySysValue (OS.HWND_DESKTOP, OS.SV_CYPOINTER);
+		    int fPointer = -1;
+		    /*
+		     *  Bug in OS/2. When we query bitmap data from the bitmap handle that
+		     *  is a part of an icon or pointer (i.e. it is obtained via the
+		     *  WinQueryPointerInfo() call) OS/2 always returns the bitmap converted
+		     *  to match the default system palette corresponding the icon's color
+		     *  depth (so the "true" bitmap palette and bits used to create the icon
+		     *  are lost). As a temporary solution the code below is commented
+		     *  which prevents usage of OS/2 icons (pointers) at all -- every icon
+		     *  in SWT just becomes a pair of bitmaps that are handled manually
+		     *  by SWT drawing routines.
+		     *
+		     *  @@TODO (dmik): make it permanent? 
+		     */
+		    if (i.width == sysIconWidth) fPointer = 0;
+		    else if (i.width == sysPtrWidth) fPointer = 1;
+		    // @@TODO (lpino): Remove if not necessary in the future
+/* 		    boolean isMini = false;
+		    boolean needCenter = false;
+		    switch(i.width){
+		    	case 16:
+				isMini = true;
+				needCenter = true;
+				break;
+			case 20:
+				isMini = true;
+				break;
+			case 32:
+				needCenter = true;
+				break;
+			case 40:
+				break;
+		    }
+ */		    if (fPointer >= 0) {
+			POINTERINFO info = new POINTERINFO();
+			info.fPointer = fPointer;
+			info.hbmColor = hBitmap;
+			info.hbmPointer = hMask;
+			info.hbmMiniPointer = 0;
+			info.hbmMiniColor = 0;
+			int hIcon = OS.WinCreatePointerIndirect (OS.HWND_DESKTOP, info);
+			if (hIcon == 0) SWT.error(SWT.ERROR_NO_HANDLES);
+			OS.GpiDeleteBitmap (hBitmap);
+			OS.GpiDeleteBitmap (hMask);
+			image.handle = hIcon;			  		
+ 		    } else {
+			image.handle = hBitmap;
+			image.maskHandle = hMask;
+		    }
+		    image.type = SWT.ICON;
 		}
 	} else {
 		if (image == null) {
-            result = new int[] {hBitmap};
+		result = new int[] {hBitmap};
 		} else {
-            image.handle = hBitmap;
+			image.handle = hBitmap;
 			image.type = SWT.BITMAP;
 			image.transparentPixel = i.transparentPixel;
 			if (image.transparentPixel == -1) {
@@ -1955,6 +1956,18 @@ public static Image pm_new(Device device, int type, int handle) {
 	image.handle = handle;
 	image.device = device;
 	return image;
+}
+
+private String getBits(int value){
+	int displayMask = 1 << 31;
+	StringBuffer buf = new StringBuffer(35);
+	for(int c= 1; c<=32; c++){
+		buf.append((value & displayMask) == 0 ? '0' : '1' );
+		value <<=1;
+		if(c %8 == 0)
+			buf.append(' ');
+	}
+	return buf.toString();
 }
 
 }
