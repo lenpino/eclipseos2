@@ -296,31 +296,22 @@ public void setBounds (int x, int y, int width, int height) {
 public Point computeSize (int wHint, int hHint, boolean changed) {
 	checkWidget ();
         Point size = new Point (0, 0);
+	int count = ((style & SWT.MULTI) != 0)?OS.WinSendMsg (handle, OS.MLM_QUERYLINECOUNT, 0, 0):1;
         int hps = this.hps;
         if (hps == 0) hps = OS.WinGetPS (handle);
-//	int newFont, oldFont = 0;
-//	int hDC = OS.GetDC (handle);
-//	newFont = OS.SendMessage (handle, OS.WM_GETFONT, 0, 0);
-//	if (newFont != 0) oldFont = OS.SelectObject (hDC, newFont);
-//	TEXTMETRIC tm = new TEXTMETRIC ();
-//	OS.GetTextMetrics (hDC, tm);
         FONTMETRICS fm = new FONTMETRICS();
         OS.GpiQueryFontMetrics (hps, FONTMETRICS.sizeof, fm);
-	int count = ((style & SWT.MULTI) != 0)?OS.WinSendMsg (handle, OS.MLM_QUERYLINECOUNT, 0, 0):1;
 	int height = count * fm.lEmHeight, width = 0;
-//	RECT rect = new RECT ();
-//	int flags = OS.DT_CALCRECT | OS.DT_EDITCONTROL | OS.DT_NOPREFIX;
-//	boolean wrap = (style & SWT.MULTI) != 0 && (style & SWT.WRAP) != 0;
-//	if (wrap && wHint != SWT.DEFAULT) {
-//		flags |= OS.DT_WORDBREAK;
-//		rect.right = wHint;
-//	}
-//	String text = getText ();
-//        PSZ buffer = new PSZ (text);
-//	TCHAR buffer = new TCHAR (getCodePage (), text, false);
-//	OS.DrawText (hDC, buffer, buffer.length (), rect, flags);
-//	width = rect.right - rect.left;
-        int length = OS.WinQueryWindowTextLength (handle);
+
+	boolean wrap = (style & SWT.MULTI) != 0 && (style & SWT.WRAP) != 0;
+
+/* 	int[] pts = new int[8];
+	OS.WinSendMsg (handle, OS.MLM_QUERYFORMATRECT, pts, OS.MLFFMTRECT_MATCHWINDOW);
+ */        
+ 	int length = OS.WinQueryWindowTextLength (handle);
+	System.out.println("Text::computeSize -> text = " + getText());
+	System.out.println("Text::computeSize -> lineas = " + count);
+	System.out.println("Text::computeSize -> handle = " + Integer.toHex);
         byte[] text = null;
         if (length != 0) {
             RECTL rect = new RECTL();
@@ -352,6 +343,7 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
             size.x = extX + dx;
         }
         width += size.x;
+	System.out.println("Text::computeSize -> ancho = " + width);
         if (this.hps == 0) OS.WinReleasePS (hps);
 //	if (wrap && hHint == SWT.DEFAULT) {
 //		int newHeight = rect.bottom - rect.top;
@@ -473,7 +465,6 @@ public int getCaretLineNumber () {
         if ((style & SWT.MULTI) != 0)
             return OS.WinSendMsg(handle, OS.MLM_CHARFROMLINE, -1, 0);
         else
-            //@@TODO(lpino): Check if this it's OK for SINGLE style
             return 1;
 }
 
@@ -490,34 +481,18 @@ public int getCaretLineNumber () {
  *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
  * </ul>
  */
-//public Point getCaretLocation () {
-//	checkWidget ();
-//	/*
-//	* Bug in Windows.  For some reason, Windows is unable
-//	* to return the pixel coordinates of the last character
-//	* in the widget.  The fix is to temporarily insert a
-//	* space, query the coordinates and delete the space.
-//	* The selection is always an i-beam in this case because
-//	* this is the only time the start of the selection can
-//	* be equal to the last character position in the widget.
-//	* If EM_POSFROMCHAR fails for any other reason, return
-//	* pixel coordinates (0,0). 
-//	*/
-//	int start = 0;
-//	OS.SendMessage (handle, OS.EM_GETSEL, start, (int []) null);
-//	int pos = OS.SendMessage (handle, OS.EM_POSFROMCHAR, start [0], 0);
-//	if (pos == -1) {
-//		pos = 0;
-//		if (start [0] >= OS.GetWindowTextLength (handle)) {
-//			int cp = getCodePage ();
-//			OS.SendMessage (handle, OS.EM_REPLACESEL, 0, new TCHAR (cp, " ", true));
-//			pos = OS.SendMessage (handle, OS.EM_POSFROMCHAR, start [0], 0);
-//			OS.SendMessage (handle, OS.EM_SETSEL, start [0], start [0] + 1);
-//			OS.SendMessage (handle, OS.EM_REPLACESEL, 0, new TCHAR (cp, "", true));
-//		}
-//	}
-//	return new Point ((short) (pos & 0xFFFF), (short) (pos >> 16));
-//}
+public Point getCaretLocation () {
+	checkWidget ();
+/* 	int pos = 0;
+	if ((style & SWT.MULTI) != 0){
+		pos = OS.WinSendMsg (handle, OS.MLM_QUERYSEL, OS.MLFQS_MINSEL, 0);
+	} else {
+		pos = OS.WinSendMsg (handle, OS.EM_QUERYSEL, 0, 0);
+	}
+	return new Point ((short) (pos & 0xFFFF), (short) (pos >> 16));
+	*/
+	return null;
+}
 
 /**
  * Gets the position of the caret.
@@ -550,14 +525,6 @@ public int getCaretPosition () {
             int pos = OS.WinSendMsg (handle, OS.EM_QUERYSEL, 0, 0);
             return OS.SHORT1FROMMP(pos);
         }
-//	int [] start = new int [1], end = new int [1];
-//	OS.SendMessage (handle, OS.EM_GETSEL, start, end);
-//	int startLine = OS.SendMessage (handle, OS.EM_LINEFROMCHAR, start [0], 0);
-//	int caretPos = OS.SendMessage (handle, OS.EM_LINEINDEX, -1, 0);
-//	int caretLine = OS.SendMessage (handle, OS.EM_LINEFROMCHAR, caretPos, 0);
-//	int caret = end [0];
-//	if (caretLine == startLine) caret = start [0];	
-//	return caret;
 }
 
 /**
@@ -742,8 +709,12 @@ public int getLineHeight () {
  */
 public Point getSelection () {
 	checkWidget ();
-        int pos = 0;
-	pos = OS.WinSendMsg (handle, OS.EM_QUERYSEL, 0, 0);
+	int pos = 0;
+	if ((style & SWT.MULTI) != 0){
+		pos = OS.WinSendMsg (handle, OS.MLM_QUERYSEL, (short)OS.MLFQS_MINMAXSEL , 0);
+	}else{
+		pos = OS.WinSendMsg (handle, OS.EM_QUERYSEL, 0, 0);
+	}
         //@@TODO(lpino): Do we need to consider DB?
 //	if (OS.IsDBLocale) {
 //		start [0] = mbcsToWcsPos (start [0]);
@@ -1297,8 +1268,8 @@ public void setDoubleClickEnabled (boolean doubleClick) {
  *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
  * </ul>
  */
-//public void setEchoChar (char echo) {
-//	checkWidget ();
+public void setEchoChar (char echo) {
+	checkWidget ();
 //	if (echo != 0) {
 //		if ((echo = (char) wcsToMbcs (echo, getCodePage ())) == 0) echo = '*';
 //	}
@@ -1309,7 +1280,7 @@ public void setDoubleClickEnabled (boolean doubleClick) {
 //	* The fix is to force a redraw when the character is set.
 //	*/
 //	OS.InvalidateRect (handle, null, true);
-//}
+}
 
 /**
  * Sets the editable state.
@@ -1409,9 +1380,9 @@ public void setSelection (int start, int end) {
             OS.WinSendMsg (handle, OS.EM_SETSEL, OS.MPFROM2SHORT((short)start,(short)end), 0);
 }
 
-//public void setRedraw (boolean redraw) {
-//	checkWidget ();
-//	super.setRedraw (redraw);
+public void setRedraw (boolean redraw) {
+	checkWidget ();
+	super.setRedraw (redraw);
 //	/*
 //	* Feature in Windows.  When WM_SETREDRAW is used to turn
 //	* redraw off, the text control is not scrolled to show the
@@ -1428,7 +1399,7 @@ public void setSelection (int start, int end) {
 //	}
 //	if (oldStart == start [0] && oldEnd == end [0]) return;
 //	OS.SendMessage (handle, OS.EM_SCROLLCARET, 0, 0);		
-//}
+}
 
 /**
  * Sets the selection.
@@ -1565,15 +1536,18 @@ public void setTextLimit (int limit) {
  *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
  * </ul>
  */
-//public void setTopIndex (int index) {
-//	checkWidget ();
-//	int bits = OS.GetWindowLong (handle, OS.GWL_STYLE); 
-//	if ((bits & OS.ES_MULTILINE) == 0) return;
-//	int count = OS.SendMessage (handle, OS.EM_GETLINECOUNT, 0, 0);
-//	index = Math.min (Math.max (index, 0), count - 1);
-//	int topIndex = OS.SendMessage (handle, OS.EM_GETFIRSTVISIBLELINE, 0, 0);
-//	OS.SendMessage (handle, OS.EM_LINESCROLL, 0, index - topIndex);
-//}
+public void setTopIndex (int index) {
+	checkWidget ();
+	if ((style & SWT.MULTI) == 0) return;
+/* 	int bits = OS.WinQueryWindowULong (handle, OS.QWL_STYLE);
+	if ((bits & OS.ES_MULTILINE) == 0) return; */
+	int count = OS.WinSendMsg (handle, OS.MLM_QUERYLINECOUNT, 0, 0);
+	index = Math.min (Math.max (index, 0), count - 1);
+	/* In PM this is the actual char position */
+	int topIndex = OS.WinSendMsg (handle, OS.MLM_QUERYFIRSTCHAR, 0, 0);
+	/* This will cause a scroll to the selected position */
+	OS.WinSendMsg (handle, OS.MLM_SETSEL, topIndex, topIndex);
+}
 
 /*
 * Not currently used.
@@ -1685,13 +1659,12 @@ String verifyText (String string, int start, int end, Event keyEvent) {
 int widgetStyle () {
 	int bits = super.widgetStyle ();
         if ((style & SWT.MULTI) != 0){
-            if ((style & SWT.READ_ONLY) != 0) bits |= OS.MLS_READONLY;
-    //	if ((style & SWT.SINGLE) != 0) return bits | OS.MLS_HSCROLL;
-    //	bits |= OS.MLS_HSCROLL;	
+            if ((style & SWT.READ_ONLY) != 0) bits |= OS.MLS_READONLY;	
             if ((style & SWT.WRAP) != 0) bits |= OS.MLS_WORDWRAP;
             if ((style & SWT.V_SCROLL) != 0) bits |= OS.MLS_VSCROLL;
             if ((style & SWT.H_SCROLL) != 0) bits |= OS.MLS_HSCROLL;
-            return bits | OS.MLS_BORDER;
+	    if ((style & SWT.BORDER) != 0) bits |= OS.MLS_BORDER;
+            return bits | OS.WS_VISIBLE;
         }
         else{
             bits &= ~ (OS.ES_AUTOSIZE | OS.ES_MARGIN);
