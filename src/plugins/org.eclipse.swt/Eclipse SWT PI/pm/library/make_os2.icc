@@ -10,8 +10,6 @@
  */
 
 option ProjectOptions =
-//    incl( searchPath, '..\..\..\Eclipse SWT\common\library' ), // for sources, spaces in path are accepted
-//    incl( searchPath, '"..\..\..\Eclipse SWT\common\library"' ), // for headers, path need to be in quotes (VAC bug?)
     info( cnd, no ) // disable "condition always true" messages
 {
     option
@@ -19,13 +17,12 @@ option ProjectOptions =
         link( linkwithmultithreadlib),
         link( linkwithsharedlib),
         define( DEBUG_CHECK_NULL_EXCEPTIONS )
-//        opt( level, "2" )
+//	define( DEBUG_CALL ),
+//       opt( level, "2" )
     {
         target $SWT_LIB
         {
- //               source "c:\\apps\\dev\\swt2\\trunk\\src\\plugins\\org.eclipse.swt\\Eclipse SWT PI\\pm\\library\\editcol.c"
- //               source "c:\\apps\\dev\\swt2\\trunk\\src\\plugins\\org.eclipse.swt\\Eclipse SWT PI\\pm\\library\\editcol.h"
- //               source "c:\\apps\\dev\\swt2\\trunk\\src\\plugins\\org.eclipse.swt\\Eclipse SWT PI\\pm\\library\\editcol.rc"
+		source type(lib) "ft2lib.lib"
             	source "editcol.c", "editcol.h", "editcol.rc", "swt.c", "structs.c", "callback.c"
         }
     }
