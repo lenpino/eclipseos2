@@ -1,6 +1,6 @@
 /*
  * OS/2 version.
- * Copyright (c) 2002, 2008 EclipseOS2 Team.
+ * Copyright (c) 2002, 2009 EclipseOS2 Team.
  */
 
 /*
@@ -483,6 +483,22 @@ JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_WinSendMsg__IIII
     DEBUG_CALL("WinSendMsg\n")
 
     return (jint)WinSendMsg((HWND)hwnd, ulMsgid, (MPARAM)mpParam1, (MPARAM)mpParam2);
+}
+
+JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_WinSendMsg__II_3II
+        (JNIEnv *env, jclass that, jint hwnd, jint ulMsgid, jintArray mpParam1, jint mpParam2)
+{
+	jint *c_pptl = NULL;
+	jint rc;
+	DEBUG_CALL("WinSendMsg\n")
+	if (mpParam1) c_pptl = (*env)->GetIntArrayElements(env, mpParam1, NULL);
+	
+	rc = (jint)WinSendMsg((HWND)hwnd, ulMsgid, (PPOINTL)c_pptl, (MPARAM)mpParam2);
+	
+	if (mpParam1) (*env)->ReleaseIntArrayElements(env, mpParam1, c_pptl, 0);
+
+	return rc;
+	
 }
 
 JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_WinSendMsg__IILorg_eclipse_swt_internal_pm_RECTL_2I
