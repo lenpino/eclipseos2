@@ -1737,6 +1737,14 @@ public class OS {
    public static final int MLFQS_ANCHORSEL            = 3;
    public static final int MLFQS_CURSORSEL            = 4;
 
+   /*************************************************************************
+   * afFormatFlags mask
+   *************************************************************************/
+   public static final int MLFFMTRECT_LIMITHORZ       = 0x00000001;
+   public static final int MLFFMTRECT_LIMITVERT       = 0x00000002;
+   public static final int MLFFMTRECT_MATCHWINDOW     = 0x00000004;
+   public static final int MLFFMTRECT_FORMATRECT      = 0x00000007;
+
    /* Entry field  styles */
    
    public static final int ES_LEFT                    = 0x00000000;
@@ -2330,6 +2338,7 @@ public static final native int WinSendMsg (int hwnd, int ulMsgid, PSZ mpParam1, 
 public static final native int WinSendMsg (int hwnd, int ulMsgid, int mpParam1, PSZ mpParam2);
 public static final native int WinSendMsg (int hwnd, int ulMsgid, LBOXINFO mpParam1, PSZ[] mpParam2);
 public static final native int WinSendMsg (int hwnd, int ulMsgid, MENUITEM mpParam1, PSZ mpParam2);
+public static final native int WinSendMsg (int hwnd, int ulMsgid, int[] mpParam1, int mpParam2);
 public static final native boolean WinSendMsg (int hwnd, int ulMsgid, int mpParam1, MENUITEM mpParam2);
 public static final native boolean WinPostMsg (int hwnd, int ulMsgid,int mpParam1, int mpParam2);
 public static final native int WinQueryMsgTime (int hab);
