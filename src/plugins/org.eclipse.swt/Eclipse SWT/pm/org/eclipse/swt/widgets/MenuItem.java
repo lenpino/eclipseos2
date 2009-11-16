@@ -705,7 +705,7 @@ public void setText (String string) {
 	if ((style & SWT.SEPARATOR) != 0) return;
 	super.setText (string);
 	int hMenu = parent.handle;
-        string = patchMnemonics (string);
+	string = patchMnemonics(string);
         PSZ buffer = new PSZ(string);
         int rc = OS.WinSendMsg (hMenu, OS.MM_SETITEMTEXT,  (short)id, buffer);
 	if (rc != 1) 
