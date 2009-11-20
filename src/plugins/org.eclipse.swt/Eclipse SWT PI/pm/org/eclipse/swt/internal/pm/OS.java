@@ -157,7 +157,7 @@ public class OS {
 //    public static final int WS_ANIMATE =        0x00400000;
 
     /* Dialog manager styles */
-//    public static final int WS_GROUP =          0x00010000;
+    public static final int WS_GROUP =          0x00010000;
     public static final int WS_TABSTOP =        0x00020000;
 //    public static final int WS_MULTISELECT =    0x00040000;
     public static final int WS_SYSMENU =          0x00080000;
@@ -2340,6 +2340,7 @@ public static final native int WinSendMsg (int hwnd, int ulMsgid, LBOXINFO mpPar
 public static final native int WinSendMsg (int hwnd, int ulMsgid, MENUITEM mpParam1, PSZ mpParam2);
 public static final native int WinSendMsg (int hwnd, int ulMsgid, int[] mpParam1, int mpParam2);
 public static final native boolean WinSendMsg (int hwnd, int ulMsgid, int mpParam1, MENUITEM mpParam2);
+public static final native boolean WinSendMsg (int hwnd, int ulMsgid, FATTRS mpParam1, int mpParam2);
 public static final native boolean WinPostMsg (int hwnd, int ulMsgid,int mpParam1, int mpParam2);
 public static final native int WinQueryMsgTime (int hab);
 public static final native boolean WinQueryMsgPos (int hab, int[] pptl);
