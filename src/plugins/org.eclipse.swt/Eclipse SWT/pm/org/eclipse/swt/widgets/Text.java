@@ -1,6 +1,11 @@
 package org.eclipse.swt.widgets;
 
 /*
+ * OS/2 version.
+ * Copyright (c) 2002, 2009 EclipseOS2 Team.
+ */
+
+/*
  * Copyright (c) 2000, 2002 IBM Corp.  All rights reserved.
  * This file is made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -93,8 +98,6 @@ public class Text extends Scrollable {
  */
 public Text (Composite parent, int style) {
 	super (parent, checkStyle (style));
-        if ((style & SWT.SINGLE) != 0)
-            textLimit = 32;
 }
 
 int callWindowProc (int msg, int mp1, int mp2) {
@@ -107,6 +110,8 @@ int callWindowProc (int msg, int mp1, int mp2) {
 
 void createHandle () {
 	super.createHandle ();
+	if ((style & SWT.MULTI) != 0) OS.WinSendMsg (handle, OS.MLM_SETTEXTLIMIT, -1, 0);
+	else OS.WinSendMsg (handle, OS.EM_SETTEXTLIMIT, LIMIT, 0);
 }
 
 /**
@@ -295,81 +300,32 @@ public void setBounds (int x, int y, int width, int height) {
 
 public Point computeSize (int wHint, int hHint, boolean changed) {
 	checkWidget ();
-        Point size = new Point (0, 0);
-	int count = ((style & SWT.MULTI) != 0)?OS.WinSendMsg (handle, OS.MLM_QUERYLINECOUNT, 0, 0):1;
+	int count = getLineCount();
         int hps = this.hps;
         if (hps == 0) hps = OS.WinGetPS (handle);
-        FONTMETRICS fm = new FONTMETRICS();
-        OS.GpiQueryFontMetrics (hps, FONTMETRICS.sizeof, fm);
-	int height = count * fm.lEmHeight, width = 0;
-
+	int height = count * getLineHeight (), width = 0;
 	boolean wrap = (style & SWT.MULTI) != 0 && (style & SWT.WRAP) != 0;
-
-/* 	int[] pts = new int[8];
-	OS.WinSendMsg (handle, OS.MLM_QUERYFORMATRECT, pts, OS.MLFFMTRECT_MATCHWINDOW);
- */        
- 	int length = OS.WinQueryWindowTextLength (handle);
-	System.out.println("Text::computeSize -> text = " + getText());
-	System.out.println("Text::computeSize -> lineas = " + count);
-	System.out.println("Text::computeSize -> handle = " + Integer.toHex);
+	
+ 	int length = ((style & SWT.MULTI) != 0)?OS.WinSendMsg (handle, OS.MLM_QUERYTEXTLENGTH, 0, 0):OS.WinQueryWindowTextLength (handle);
+//	System.out.println("Text::computeSize -> height = " + height);
+//	System.out.println("Text::computeSize -> lineas = " + count);
         byte[] text = null;
-        if (length != 0) {
-            RECTL rect = new RECTL();
-            text = getText().getBytes();
-            int[] pnts = new int [OS.TXTBOX_COUNT * 2];
-            /*
-             *  Feature in OS/2. The maximum length of the string in string-related
-             *  GPI functions is 512 chars. Do the cycle to handle larger strings.
-             */
-            int extX = 0, dx = 0;
-            int is = 0;
-            while (is < length) {
-    //@@TODO (dmik): Unicode    
-    //                int ie = is + 256;
-                int ie = is + 512;
-                if (ie > length) ie = length;
-                if (is != 0) {
-                    System.arraycopy (text, is, text, 0, ie - is);  
-                }
-    //@@TODO (dmik): Unicode    
-    //                OS.GpiQueryTextBox (hps, (ie - is) << 1, text, OS.TXTBOX_COUNT, pnts);
-                OS.GpiQueryTextBox (hps, ie - is, text, OS.TXTBOX_COUNT, pnts);
-                extX += pnts [8];
-                dx = pnts [4];
-                if (dx < pnts [8]) dx = pnts [8];
-                dx = dx - pnts [8];
-                is = ie;
-            }
-            size.x = extX + dx;
-        }
-        width += size.x;
-	System.out.println("Text::computeSize -> ancho = " + width);
+        text = getText().getBytes();
+        int[] pnts = new int [OS.TXTBOX_COUNT * 2];
+	OS.GpiQueryTextBox (hps, length, text, OS.TXTBOX_COUNT, pnts);
+	width = Math.max (width, pnts[4] - pnts[0]);
+//	System.out.println("Text::computeSize -> ancho = " + width);
         if (this.hps == 0) OS.WinReleasePS (hps);
-//	if (wrap && hHint == SWT.DEFAULT) {
-//		int newHeight = rect.bottom - rect.top;
-//		if (newHeight != 0) height = newHeight;
-//	}
-//	if (newFont != 0) OS.SelectObject (hDC, oldFont);
-//	OS.ReleaseDC (handle, hDC);
+	if (wrap && hHint == SWT.DEFAULT) {
+		int newHeight = pnts[1] - pnts[3];
+		if (newHeight != 0) height = newHeight;
+	}
         
 	if (width == 0) width = DEFAULT_WIDTH;
 	if (height == 0) height = DEFAULT_HEIGHT;
 	if (wHint != SWT.DEFAULT) width = wHint;
 	if (hHint != SWT.DEFAULT) height = hHint;
-//
-//	/* Calculate the margin width */
-//	int margins = OS.SendMessage(handle, OS.EM_GETMARGINS, 0, 0);
-//	int marginWidth = (margins & 0xFFFF) + ((margins >> 16) & 0xFFFF);
-//	width += marginWidth;
-//	
-//	/*
-//	* The preferred height of a single-line text widget
-//	* has been hand-crafted to be the same height as
-//	* the single-line text widget in an editable combo
-//	* box.
-//	*/
-//	width += editRect.left * 2;
-//	height += editRect.top * 2;
+
 	if ((style & SWT.V_SCROLL) != 0) {
 		width += OS.WinQuerySysValue (OS.HWND_DESKTOP, OS.SV_CXVSCROLL);
 	}
@@ -599,11 +555,7 @@ public boolean getDoubleClickEnabled () {
  */
 public char getEchoChar () {
 	checkWidget ();
-        //@@TODO(lpino): Find out how to implement this. Maybe there is no need
-//	char echo = (char) OS.SendMessage (handle, OS.EM_GETPASSWORDCHAR, 0, 0);
-//	if (echo != 0 && (echo = mbcsToWcs (echo, getCodePage ())) == 0) echo = '*';
-//	return echo;
-        return '*';
+         return '*';
 }
 
 /**
@@ -668,28 +620,18 @@ public String getLineDelimiter () {
  */
 public int getLineHeight () {
 	checkWidget ();
-//	int newFont, oldFont = 0;
-//	int hDC = OS.GetDC (handle);
-//	newFont = OS.SendMessage (handle, OS.WM_GETFONT, 0, 0);
-//	if (newFont != 0) oldFont = OS.SelectObject (hDC, newFont);
-//	TEXTMETRIC tm = new TEXTMETRIC ();
-//	OS.GetTextMetrics (hDC, tm);
-//	if (newFont != 0) OS.SelectObject (hDC, oldFont);
-//	OS.ReleaseDC (handle, hDC);
-//	return tm.tmHeight;
-        
-        //@@TODO(lpino): Implement MLM_QUERYFONT
-//        if ((style & SWT.MULTI) != 0){
-//            FATTRS hFont;
-//            OS.WinSendMsg (handle, OS.MLM_QUERYFONT, hFont, 0);
-//        }else{
+        if ((style & SWT.MULTI) != 0){
+            FATTRS hFont = new FATTRS();
+            OS.WinSendMsg (handle, OS.MLM_QUERYFONT, hFont, 0);
+	    return hFont.lMaxBaselineExt + 4;
+        }else{
             int hps = this.hps;
             if (hps == 0) hps = OS.WinGetPS (handle);
             FONTMETRICS fm = new FONTMETRICS();
             OS.GpiQueryFontMetrics (hps, FONTMETRICS.sizeof, fm);
-            return fm.lEmHeight;
-//        }
-//        return 0;
+	    OS.WinReleasePS(hps);
+            return fm.lMaxBaselineExt + 4;
+        }
 }
 
 /**
@@ -783,20 +725,13 @@ public int getTabs () {
 int getTabWidth (int tabs) {
         int hps = this.hps;
         if (hps == 0) hps = OS.WinGetPS (handle);
-        int extX = 0, dx = 0;
+	int dx = 0;
         int[] pnts = new int [OS.TXTBOX_COUNT * 2];
-//        byte[] text = (new String(" ")).getBytes();
         PSZ buffer = new PSZ (" ");
         OS.GpiQueryTextBox (hps, 1, buffer.getBytes(), OS.TXTBOX_COUNT, pnts);
-        extX += pnts [8];
-        dx = pnts [4];
-        if (dx < pnts [8]) dx = pnts [8];
-        dx = dx - pnts [8];
-//        System.out.println("TOTAL = " + (extX + dx));
-//        for(int i=0;i<OS.TXTBOX_COUNT * 2;i++){
-//            System.out.println("Punto " + i + "=" + pnts[i]);
-//        }
-	return extX + dx;
+        dx = pnts [4]-pnts [0];
+	OS.WinReleasePS(hps);
+	return dx;
 }
 
 /**
@@ -814,7 +749,7 @@ int getTabWidth (int tabs) {
  */
 public String getText () {
 	checkWidget ();
-	int length = OS.WinQueryWindowTextLength (handle);
+ 	int length = ((style & SWT.MULTI) != 0)?OS.WinSendMsg (handle, OS.MLM_QUERYTEXTLENGTH, 0, 0):OS.WinQueryWindowTextLength (handle);
 	if (length == 0) return "";
         PSZ buffer = new PSZ(length);
 	OS.WinQueryWindowText (handle, length + 1, buffer);
@@ -1305,7 +1240,7 @@ public void setEditable (boolean editable) {
 public void setFont (Font font) {
 	checkWidget ();
 	super.setFont (font);
-//	setTabStops (tabs);
+	setTabStops (tabs);
 }
 
 /**
@@ -1487,9 +1422,13 @@ public void setText (String string) {
 	PSZ buffer = new PSZ (string);
         if ((style & SWT.MULTI) != 0){
             OS.WinSendMsg(handle, OS.MLM_INSERT, buffer, 0);
+	    /* SWT places the I-beam before the inserted text */
+	    OS.WinSendMsg(handle, OS.MLM_SETSEL, 0, 0);
         }
         else{
             OS.WinSetWindowText(handle, buffer);
+	    /* SWT places the I-beam before the inserted text */
+	    OS.WinSendMsg (handle, OS.EM_SETSEL, OS.MPFROM2SHORT((short)0, (short)0), 0);
         }
 }
 //
@@ -1576,7 +1515,8 @@ void setWrap (boolean wrap) {
  */
 public void showSelection () {
 	checkWidget ();
-//	OS.SendMessage (handle, OS.EM_SCROLLCARET, 0, 0);
+	int pos = OS.WinSendMsg (handle, OS.MLM_QUERYSEL, OS.MLFQS_ANCHORSEL , 0);
+	OS.WinSendMsg (handle, OS.MLM_SETSEL, pos, pos);
 }
 
 String verifyText (String string, int start, int end) {
@@ -1664,13 +1604,13 @@ int widgetStyle () {
             if ((style & SWT.V_SCROLL) != 0) bits |= OS.MLS_VSCROLL;
             if ((style & SWT.H_SCROLL) != 0) bits |= OS.MLS_HSCROLL;
 	    if ((style & SWT.BORDER) != 0) bits |= OS.MLS_BORDER;
-            return bits | OS.WS_VISIBLE;
+            return bits | OS.WS_VISIBLE | OS.WS_GROUP | OS.WS_TABSTOP;
         }
         else{
             bits &= ~ (OS.ES_AUTOSIZE | OS.ES_MARGIN);
             if ((style & SWT.READ_ONLY) != 0) bits |= OS.ES_READONLY;
             if ((style & SWT.BORDER) != 0) bits |= OS.ES_MARGIN;
-            return bits | OS.WS_VISIBLE | OS.ES_AUTOSCROLL;
+            return bits | OS.WS_VISIBLE | OS.ES_AUTOSCROLL | OS.ES_LEFT | OS.WS_TABSTOP;
         }
 }
 
@@ -1745,24 +1685,6 @@ MRESULT WM_CHAR (int mp1, int mp2) {
 //	}
 //	return result;
 //}
-//
-//LRESULT WM_GETDLGCODE (int wParam, int lParam) {
-//	LRESULT result = super.WM_GETDLGCODE (wParam, lParam);
-//	if (result != null) return result;
-//	/*
-//	* Feature in Windows.  Despite the fact that the
-//	* text control is read only, it still returns a
-//	* dialog code indicating that it wants keys.  The
-//	* fix is to detect this case and clear the bits.
-//	*/
-//	if ((style & SWT.READ_ONLY) != 0) {
-//		int code = callWindowProc (OS.WM_GETDLGCODE, wParam, lParam);
-//		code &= ~(OS.DLGC_WANTALLKEYS | OS.DLGC_WANTTAB | OS.DLGC_WANTARROWS);
-//		return new LRESULT (code);
-//	}
-//	return null;
-//}
-//
 //LRESULT WM_IME_CHAR (int wParam, int lParam) {
 //
 //	/* Process a DBCS character */
@@ -1940,24 +1862,6 @@ MRESULT wmControlChild (int mp1, int mp2) {
     }
     return super.wmControlChild (mp1, mp2);
 }
-
-//MRESULT wmCommandChild (int mp1, int mp2) {
-//	int code = mp1 >> 16;
-//	switch (code) {
-//		case OS.EN_CHANGE: 
-//			/*
-//			* It is possible (but unlikely), that application
-//			* code could have disposed the widget in the modify
-//			* event.  If this happens, end the processing of the
-//			* Windows message by returning zero as the result of
-//			* the window proc.
-//			*/
-//			sendEvent (SWT.Modify);
-//			if (isDisposed ()) return MRESULT.ZERO;
-//			break;
-//	}
-//	return super.wmCommandChild (mp1, mp2);
-//}
 
 MRESULT wmScroll (int msg, int mp1, int mp2) {
 	int code = callWindowProc (msg, mp1, mp2);
