@@ -2253,6 +2253,18 @@ public class OS {
    public static final int IBB_MIX_MODE               = 0x0004;
    public static final int IBB_BACK_MIX_MODE           = 0x0008;
 
+   /*
+      * Standard Clipboard formats
+   */
+   public static final int CF_TEXT                    = 1;
+   public static final int CF_BITMAP                  = 2;
+   public static final int CF_DSPTEXT                 = 3;
+   public static final int CF_DSPBITMAP               = 4;
+   public static final int CF_METAFILE                = 5;
+   public static final int CF_DSPMETAFILE             = 6;
+   public static final int CF_PALETTE                 = 9;
+   public static final int CF_MMPMFIRST              = 10;
+   public static final int CF_MMPMLAST               = 19;
 
 /* PM macros */
 
@@ -2274,12 +2286,16 @@ public static final native int malloc (int size);
 public static final native void free (int block);
 public static final native void memcpy (int dest, int src, int n);
 public static final native void memset (int str, int ch, int n);
+public static final native int strlen (int str);
 
 /* Native<->Java Object copiers */
     
 public static final native void objcpy (int to, int[] from);    
 public static final native void objcpy (int[] to, int from);
-    
+
+public static final native void objcpy (int to, byte[] from);    
+public static final native void objcpy (byte[] to, int from);
+
 public static final native void objcpy (int to, TIB from);    
 public static final native void objcpy (TIB to, int from);
 
@@ -2466,7 +2482,7 @@ public static final native int WinQueryCapture(int hwndDeskTop);
 public static final native boolean WinSetActiveWindow(int hwndDeskTop, int hwnd);
 public static final native boolean WinQueryUpdateRect(int hwnd, RECTL prclPrc);
 public static final native boolean WinOpenClipbrd(int hab);
-public static final native boolean WinCloseClipbr(int hab);
+public static final native boolean WinCloseClipbrd(int hab);
 public static final native int WinQueryClipbrdData(int hab, int fmt);
 public static final native int WinUpperChar(int hab, int ulCodepage, int ulCountry, int ulInchar);
 public static final native int WinStartTimer(int hab, int hwnd, int idTimer, int dtTimeout);
