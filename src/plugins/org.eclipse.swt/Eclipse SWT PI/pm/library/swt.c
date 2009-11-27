@@ -82,6 +82,14 @@ JNIEXPORT void JNICALL Java_org_eclipse_swt_internal_pm_OS_memset
     memset((void*)str, (int)ch, (size_t)n);
 }
 
+JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_strlen
+        (JNIEnv *env, jclass that, jint str)
+{
+    DEBUG_CALL("strlen\n")
+
+    return (jint) strlen((PCHAR)str);
+}
+
 /* Native<->Java Object copiers */
 
 JNIEXPORT void JNICALL Java_org_eclipse_swt_internal_pm_OS_objcpy__I_3I
@@ -110,6 +118,34 @@ JNIEXPORT void JNICALL Java_org_eclipse_swt_internal_pm_OS_objcpy___3II
     memcpy ((void*)c_array, (void*)parray, (size_t)(*env)->GetArrayLength(env, array));
 
     if (array) (*env)->ReleaseIntArrayElements(env, array, c_array, 0);
+}
+
+JNIEXPORT void JNICALL Java_org_eclipse_swt_internal_pm_OS_objcpy__I_3B
+        (JNIEnv *env, jclass that, jint parray, jbyteArray array)
+{
+    jbyte *c_array = NULL;
+
+    DEBUG_CALL("objcpy\n")
+
+    if (array) c_array = (*env)->GetByteArrayElements(env, array, NULL);
+    
+    memcpy ((void*)parray, (void*)c_array, (size_t)(*env)->GetArrayLength(env, array));
+
+    if (array) (*env)->ReleaseByteArrayElements(env, array, c_array, 0);
+}
+
+JNIEXPORT void JNICALL Java_org_eclipse_swt_internal_pm_OS_objcpy___3BI
+        (JNIEnv *env, jclass that, jbyteArray array, jint parray)
+{
+    jbyte *c_array = NULL;
+
+    DEBUG_CALL("objcpy\n")
+
+    if (array) c_array = (*env)->GetByteArrayElements(env, array, NULL);
+    
+    memcpy ((void*)c_array, (void*)parray, (size_t)(*env)->GetArrayLength(env, array));
+
+    if (array) (*env)->ReleaseByteArrayElements(env, array, c_array, 0);
 }
 
 JNIEXPORT void JNICALL Java_org_eclipse_swt_internal_pm_OS_objcpy__ILorg_eclipse_swt_internal_pm_TIB_2
@@ -1668,6 +1704,14 @@ JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinCloseClipbrd
     DEBUG_CALL("WinCloseClipbrd\n")
 
     return (jboolean)WinCloseClipbrd((HAB)hab);
+}
+
+JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_WinQueryClipbrdData
+        (JNIEnv *env, jclass that, jint hab, jint fmt)
+{
+    DEBUG_CALL("WinQueryClipbrdData\n")
+
+    return (jint)WinQueryClipbrdData((HAB)hab, (MPARAM)fmt);
 }
 
 JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_WinUpperChar
