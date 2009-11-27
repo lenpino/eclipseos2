@@ -326,19 +326,19 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 	if (wHint != SWT.DEFAULT) width = wHint;
 	if (hHint != SWT.DEFAULT) height = hHint;
 
-	if ((style & SWT.V_SCROLL) != 0) {
+ 	if ((style & SWT.V_SCROLL) != 0) {
 		width += OS.WinQuerySysValue (OS.HWND_DESKTOP, OS.SV_CXVSCROLL);
 	}
-	if ((style & SWT.H_SCROLL) != 0) {
+ 	if ((style & SWT.H_SCROLL) != 0) {
 		height += OS.WinQuerySysValue (OS.HWND_DESKTOP, OS.SV_CYHSCROLL);
 		if ((style & SWT.BORDER) == 0) width++;
 	}
 	if ((style & SWT.BORDER) != 0) {
 		int border = getBorderWidth ();
-		width += (border * 2) + 3;
-		height += (border * 2) + 1;
+		width += (border * 2) + 1;
+		height += (border * 2) + 2;
 	}
-	return new Point (width, height);
+	return new Point(width, height);
 }
 
 /**
@@ -495,29 +495,29 @@ public int getCaretPosition () {
  */
 public int getCharCount () {
 	checkWidget ();
-	int length = OS.WinQueryWindowTextLength (handle);
+	int length = 0;
+	if ((style & SWT.MULTI) != 0){
+		length = OS.WinSendMsg (handle, OS.MLM_QUERYTEXTLENGTH, 0, 0);
+	}else{
+		length = OS.WinQueryWindowTextLength (handle);
+	}
          //@@TODO(lpino): Implement the DB support
 //	if (OS.IsDBLocale) length = mbcsToWcsPos (length);
 	return length;
 }
-//
+
 String getClipboardText () {
 	String string = "";
 	int hab = parent.getDisplay ().hab;
 	if (OS.WinOpenClipbrd (hab)) {
-//		int hMem = OS.GetClipboardData (OS.IsUnicode ? OS.CF_UNICODETEXT : OS.CF_TEXT);
-//		if (hMem != 0) {
-//			int byteCount = OS.GlobalSize (hMem);
-//			int ptr = OS.GlobalLock (hMem);
-//			if (ptr != 0) {
-//				/* Use the character encoding for the default locale */
-//				TCHAR buffer = new TCHAR (0, byteCount / TCHAR.sizeof);
-//				OS.MoveMemory (buffer, ptr, byteCount);
-//				string = buffer.toString (0, buffer.strlen ());
-//				OS.GlobalUnlock (hMem);
-//			}
-//		}
-		OS.WinCloseClipbr (hab);
+		int pText = OS.WinQueryClipbrdData(hab, OS.CF_TEXT);
+		if(pText != 0){
+			byte[] buffer = new byte[OS.strlen(pText)];
+			OS.objcpy(buffer, pText);
+			PSZ text = new PSZ(buffer);
+			string = text.toString();
+		}
+		OS.WinCloseClipbrd (hab);
 	}
 	return string;
 }
@@ -846,18 +846,11 @@ public int getTopIndex () {
  *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
  * </ul>
  */
-//public int getTopPixel () {
-//	checkWidget ();
-//	/*
-//	* Note, EM_GETSCROLLPOS is implemented in Rich Edit 3.0
-//	* and greater.  The plain text widget and previous versions
-//	* of Rich Edit return zero.
-//	*/
-//	int [] buffer = new int [2];
-//	int code = OS.SendMessage (handle, OS.EM_GETSCROLLPOS, 0, buffer);
-//	if (code == 1) return buffer [1];
-//	return getTopIndex () * getLineHeight ();
-//}
+public int getTopPixel () {
+	checkWidget ();
+	if((style & SWT.SINGLE) != 0) return 0;
+	return getTopIndex () * getLineHeight ();
+}
 
 /*
 * Currently not used.
@@ -1271,11 +1264,9 @@ public void setSelection (int start) {
 //	if (OS.IsDBLocale) start = wcsToMbcsPos (start);
         if ((style & SWT.MULTI) != 0){
             OS.WinSendMsg (handle, OS.MLM_SETSEL, start, start);
-//            OS.SendMessage (handle, OS.EM_SCROLLCARET, 0, 0);
         }
         else{
             OS.WinSendMsg (handle, OS.EM_SETSEL, OS.MPFROM2SHORT((short)start,(short)start),0);
-//            OS.SendMessage (handle, OS.EM_SCROLLCARET, 0, 0);
         }
 }
 
@@ -1515,8 +1506,13 @@ void setWrap (boolean wrap) {
  */
 public void showSelection () {
 	checkWidget ();
-	int pos = OS.WinSendMsg (handle, OS.MLM_QUERYSEL, OS.MLFQS_ANCHORSEL , 0);
-	OS.WinSendMsg (handle, OS.MLM_SETSEL, pos, pos);
+	if ((style & SWT.MULTI) != 0){
+		int pos = OS.WinSendMsg (handle, OS.MLM_QUERYSEL, OS.MLFQS_ANCHORSEL , 0);
+		OS.WinSendMsg (handle, OS.MLM_SETSEL, pos, pos);
+	} else {
+		int pos = OS.WinSendMsg (handle, OS.EM_QUERYSEL, 0 , 0);
+		OS.WinSendMsg (handle, OS.MLM_SETFIRSTCHAR, OS.SHORT1FROMMP(pos), 0);
+	}
 }
 
 String verifyText (String string, int start, int end) {
@@ -1604,7 +1600,7 @@ int widgetStyle () {
             if ((style & SWT.V_SCROLL) != 0) bits |= OS.MLS_VSCROLL;
             if ((style & SWT.H_SCROLL) != 0) bits |= OS.MLS_HSCROLL;
 	    if ((style & SWT.BORDER) != 0) bits |= OS.MLS_BORDER;
-            return bits | OS.WS_VISIBLE | OS.WS_GROUP | OS.WS_TABSTOP;
+            return bits | OS.WS_VISIBLE | OS.WS_GROUP | OS.WS_TABSTOP | OS.MLS_LIMITVSCROLL;
         }
         else{
             bits &= ~ (OS.ES_AUTOSIZE | OS.ES_MARGIN);
@@ -1628,63 +1624,44 @@ int windowProc () {
             return FieldProc;
 }
 
-//int windowProc (int msg, int mp1, int mp2) {
-//    int result = super.windowProc (msg, mp1, mp2);
-//    switch(msg){
-//        case OS.MLM_CUT:{
-//            OS.WinSendMsg(handle, OS.MLM_CUT,0,0);
-//            break;
-//        }
-//    }
-//    return result;
-//}
-
+/* int windowProc (int msg, int mp1, int mp2) {
+    int result = super.windowProc (msg, mp1, mp2);
+    switch(msg){
+        case OS.MLM_PASTE:{
+            System.out.println("Text::windowProc -> MLM_PASTE");
+            break;
+        }
+	case OS.EM_PASTE:{
+            System.out.println("Text::windowProc -> EM_PASTE");
+	    if (!hooks (SWT.Verify)) return result;
+	    int bits = OS.WinQueryWindowULong(handle, OS.QWL_STYLE);
+	    if ((bits & OS.ES_READONLY) != 0) return result;
+	    String oldText = getClipboardText ();
+	    if (oldText == null) return result;
+	    int pos = OS.WinSendMsg (handle, OS.EM_QUERYSEL, 0, 0);
+	    int start = OS.SHORT1FROMMP(pos);
+	    int end = OS.SHORT2FROMMP(pos);
+	    String newText = verifyText (oldText, start, end);
+	    if (newText == null) return OS.FALSE;
+	    if (newText != oldText) {
+		newText = Display.withCrLf (newText);
+		PSZ buffer = new PSZ(newText);
+//		OS.SendMessage (handle, OS.EM_REPLACESEL, 0, buffer);
+//		return LRESULT.ZERO;
+	}
+            break;
+	}
+    }
+    return result;
+}
+ */
 MRESULT WM_CHAR (int mp1, int mp2) {
 	if (ignoreCharacter) return null;
 	MRESULT result = super.WM_CHAR (mp1, mp2);
 	if (result != null) return result;
 	return result;
 }
-//
-//LRESULT WM_CLEAR (int wParam, int lParam) {
-//	LRESULT result = super.WM_CLEAR (wParam, lParam);
-//	if (result != null) return result;
-//	if (!hooks (SWT.Verify)) return result;
-//	int bits = OS.GetWindowLong (handle, OS.GWL_STYLE);
-//	if ((bits & OS.ES_READONLY) != 0) return result;
-//	int [] start = new int [1], end = new int [1];
-//	OS.SendMessage (handle, OS.EM_GETSEL, start, end);
-//	if (start [0] == end [0]) return result;
-//	String newText = verifyText ("", start [0], end [0]);
-//	if (newText == null) return LRESULT.ZERO;
-//	if (newText.length () != 0) {
-//		result = new LRESULT (callWindowProc (OS.WM_CLEAR, 0, 0));	
-//		newText = Display.withCrLf (newText);
-//		TCHAR buffer = new TCHAR (getCodePage (), newText, true);
-//		OS.SendMessage (handle, OS.EM_REPLACESEL, 0, buffer);
-//	}
-//	return result;
-//}
-//
-//LRESULT WM_CUT (int wParam, int lParam) {
-//	LRESULT result = super.WM_CUT (wParam, lParam);
-//	if (result != null) return result;
-//	if (!hooks (SWT.Verify)) return result;
-//	int bits = OS.GetWindowLong (handle, OS.GWL_STYLE);
-//	if ((bits & OS.ES_READONLY) != 0) return result;
-//	int [] start = new int [1], end = new int [1];
-//	OS.SendMessage (handle, OS.EM_GETSEL, start, end);
-//	if (start [0] == end [0]) return result;
-//	String newText = verifyText ("", start [0], end [0]);
-//	if (newText == null) return LRESULT.ZERO;
-//	if (newText.length () != 0) {
-//		result = new LRESULT (callWindowProc (OS.WM_CUT, 0, 0));	
-//		newText = Display.withCrLf (newText);
-//		TCHAR buffer = new TCHAR (getCodePage (), newText, true);
-//		OS.SendMessage (handle, OS.EM_REPLACESEL, 0, buffer);
-//	}
-//	return result;
-//}
+
 //LRESULT WM_IME_CHAR (int wParam, int lParam) {
 //
 //	/* Process a DBCS character */
@@ -1748,28 +1725,6 @@ MRESULT WM_CHAR (int mp1, int mp2) {
 //	}
 //	return null;
 //}
-//
-//LRESULT WM_PASTE (int wParam, int lParam) {
-//	LRESULT result = super.WM_PASTE (wParam, lParam);
-//	if (result != null) return result;
-//	if (!hooks (SWT.Verify)) return result;
-//	int bits = OS.GetWindowLong (handle, OS.GWL_STYLE);
-//	if ((bits & OS.ES_READONLY) != 0) return result;
-//	String oldText = getClipboardText ();
-//	if (oldText == null) return result;
-//	int [] start = new int [1], end = new int [1];
-//	OS.SendMessage (handle, OS.EM_GETSEL, start, end);
-//	String newText = verifyText (oldText, start [0], end [0]);
-//	if (newText == null) return LRESULT.ZERO;
-//	if (newText != oldText) {
-//		newText = Display.withCrLf (newText);
-//		TCHAR buffer = new TCHAR (getCodePage (), newText, true);
-//		OS.SendMessage (handle, OS.EM_REPLACESEL, 0, buffer);
-//		return LRESULT.ZERO;
-//	}
-//	return result;
-//}
-//
 //LRESULT WM_SIZE (int wParam, int lParam) {
 //	LRESULT result = super.WM_SIZE (wParam, lParam);
 //	// widget may be disposed at this point
@@ -1805,40 +1760,6 @@ MRESULT WM_CHAR (int mp1, int mp2) {
 //	OS.SendMessage (handle, OS.EM_SETSEL, 0, 0);
 //	OS.SendMessage (handle, OS.EM_SETSEL, start [0], end [0]);
 //	return result;
-//}
-//
-//LRESULT WM_UNDO (int wParam, int lParam) {
-//	LRESULT result = super.WM_UNDO (wParam, lParam);
-//	if (result != null) return result;
-//	if (!hooks (SWT.Verify)) return result;
-//
-//	/* Undo and then Redo to get the Undo text */
-//	if (OS.SendMessage (handle, OS.EM_CANUNDO, 0, 0) == 0) {
-//		return result;
-//	}
-//	ignoreVerify = true;
-//	callWindowProc (OS.WM_UNDO, wParam, lParam);
-//	String oldText = getSelectionText ();
-//	callWindowProc (OS.WM_UNDO, wParam, lParam);
-//	ignoreVerify = false;
-//
-//	/* Verify the Undo operation */
-//	int [] start = new int [1], end = new int [1];
-//	OS.SendMessage (handle, OS.EM_GETSEL, start, end);
-//	String newText = verifyText (oldText, start [0], end [0]);
-//	if (newText == null) return LRESULT.ZERO;
-//	if (newText != oldText) {
-//		newText = Display.withCrLf (newText);
-//		TCHAR buffer = new TCHAR (getCodePage (), newText, true);
-//		OS.SendMessage (handle, OS.EM_REPLACESEL, 0, buffer);
-//		return LRESULT.ZERO;
-//	}
-//	
-//	/* Do the original Undo */
-//	ignoreVerify = true;
-//	callWindowProc (OS.WM_UNDO, wParam, lParam);
-//	ignoreVerify = false;
-//	return LRESULT.ONE;
 //}
 
 MRESULT wmControlChild (int mp1, int mp2) {
