@@ -46,6 +46,8 @@ org\eclipse\swt\widgets\Group.java
 org\eclipse\swt\widgets\Menu.java
 org\eclipse\swt\widgets\MenuItem.java
 org\eclipse\swt\widgets\Scale.java
+org\eclipse\swt\widgets\Tree.java
+org\eclipse\swt\widgets\TreeItem.java
 
 # SWT Base
 
@@ -215,8 +217,17 @@ org\eclipse\swt\accessibility\AccessibleControlEvent.java
 org\eclipse\swt\accessibility\AccessibleControlListener.java
 org\eclipse\swt\accessibility\AccessibleEvent.java
 org\eclipse\swt\accessibility\AccessibleListener.java
+
+# SWT Custom Widgets
+
+org\eclipse\swt\custom\StyledText.java
+org\eclipse\swt\custom\StyledTextBidi.java
+org\eclipse\swt\custom\StyledTextContent.java
+org\eclipse\swt\custom\StyledTextListener.java
+org\eclipse\swt\custom\StyledTextRenderer.java
+
+
 # emulated
 org\eclipse\swt\accessibility\Accessible.java
 
 
-
