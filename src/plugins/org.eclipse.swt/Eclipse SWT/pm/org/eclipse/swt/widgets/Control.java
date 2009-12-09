@@ -470,14 +470,14 @@ void createHandle () {
     OS.WinSetWindowUShort (handle, OS.QWS_ID, (short)(handle & 0xFFFF));
 
 //@@TODO (dmik): debug code, remove when no more necessary
-//System.out.println (
-//    "Control.createHandle(): Window has been created:\n" +
-//    "    hwnd = " + Integer.toHexString (handle) + "\n" +
-//    "    hwnd.parent = hwnd.owner = " + Integer.toHexString (parent.handle) + "\n" +
-//    "    class = " + windowClass() + "\n" +
-//    "    style = " + Integer.toHexString (widgetStyle())
-//);
-
+/* System.out.println (
+    "Control.createHandle(): Window has been created:\n" +
+    "    hwnd = " + Integer.toHexString (handle) + "\n" +
+    "    hwnd.parent = hwnd.owner = " + Integer.toHexString (parent.handle) + "\n" +
+    "    class = " + windowClass() + "\n" +
+    "    style = " + Integer.toHexString (widgetStyle())
+);
+ */
 //@@TODO(dmik): DBCS handling?
 //    if (OS.IsDBLocale && parent != null) {
 //        int hIMC = OS.ImmGetContext (hwndParent);
@@ -2948,11 +2948,11 @@ int windowProc (int msg, int mp1, int mp2) {
 //        case OS.WM_CTLCOLORSCROLLBAR:
 //        case OS.WM_CTLCOLORSTATIC: result = WM_CTLCOLOR (wParam, lParam); break;
 //        case OS.WM_CUT: result = WM_CUT (wParam, lParam); break;
-//        case OS.WM_DESTROY: result = WM_DESTROY (wParam, lParam); break;
+        case OS.WM_DESTROY: result = WM_DESTROY (mp1, mp2); break;
         case OS.WM_DRAWITEM: result = WM_DRAWITEM (mp1, mp2); break;
 //        case OS.WM_ENDSESSION: result = WM_ENDSESSION (wParam, lParam); break;
         case OS.WM_ERASEBACKGROUND: result = WM_ERASEBACKGROUND (mp1, mp2); break;
-        case OS.WM_FOCUSCHANGE: result = WM_FOCUSCHANGE (mp1, mp2); break;
+//        case OS.WM_FOCUSCHANGE: result = WM_FOCUSCHANGE (mp1, mp2); break;
         case OS.WM_QUERYDLGCODE: result = WM_QUERYDLGCODE (mp1, mp2); break;
 //        case OS.WM_HELP: result = WM_HELP (wParam, lParam); break;
         case OS.WM_HSCROLL: result = WM_HSCROLL (mp1, mp2); break;
@@ -3105,15 +3105,11 @@ MRESULT WM_CONTROL (int mp1, int mp2) {
 //      if (control == null) return null;
 //      return control.wmColorChild (wParam, lParam);
 //}
-//
-//LRESULT WM_CUT (int wParam, int lParam) {
-//      return null;
-//}
-//
-//LRESULT WM_DESTROY (int wParam, int lParam) {
-//      return null;
-//}
-//
+
+MRESULT WM_DESTROY (int mp1, int mp2) {
+      return null;
+}
+
 //LRESULT WM_DRAWITEM (int wParam, int lParam) {
 //      DRAWITEMSTRUCT struct = new DRAWITEMSTRUCT ();
 //      OS.MoveMemory (struct, lParam, DRAWITEMSTRUCT.sizeof);
@@ -3727,9 +3723,9 @@ MRESULT WM_PAINT (int mp1, int mp2) {
 //}
 
 MRESULT WM_SETFOCUS (int mp1, int mp2) {
-    // System.out.println("Control::WM_SETFOCUS -> handle = " + Integer.toHexString(mp1));
+//    System.out.println("Control::WM_SETFOCUS -> handle = " + Integer.toHexString(mp1));
     // System.out.println("Control::WM_SETFOCUS -> mp2 = " + OS.SHORT1FROMMP (mp2));
-    callWindowProc (OS.WM_SETFOCUS, mp1, mp2);
+    int code = callWindowProc (OS.WM_SETFOCUS, mp1, mp2);
     Shell shell = getShell ();
 
     boolean gotFocus = OS.SHORT1FROMMP (mp2) > 0;
@@ -3763,7 +3759,8 @@ MRESULT WM_SETFOCUS (int mp1, int mp2) {
             }
         }
     }
-
+    if(isDisposed()) return MRESULT.ZERO;
+    if(code == 0) return MRESULT.ZERO;
     return MRESULT.ZERO;
 }
 
@@ -3974,11 +3971,11 @@ MRESULT WM_WINDOWPOSCHANGED (int mp1, int mp2) {
     return new MRESULT (result);
 }
 
-MRESULT WM_FOCUSCHANGE (int mp1, int mp2) {
+/* MRESULT WM_FOCUSCHANGE (int mp1, int mp2) {
     callWindowProc (OS.WM_FOCUSCHANGE, mp1, mp2);
     return MRESULT.ZERO;
 }
-
+ */
 //@@TODO(lpino): Consider the process in Menu controls and ListBoxes
 //MRESULT WM_ADJUSTWINDOWPOS (int mp1, int mp2) {
 //    System.out.println("Control:WM_ADJUSTWINDOWPOS");

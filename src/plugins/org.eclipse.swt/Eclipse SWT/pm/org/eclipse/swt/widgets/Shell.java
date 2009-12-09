@@ -1069,34 +1069,33 @@ MRESULT FRAME_WM_REALIZEPALETTE (int mp1, int mp2) {
 	return super.FRAME_WM_REALIZEPALETTE (mp1, mp2);
 }
 
-//@@TODO (dmik): need?
-//LRESULT WM_CLOSE (int wParam, int lParam) {
-//	if ((display.TrimEnabled && !isEnabled ()) || !isActive ()) {
-//		return LRESULT.ZERO;
-//	}
-//	return super.WM_CLOSE (wParam, lParam);
-//}
+MRESULT WM_CLOSE (int mp1, int mp2) {
+	if ((display.TrimEnabled && !isEnabled ()) || !isActive ()) {
+		return MRESULT.ZERO;
+	}
+	return super.WM_CLOSE (mp1, mp2);
+}
 
 MRESULT WM_COMMAND (int mp1, int mp2) {
 	return super.WM_COMMAND (mp1, mp2);
 }
 
-//LRESULT WM_DESTROY (int wParam, int lParam) {
-//	LRESULT result = super.WM_DESTROY (wParam, lParam);
-//	/*
-//	* When the shell is a WS_CHILD window of a non-SWT
-//	* window, the destroy code does not get called because
-//	* the non-SWT window does not call dispose ().  Instead,
-//	* the destroy code is called here in WM_DESTROY.
-//	*/
+MRESULT WM_DESTROY (int mp1, int mp2) {
+	MRESULT result = super.WM_DESTROY (mp1, mp2);
+	/*
+	* When the shell is a WS_CHILD window of a non-SWT
+	* window, the destroy code does not get called because
+	* the non-SWT window does not call dispose ().  Instead,
+	* the destroy code is called here in WM_DESTROY.
+	*/
 //	int bits = OS.GetWindowLong (handle, OS.GWL_STYLE);
 //	if ((bits & OS.WS_CHILD) != 0) {
 //		releaseChild ();
 //		releaseWidget ();
 //	}
-//	return result;
-//}
-//
+	return result;
+}
+
 //LRESULT WM_MOUSEACTIVATE (int wParam, int lParam) {
 //	LRESULT result = super.WM_MOUSEACTIVATE (wParam, lParam);
 //	if (result != null) return result;
