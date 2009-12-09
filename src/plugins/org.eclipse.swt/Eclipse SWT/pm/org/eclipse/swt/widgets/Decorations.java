@@ -1026,21 +1026,21 @@ public void setMaximized (boolean maximized) {
     OS.WinSetWindowPos (frameHandle, 0, 0, 0, 0, 0, flags);
 }
 
-///**
-// * Sets the receiver's menu bar to the argument, which
-// * may be null.
-// *
-// * @param menu the new menu bar
-// *
-// * @exception IllegalArgumentException <ul>
-// *    <li>ERROR_INVALID_ARGUMENT - if the menu has been disposed</li> 
-// *    <li>ERROR_INVALID_PARENT - if the menu is not in the same widget tree</li>
-// * </ul>
-// * @exception SWTException <ul>
-// *    <li>ERROR_WIDGET_DISPOSED - if the receiver has been disposed</li>
-// *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
-// * </ul>
-// */
+/**
+ * Sets the receiver's menu bar to the argument, which
+ * may be null.
+ *
+ * @param menu the new menu bar
+ *
+ * @exception IllegalArgumentException <ul>
+ *    <li>ERROR_INVALID_ARGUMENT - if the menu has been disposed</li> 
+ *    <li>ERROR_INVALID_PARENT - if the menu is not in the same widget tree</li>
+ * </ul>
+ * @exception SWTException <ul>
+ *    <li>ERROR_WIDGET_DISPOSED - if the receiver has been disposed</li>
+ *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
+ * </ul>
+ */
 public void setMenuBar (Menu menu) {
 	checkWidget ();
 	if (menuBar == menu) return;
@@ -1053,7 +1053,6 @@ public void setMenuBar (Menu menu) {
         int hMenu = 0;
         if (menuBar != null) 
             hMenu = menuBar.handle;
-//        OS.SetMenu (handle, hMenu);
         OS.WinSendMsg (frameHandle, OS.WM_UPDATEFRAME, OS.FCF_MENU, 0);
 	destroyAcceleratorTable ();
 }
@@ -1413,6 +1412,7 @@ void deregister () {
 }
 
 MRESULT FRAME_WM_ACTIVATE (int mp1, int mp2) {
+	int result = callWindowFrameProc (OS.WM_ACTIVATE, mp1, mp2);
 	if ((OS.SHORT1FROMMP (mp1)) == 0) {
 		/*
 		* It is possible (but unlikely), that application
@@ -1522,6 +1522,7 @@ MRESULT WM_CLOSE (int mp1, int mp2) {
 	 return MRESULT.FALSE;
 }
 MRESULT WM_SETFOCUS (int mp1, int mp2) {
+//	System.out.println("Decorations::WM_SETFOCUS -> HANDLE = " + Integer.toHexString(handle));
     MRESULT result  = super.WM_SETFOCUS (mp1, mp2);
     boolean gotFocus = OS.SHORT1FROMMP (mp2) > 0;
     if (gotFocus) {
