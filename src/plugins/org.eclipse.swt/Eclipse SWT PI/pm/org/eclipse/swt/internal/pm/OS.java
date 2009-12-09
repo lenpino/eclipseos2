@@ -3,7 +3,7 @@ package org.eclipse.swt.internal.pm;
 
 /*
  * OS/2 version.
- * Copyright (c) 2002, 2008 EclipseOS2 Team.
+ * Copyright (c) 2002, 2009 EclipseOS2 Team.
  */
 
 /*
@@ -130,7 +130,7 @@ public class OS {
 //    public static final int WC_PECIC =          0xffff0012;
 //    public static final int WC_DBE_KKPOPUP =    0xffff0013;
 //    public static final int WC_SPINBUTTON =     0xffff0020;
-//    public static final int WC_CONTAINER =      0xffff0025;
+    public static final int WC_CONTAINER =      0xffff0025;
     public static final int WC_SLIDER =         0xffff0026;
 //    public static final int WC_VALUESET =       0xffff0027;
     public static final int WC_NOTEBOOK =       0xffff0028;
@@ -2265,6 +2265,66 @@ public class OS {
    public static final int CF_PALETTE                 = 9;
    public static final int CF_MMPMFIRST              = 10;
    public static final int CF_MMPMLAST               = 19;
+
+   /**********************************************************************/
+   /* Container control styles.                                          */
+   /**********************************************************************/
+   public static final int CCS_EXTENDSEL             = 1;
+   public static final int CCS_MULTIPLESEL           = 2;
+   public static final int CCS_SINGLESEL             = 4;
+   public static final int CCS_AUTOPOSITION          = 8;
+   public static final int CCS_VERIFYPOINTERS        = 10;
+   public static final int CCS_READONLY              = 20;
+   public static final int CCS_MINIRECORDCORE        = 40;
+   /* Style to have container support mini icons with the minirecord. */
+   public static final int CCS_MINIICONS             = 800;
+   /* don't send WM_CONTROLPOINTER on WM_MOUSEMOVE                    */
+   public static final int CCS_NOCONTROLPTR          = 1000;
+   
+   /**********************************************************************/
+   /* view identifiers           (flWindowAttr)                          */
+   /**********************************************************************/
+   public static final int CV_TEXT                  = 1;  /* text view            */
+   public static final int CV_NAME                  = 2;  /* name view            */
+   public static final int CV_ICON                  = 4;  /* icon view            */
+   public static final int CV_DETAIL                = 8;  /* detail view          */
+   public static final int CV_FLOW                  = 10;  /* flow items           */
+   public static final int CV_MINI                  = 20;  /* use mini icon        */
+   public static final int CV_TREE                  = 40;  /* tree view            */
+   public static final int CV_GRID                  = 80;  /* gridded icon view    */
+   public static final int CV_EXACTLENGTH           = 10000000;  /* Exact match for SearchString */
+   
+   /**********************************************************************/
+   /* Container Attributes        (flWindowAttr)                         */
+   /**********************************************************************/
+   public static final int CA_CONTAINERTITLE        = 200;
+   public static final int CA_TITLESEPARATOR        = 400;
+   public static final int CA_TITLELEFT             = 800;
+   public static final int CA_TITLERIGHT            = 1000;
+   public static final int CA_TITLECENTER           = 2000;
+   public static final int CA_OWNERDRAW             = 4000;
+   public static final int CA_DETAILSVIEWTITLES     = 8000;
+   public static final int CA_ORDEREDTARGETEMPH     = 10000;
+   public static final int CA_DRAWBITMAP            = 20000;
+   public static final int CA_DRAWICON              = 40000;
+   public static final int CA_TITLEREADONLY         = 80000;
+   public static final int CA_OWNERPAINTBACKGROUND  = 100000;
+   public static final int CA_MIXEDTARGETEMPH       = 200000;
+   public static final int CA_TREELINE              = 400000;
+   
+   /**********************************************************************/
+   /* child window IDs                                                   */
+   /**********************************************************************/
+   public static final int CID_LEFTCOLTITLEWND     = 0x7FF0;   /* column title (left)       */
+   public static final int CID_RIGHTCOLTITLEWND    = 0x7FF1;   /* right column title        */
+   public static final int CID_BLANKBOX            = 0x7FF2;   /* blank box at bottom right */
+   public static final int CID_HSCROLL             = 0x7FF3;   /* horizontal scroll bar     */
+   public static final int CID_RIGHTHSCROLL        = 0x7FF4;   /* right horz scroll bar     */
+   public static final int CID_CNRTITLEWND         = 0x7FF5;   /* Container title window    */
+   public static final int CID_LEFTDVWND           = 0x7FF7;   /* Left Details View window  */
+   public static final int CID_RIGHTDVWND          = 0x7FF8;   /* Right Details View window */
+   public static final int CID_VSCROLL             = 0x7FF9;   /* vertical scroll bar       */
+   public static final int CID_MLE                 = 0x7FFA;   /* MLE window for direct edit*/
 
 /* PM macros */
 
