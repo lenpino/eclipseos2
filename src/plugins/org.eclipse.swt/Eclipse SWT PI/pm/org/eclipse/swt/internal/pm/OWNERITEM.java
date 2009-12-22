@@ -15,7 +15,7 @@ public class OWNERITEM
   public int fsAttribute;     /*  Attribute. */
   public int fsStateOld;      /*  Old state. */
   public int fsAttributeOld;  /*  Old attribute. */
-  public RECTL rclItem;         /*  Item rectangle. */
+  public RECTL rclItem = new RECTL();         /*  Item rectangle. */
   public int idItem;          /*  Item identity. */
   public int hItem;           /*  Item. */
   public final static int sizeof = 48;
