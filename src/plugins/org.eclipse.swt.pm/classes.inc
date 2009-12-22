@@ -203,6 +203,10 @@ org\eclipse\swt\internal\pm\POINTL.java
 org\eclipse\swt\internal\pm\CURSORINFO.java
 org\eclipse\swt\internal\pm\SLDCDATA.java
 org\eclipse\swt\internal\pm\POINTS.java
+org\eclipse\swt\internal\pm\MINIRECORDCORE.java
+org\eclipse\swt\internal\pm\TREEITEMDESC.java
+org\eclipse\swt\internal\pm\RECORDCORE.java
+org\eclipse\swt\internal\pm\RECORDINSERT.java
 
 # SWT PI (+)
 

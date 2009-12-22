@@ -175,6 +175,8 @@ CURSORINFO_FID_CACHE CURSORINFOFc;
 POINTL_FID_CACHE POINTLFc;
 SLDCDATA_FID_CACHE SLDCDATAFc;
 POINTS_FID_CACHE POINTSFc;
+MINIRECORDCORE_FID_CACHE MINIRECORDCOREFc;
+TREEITEMDESC_FID_CACHE TREEITEMDESCFc;
 
 /*@@TODO (dmik): remove
 FACENAMEDESC_FID_CACHE FACENAMEDESCFc;
@@ -996,7 +998,7 @@ PFONTDLG getFONTDLGFields(JNIEnv *env, jobject lpObject, PFONTDLG lpStruct, PFON
         if (pszS)
             lpStruct->pszPtSizeList = getPSZBytes(env, pszS);
     }
-    lpStruct->pfnDlgProc = (*env)->GetIntField(env, lpObject, lpCache->pfnDlgProc);
+    lpStruct->pfnDlgProc = (PFNWP)((*env)->GetIntField(env, lpObject, lpCache->pfnDlgProc));
     {
         jobject pszF = (*env)->GetObjectField(env, lpObject, lpCache->pszFamilyname);
         if(pszF)
@@ -1064,7 +1066,7 @@ void setFONTDLGFields(JNIEnv *env, jobject lpObject, PFONTDLG lpStruct, PFONTDLG
         }
     }
 
-    (*env)->SetIntField(env, lpObject, lpCache->pfnDlgProc, lpStruct->pfnDlgProc);
+    (*env)->SetIntField(env, lpObject, lpCache->pfnDlgProc, (ULONG)lpStruct->pfnDlgProc);
 
     {
         jobject psz = (*env)->GetObjectField(env, lpObject, lpCache->pszFamilyname);
@@ -1485,17 +1487,18 @@ PACCELTABLE getACCELTABLEFields(JNIEnv *env, jobject lpObject, PACCELTABLE lpStr
     {
         jobjectArray aaccel = (*env)->GetObjectField(env, lpObject, lpCache->aaccel);
         jsize length = (*env)->GetArrayLength(env, aaccel);
-
+	
         if (aaccel) {
             DEBUG_CALL("getACCELTABLEFields:aaccel array.\n")
-            jint ulAccelLen = sizeof( sizeof(ACCEL )*length) + sizeof( ACCELTABLE );
-            PACCELTABLE pacctAccelTable = (PACCELTABLE) malloc ( ulAccelLen );
+//            jint ulAccelLen = sizeof( sizeof(ACCEL )*length) + sizeof( ACCELTABLE );
+//            PACCELTABLE pacctAccelTable = (PACCELTABLE) malloc ( ulAccelLen );
 
             ACCEL c_pacctAccel, *c_ppacctAccel = NULL;
             int i=0;
             for(i=0; i<length;i++){
                 jobject jaccel = (*env)->GetObjectArrayElement(env, aaccel, i);
-                if (pacctAccelTable) c_ppacctAccel = getACCELFields(env, jaccel, &c_pacctAccel, &PGLOB(ACCELFc));
+//                if (pacctAccelTable) 
+			c_ppacctAccel = getACCELFields(env, jaccel, &c_pacctAccel, &PGLOB(ACCELFc));
                 lpStruct->aaccel[i] = *c_ppacctAccel;
             }
         }
@@ -1508,10 +1511,22 @@ void setACCELTABLEFields(JNIEnv *env, jobject lpObject, PACCELTABLE lpStruct, PA
     if (!lpCache->cached) cacheACCELTABLEFids(env, lpObject, lpCache);
     (*env)->SetShortField(env, lpObject, lpCache->cAccel, lpStruct->cAccel);
     (*env)->SetShortField(env, lpObject, lpCache->codepage, lpStruct->codepage);
+        
     {
         jobjectArray aaccel = (*env)->GetObjectField(env, lpObject, lpCache->aaccel);
-        (*env)->SetObjectField(env, lpObject, lpCache->aaccel, aaccel);
+	jsize length = (*env)->GetArrayLength(env, aaccel);
+
+	ACCEL *c_ppacctAccel = NULL;	
+	int i=0;
+ 	for(i=0; i<length;i++){
+		jobject jaccel = (*env)->GetObjectArrayElement(env, aaccel, i);
+		setACCELFields(env, jaccel, c_ppacctAccel, &PGLOB(ACCELFc));
+		lpStruct->aaccel[i] = *c_ppacctAccel;
+	}
+ 
+ 	(*env)->SetObjectField(env, lpObject, lpCache->aaccel, aaccel);
     }
+    	printf("setACCELTABLEFields \n");
 }
 
 /******************************************** CURSORINFO struct *************************************/
@@ -1653,7 +1668,89 @@ void setPOINTSFields(JNIEnv *env, jobject lpObject, PPOINTS lpStruct, PPOINTS_FI
     (*env)->SetShortField(env, lpObject, lpCache->y, lpStruct->y);
 }
 
-/***************************************** FACENAMEDESC struct ********************************************/
+/***************************************** MINIRECORDCORE struct ********************************************/
+void cacheMINIRECORDCOREFids(JNIEnv *env, jobject lpObject, PMINIRECORDCORE_FID_CACHE lpCache)
+{
+    if (lpCache->cached) return;
+    lpCache->clazz = (*env)->GetObjectClass(env, lpObject);
+    lpCache->cb = (*env)->GetFieldID(env, lpCache->clazz, "cb", "I");
+    lpCache->flRecordAttr = (*env)->GetFieldID(env, lpCache->clazz, "flRecordAttr", "I");
+    lpCache->ptlIcon = (*env)->GetFieldID(env, lpCache->clazz, "ptlIcon", "Lorg/eclipse/swt/internal/pm/POINTL;");
+    lpCache->preccNextRecord = (*env)->GetFieldID(env, lpCache->clazz, "preccNextRecord", "I");
+    lpCache->pszIcon = (*env)->GetFieldID(env, lpCache->clazz, "pszIcon", "Lorg/eclipse/swt/internal/pm/PSZ;");
+    lpCache->hptrIcon = (*env)->GetFieldID(env, lpCache->clazz, "hptrIcon", "I");
+    lpCache->cached = 1;
+}
+
+PMINIRECORDCORE getMINIRECORDCOREFields(JNIEnv *env, jobject lpObject, PMINIRECORDCORE lpStruct, PMINIRECORDCORE_FID_CACHE lpCache)
+{
+    if (!lpCache->cached) cacheMINIRECORDCOREFids(env, lpObject, lpCache);
+    lpStruct->cb = (*env)->GetIntField(env, lpObject, lpCache->cb);
+    lpStruct->flRecordAttr = (*env)->GetIntField(env, lpObject, lpCache->flRecordAttr);
+    {
+        jobject pptlIcon = (*env)->GetObjectField(env, lpObject, lpCache->ptlIcon);
+        if (pptlIcon && &(lpStruct->ptlIcon)) getPOINTLFields(env, pptlIcon, &(lpStruct->ptlIcon), &PGLOB(POINTLFc));
+    }
+    lpStruct->preccNextRecord = (PMINIRECORDCORE)((*env)->GetIntField(env, lpObject, lpCache->preccNextRecord));
+   {
+        jobject psz = (*env)->GetObjectField(env, lpObject, lpCache->pszIcon);
+        if(psz)
+            lpStruct->pszIcon = getPSZBytes(env,psz);
+    }
+    lpStruct->hptrIcon = (*env)->GetIntField(env, lpObject, lpCache->hptrIcon);
+    return lpStruct;
+}
+
+void setMINIRECORDCOREFields(JNIEnv *env, jobject lpObject, PMINIRECORDCORE lpStruct, PMINIRECORDCORE_FID_CACHE lpCache)
+{
+    if (!lpCache->cached) cacheMINIRECORDCOREFids(env, lpObject, lpCache);
+    (*env)->SetIntField(env, lpObject, lpCache->cb, lpStruct->cb);
+    (*env)->SetIntField(env, lpObject, lpCache->flRecordAttr, lpStruct->flRecordAttr);
+    {
+        jobject pptlIcon = (*env)->GetObjectField(env, lpObject, lpCache->ptlIcon);
+        if (pptlIcon && &(lpStruct->ptlIcon)) setPOINTLFields(env, pptlIcon, &(lpStruct->ptlIcon), &PGLOB(POINTLFc));
+    }
+    (*env)->SetIntField(env, lpObject, lpCache->preccNextRecord, (ULONG)lpStruct->preccNextRecord);
+    {
+        jobject psz = (*env)->GetObjectField(env, lpObject, lpCache->pszIcon);
+        if (psz)
+            releasePSZBytes(env, psz, lpStruct->pszIcon);
+    }
+    (*env)->SetIntField(env, lpObject, lpCache->hptrIcon, lpStruct->hptrIcon);
+}
+
+/***************************************** TREEITEMDESC struct ********************************************/
+
+void cacheTREEITEMDESCFids(JNIEnv *env, jobject lpObject, PTREEITEMDESC_FID_CACHE lpCache)
+{
+    if (lpCache->cached) return;
+    lpCache->clazz = (*env)->GetObjectClass(env, lpObject);
+    lpCache->hbmExpanded = (*env)->GetFieldID(env, lpCache->clazz, "hbmExpanded", "I");
+    lpCache->hbmCollapsed = (*env)->GetFieldID(env, lpCache->clazz, "hbmCollapsed", "I");
+    lpCache->hptrExpanded = (*env)->GetFieldID(env, lpCache->clazz, "hptrExpanded", "I");
+    lpCache->hptrCollapsed = (*env)->GetFieldID(env, lpCache->clazz, "hptrCollapsed", "I");
+    lpCache->cached = 1;
+}
+
+PTREEITEMDESC getTREEITEMDESCFields(JNIEnv *env, jobject lpObject, PTREEITEMDESC lpStruct, PTREEITEMDESC_FID_CACHE lpCache)
+{
+    if (!lpCache->cached) cacheTREEITEMDESCFids(env, lpObject, lpCache);
+    lpStruct->hbmExpanded = (*env)->GetIntField(env, lpObject, lpCache->hbmExpanded);
+    lpStruct->hbmCollapsed = (*env)->GetIntField(env, lpObject, lpCache->hbmCollapsed);
+    lpStruct->hptrExpanded= (*env)->GetIntField(env, lpObject, lpCache->hptrExpanded);
+    lpStruct->hptrCollapsed= (*env)->GetIntField(env, lpObject, lpCache->hptrCollapsed);
+    return lpStruct;
+}
+
+void setTREEITEMDESCFields(JNIEnv *env, jobject lpObject, PTREEITEMDESC lpStruct, PTREEITEMDESC_FID_CACHE lpCache)
+{
+    if (!lpCache->cached) cacheTREEITEMDESCFids(env, lpObject, lpCache);
+    (*env)->SetIntField(env, lpObject, lpCache->hbmExpanded, lpStruct->hbmExpanded);
+    (*env)->SetIntField(env, lpObject, lpCache->hbmCollapsed, lpStruct->hbmCollapsed);
+    (*env)->SetIntField(env, lpObject, lpCache->hptrExpanded, lpStruct->hptrExpanded);
+    (*env)->SetIntField(env, lpObject, lpCache->hptrCollapsed, lpStruct->hptrCollapsed);
+}
+
 /*@@TODO (dmik): don't need, remove!
 void cacheFACENAMEDESCFids(JNIEnv *env, jobject lpObject, PFACENAMEDESC_FID_CACHE lpCache)
 {

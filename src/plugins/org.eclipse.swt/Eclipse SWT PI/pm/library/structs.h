@@ -596,6 +596,41 @@ void cachePOINTSFids(JNIEnv *env, jobject lpObject, PPOINTS_FID_CACHE lpCache);
 PPOINTS getPOINTSFields(JNIEnv *env, jobject lpObject, PPOINTS lpStruct, PPOINTS_FID_CACHE lpCache);
 void setPOINTSFields(JNIEnv *env, jobject lpObject, PPOINTS lpStruct, PPOINTS_FID_CACHE lpCache);
 
+/* MINIRECORDCORE struct */
+typedef struct MINIRECORDCORE_FID_CACHE {
+    int cached;
+    jclass clazz;
+    jfieldID
+        cb,        
+        flRecordAttr,
+	ptlIcon,
+	preccNextRecord,
+	pszIcon,
+	hptrIcon;        
+} MINIRECORDCORE_FID_CACHE;
+typedef MINIRECORDCORE_FID_CACHE *PMINIRECORDCORE_FID_CACHE;
+
+void cacheMINIRECORDCOREFids(JNIEnv *env, jobject lpObject, PMINIRECORDCORE_FID_CACHE lpCache);
+PMINIRECORDCORE getMINIRECORDCOREFields(JNIEnv *env, jobject lpObject, PMINIRECORDCORE lpStruct, PMINIRECORDCORE_FID_CACHE lpCache);
+void setMINIRECORDCOREFields(JNIEnv *env, jobject lpObject, PMINIRECORDCORE lpStruct, PMINIRECORDCORE_FID_CACHE lpCache);
+
+/* TREEITEMDESC struct */
+typedef struct TREEITEMDESC_FID_CACHE {
+    int cached;
+    jclass clazz;
+    jfieldID
+        hbmExpanded,        
+        hbmCollapsed,
+	hptrExpanded,
+	hptrCollapsed;
+        
+} TREEITEMDESC_FID_CACHE;
+typedef TREEITEMDESC_FID_CACHE *PTREEITEMDESC_FID_CACHE;
+
+void cacheTREEITEMDESCFids(JNIEnv *env, jobject lpObject, PTREEITEMDESC_FID_CACHE lpCache);
+PTREEITEMDESC getTREEITEMDESCFields(JNIEnv *env, jobject lpObject, PTREEITEMDESC lpStruct, PTREEITEMDESC_FID_CACHE lpCache);
+void setTREEITEMDESCFields(JNIEnv *env, jobject lpObject, PTREEITEMDESC lpStruct, PTREEITEMDESC_FID_CACHE lpCache);
+
 /* FACENAMEDESC struct */
 /*@@TODO (dmik): remove!
 typedef struct FACENAMEDESC_FID_CACHE {
@@ -643,6 +678,8 @@ extern CURSORINFO_FID_CACHE CURSORINFOFc;
 extern POINTL_FID_CACHE POINTLFc;
 extern SLDCDATA_FID_CACHE SLDCDATAFc;
 extern POINTS_FID_CACHE POINTSFc;
+extern MINIRECORDCORE_FID_CACHE MINIRECORDCOREFc;
+extern TREEITEMDESC_FID_CACHE TREEITEMDESCFc;
 /*@@TODO (dmik): remove! 
 extern FACENAMEDESC_FID_CACHE FACENAMEDESCFc;
 */

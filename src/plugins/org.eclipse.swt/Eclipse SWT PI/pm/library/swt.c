@@ -1711,7 +1711,7 @@ JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_WinQueryClipbrdData
 {
     DEBUG_CALL("WinQueryClipbrdData\n")
 
-    return (jint)WinQueryClipbrdData((HAB)hab, (MPARAM)fmt);
+    return (jint)WinQueryClipbrdData((HAB)hab, (ULONG)fmt);
 }
 
 JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_WinUpperChar
