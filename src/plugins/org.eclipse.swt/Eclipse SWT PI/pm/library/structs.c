@@ -177,6 +177,7 @@ SLDCDATA_FID_CACHE SLDCDATAFc;
 POINTS_FID_CACHE POINTSFc;
 MINIRECORDCORE_FID_CACHE MINIRECORDCOREFc;
 TREEITEMDESC_FID_CACHE TREEITEMDESCFc;
+RECORDINSERT_FID_CACHE RECORDINSERTFc;
 
 /*@@TODO (dmik): remove
 FACENAMEDESC_FID_CACHE FACENAMEDESCFc;
@@ -1749,6 +1750,147 @@ void setTREEITEMDESCFields(JNIEnv *env, jobject lpObject, PTREEITEMDESC lpStruct
     (*env)->SetIntField(env, lpObject, lpCache->hbmCollapsed, lpStruct->hbmCollapsed);
     (*env)->SetIntField(env, lpObject, lpCache->hptrExpanded, lpStruct->hptrExpanded);
     (*env)->SetIntField(env, lpObject, lpCache->hptrCollapsed, lpStruct->hptrCollapsed);
+}
+
+/***************************************** RECORDINSERT struct ********************************************/
+
+void cacheRECORDINSERTFids(JNIEnv *env, jobject lpObject, PRECORDINSERT_FID_CACHE lpCache)
+{
+    if (lpCache->cached) return;
+    lpCache->clazz = (*env)->GetObjectClass(env, lpObject);
+    lpCache->cb = (*env)->GetFieldID(env, lpCache->clazz, "cb", "I");
+    lpCache->pRecordOrder = (*env)->GetFieldID(env, lpCache->clazz, "pRecordOrder", "I");
+    lpCache->pRecordParent = (*env)->GetFieldID(env, lpCache->clazz, "pRecordParent", "I");
+    lpCache->fInvalidateRecord = (*env)->GetFieldID(env, lpCache->clazz, "fInvalidateRecord", "I");
+    lpCache->zOrder = (*env)->GetFieldID(env, lpCache->clazz, "zOrder", "I");
+    lpCache->cRecordsInsert = (*env)->GetFieldID(env, lpCache->clazz, "cRecordsInsert", "I");
+    lpCache->cached = 1;
+}
+
+PRECORDINSERT getRECORDINSERTFields(JNIEnv *env, jobject lpObject, PRECORDINSERT lpStruct, PRECORDINSERT_FID_CACHE lpCache)
+{
+    if (!lpCache->cached) cacheRECORDINSERTFids(env, lpObject, lpCache);
+    lpStruct->cb = (*env)->GetIntField(env, lpObject, lpCache->cb);
+    lpStruct->pRecordOrder = (PRECORDCORE)(*env)->GetIntField(env, lpObject, lpCache->pRecordOrder);
+    lpStruct->pRecordParent= (PRECORDCORE)(*env)->GetIntField(env, lpObject, lpCache->pRecordParent);
+    lpStruct->fInvalidateRecord= (*env)->GetIntField(env, lpObject, lpCache->fInvalidateRecord);
+    lpStruct->zOrder= (*env)->GetIntField(env, lpObject, lpCache->zOrder);
+    lpStruct->cRecordsInsert= (*env)->GetIntField(env, lpObject, lpCache->cRecordsInsert);
+    return lpStruct;
+}
+
+void setRECORDINSERTFields(JNIEnv *env, jobject lpObject, PRECORDINSERT lpStruct, PRECORDINSERT_FID_CACHE lpCache)
+{
+    if (!lpCache->cached) cacheRECORDINSERTFids(env, lpObject, lpCache);
+    (*env)->SetIntField(env, lpObject, lpCache->cb, lpStruct->cb);
+    (*env)->SetIntField(env, lpObject, lpCache->pRecordOrder, (ULONG)lpStruct->pRecordOrder);
+    (*env)->SetIntField(env, lpObject, lpCache->pRecordParent, (ULONG)lpStruct->pRecordParent);
+    (*env)->SetIntField(env, lpObject, lpCache->fInvalidateRecord, lpStruct->fInvalidateRecord);
+    (*env)->SetIntField(env, lpObject, lpCache->zOrder, lpStruct->zOrder);
+    (*env)->SetIntField(env, lpObject, lpCache->cRecordsInsert, lpStruct->cRecordsInsert);
+}
+
+/***************************************** RECORDCORE struct ********************************************/
+
+void cacheRECORDCOREFids(JNIEnv *env, jobject lpObject, PRECORDCORE_FID_CACHE lpCache)
+{
+    if (lpCache->cached) return;
+    lpCache->clazz = (*env)->GetObjectClass(env, lpObject);
+    lpCache->cb = (*env)->GetFieldID(env, lpCache->clazz, "cb", "I");
+    lpCache->flRecordAttr = (*env)->GetFieldID(env, lpCache->clazz, "flRecordAttr", "I");
+    lpCache->ptlIcon = (*env)->GetFieldID(env, lpCache->clazz, "ptlIcon", "Lorg/eclipse/swt/internal/pm/POINTL;");
+    lpCache->preccNextRecord = (*env)->GetFieldID(env, lpCache->clazz, "preccNextRecord", "I");
+    lpCache->pszIcon = (*env)->GetFieldID(env, lpCache->clazz, "pszIcon", "Lorg/eclipse/swt/internal/pm/PSZ;");
+    lpCache->hptrIcon = (*env)->GetFieldID(env, lpCache->clazz, "hptrIcon", "I");
+    lpCache->hptrMiniIcon = (*env)->GetFieldID(env, lpCache->clazz, "hptrMiniIcon", "I");
+    lpCache->hbmBitmap = (*env)->GetFieldID(env, lpCache->clazz, "hbmBitmap", "I");
+    lpCache->hbmMiniBitmap = (*env)->GetFieldID(env, lpCache->clazz, "hbmMiniBitmap", "I");
+    lpCache->pTreeItemDesc = (*env)->GetFieldID(env, lpCache->clazz, "pTreeItemDesc", "Lorg/eclipse/swt/internal/pm/TREEITEMDESC;");
+    lpCache->pszText = (*env)->GetFieldID(env, lpCache->clazz, "pszText", "Lorg/eclipse/swt/internal/pm/PSZ;");
+    lpCache->pszName = (*env)->GetFieldID(env, lpCache->clazz, "pszName", "Lorg/eclipse/swt/internal/pm/PSZ;");
+    lpCache->pszTree = (*env)->GetFieldID(env, lpCache->clazz, "pszTree", "Lorg/eclipse/swt/internal/pm/PSZ;");
+    lpCache->cached = 1;
+}
+
+PRECORDCORE getRECORDCOREFields(JNIEnv *env, jobject lpObject, PRECORDCORE lpStruct, PRECORDCORE_FID_CACHE lpCache)
+{
+    if (!lpCache->cached) cacheRECORDCOREFids(env, lpObject, lpCache);
+    lpStruct->cb = (*env)->GetIntField(env, lpObject, lpCache->cb);
+    lpStruct->flRecordAttr = (*env)->GetIntField(env, lpObject, lpCache->flRecordAttr);
+    {
+        jobject pptlIcon = (*env)->GetObjectField(env, lpObject, lpCache->ptlIcon);
+        if (pptlIcon && &(lpStruct->ptlIcon)) getPOINTLFields(env, pptlIcon, &(lpStruct->ptlIcon), &PGLOB(POINTLFc));
+    }
+    lpStruct->preccNextRecord= (PRECORDCORE)(*env)->GetIntField(env, lpObject, lpCache->preccNextRecord);
+   {
+        jobject psz = (*env)->GetObjectField(env, lpObject, lpCache->pszIcon);
+        if(psz)
+            lpStruct->pszIcon = getPSZBytes(env,psz);
+    }
+    lpStruct->hptrIcon= (*env)->GetIntField(env, lpObject, lpCache->hptrIcon);
+    lpStruct->hptrMiniIcon= (*env)->GetIntField(env, lpObject, lpCache->hptrMiniIcon);
+    lpStruct->hbmBitmap= (*env)->GetIntField(env, lpObject, lpCache->hbmBitmap);
+    lpStruct->hbmMiniBitmap= (*env)->GetIntField(env, lpObject, lpCache->hbmMiniBitmap);
+    {
+        jobject itemDesc = (*env)->GetObjectField(env, lpObject, lpCache->pTreeItemDesc);
+        if (itemDesc && lpStruct->pTreeItemDesc) getTREEITEMDESCFields(env, itemDesc, lpStruct->pTreeItemDesc, &PGLOB(TREEITEMDESCFc));
+    }
+   {
+        jobject psz = (*env)->GetObjectField(env, lpObject, lpCache->pszText);
+        if(psz)
+            lpStruct->pszText = getPSZBytes(env,psz);
+    }
+   {
+        jobject psz = (*env)->GetObjectField(env, lpObject, lpCache->pszName);
+        if(psz)
+            lpStruct->pszName = getPSZBytes(env,psz);
+    }
+   {
+        jobject psz = (*env)->GetObjectField(env, lpObject, lpCache->pszTree);
+        if(psz)
+            lpStruct->pszTree = getPSZBytes(env,psz);
+    }
+    return lpStruct;
+}
+
+void setRECORDCOREFields(JNIEnv *env, jobject lpObject, PRECORDCORE lpStruct, PRECORDCORE_FID_CACHE lpCache)
+{
+    if (!lpCache->cached) cacheRECORDCOREFids(env, lpObject, lpCache);
+    (*env)->SetIntField(env, lpObject, lpCache->cb, lpStruct->cb);
+    (*env)->SetIntField(env, lpObject, lpCache->flRecordAttr, (ULONG)lpStruct->flRecordAttr);
+    {
+        jobject pptlIcon = (*env)->GetObjectField(env, lpObject, lpCache->ptlIcon);
+        if (pptlIcon && &(lpStruct->ptlIcon)) setPOINTLFields(env, pptlIcon, &(lpStruct->ptlIcon), &PGLOB(POINTLFc));
+    }
+    (*env)->SetIntField(env, lpObject, lpCache->preccNextRecord, (ULONG)lpStruct->preccNextRecord);
+    {
+        jobject psz = (*env)->GetObjectField(env, lpObject, lpCache->pszIcon);
+        if (psz)
+            releasePSZBytes(env, psz, lpStruct->pszIcon);
+    }
+    (*env)->SetIntField(env, lpObject, lpCache->hptrIcon, lpStruct->hptrIcon);
+    (*env)->SetIntField(env, lpObject, lpCache->hptrMiniIcon, lpStruct->hptrMiniIcon);
+    (*env)->SetIntField(env, lpObject, lpCache->hbmBitmap, lpStruct->hbmBitmap);
+    (*env)->SetIntField(env, lpObject, lpCache->hbmMiniBitmap, lpStruct->hbmMiniBitmap);
+    {
+        jobject itemDesc = (*env)->GetObjectField(env, lpObject, lpCache->pTreeItemDesc);
+        if (itemDesc && lpStruct->pTreeItemDesc) setTREEITEMDESCFields(env, itemDesc, lpStruct->pTreeItemDesc, &PGLOB(TREEITEMDESCFc));
+    }
+    {
+        jobject psz = (*env)->GetObjectField(env, lpObject, lpCache->pszText);
+        if (psz)
+            releasePSZBytes(env, psz, lpStruct->pszText);
+    }
+    {
+        jobject psz = (*env)->GetObjectField(env, lpObject, lpCache->pszName);
+        if (psz)
+            releasePSZBytes(env, psz, lpStruct->pszName);
+    }
+    {
+        jobject psz = (*env)->GetObjectField(env, lpObject, lpCache->pszTree);
+        if (psz)
+            releasePSZBytes(env, psz, lpStruct->pszTree);
+    }
 }
 
 /*@@TODO (dmik): don't need, remove!

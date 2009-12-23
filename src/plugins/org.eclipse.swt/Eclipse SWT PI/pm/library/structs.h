@@ -622,14 +622,56 @@ typedef struct TREEITEMDESC_FID_CACHE {
         hbmExpanded,        
         hbmCollapsed,
 	hptrExpanded,
-	hptrCollapsed;
-        
+	hptrCollapsed;        
 } TREEITEMDESC_FID_CACHE;
 typedef TREEITEMDESC_FID_CACHE *PTREEITEMDESC_FID_CACHE;
 
 void cacheTREEITEMDESCFids(JNIEnv *env, jobject lpObject, PTREEITEMDESC_FID_CACHE lpCache);
 PTREEITEMDESC getTREEITEMDESCFields(JNIEnv *env, jobject lpObject, PTREEITEMDESC lpStruct, PTREEITEMDESC_FID_CACHE lpCache);
 void setTREEITEMDESCFields(JNIEnv *env, jobject lpObject, PTREEITEMDESC lpStruct, PTREEITEMDESC_FID_CACHE lpCache);
+
+/* RECORDINSERT struct */
+typedef struct RECORDINSERT_FID_CACHE {
+    int cached;
+    jclass clazz;
+    jfieldID
+        cb,        
+        pRecordOrder,
+	pRecordParent,
+	fInvalidateRecord,
+	zOrder,
+	cRecordsInsert;       
+} RECORDINSERT_FID_CACHE;
+typedef RECORDINSERT_FID_CACHE *PRECORDINSERT_FID_CACHE;
+
+void cacheRECORDINSERTFids(JNIEnv *env, jobject lpObject, PRECORDINSERT_FID_CACHE lpCache);
+PRECORDINSERT getRECORDINSERTFields(JNIEnv *env, jobject lpObject, PRECORDINSERT lpStruct, PRECORDINSERT_FID_CACHE lpCache);
+void setRECORDINSERTFields(JNIEnv *env, jobject lpObject, PRECORDINSERT lpStruct, PRECORDINSERT_FID_CACHE lpCache);
+
+/* RECORDCORE struct */
+typedef struct RECORDCORE_FID_CACHE {
+    int cached;
+    jclass clazz;
+    jfieldID
+        cb,        
+        flRecordAttr,
+	ptlIcon,
+	preccNextRecord,
+	pszIcon,
+	hptrIcon,
+	hptrMiniIcon,
+	hbmBitmap,
+	hbmMiniBitmap,
+	pTreeItemDesc,
+	pszText,
+	pszName,
+	pszTree;       
+} RECORDCORE_FID_CACHE;
+typedef RECORDCORE_FID_CACHE *PRECORDCORE_FID_CACHE;
+
+void cacheRECORDCOREFids(JNIEnv *env, jobject lpObject, PRECORDCORE_FID_CACHE lpCache);
+PRECORDCORE getRECORDCOREFields(JNIEnv *env, jobject lpObject, PRECORDCORE lpStruct, PRECORDCORE_FID_CACHE lpCache);
+void setRECORDCOREFields(JNIEnv *env, jobject lpObject, PRECORDCORE lpStruct, PRECORDCORE_FID_CACHE lpCache);
 
 /* FACENAMEDESC struct */
 /*@@TODO (dmik): remove!
@@ -680,6 +722,8 @@ extern SLDCDATA_FID_CACHE SLDCDATAFc;
 extern POINTS_FID_CACHE POINTSFc;
 extern MINIRECORDCORE_FID_CACHE MINIRECORDCOREFc;
 extern TREEITEMDESC_FID_CACHE TREEITEMDESCFc;
+extern RECORDINSERT_FID_CACHE RECORDINSERTFc;
+extern RECORDCORE_FID_CACHE RECORDCOREFc;
 /*@@TODO (dmik): remove! 
 extern FACENAMEDESC_FID_CACHE FACENAMEDESCFc;
 */
