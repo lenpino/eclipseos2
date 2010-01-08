@@ -673,6 +673,52 @@ void cacheRECORDCOREFids(JNIEnv *env, jobject lpObject, PRECORDCORE_FID_CACHE lp
 PRECORDCORE getRECORDCOREFields(JNIEnv *env, jobject lpObject, PRECORDCORE lpStruct, PRECORDCORE_FID_CACHE lpCache);
 void setRECORDCOREFields(JNIEnv *env, jobject lpObject, PRECORDCORE lpStruct, PRECORDCORE_FID_CACHE lpCache);
 
+/* SIZEL struct */
+typedef struct SIZEL_FID_CACHE {
+    int cached;
+    jclass clazz;
+    jfieldID
+        cx,        
+ 	cy;       
+} SIZEL_FID_CACHE;
+typedef SIZEL_FID_CACHE *PSIZEL_FID_CACHE;
+
+void cacheSIZELFids(JNIEnv *env, jobject lpObject, PSIZEL_FID_CACHE lpCache);
+PSIZEL getSIZELFields(JNIEnv *env, jobject lpObject, PSIZEL lpStruct, PSIZEL_FID_CACHE lpCache);
+void setSIZELFields(JNIEnv *env, jobject lpObject, PSIZEL lpStruct, PSIZEL_FID_CACHE lpCache);
+
+/* CNRINFO struct */
+typedef struct CNRINFO_FID_CACHE {
+    int cached;
+    jclass clazz;
+    jfieldID
+    	cb,
+  	pSortRecord,
+  	pFieldInfoLast,
+  	pFieldInfoObject,
+  	pszCnrTitle,
+  	flWindowAttr,
+  	ptlOrigin,
+  	cDelta,
+  	cRecords,
+  	slBitmapOrIcon,
+  	slTreeBitmapOrIcon,
+  	hbmExpanded,
+  	hbmCollapsed,
+  	hptrExpanded,
+  	hptrCollapsed,
+  	cyLineSpacing,
+  	cxTreeIndent,
+  	cxTreeLine,
+  	cFields,
+  	xVertSplitbar;
+} CNRINFO_FID_CACHE;
+typedef CNRINFO_FID_CACHE *PCNRINFO_FID_CACHE;
+
+void cacheCNRINFOFids(JNIEnv *env, jobject lpObject, PCNRINFO_FID_CACHE lpCache);
+PCNRINFO getCNRINFOFields(JNIEnv *env, jobject lpObject, PCNRINFO lpStruct, PCNRINFO_FID_CACHE lpCache);
+void setCNRINFOFields(JNIEnv *env, jobject lpObject, PCNRINFO lpStruct, PCNRINFO_FID_CACHE lpCache);
+
 /* FACENAMEDESC struct */
 /*@@TODO (dmik): remove!
 typedef struct FACENAMEDESC_FID_CACHE {
@@ -724,6 +770,8 @@ extern MINIRECORDCORE_FID_CACHE MINIRECORDCOREFc;
 extern TREEITEMDESC_FID_CACHE TREEITEMDESCFc;
 extern RECORDINSERT_FID_CACHE RECORDINSERTFc;
 extern RECORDCORE_FID_CACHE RECORDCOREFc;
+extern SIZEL_FID_CACHE SIZELFc;
+extern CNRINFO_FID_CACHE CNRINFOFc;
 /*@@TODO (dmik): remove! 
 extern FACENAMEDESC_FID_CACHE FACENAMEDESCFc;
 */

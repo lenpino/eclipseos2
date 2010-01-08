@@ -207,6 +207,8 @@ org\eclipse\swt\internal\pm\MINIRECORDCORE.java
 org\eclipse\swt\internal\pm\TREEITEMDESC.java
 org\eclipse\swt\internal\pm\RECORDCORE.java
 org\eclipse\swt\internal\pm\RECORDINSERT.java
+org\eclipse\swt\internal\pm\SIZEL.java
+org\eclipse\swt\internal\pm\CNRINFO.java
 
 # SWT PI (+)
 

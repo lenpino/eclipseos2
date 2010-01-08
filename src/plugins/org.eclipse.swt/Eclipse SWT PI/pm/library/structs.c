@@ -178,6 +178,8 @@ POINTS_FID_CACHE POINTSFc;
 MINIRECORDCORE_FID_CACHE MINIRECORDCOREFc;
 TREEITEMDESC_FID_CACHE TREEITEMDESCFc;
 RECORDINSERT_FID_CACHE RECORDINSERTFc;
+SIZEL_FID_CACHE SIZELFc;
+CNRINFO_FID_CACHE CNRINFOFc;
 
 /*@@TODO (dmik): remove
 FACENAMEDESC_FID_CACHE FACENAMEDESCFc;
@@ -1891,6 +1893,138 @@ void setRECORDCOREFields(JNIEnv *env, jobject lpObject, PRECORDCORE lpStruct, PR
         if (psz)
             releasePSZBytes(env, psz, lpStruct->pszTree);
     }
+}
+
+/* SIZEL struct */
+
+void cacheSIZELFids(JNIEnv *env, jobject lpObject, PSIZEL_FID_CACHE lpCache)
+{
+    if (lpCache->cached) return;
+    lpCache->clazz = (*env)->GetObjectClass(env, lpObject);
+    lpCache->cx = (*env)->GetFieldID(env, lpCache->clazz, "cx", "I");
+    lpCache->cy = (*env)->GetFieldID(env, lpCache->clazz, "cy", "I");
+    lpCache->cached = 1;
+}
+
+PSIZEL getSIZELFields(JNIEnv *env, jobject lpObject, PSIZEL lpStruct, PSIZEL_FID_CACHE lpCache)
+{
+    if (!lpCache->cached) cacheSIZELFids(env, lpObject, lpCache);
+    lpStruct->cx = (*env)->GetIntField(env, lpObject, lpCache->cx);
+    lpStruct->cy = (*env)->GetIntField(env, lpObject, lpCache->cy);
+    return lpStruct;
+}
+
+void setSIZELFields(JNIEnv *env, jobject lpObject, PSIZEL lpStruct, PSIZEL_FID_CACHE lpCache)
+{
+    if (!lpCache->cached) cacheSIZELFids(env, lpObject, lpCache);
+    (*env)->SetIntField(env, lpObject, lpCache->cx, lpStruct->cx);
+    (*env)->SetIntField(env, lpObject, lpCache->cy, lpStruct->cy);
+}
+
+/* CNRINFO struct */
+
+void cacheCNRINFOFids(JNIEnv *env, jobject lpObject, PCNRINFO_FID_CACHE lpCache)
+{
+    if (lpCache->cached) return;
+    lpCache->clazz = (*env)->GetObjectClass(env, lpObject);
+    lpCache->cb = (*env)->GetFieldID(env, lpCache->clazz, "cb", "I");
+    lpCache->pSortRecord = (*env)->GetFieldID(env, lpCache->clazz, "pSortRecord", "I");
+    lpCache->pFieldInfoLast = (*env)->GetFieldID(env, lpCache->clazz, "pFieldInfoLast", "I");
+    lpCache->pFieldInfoObject = (*env)->GetFieldID(env, lpCache->clazz, "pFieldInfoObject", "I");
+    lpCache->pszCnrTitle = (*env)->GetFieldID(env, lpCache->clazz, "pszCnrTitle", "Lorg/eclipse/swt/internal/pm/PSZ;");
+    lpCache->flWindowAttr = (*env)->GetFieldID(env, lpCache->clazz, "flWindowAttr", "I");
+    lpCache->ptlOrigin = (*env)->GetFieldID(env, lpCache->clazz, "ptlOrigin", "Lorg/eclipse/swt/internal/pm/POINTL;");
+    lpCache->cDelta  = (*env)->GetFieldID(env, lpCache->clazz, "cDelta ", "I");
+    lpCache->cRecords = (*env)->GetFieldID(env, lpCache->clazz, "cRecords", "I");
+    lpCache->slBitmapOrIcon = (*env)->GetFieldID(env, lpCache->clazz, "slBitmapOrIcon", "Lorg/eclipse/swt/internal/pm/SIZEL;");
+    lpCache->slTreeBitmapOrIcon = (*env)->GetFieldID(env, lpCache->clazz, "slTreeBitmapOrIcon", "Lorg/eclipse/swt/internal/pm/SIZEL;");
+    lpCache->hbmExpanded = (*env)->GetFieldID(env, lpCache->clazz, "hbmExpanded", "I");
+    lpCache->hbmCollapsed = (*env)->GetFieldID(env, lpCache->clazz, "hbmCollapsed", "I");
+    lpCache->hptrExpanded = (*env)->GetFieldID(env, lpCache->clazz, "hptrExpanded", "I");
+    lpCache->hptrCollapsed = (*env)->GetFieldID(env, lpCache->clazz, "hptrCollapsed", "I");
+    lpCache->cyLineSpacing = (*env)->GetFieldID(env, lpCache->clazz, "cyLineSpacing", "I");
+    lpCache->cxTreeIndent = (*env)->GetFieldID(env, lpCache->clazz, "cxTreeIndent", "I");
+    lpCache->cxTreeLine = (*env)->GetFieldID(env, lpCache->clazz, "cxTreeLine", "I");
+    lpCache->cFields = (*env)->GetFieldID(env, lpCache->clazz, "cFields", "I");
+    lpCache->xVertSplitbar = (*env)->GetFieldID(env, lpCache->clazz, "xVertSplitbar", "I");
+    lpCache->cached = 1;
+}
+
+PCNRINFO getCNRINFOFields(JNIEnv *env, jobject lpObject, PCNRINFO lpStruct, PCNRINFO_FID_CACHE lpCache)
+{
+    if (!lpCache->cached) cacheCNRINFOFids(env, lpObject, lpCache);
+    lpStruct->cb = (*env)->GetIntField(env, lpObject, lpCache->cb);
+    lpStruct->pSortRecord = (PVOID)(*env)->GetIntField(env, lpObject, lpCache->pSortRecord);
+    lpStruct->pFieldInfoLast = (PFIELDINFO)(*env)->GetIntField(env, lpObject, lpCache->pFieldInfoLast);
+    lpStruct->pFieldInfoObject = (PFIELDINFO)(*env)->GetIntField(env, lpObject, lpCache->pFieldInfoObject);
+   {
+        jobject psz = (*env)->GetObjectField(env, lpObject, lpCache->pszCnrTitle);
+        if(psz)
+            lpStruct->pszCnrTitle = getPSZBytes(env,psz);
+    }
+    lpStruct->flWindowAttr = (*env)->GetIntField(env, lpObject, lpCache->flWindowAttr);
+    {
+        jobject pptlOrigin = (*env)->GetObjectField(env, lpObject, lpCache->ptlOrigin);
+        if (pptlOrigin && &(lpStruct->ptlOrigin)) getPOINTLFields(env, pptlOrigin, &(lpStruct->ptlOrigin), &PGLOB(POINTLFc));
+    }
+    lpStruct->cDelta = (*env)->GetIntField(env, lpObject, lpCache->cDelta);
+    lpStruct->cRecords = (*env)->GetIntField(env, lpObject, lpCache->cRecords);
+    {
+        jobject sizel = (*env)->GetObjectField(env, lpObject, lpCache->slBitmapOrIcon);
+        if (sizel && &(lpStruct->slBitmapOrIcon)) getSIZELFields(env, sizel, &(lpStruct->slBitmapOrIcon), &PGLOB(SIZELFc));
+    }
+    {
+        jobject sizel = (*env)->GetObjectField(env, lpObject, lpCache->slTreeBitmapOrIcon);
+        if (sizel && &(lpStruct->slTreeBitmapOrIcon)) getSIZELFields(env, sizel, &(lpStruct->slTreeBitmapOrIcon), &PGLOB(SIZELFc));
+    }
+    lpStruct->hbmExpanded = (*env)->GetIntField(env, lpObject, lpCache->hbmExpanded);
+    lpStruct->hbmCollapsed = (*env)->GetIntField(env, lpObject, lpCache->hbmCollapsed);
+    lpStruct->hptrExpanded = (*env)->GetIntField(env, lpObject, lpCache->hptrExpanded);
+    lpStruct->hptrCollapsed = (*env)->GetIntField(env, lpObject, lpCache->hptrCollapsed);
+    lpStruct->cyLineSpacing = (*env)->GetIntField(env, lpObject, lpCache->cyLineSpacing);
+    lpStruct->cxTreeIndent = (*env)->GetIntField(env, lpObject, lpCache->cxTreeIndent);
+    lpStruct->cxTreeLine = (*env)->GetIntField(env, lpObject, lpCache->cxTreeLine);
+    lpStruct->cFields = (*env)->GetIntField(env, lpObject, lpCache->cFields);
+    lpStruct->xVertSplitbar = (*env)->GetIntField(env, lpObject, lpCache->xVertSplitbar);
+    return lpStruct;
+}
+
+void setCNRINFOFields(JNIEnv *env, jobject lpObject, PCNRINFO lpStruct, PCNRINFO_FID_CACHE lpCache)
+{
+    if (!lpCache->cached) cacheCNRINFOFids(env, lpObject, lpCache);
+    (*env)->SetIntField(env, lpObject, lpCache->cb, lpStruct->cb);
+    (*env)->SetIntField(env, lpObject, lpCache->pSortRecord, (LONG)lpStruct->pSortRecord);
+    (*env)->SetIntField(env, lpObject, lpCache->pFieldInfoLast, (LONG)lpStruct->pFieldInfoLast);
+    (*env)->SetIntField(env, lpObject, lpCache->pFieldInfoObject, lpStruct->pFieldInfoObject);
+    {
+        jobject psz = (*env)->GetObjectField(env, lpObject, lpCache->pszCnrTitle);
+        if (psz)
+            releasePSZBytes(env, psz, lpStruct->pszCnrTitle);
+    }
+    (*env)->SetIntField(env, lpObject, lpCache->flWindowAttr, lpStruct->flWindowAttr);
+    {
+        jobject pptlOrigin = (*env)->GetObjectField(env, lpObject, lpCache->ptlOrigin);
+        if (pptlOrigin && &(lpStruct->ptlOrigin)) setPOINTLFields(env, pptlOrigin, &(lpStruct->ptlOrigin), &PGLOB(POINTLFc));
+    }
+    (*env)->SetIntField(env, lpObject, lpCache->cDelta, lpStruct->cDelta);
+    (*env)->SetIntField(env, lpObject, lpCache->cRecords, lpStruct->cRecords);
+    {
+        jobject sizel = (*env)->GetObjectField(env, lpObject, lpCache->slBitmapOrIcon);
+        if (sizel && &(lpStruct->slBitmapOrIcon)) setSIZELFields(env, sizel, &(lpStruct->slBitmapOrIcon), &PGLOB(SIZELFc));
+    }
+    {
+        jobject sizel = (*env)->GetObjectField(env, lpObject, lpCache->slTreeBitmapOrIcon);
+        if (sizel && &(lpStruct->slTreeBitmapOrIcon)) setSIZELFields(env, sizel, &(lpStruct->slTreeBitmapOrIcon), &PGLOB(SIZELFc));
+    }
+    (*env)->SetIntField(env, lpObject, lpCache->hbmExpanded, lpStruct->hbmExpanded);
+    (*env)->SetIntField(env, lpObject, lpCache->hbmCollapsed, lpStruct->hbmCollapsed);
+    (*env)->SetIntField(env, lpObject, lpCache->hptrExpanded, lpStruct->hptrExpanded);
+    (*env)->SetIntField(env, lpObject, lpCache->hptrCollapsed, lpStruct->hptrCollapsed);
+    (*env)->SetIntField(env, lpObject, lpCache->cyLineSpacing, lpStruct->cyLineSpacing);
+    (*env)->SetIntField(env, lpObject, lpCache->cxTreeIndent, lpStruct->cxTreeIndent);
+    (*env)->SetIntField(env, lpObject, lpCache->cxTreeLine, lpStruct->cxTreeLine);
+    (*env)->SetIntField(env, lpObject, lpCache->cFields, lpStruct->cFields);
+    (*env)->SetIntField(env, lpObject, lpCache->xVertSplitbar, lpStruct->xVertSplitbar);
 }
 
 /*@@TODO (dmik): don't need, remove!
