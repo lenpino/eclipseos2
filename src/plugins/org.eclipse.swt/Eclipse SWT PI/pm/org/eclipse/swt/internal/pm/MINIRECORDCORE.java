@@ -9,7 +9,7 @@ package org.eclipse.swt.internal.pm;
 
 public class MINIRECORDCORE
 {
-  public int cb;               					/*  Structure size. */
+  public int cb = 28;               				/*  Structure size. */
   public int flRecordAttr;     				/*  Attributes of container records. */
   public POINTL  ptlIcon = new POINTL();       /*  Record position. */
   public int preccNextRecord;  				/*  Pointer to the next linked record. */

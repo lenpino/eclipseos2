@@ -9,7 +9,7 @@ package org.eclipse.swt.internal.pm;
 
 public class RECORDCORE
 {
-  public int cb;               									/*  Structure size. */
+  public int cb = 56;               								/*  Structure size. */
   public int flRecordAttr;     								/*  Container record attributes. */
   public POINTL ptlIcon = new POINTL();        					/*  Position of a container record in the icon view. */
   public int preccNextRecord;								/*  Pointer to the next linked record. */

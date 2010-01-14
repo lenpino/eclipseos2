@@ -9,7 +9,7 @@ package org.eclipse.swt.internal.pm;
 
 public class RECORDINSERT
 {
-  public int cb;               				/*  Structure size. */
+  public static final int cb = 24;               /*  Structure size. */
   public int pRecordOrder;       		/*  Record order. */
   public int pRecordParent;      		/*  Pointer to record parent. */
   public int fInvalidateRecord;  		/*  Update flag. */

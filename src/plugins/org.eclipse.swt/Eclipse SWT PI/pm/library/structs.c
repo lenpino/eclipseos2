@@ -178,6 +178,7 @@ POINTS_FID_CACHE POINTSFc;
 MINIRECORDCORE_FID_CACHE MINIRECORDCOREFc;
 TREEITEMDESC_FID_CACHE TREEITEMDESCFc;
 RECORDINSERT_FID_CACHE RECORDINSERTFc;
+RECORDCORE_FID_CACHE RECORDCOREFc;
 SIZEL_FID_CACHE SIZELFc;
 CNRINFO_FID_CACHE CNRINFOFc;
 
@@ -1995,7 +1996,7 @@ void setCNRINFOFields(JNIEnv *env, jobject lpObject, PCNRINFO lpStruct, PCNRINFO
     (*env)->SetIntField(env, lpObject, lpCache->cb, lpStruct->cb);
     (*env)->SetIntField(env, lpObject, lpCache->pSortRecord, (LONG)lpStruct->pSortRecord);
     (*env)->SetIntField(env, lpObject, lpCache->pFieldInfoLast, (LONG)lpStruct->pFieldInfoLast);
-    (*env)->SetIntField(env, lpObject, lpCache->pFieldInfoObject, lpStruct->pFieldInfoObject);
+    (*env)->SetIntField(env, lpObject, lpCache->pFieldInfoObject, (LONG)lpStruct->pFieldInfoObject);
     {
         jobject psz = (*env)->GetObjectField(env, lpObject, lpCache->pszCnrTitle);
         if (psz)

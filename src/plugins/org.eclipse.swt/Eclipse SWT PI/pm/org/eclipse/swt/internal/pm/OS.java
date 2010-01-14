@@ -2326,6 +2326,87 @@ public class OS {
    public static final int CID_VSCROLL             = 0x7FF9;   /* vertical scroll bar       */
    public static final int CID_MLE                 = 0x7FFA;   /* MLE window for direct edit*/
 
+   /**********************************************************************/
+   /* Container messages                                                 */
+   /**********************************************************************/
+   public static final int CM_ALLOCDETAILFIELDINFO       = 0x0330;
+   public static final int CM_ALLOCRECORD                = 0x0331;
+   public static final int CM_ARRANGE                    = 0x0332;
+   public static final int CM_ERASERECORD                = 0x0333;
+   public static final int CM_FILTER                     = 0x0334;
+   public static final int CM_FREEDETAILFIELDINFO        = 0x0335;
+   public static final int CM_FREERECORD                 = 0x0336;
+   public static final int CM_HORZSCROLLSPLITWINDOW      = 0x0337;
+   public static final int CM_INSERTDETAILFIELDINFO      = 0x0338;
+   public static final int CM_INSERTRECORD               = 0x0339;
+   public static final int CM_INVALIDATEDETAILFIELDINFO  = 0x033a;
+   public static final int CM_INVALIDATERECORD           = 0x033b;
+   public static final int CM_PAINTBACKGROUND            = 0x033c;
+   public static final int CM_QUERYCNRINFO               = 0x033d;
+   public static final int CM_QUERYDETAILFIELDINFO       = 0x033e;
+   public static final int CM_QUERYDRAGIMAGE             = 0x033f;
+   public static final int CM_QUERYRECORD                = 0x0340;
+   public static final int CM_QUERYRECORDEMPHASIS        = 0x0341;
+   public static final int CM_QUERYRECORDFROMRECT        = 0x0342;
+   public static final int CM_QUERYRECORDRECT            = 0x0343;
+   public static final int CM_QUERYVIEWPORTRECT          = 0x0344;
+   public static final int CM_REMOVEDETAILFIELDINFO      = 0x0345;
+   public static final int CM_REMOVERECORD               = 0x0346;
+   public static final int CM_SCROLLWINDOW               = 0x0347;
+   public static final int CM_SEARCHSTRING               = 0x0348;
+   public static final int CM_SETCNRINFO                 = 0x0349;
+   public static final int CM_SETRECORDEMPHASIS          = 0x034a;
+   public static final int CM_SORTRECORD                 = 0x034b;
+   public static final int CM_OPENEDIT                   = 0x034c;
+   public static final int CM_CLOSEEDIT                  = 0x034d;
+   public static final int CM_COLLAPSETREE               = 0x034e;
+   public static final int CM_EXPANDTREE                 = 0x034f;
+   public static final int CM_QUERYRECORDINFO            = 0x0350;
+   public static final int CM_INSERTRECORDARRAY          = 0x0351;
+   public static final int CM_MOVETREE                   = 0x0352;
+   public static final int CM_SETTEXTVISIBILITY          = 0x0353;
+   public static final int CM_SETGRIDINFO                = 0x0354;
+   public static final int CM_QUERYGRIDINFO              = 0x0355;
+   public static final int CM_SNAPTOGRID                 = 0x0356;
+   
+   /**********************************************************************/
+   /* Container notifications                                            */
+   /**********************************************************************/
+   public static final int CN_DRAGAFTER                  = 101;
+   public static final int CN_DRAGLEAVE                  = 102;
+   public static final int CN_DRAGOVER                   = 103;
+   public static final int CN_DROP                          = 104;
+   public static final int CN_DROPHELP                   = 105;
+   public static final int CN_ENTER                         = 106;
+   public static final int CN_INITDRAG                   = 107;
+   public static final int CN_EMPHASIS                   = 108;
+   public static final int CN_KILLFOCUS                  = 109;
+   public static final int CN_SCROLL                        = 110;
+   public static final int CN_QUERYDELTA                 = 111;
+   public static final int CN_SETFOCUS                   = 112;
+   public static final int CN_REALLOCPSZ                 = 113;
+   public static final int CN_BEGINEDIT                  = 114;
+   public static final int CN_ENDEDIT                    = 115;
+   public static final int CN_COLLAPSETREE               = 116;
+   public static final int CN_EXPANDTREE                 = 117;
+   public static final int CN_HELP                       = 118;
+   public static final int CN_CONTEXTMENU                = 119;
+   public static final int CN_VERIFYEDIT                 = 134;
+   public static final int CN_PICKUP                     = 135;
+   public static final int CN_DROPNOTIFY                 = 136;
+   public static final int CN_GRIDRESIZED                = 137;
+
+   /**********************************************************************/
+   /* Message parameter flags                                            */
+   /**********************************************************************/
+   public static final int CMA_TOP              = 0x0001;       /* Place at top of zorder   */
+
+   public static final int CMA_FIRST            = 0x0010;       /* Add record as first      */
+   public static final int CMA_LAST             = 0x0020;
+   public static final int CMA_END              = 0x0040;       /* Add record to end of list*/
+   public static final int CMA_PREV             = 0x0080;
+   public static final int CMA_NEXT             = 0x0100;
+
 /* PM macros */
 
 public static final short SHORT1FROMMP (int mp) { return (short)mp; }    
@@ -2371,6 +2452,9 @@ public static final native void objcpy (SWP to, int from);
 public static final native void objcpy (int to, OWNERITEM from);    
 public static final native void objcpy (OWNERITEM to, int from);
 
+public static final native void objcpy (int to, RECORDCORE from);    
+public static final native void objcpy (RECORDCORE to, int from);
+
 /* PM functions */
 
 public static final native int DevOpenDC (int hab, int lType, PSZ pszToken,
@@ -2414,6 +2498,7 @@ public static final native int WinSendMsg (int hwnd, int ulMsgid, PSZ mpParam1, 
 public static final native int WinSendMsg (int hwnd, int ulMsgid, int mpParam1, PSZ mpParam2);
 public static final native int WinSendMsg (int hwnd, int ulMsgid, LBOXINFO mpParam1, PSZ[] mpParam2);
 public static final native int WinSendMsg (int hwnd, int ulMsgid, MENUITEM mpParam1, PSZ mpParam2);
+public static final native int WinSendMsg (int hwnd, int ulMsgid, RECORDCORE mpParam1, RECORDINSERT mpParam2);
 public static final native int WinSendMsg (int hwnd, int ulMsgid, int[] mpParam1, int mpParam2);
 public static final native boolean WinSendMsg (int hwnd, int ulMsgid, int mpParam1, MENUITEM mpParam2);
 public static final native boolean WinSendMsg (int hwnd, int ulMsgid, FATTRS mpParam1, int mpParam2);

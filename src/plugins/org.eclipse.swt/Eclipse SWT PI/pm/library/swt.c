@@ -256,6 +256,27 @@ JNIEXPORT void JNICALL Java_org_eclipse_swt_internal_pm_OS_objcpy__Lorg_eclipse_
     if (owner && powner) setOWNERITEMFields(env, owner, (POWNERITEM)powner, &PGLOB(OWNERITEMFc));
 }
 
+JNIEXPORT void JNICALL Java_org_eclipse_swt_internal_pm_OS_objcpy__ILorg_eclipse_swt_internal_pm_RECORDCORE_2
+    (JNIEnv *env, jclass that, jint powner, jobject owner)
+{
+    DECL_GLOB(pGlob)
+
+    DEBUG_CALL("objcpy\n")
+    DEBUG_CHECK_NULL(env, (powner && owner))
+
+    if (powner && owner) getRECORDCOREFields(env, owner, (PRECORDCORE)powner, &PGLOB(RECORDCOREFc));
+}
+JNIEXPORT void JNICALL Java_org_eclipse_swt_internal_pm_OS_objcpy__Lorg_eclipse_swt_internal_pm_RECORDCORE_2I
+    (JNIEnv *env, jclass that, jobject owner, jint powner)
+{
+    DECL_GLOB(pGlob)
+
+    DEBUG_CALL("objcpy\n")
+    DEBUG_CHECK_NULL(env, (owner && powner))
+
+    if (owner && powner) setRECORDCOREFields(env, owner, (PRECORDCORE)powner, &PGLOB(RECORDCOREFc));
+}
+
 /* PM functions */
 
 JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_DevOpenDC
@@ -627,6 +648,24 @@ JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_WinSendMsg__IILorg_ec
         releasePSZBytes(env, mpParam2, c_mpParam2);
     if (mpParam1)
         setMENUITEMFields(env, mpParam1, c_pmpParam1, &PGLOB(MENUITEMFc));
+    return rc;
+}
+
+JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_WinSendMsg__IILorg_eclipse_swt_internal_pm_RECORDCORE_2Lorg_eclipse_swt_internal_pm_RECORDINSERT_2
+         (JNIEnv *env, jclass that, jint hwnd, jint ulMsgid, jobject mpParam1, jobject mpParam2)
+{
+    RECORDCORE c_mpParam1, *c_pmpParam1 = NULL;
+    RECORDINSERT c_mpParam2, *c_pmpParam2 = NULL;
+    jint rc;
+    if (mpParam2) 
+        c_pmpParam2 = getRECORDINSERTFields(env, mpParam2, &c_mpParam2, &PGLOB(RECORDINSERTFc));
+    if (mpParam1) 
+        c_pmpParam1 = getRECORDCOREFields(env, mpParam1, &c_mpParam1, &PGLOB(RECORDCOREFc));
+    rc = (jint)WinSendMsg((HWND)hwnd, ulMsgid, c_pmpParam1, c_pmpParam2);
+    if (mpParam2)
+        setRECORDINSERTFields(env, mpParam2, c_pmpParam2, &PGLOB(RECORDINSERTFc));
+    if (mpParam1)
+        setRECORDCOREFields(env, mpParam1, c_pmpParam1, &PGLOB(RECORDCOREFc));
     return rc;
 }
 
