@@ -2406,6 +2406,11 @@ public class OS {
    public static final int CMA_END              = 0x0040;       /* Add record to end of list*/
    public static final int CMA_PREV             = 0x0080;
    public static final int CMA_NEXT             = 0x0100;
+   
+   public static final int CMA_FIRSTCHILD       = 0x0002;
+   
+   public static final int CMA_FLWINDOWATTR      = 0x0004;       /* Container attributes     */
+   public static final int CMA_ITEMORDER        = 0x0001;       /* QueryRecord search flags */
 
 /* PM macros */
 
@@ -2499,9 +2504,11 @@ public static final native int WinSendMsg (int hwnd, int ulMsgid, int mpParam1, 
 public static final native int WinSendMsg (int hwnd, int ulMsgid, LBOXINFO mpParam1, PSZ[] mpParam2);
 public static final native int WinSendMsg (int hwnd, int ulMsgid, MENUITEM mpParam1, PSZ mpParam2);
 public static final native int WinSendMsg (int hwnd, int ulMsgid, RECORDCORE mpParam1, RECORDINSERT mpParam2);
+public static final native int WinSendMsg (int hwnd, int ulMsgid, RECORDCORE mpParam1, int mpParam2);
 public static final native int WinSendMsg (int hwnd, int ulMsgid, int[] mpParam1, int mpParam2);
 public static final native boolean WinSendMsg (int hwnd, int ulMsgid, int mpParam1, MENUITEM mpParam2);
 public static final native boolean WinSendMsg (int hwnd, int ulMsgid, FATTRS mpParam1, int mpParam2);
+public static final native boolean WinSendMsg (int hwnd, int ulMsgid, CNRINFO mpParam1, int mpParam2);
 public static final native boolean WinPostMsg (int hwnd, int ulMsgid,int mpParam1, int mpParam2);
 public static final native int WinQueryMsgTime (int hab);
 public static final native boolean WinQueryMsgPos (int hab, int[] pptl);
