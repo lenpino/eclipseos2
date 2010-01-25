@@ -669,6 +669,21 @@ JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_WinSendMsg__IILorg_ec
     return rc;
 }
 
+JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_WinSendMsg__IILorg_eclipse_swt_internal_pm_RECORDCORE_2I
+         (JNIEnv *env, jclass that, jint hwnd, jint ulMsgid, jobject mpParam1, jint mpParam2)
+{
+    RECORDCORE c_mpParam1, *c_pmpParam1 = NULL;
+    jint rc;
+
+    if (mpParam1) 
+        c_pmpParam1 = getRECORDCOREFields(env, mpParam1, &c_mpParam1, &PGLOB(RECORDCOREFc));
+    rc = (jint)WinSendMsg((HWND)hwnd, ulMsgid, c_pmpParam1, (MPARAM)mpParam2);
+
+    if (mpParam1)
+        setRECORDCOREFields(env, mpParam1, c_pmpParam1, &PGLOB(RECORDCOREFc));
+    return rc;
+}
+
 JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinSendMsg__IIILorg_eclipse_swt_internal_pm_MENUITEM_2
          (JNIEnv *env, jclass that, jint hwnd, jint ulMsgid, jint mpParam1, jobject mpParam2)
 {
@@ -699,6 +714,24 @@ JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinSendMsg__IILor
     rc = (jboolean)WinSendMsg((HWND)hwnd, ulMsgid, (PFATTRS)c_pmpParam1, (MPARAM)mpParam2);
 
     if (mpParam1) setFATTRSFields(env, mpParam1, c_pmpParam1, &PGLOB(FATTRSFc));
+
+    return rc;
+}
+
+JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinSendMsg__IILorg_eclipse_swt_internal_pm_CNRINFO_2I
+        (JNIEnv *env, jclass that, jint hwnd, jint ulMsgid, jobject mpParam1, jint mpParam2)
+{
+    DECL_GLOB(pGlob)
+    CNRINFO c_mpParam1, *c_pmpParam1 = NULL;
+    jboolean rc;
+
+    DEBUG_CALL("WinSendMsg\n")
+
+    if (mpParam1) c_pmpParam1 = getCNRINFOFields(env, mpParam1, &c_mpParam1, &PGLOB(CNRINFOFc));
+
+    rc = (jboolean)WinSendMsg((HWND)hwnd, ulMsgid, (PCNRINFO)c_pmpParam1, (MPARAM)mpParam2);
+
+    if (mpParam1) setCNRINFOFields(env, mpParam1, c_pmpParam1, &PGLOB(CNRINFOFc));
 
     return rc;
 }
