@@ -65,7 +65,7 @@ public class TreeItem extends Item {
 public TreeItem (Tree parent, int style) {
 	super (parent, style);
 	this.parent = parent;
-//	parent.createItem (this, 0, OS.TVI_LAST);
+	parent.createItem (this, 0, OS.CMA_END);
 }
 
 /**
@@ -99,23 +99,26 @@ public TreeItem (Tree parent, int style) {
  * @see Widget#checkSubclass
  * @see Widget#getStyle
  */
-/* public TreeItem (Tree parent, int style, int index) {
+ public TreeItem (Tree parent, int style, int index) {
 	super (parent, style);
 	if (index < 0) error (SWT.ERROR_INVALID_RANGE);
 	this.parent = parent;
-	int hItem = OS.TVI_FIRST;
+	int hItem = OS.CMA_FIRST;
 	if (index != 0) {
 		int count = 1, hwnd = parent.handle;
-		hItem = OS.SendMessage (hwnd, OS.TVM_GETNEXTITEM, OS.TVGN_ROOT, 0);
+		RECORDCORE item = new RECORDCORE();
+//		hItem = OS.SendMessage (hwnd, OS.TVM_GETNEXTITEM, OS.TVGN_ROOT, 0);
+		hItem = OS.WinSendMsg (hwnd, OS.CM_QUERYRECORD, item, OS.MPFROM2SHORT((short)OS.CMA_FIRST, (short)OS.CMA_ITEMORDER));
 		while (hItem != 0 && count < index) {
-			hItem = OS.SendMessage (hwnd, OS.TVM_GETNEXTITEM, OS.TVGN_NEXT, hItem);
+//			hItem = OS.SendMessage (hwnd, OS.TVM_GETNEXTITEM, OS.TVGN_NEXT, hItem);
+			hItem = OS.WinSendMsg (hwnd, OS.CM_QUERYRECORD, item, OS.MPFROM2SHORT((short)OS.CMA_NEXT, (short)OS.CMA_ITEMORDER));
 			count++;
 		}
 		if (hItem == 0) error (SWT.ERROR_INVALID_RANGE);
 	};
 	parent.createItem (this, 0, hItem);
 }
- */
+
 /**
  * Constructs a new instance of this class given its parent
  * (which must be a <code>Tree</code> or a <code>TreeItem</code>)
@@ -150,7 +153,7 @@ public TreeItem (TreeItem parentItem, int style) {
 	super (checkNull (parentItem).parent, style);
 	parent = parentItem.parent;
 	int hItem = parentItem.handle;
-//	parent.createItem (this, hItem, OS.TVI_LAST);
+	parent.createItem (this, hItem, OS.CMA_END);
 }
 
 /**
@@ -184,24 +187,27 @@ public TreeItem (TreeItem parentItem, int style) {
  * @see Widget#checkSubclass
  * @see Widget#getStyle
  */
-/* public TreeItem (TreeItem parentItem, int style, int index) {
+ public TreeItem (TreeItem parentItem, int style, int index) {
 	super (checkNull (parentItem).parent, style);
 	if (index < 0) error (SWT.ERROR_INVALID_RANGE);
 	parent = parentItem.parent;
-	int hItem = OS.TVI_FIRST;
+	int hItem = OS.CMA_FIRST;
 	int hParent = parentItem.handle;
+	RECORDCORE item = new RECORDCORE();
+	OS.objcpy (item, parentItem.handle);
 	if (index != 0) {
 		int count = 1, hwnd = parent.handle;
-		hItem = OS.SendMessage (hwnd, OS.TVM_GETNEXTITEM, OS.TVGN_CHILD, hParent);
+//		hItem = OS.SendMessage (hwnd, OS.TVM_GETNEXTITEM, OS.TVGN_CHILD, hParent);
+		hItem = OS.WinSendMsg (hwnd, OS.CM_QUERYRECORD, item, OS.MPFROM2SHORT((short)OS.CMA_FIRSTCHILD, (short)OS.CMA_ITEMORDER));
 		while (hItem != 0 && count < index) {
-			hItem = OS.SendMessage (hwnd, OS.TVM_GETNEXTITEM, OS.TVGN_NEXT, hItem);
+//			hItem = OS.SendMessage (hwnd, OS.TVM_GETNEXTITEM, OS.TVGN_NEXT, hItem);
 			count++;
 		}
 		if (hItem == 0) error (SWT.ERROR_INVALID_RANGE);
 	}
 	parent.createItem (this, hParent, hItem);
 }
- */
+
 static TreeItem checkNull (TreeItem item) {
 	if (item == null) SWT.error (SWT.ERROR_NULL_ARGUMENT);
 	return item;

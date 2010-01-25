@@ -2,7 +2,7 @@ package org.eclipse.swt.widgets;
 
 /*
  * OS/2 version.
- * Copyright (c) 2002, 2009 EclipseOS2 Team.
+ * Copyright (c) 2002, 2010 EclipseOS2 Team.
  */
 
 /*
@@ -205,6 +205,10 @@ void createHandle () {
 	super.createHandle ();
 	state &= ~CANVAS;
 	
+	/* Set the container's view */
+	CNRINFO cnrInfo = new CNRINFO();
+	cnrInfo.flWindowAttr = OS.CV_TREE | OS.CV_ICON;
+	OS.WinSendMsg(handle, OS.CM_SETCNRINFO, cnrInfo, OS.CMA_FLWINDOWATTR);
 	/* Set the checkbox image list */
 //	if ((style & SWT.CHECK) != 0) setCheckboxImageList ();
 	
@@ -224,15 +228,29 @@ void createHandle () {
 //	OS.SendMessage (handle, OS.WM_SETFONT, hFont, 0);
 }
 
-// void createItem (TreeItem item, int hParent, int hInsertAfter) {
-	// item.foreground = item.background = -1;
-	// int id = 0;
-	// while (id < items.length && items [id] != null) id++;
-	// if (id == items.length) {
-		// TreeItem [] newItems = new TreeItem [items.length + 4];
-		// System.arraycopy (items, 0, newItems, 0, items.length);
-		// items = newItems;
-	// }
+void createItem (TreeItem item, int hParent, int hInsertAfter) {
+	item.foreground = item.background = -1;
+	int id = 0;
+	while (id < items.length && items [id] != null) id++;
+	if (id == items.length) {
+		TreeItem [] newItems = new TreeItem [items.length + 4];
+		System.arraycopy (items, 0, newItems, 0, items.length);
+		items = newItems;
+	}
+	int hItem = OS.WinSendMsg(handle, OS.CM_ALLOCRECORD, 0, 1);
+	item.handle = hItem;
+	RECORDCORE struct = new RECORDCORE();
+        OS.objcpy(struct, hItem);
+	RECORDINSERT recsIn = new RECORDINSERT();
+	recsIn.pRecordParent = hParent;
+	recsIn.pRecordOrder = hInsertAfter;
+	recsIn.zOrder = OS.CMA_TOP;
+	recsIn.fInvalidateRecord = OS.TRUE;
+	recsIn.cRecordsInsert = 1;
+	/* Insert the item */
+	int count  = OS.WinSendMsg(handle, OS.CM_INSERTRECORD, struct, recsIn);
+	if (count == 0) error (SWT.ERROR_ITEM_NOT_ADDED);
+	items [id] = item;
 	// TVINSERTSTRUCT tvInsert = new TVINSERTSTRUCT ();
 	// tvInsert.hParent = hParent;
 	// tvInsert.hInsertAfter = hInsertAfter;
@@ -279,17 +297,17 @@ void createHandle () {
 	// if (OS.SendMessage (handle, OS.TVM_GETITEMRECT, 0, rect) != 0) {
 		// OS.InvalidateRect (handle, rect, false);
 	// }
-// }
+}
 
 void createWidget () {
 	super.createWidget ();
 	items = new TreeItem [4];
 }
 
-/* int defaultBackground () {
-	return OS.GetSysColor (OS.COLOR_WINDOW);
+ int defaultBackground () {
+	return OS.WinQuerySysColor(super.handle, OS.SYSCLR_WINDOW, 0);
 }
- */
+
 /**
  * Deselects all selected items in the receiver.
  *
@@ -1055,7 +1073,7 @@ public void removeTreeListener(TreeListener listener) {
 }
  */
  int widgetStyle () {
-	 int bits = super.widgetStyle () | OS.CCS_MINIRECORDCORE;
+	 int bits = super.widgetStyle () | OS.CCS_READONLY | OS.CCS_AUTOPOSITION;
 //	 bits |= OS.TVS_LINESATROOT | OS.TVS_HASLINES | OS.TVS_HASBUTTONS;
 	// /*
 	// * This code is intentionally commented.  In future,
