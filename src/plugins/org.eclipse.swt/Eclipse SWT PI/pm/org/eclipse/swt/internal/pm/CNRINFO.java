@@ -29,4 +29,5 @@ public class CNRINFO
   public int cxTreeLine;          			/*  Line width. */
   public int cFields;             			/*  Number of columns. */
   public int xVertSplitbar;       			/*  Split bar position. */
+  public static final int sizeof = 92;
 }
