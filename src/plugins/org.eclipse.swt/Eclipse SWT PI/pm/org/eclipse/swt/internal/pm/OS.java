@@ -3,7 +3,7 @@ package org.eclipse.swt.internal.pm;
 
 /*
  * OS/2 version.
- * Copyright (c) 2002, 2009 EclipseOS2 Team.
+ * Copyright (c) 2002, 2010 EclipseOS2 Team.
  */
 
 /*
@@ -2509,6 +2509,7 @@ public static final native int WinSendMsg (int hwnd, int ulMsgid, int[] mpParam1
 public static final native boolean WinSendMsg (int hwnd, int ulMsgid, int mpParam1, MENUITEM mpParam2);
 public static final native boolean WinSendMsg (int hwnd, int ulMsgid, FATTRS mpParam1, int mpParam2);
 public static final native boolean WinSendMsg (int hwnd, int ulMsgid, CNRINFO mpParam1, int mpParam2);
+public static final native int WinSendMsg (int hwnd, int ulMsgid, CNRINFO mpParam1, short mpParam2);
 public static final native boolean WinPostMsg (int hwnd, int ulMsgid,int mpParam1, int mpParam2);
 public static final native int WinQueryMsgTime (int hab);
 public static final native boolean WinQueryMsgPos (int hab, int[] pptl);
