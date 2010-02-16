@@ -48,6 +48,27 @@ void releasePSZBytes(JNIEnv *env, jobject j_psz, PSZ psz);
 PAPSZ getPAPSZArray(JNIEnv *env, jobjectArray j_papsz);
 void releasePAPSZArray(JNIEnv *env, jobjectArray j_papsz, PAPSZ papsz);
 
+/* Tree record struct */
+typedef struct TREERECORD{
+   RECORDCORE item;
+   ULONG           lParam;
+} TREERECORD;
+typedef TREERECORD *PTREERECORD;
+
+/* TREERECORD struct */
+typedef struct TREERECORD_FID_CACHE {
+    int cached;
+    jclass clazz;
+    jfieldID
+        item,
+        lParam;
+} TREERECORD_FID_CACHE;
+typedef TREERECORD_FID_CACHE *PTREERECORD_FID_CACHE;
+
+void cacheTREERECORDFids(JNIEnv *env, jobject lpObject, PTREERECORD_FID_CACHE lpCache);
+PTREERECORD getTREERECORDFields(JNIEnv *env, jobject lpObject, PTREERECORD lpStruct, PTREERECORD_FID_CACHE lpCache);
+void setTREERECORDFields(JNIEnv *env, jobject lpObject, PTREERECORD lpStruct, PTREERECORD_FID_CACHE lpCache);
+
 /* QMSG struct */
 typedef struct QMSG_FID_CACHE {
     int cached;
@@ -772,6 +793,7 @@ extern RECORDINSERT_FID_CACHE RECORDINSERTFc;
 extern RECORDCORE_FID_CACHE RECORDCOREFc;
 extern SIZEL_FID_CACHE SIZELFc;
 extern CNRINFO_FID_CACHE CNRINFOFc;
+extern TREERECORD_FID_CACHE TREERECORDFc;
 /*@@TODO (dmik): remove! 
 extern FACENAMEDESC_FID_CACHE FACENAMEDESCFc;
 */

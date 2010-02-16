@@ -736,6 +736,24 @@ JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinSendMsg__IILor
     return rc;
 }
 
+JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_WinSendMsg__IILorg_eclipse_swt_internal_pm_CNRINFO_2S
+        (JNIEnv *env, jclass that, jint hwnd, jint ulMsgid, jobject mpParam1, jshort mpParam2)
+{
+    DECL_GLOB(pGlob)
+    CNRINFO c_mpParam1, *c_pmpParam1 = NULL;
+    jint rc;
+
+    DEBUG_CALL("WinSendMsg\n")
+
+    if (mpParam1) c_pmpParam1 = getCNRINFOFields(env, mpParam1, &c_mpParam1, &PGLOB(CNRINFOFc));
+
+    rc = (jint)WinSendMsg((HWND)hwnd, ulMsgid, (PCNRINFO)c_pmpParam1, (MPARAM)mpParam2);
+
+    if (mpParam1) setCNRINFOFields(env, mpParam1, c_pmpParam1, &PGLOB(CNRINFOFc));
+
+    return rc;
+}
+
 JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_WinSendMsg__IILorg_eclipse_swt_internal_pm_RECTL_2Z
         (JNIEnv *env, jclass that, jint hwnd, jint ulMsgid, jobject mpParam1, jboolean mpParam2)
 {

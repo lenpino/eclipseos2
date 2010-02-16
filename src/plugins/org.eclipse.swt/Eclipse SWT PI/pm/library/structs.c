@@ -181,6 +181,7 @@ RECORDINSERT_FID_CACHE RECORDINSERTFc;
 RECORDCORE_FID_CACHE RECORDCOREFc;
 SIZEL_FID_CACHE SIZELFc;
 CNRINFO_FID_CACHE CNRINFOFc;
+TREERECORD_FID_CACHE TREERECORDFc;
 
 /*@@TODO (dmik): remove
 FACENAMEDESC_FID_CACHE FACENAMEDESCFc;
@@ -2026,6 +2027,38 @@ void setCNRINFOFields(JNIEnv *env, jobject lpObject, PCNRINFO lpStruct, PCNRINFO
     (*env)->SetIntField(env, lpObject, lpCache->cxTreeLine, lpStruct->cxTreeLine);
     (*env)->SetIntField(env, lpObject, lpCache->cFields, lpStruct->cFields);
     (*env)->SetIntField(env, lpObject, lpCache->xVertSplitbar, lpStruct->xVertSplitbar);
+}
+
+/* TREERECORD struct */
+void cacheTREERECORDFids(JNIEnv *env, jobject lpObject, PTREERECORD_FID_CACHE lpCache)
+{
+    if (lpCache->cached) return;
+    lpCache->clazz = (*env)->GetObjectClass(env, lpObject);
+    lpCache->item = (*env)->GetFieldID(env, lpCache->clazz, "item", "Lorg/eclipse/swt/internal/pm/TREERECORD;");
+    lpCache->lParam = (*env)->GetFieldID(env, lpCache->clazz, "usWeightClass", "I");
+    lpCache->cached = 1;
+}
+
+PTREERECORD getTREERECORDFields(JNIEnv *env, jobject lpObject, PTREERECORD lpStruct, PTREERECORD_FID_CACHE lpCache)
+{
+    if (!lpCache->cached) cacheTREERECORDFids(env, lpObject, lpCache);
+    {
+        jobject hItem = (*env)->GetObjectField(env, lpObject, lpCache->item);
+        if (hItem && &(lpStruct->item)) getRECORDCOREFields(env, hItem, &(lpStruct->item), &PGLOB(RECORDCOREFc));
+    }
+    lpStruct->lParam = (*env)->GetIntField(env, lpObject, lpCache->lParam);
+    return lpStruct;
+}
+
+void setTREERECORDFields(JNIEnv *env, jobject lpObject, PTREERECORD lpStruct, PTREERECORD_FID_CACHE lpCache)
+{
+    if (!lpCache->cached) cacheTREERECORDFids(env, lpObject, lpCache);
+    {
+        jobject hItem = (*env)->GetObjectField(env, lpObject, lpCache->item);
+        if (hItem && &(lpStruct->item)) setRECORDCOREFields(env, hItem, &(lpStruct->item), &PGLOB(RECORDCOREFc));
+    }
+    (*env)->SetIntField(env, lpObject, lpCache->lParam, lpStruct->lParam);
+
 }
 
 /*@@TODO (dmik): don't need, remove!
