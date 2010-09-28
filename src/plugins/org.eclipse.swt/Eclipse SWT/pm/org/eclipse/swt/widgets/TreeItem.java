@@ -193,14 +193,16 @@ public TreeItem (TreeItem parentItem, int style) {
 	parent = parentItem.parent;
 	int hItem = OS.CMA_FIRST;
 	int hParent = parentItem.handle;
-	RECORDCORE item = new RECORDCORE();
-	OS.objcpy (item, parentItem.handle);
+//	RECORDCORE item = new RECORDCORE();
+//	OS.objcpy (item, parentItem.handle);
 	if (index != 0) {
 		int count = 1, hwnd = parent.handle;
 //		hItem = OS.SendMessage (hwnd, OS.TVM_GETNEXTITEM, OS.TVGN_CHILD, hParent);
-		hItem = OS.WinSendMsg (hwnd, OS.CM_QUERYRECORD, item, OS.MPFROM2SHORT((short)OS.CMA_FIRSTCHILD, (short)OS.CMA_ITEMORDER));
+//		hItem = OS.WinSendMsg (hwnd, OS.CM_QUERYRECORD, item, OS.MPFROM2SHORT((short)OS.CMA_FIRSTCHILD, (short)OS.CMA_ITEMORDER));
+		hItem = OS.WinSendMsg (hwnd, OS.CM_QUERYRECORD, hParent, OS.MPFROM2SHORT((short)OS.CMA_FIRSTCHILD, (short)OS.CMA_ITEMORDER));
 		while (hItem != 0 && count < index) {
 //			hItem = OS.SendMessage (hwnd, OS.TVM_GETNEXTITEM, OS.TVGN_NEXT, hItem);
+			hItem = OS.WinSendMsg (hwnd, OS.CM_QUERYRECORD, hItem, OS.MPFROM2SHORT((short)OS.CMA_NEXT, (short)OS.CMA_ITEMORDER));
 			count++;
 		}
 		if (hItem == 0) error (SWT.ERROR_INVALID_RANGE);
@@ -371,18 +373,15 @@ public Display getDisplay () {
  *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
  * </ul>
  */
-/* public int getItemCount () {
+ public int getItemCount () {
 	checkWidget ();
 	int count = 0;
 	int hwnd = parent.handle;
-	int hItem = OS.SendMessage (hwnd, OS.TVM_GETNEXTITEM, OS.TVGN_CHILD, handle);
-	while (hItem != 0) {
-		hItem = OS.SendMessage (hwnd, OS.TVM_GETNEXTITEM, OS.TVGN_NEXT, hItem);
-		count++;
-	}
-	return count;
+	CNRINFO data = new CNRINFO();
+	int rc = OS.WinSendMsg (hwnd, OS.CM_QUERYCNRINFO, data, (short)CNRINFO.sizeof);
+	return data.cRecords;
 }
- */
+
 /**
  * Returns an array of <code>TreeItem</code>s which are the
  * direct item children of the receiver.
@@ -448,17 +447,16 @@ public Tree getParent () {
  *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
  * </ul>
  */
-/* public TreeItem getParentItem () {
+  public TreeItem getParentItem () {
 	checkWidget ();
 	int hwnd = parent.handle;
-	TVITEM tvItem = new TVITEM ();
+/* 	TVITEM tvItem = new TVITEM ();
 	tvItem.mask = OS.TVIF_HANDLE | OS.TVIF_PARAM;
 	tvItem.hItem = OS.SendMessage (hwnd, OS.TVM_GETNEXTITEM, OS.TVGN_PARENT, handle);
 	if (tvItem.hItem == 0) return null;
 	OS.SendMessage (hwnd, OS.TVM_GETITEM, 0, tvItem);
-	return parent.items [tvItem.lParam];
+ */	return parent.items [0];
 }
- */
 /* void redraw () {
 	if (parent.drawCount > 0) return;
 	int hwnd = parent.handle;
