@@ -14,6 +14,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.*;
 import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.graphics.*;
 
 public class SWT009_07 extends SWTTestCase {
@@ -23,6 +25,8 @@ public class SWT009_07 extends SWTTestCase {
 		TEST = "07";
 		DESC = "Group";
 	}
+	
+	final static String imageDir = System.getProperty ("user.dir") + "/tests/SWT/images/"; 
 
 	Shell createTopShell(Display display) {
 		return new Shell(display, SWT.SHELL_TRIM | SWT.NO_REDRAW_RESIZE);
@@ -30,6 +34,7 @@ public class SWT009_07 extends SWTTestCase {
 
 
 	void initComponents() {
+	    final Class clazz = SWT009_07.class;
             shell.setText("Hello World Group");
             shell.setSize(290, 200);    
             shell.setText("A Group Example");
@@ -69,8 +74,7 @@ public class SWT009_07 extends SWTTestCase {
             optionGrupoB_3.setText("Option B Three, Opcion Tres");
             //
             
-            shell.open();
-                
+            shell.open();              
 	}
 
 
