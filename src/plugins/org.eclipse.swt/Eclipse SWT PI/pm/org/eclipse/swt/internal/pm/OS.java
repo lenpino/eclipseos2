@@ -38,7 +38,7 @@ public class OS {
         OS2_MAJOR = sv[0];
         OS2_MINOR = sv[1];
         OS2_REVISION = sv[2];
-        
+
         IsWarp3 = (OS2_MAJOR == 20 && OS2_MINOR == 30);
         IsWarp4 = (OS2_MAJOR == 20 && OS2_MINOR == 40);
         IsAurora = (OS2_MAJOR == 20 && OS2_MINOR == 45);
@@ -57,11 +57,11 @@ public class OS {
     */
 
     /* Constants */
-    
+
     public static final int FALSE =             0;
     public static final int TRUE =              1;
     public static final int NULLHANDLE =        0;
-    
+
     /* indices for DosQuerySysInfo */
 //    public static final int QSV_MAX_PATH_LENGTH =   1;
 //    public static final int QSV_MAX_TEXT_SESSIONS = 2;
@@ -184,13 +184,13 @@ public class OS {
     public static final int BS_NOBORDER           = 0x1000;
     public static final int BS_NOCURSORSELECT     = 0x2000;
 //    public static final int BS_AUTOSIZE           = 0x4000;
-    
+
     /* WinAlarm Codes */
     public static final int WA_WARNING =    0;
     public static final int WA_NOTE =       1;
     public static final int WA_ERROR =      2;
     public static final int WA_CWINALARMS = 13;
-    
+
     /* WinPeekMsg constants */
     public static final int PM_REMOVE =     0x0001;
     public static final int PM_NOREMOVE =   0x0000;
@@ -240,7 +240,7 @@ public class OS {
     public static final int WM_SYSVALUECHANGED =    0x002d;
     public static final int WM_APPTERMINATENOTIFY = 0x002e;
     public static final int WM_PRESPARAMCHANGED =   0x002f;
-    
+
     /* Control notification messages */
     public static final int WM_CONTROL =            0x0030;
     public static final int WM_VSCROLL =            0x0031;
@@ -260,7 +260,7 @@ public class OS {
 //    public static final int WM_HELPBASE =           0x0F00;
 //    public static final int WM_HELPTOP =            0x0FFF;
     public static final int WM_USER =               0x1000;
-    
+
     /* Frame window related messages */
 //    public static final int WM_FLASHWINDOW =        0x0040;
     public static final int WM_FORMATFRAME =        0x0041;
@@ -299,10 +299,10 @@ public class OS {
     /* Key/Character input messages */
     public static final int WM_CHAR =       0x007a;
 //    public static final int WM_VIOCHAR =    0x007b;
-    
+
 /*** Mouse input messages ***********************************************/
-   public static final int WM_MOUSEMOVE               = 0x0070; 
-   public static final int WM_BUTTON1DOWN             = 0x0071; 
+   public static final int WM_MOUSEMOVE               = 0x0070;
+   public static final int WM_BUTTON1DOWN             = 0x0071;
    public static final int WM_BUTTON1UP               = 0x0072;
    public static final int WM_BUTTON1DBLCLK           = 0x0073;
    public static final int WM_BUTTON2DOWN             = 0x0074;
@@ -350,7 +350,7 @@ public class OS {
 //    public static final int KC_INVALIDCHAR =    0x2000;
 //    public static final int KC_DBCSRSRVD1 =     0x4000;
 //    public static final int KC_DBCSRSRVD2 =     0x8000;
-   
+
     /* Virtual key values */
     public static final int VK_BUTTON1 =    0x01;
     public static final int VK_BUTTON2 =    0x02;
@@ -442,7 +442,7 @@ public class OS {
     public static final int BDS_HILITED             = 0x0100;
     public static final int BDS_DISABLED            = 0x0200;
     public static final int BDS_DEFAULT             = 0x0400;
-    
+
     /* Standard WinQueryWindowUShort/ULong() indices */
     public static final int QWS_USER =      0;
     public static final int QWS_ID =        (-1);
@@ -601,7 +601,7 @@ public class OS {
 //    public static final int CVR_ALIGNRIGHT =    0x0004;
 //    public static final int CVR_ALIGNTOP =      0x0008;
     public static final int CVR_REDRAW =        0x0010;
-    
+
     /* Frame window styles */
     public static final int FCF_TITLEBAR =          0x00000001;
     public static final int FCF_SYSMENU =           0x00000002;
@@ -669,7 +669,7 @@ public class OS {
     public static final int GPI_OK =        1;
     public static final int GPI_HITS =      2;
     //public static final int GPI_ALTERROR =  (-1);
-    
+
     /* return code to indicate type of region for GpiCombineRegion and others */
     public static final int RGN_ERROR =     0;
     public static final int RGN_NULL =      1;
@@ -724,7 +724,7 @@ public class OS {
 //    public static final int CAPS_DEVICE_FONTS =             27;
 //    public static final int CAPS_GRAPHICS_SUBSET =          28;
 //    public static final int CAPS_GRAPHICS_VERSION =         29;
-//    public static final int CAPS_GRAPHICS_VECTOR_SUBSET =   30; 
+//    public static final int CAPS_GRAPHICS_VECTOR_SUBSET =   30;
 //    public static final int CAPS_DEVICE_WINDOWING =         31;
     public static final int CAPS_ADDITIONAL_GRAPHICS =      32;
 //    public static final int CAPS_PHYS_COLORS =              33;
@@ -740,7 +740,7 @@ public class OS {
 //    public static final int CAPS_IO_DUMMY =                 1;
 //    public static final int CAPS_IO_SUPPORTS_OP =           2;
 //    public static final int CAPS_IO_SUPPORTS_IP =           3;
-//    public static final int CAPS_IO_SUPPORTS_IO =           4; 
+//    public static final int CAPS_IO_SUPPORTS_IO =           4;
     /* Constants for CAPS_TECHNOLOGY */
 //    public static final int CAPS_TECH_UNKNOWN =             0;
 //    public static final int CAPS_TECH_VECTOR_PLOTTER =      1;
@@ -803,7 +803,7 @@ public class OS {
 //    public static final int CAPS_RASTER_SET_PEL =           16;
 //    public static final int CAPS_RASTER_FONTS =             32;
 //    public static final int CAPS_RASTER_FLOOD_FILL =        64;
-    
+
     /* options for GpiCreateLogColorTable and others */
 //    public static final int LCOL_RESET =                    0x0001;
 //    public static final int LCOL_REALIZABLE =               0x0002;
@@ -836,7 +836,7 @@ public class OS {
 //    public static final int FM_MERGENOTSRC =                15;
 //    public static final int FM_NOTMASKSRC =                 16;
 //    public static final int FM_ONE =                        17;
-    
+
     /* background mixes */
 //    public static final int BM_ERROR =                      -1;
 //    public static final int BM_DEFAULT =                    0;
@@ -918,7 +918,7 @@ public class OS {
     public static final int SYSCLR_MENUTEXT =               -18;
     public static final int SYSCLR_WINDOWTEXT =             -17;
 //    public static final int SYSCLR_TITLETEXT =              -16;
-//    public static final int SYSCLR_ACTIVEBORDER =           -15;
+    public static final int SYSCLR_ACTIVEBORDER =           -15;
 //    public static final int SYSCLR_INACTIVEBORDER =         -14;
 //    public static final int SYSCLR_APPWORKSPACE =           -13;
 //    public static final int SYSCLR_HELPBACKGROUND =         -12;
@@ -1041,7 +1041,7 @@ public class OS {
     public static final int PP_BACKGROUNDCOLORINDEX         = 4;
 //    public static final int PP_HILITEFOREGROUNDCOLOR        = 5;
 //    public static final int PP_HILITEFOREGROUNDCOLORINDEX   = 6;
-//    public static final int PP_HILITEBACKGROUNDCOLOR        = 7;
+    public static final int PP_HILITEBACKGROUNDCOLOR        = 7;
 //    public static final int PP_HILITEBACKGROUNDCOLORINDEX   = 8;
     public static final int PP_DISABLEDFOREGROUNDCOLOR      = 9;
     public static final int PP_DISABLEDFOREGROUNDCOLORINDEX = 10;
@@ -1148,7 +1148,7 @@ public class OS {
     public static final int DLGC_MENU               = 0x0100;
     public static final int DLGC_TABONCLICK         = 0x0200;
     public static final int DLGC_MLE                = 0x0400;
-    
+
     /* DC type for DevOpenDC */
 //    public static final int OD_SCREEN               = 0;
 //    public static final int OD_QUEUED               = 2;
@@ -1250,9 +1250,9 @@ public class OS {
 //    public static final int TA_BOTTOM               = 0x0500;
 //    public static final int TA_STANDARD_VERT        = 0x0600;
 
-    public static final int FACESIZE                = 32;    
+    public static final int FACESIZE                = 32;
 
-//@@TODO (dmik): remove!    
+//@@TODO (dmik): remove!
     /* FACENAMEDESC options for GpiQueryFaceString */
    public static final int FWEIGHT_DONT_CARE           = 0;
    public static final int FWEIGHT_ULTRA_LIGHT         = 1;
@@ -1374,7 +1374,7 @@ public class OS {
 //    public static final int CHS_CLIP            = 0x0010;
     public static final int CHS_UNDERSCORE      = 0x0200;
 //    public static final int CHS_STRIKEOUT       = 0x0400;
-    
+
     /* WinDrawText()/WinDrawTabbedText() codes */
     public static final int DT_LEFT             = 0x00000000;
     public static final int DT_QUERYEXTENT      = 0x00000002;
@@ -1414,7 +1414,7 @@ public class OS {
 //    public static final int HINI_PROFILE        = 0;
     public static final int HINI_USERPROFILE    = -1;
 //    public static final int HINI_SYSTEMPROFILE  = -2;
-    
+
     /* Message box types */
     public static final int MB_OK               = 0x0000;
     public static final int MB_OKCANCEL         = 0x0001;
@@ -1459,7 +1459,7 @@ public class OS {
     public static final int MBID_HELP           = 8;
     public static final int MBID_ENTER          = 9;
     public static final int MBID_ERROR          = 0xffff;
-    
+
    /**********************************************************************/
    /* Font Dialog Style Flags                                            */
    /**********************************************************************/
@@ -1485,7 +1485,7 @@ public class OS {
    public static final int FNTF_NOVIEWPRINTERFONTS     = 2;
    public static final int FNTF_SCREENFONTSELECTED     = 4;
    public static final int FNTF_PRINTERFONTSELECTED    = 8;
-   
+
    /**********************************************************************/
    /* Filter List message string identifiers                             */
    /**********************************************************************/
@@ -1498,7 +1498,7 @@ public class OS {
    public static final int FNTI_FAMILYNAME         =0x0100;
    public static final int FNTI_STYLENAME          = 0x0200;
    public static final int FNTI_POINTSIZE          = 0x0400;
-   
+
    /**********************************************************************/
    /* Error Return Codes from dialog (self defining)                     */
    /**********************************************************************/
@@ -1509,11 +1509,11 @@ public class OS {
    public static final int FNTS_ERR_OUT_OF_MEMORY                    = 7;
    public static final int FNTS_ERR_INVALID_VERSION                 = 10;
    public static final int FNTS_ERR_DIALOG_LOAD_ERROR               = 12;
-   
+
   /* default color table indices */
 
    public static final int CLR_FALSE			= -5;
-   public static final int CLR_TRUE			= -4;   
+   public static final int CLR_TRUE			= -4;
    public static final int CLR_ERROR			= -255;
    public static final int CLR_DEFAULT			= -3;
    public static final int CLR_WHITE			= -2;
@@ -1567,7 +1567,7 @@ public class OS {
 //   public static final int FDS_ERR_INVALID_CUSTOM_HANDLE    = 11;
 //   public static final int FDS_ERR_DIALOG_LOAD_ERROR        = 12;
 //   public static final int FDS_ERR_DRIVE_ERROR              = 13;
-   
+
     /* Static control styles: */
    public static final int SS_TEXT                    =0x0001;
    public static final int SS_GROUPBOX               = 0x0002;
@@ -1581,32 +1581,32 @@ public class OS {
    public static final int SS_BKGNDFRAME              =0x000a;
    public static final int SS_SYSICON                 =0x000b;
    public static final int SS_AUTOSIZE         =0x0040;
-   /* Static control messages */   
+   /* Static control messages */
    public static final int SM_SETHANDLE               =0x0100;
    public static final int SM_QUERYHANDLE             =0x0101;
 
       /*** Scroll Bar controls Subsection */
-   
+
    /* Scroll Bar styles */
-   
+
    public static final int SBS_HORZ                   =0;
    public static final int SBS_VERT                   =1;
    public static final int SBS_THUMBSIZE              =2;
    public static final int SBS_AUTOTRACK              =4;
    public static final int SBS_AUTOSIZE        =0x2000;
-   
-   
-   
+
+
+
    /* Scroll Bar messages */
-   
+
    public static final int SBM_SETSCROLLBAR          = 0x01a0;
    public static final int SBM_SETPOS                 =0x01a1;
    public static final int SBM_QUERYPOS               =0x01a2;
    public static final int SBM_QUERYRANGE             =0x01a3;
    public static final int SBM_SETTHUMBSIZE           =0x01a6;
-   
+
    /* Scroll Bar Commands */
-   
+
    public static final int SB_LINEUP                  =1;
    public static final int SB_LINEDOWN               = 2;
    public static final int SB_LINELEFT                =1;
@@ -1618,7 +1618,7 @@ public class OS {
    public static final int SB_SLIDERTRACK             =5;
    public static final int SB_SLIDERPOSITION          =6;
    public static final int SB_ENDSCROLL               =7;
-   
+
    /*************************************************************************
    * MLE Window styles ( in addition to WS_* )
    *************************************************************************/
@@ -1656,7 +1656,7 @@ public class OS {
    public static final int MLM_QUERYTABSTOP           = 0x01b7;
    public static final int MLM_SETREADONLY            = 0x01b8;
    public static final int MLM_QUERYREADONLY          = 0x01b9;
-   
+
    /* text content manipulation and queries messages */
    public static final int MLM_QUERYCHANGED           = 0x01ba;
    public static final int MLM_SETCHANGED             = 0x01bb;
@@ -1665,7 +1665,7 @@ public class OS {
    public static final int MLM_LINEFROMCHAR           = 0x01be;
    public static final int MLM_QUERYLINELENGTH        = 0x01bf;
    public static final int MLM_QUERYTEXTLENGTH        = 0x01c0;
-   
+
    /* text import and export messages */
    public static final int MLM_FORMAT                 = 0x01c1;
    public static final int MLM_SETIMPORTEXPORT        = 0x01c2;
@@ -1675,17 +1675,17 @@ public class OS {
    public static final int MLM_QUERYFORMATLINELENGTH  = 0x01c7;
    public static final int MLM_QUERYFORMATTEXTLENGTH  = 0x01c8;
    public static final int MLM_INSERT                 = 0x01c9;
-   
+
    /* selection messages */
    public static final int MLM_SETSEL                 = 0x01ca;
    public static final int MLM_QUERYSEL               = 0x01cb;
    public static final int MLM_QUERYSELTEXT           = 0x01cc;
-   
+
    /* undo and redo messages */
    public static final int MLM_QUERYUNDO              = 0x01cd;
    public static final int MLM_UNDO                   = 0x01ce;
    public static final int MLM_RESETUNDO              = 0x01cf;
-   
+
    /* text attributes messages */
    public static final int MLM_QUERYFONT              = 0x01d0;
    public static final int MLM_SETFONT                = 0x01d1;
@@ -1693,25 +1693,25 @@ public class OS {
    public static final int MLM_QUERYTEXTCOLOR         = 0x01d3;
    public static final int MLM_SETBACKCOLOR           = 0x01d4;
    public static final int MLM_QUERYBACKCOLOR         = 0x01d5;
-   
+
    /* scrolling messages */
    public static final int MLM_QUERYFIRSTCHAR         = 0x01d6;
    public static final int MLM_SETFIRSTCHAR           = 0x01d7;
-   
+
    /* clipboard messages */
    public static final int MLM_CUT                    = 0x01d8;
    public static final int MLM_COPY                   = 0x01d9;
    public static final int MLM_PASTE                  = 0x01da;
    public static final int MLM_CLEAR                  = 0x01db;
-   
+
    /* display manipulation messages */
    public static final int MLM_ENABLEREFRESH          = 0x01dc;
    public static final int MLM_DISABLEREFRESH         = 0x01dd;
-   
+
    /* search message */
    public static final int MLM_SEARCH                 = 0x01de;
    public static final int MLM_QUERYIMPORTEXPORT      = 0x01df;
-   
+
    /* notification messages */
    public static final int MLN_OVERFLOW               = 0x0001;
    public static final int MLN_PIXHORZOVERFLOW        = 0x0002;
@@ -1727,7 +1727,7 @@ public class OS {
    public static final int MLN_MEMERROR               = 0x000c;
    public static final int MLN_UNDOOVERFLOW           = 0x000d;
    public static final int MLN_CLPBDFAIL              = 0x000f;
-   
+
    /*************************************************************************
    * MLM_QUERYSELECTION flags
    *************************************************************************/
@@ -1746,7 +1746,7 @@ public class OS {
    public static final int MLFFMTRECT_FORMATRECT      = 0x00000007;
 
    /* Entry field  styles */
-   
+
    public static final int ES_LEFT                    = 0x00000000;
    public static final int ES_CENTER                  = 0x00000001;
    public static final int ES_RIGHT                   = 0x00000002;
@@ -1761,9 +1761,9 @@ public class OS {
    public static final int ES_SBCS                    = 0x00001000;
    public static final int ES_DBCS                    = 0x00002000;
    public static final int ES_MIXED                   = 0x00003000;
-   
+
    /* Entry Field  messages */
-   
+
    public static final int EM_QUERYCHANGED            = 0x0140;
    public static final int EM_QUERYSEL                = 0x0141;
    public static final int EM_SETSEL                  = 0x0142;
@@ -1777,9 +1777,9 @@ public class OS {
    public static final int EM_QUERYREADONLY           = 0x014a;
    public static final int EM_SETREADONLY             = 0x014b;
    public static final int EM_SETINSERTMODE           = 0x014c;
-   
+
    /* Entry Field notification messages */
-   
+
    public static final int EN_SETFOCUS                = 0x0001;
    public static final int EN_KILLFOCUS               = 0x0002;
    public static final int EN_CHANGE                  = 0x0004;
@@ -1789,15 +1789,15 @@ public class OS {
   public static final int EN_INSERTMODETOGGLE        = 0x0040;
 
      /* List box styles */
-   
+
    public static final int LS_MULTIPLESEL             = 0x00000001;
    public static final int LS_OWNERDRAW               = 0x00000002;
    public static final int LS_NOADJUSTPOS             = 0x00000004;
    public static final int LS_HORZSCROLL              = 0x00000008;
    public static final int LS_EXTENDEDSEL             = 0x00000010;
-   
+
    /* List box messages */
-   
+
    public static final int LM_QUERYITEMCOUNT         = 0x0160;
    public static final int LM_INSERTITEM              =0x0161;
    public static final int LM_SETTOPINDEX             = 0x0162;
@@ -1807,7 +1807,7 @@ public class OS {
    public static final int LM_SETITEMTEXT             = 0x0166;
    public static final int LM_QUERYITEMTEXTLENGTH     = 0x0167;
    public static final int LM_QUERYITEMTEXT           = 0x0168;
-   
+
    public static final int LM_SETITEMHANDLE           = 0x0169;
    public static final int LM_QUERYITEMHANDLE         = 0x016a;
    public static final int LM_SEARCHSTRING            = 0x016b;
@@ -1816,36 +1816,36 @@ public class OS {
    public static final int LM_DELETEALL               = 0x016e;
    public static final int LM_INSERTMULTITEMS         = 0x016f;
    public static final int LM_SETITEMWIDTH            = 0x0660;
-   
-   
+
+
    /* List box constants */
-   
+
    public static final int LIT_CURSOR          = -4;
    public static final int LIT_ERROR                  = -3;
    public static final int LIT_MEMERROR               = -2;
    public static final int LIT_NONE                   = -1;
    public static final int LIT_FIRST                  = -1;
-   
+
    /* For LM_INSERTITEM msg */
-   
+
    public static final int LIT_END                    = -1;
    public static final int LIT_SORTASCENDING          = -2;
    public static final int LIT_SORTDESCENDING         = -3;
-   
+
    /* For LM_SEARCHSTRING msg */
-   
+
    public static final int LSS_SUBSTRING              = 0x0001;
    public static final int LSS_PREFIX                 = 0x0002;
    public static final int LSS_CASESENSITIVE          = 0x0004;
 
   /* List box notification messages */
-   
+
    public static final int LN_SELECT                  =1;
    public static final int LN_SETFOCUS              =2;
    public static final int LN_KILLFOCUS              =3;
    public static final int LN_SCROLL                  =4;
    public static final int LN_ENTER                   =5;
-   
+
    /*  combo box styles*/
    public static final int CBS_SIMPLE                 = 0x0001;
    public static final int CBS_DROPDOWN            = 0x0002;
@@ -1854,11 +1854,11 @@ public class OS {
    /* IDs of combobox entry field and listbox.*/
    public static final int CBID_LIST                   = 0x029A;
    public static final int CBID_EDIT                   = 0x029B;
-   
+
    public static final int CBM_SHOWLIST               = 0x0170;
    public static final int CBM_HILITE                 = 0x0171;
    public static final int CBM_ISLISTSHOWING          = 0x0172;
-   
+
    public static final int CBN_EFCHANGE               = 1;
    public static final int CBN_EFSCROLL              = 2;
    public static final int CBN_MEMERROR               = 3;
@@ -1871,7 +1871,7 @@ public class OS {
    /*                          N O T E B O O K                           */
    /*                                                                    */
    /**********************************************************************/
-   
+
    /**********************************************************************/
    /* Message ids                                                        */
    /**********************************************************************/
@@ -1899,20 +1899,20 @@ public class OS {
    public static final int BKM_QUERYPAGEINFO        = 0x0368;   /* Query page information   */
    public static final int BKM_SETTABCOLOR          = 0x0374;  /* Set book tab color        */
    public static final int BKM_SETNOTEBOOKBUTTONS   = 0x0375;  /* Set common pushbuttons    */
-   
+
    public static final int BKN_PAGESELECTED         = 130;     /* New page selected by user */
    public static final int BKN_NEWPAGESIZE          = 131;     /* App page size changed     */
    public static final int BKN_HELP                 = 132;     /* Help notification         */
    public static final int BKN_PAGEDELETED          = 133;     /* Page deleted notification */
    public static final int BKN_PAGESELECTEDPENDING  = 134;     /* New page selected by user */
-   
+
    /**********************************************************************/
    /* Page deletion flags (usDeleteFlag)                                 */
    /**********************************************************************/
    public static final int BKA_ALL                  = 0x0001;  /* all pages                 */
    public static final int BKA_SINGLE               = 0x0002;  /* single page               */
    public static final int BKA_TAB                  = 0x0004;  /* minor/major section       */
-   
+
    /**********************************************************************/
    /* Page insertion/query order (usPageOrder, usQueryOrder)             */
    /**********************************************************************/
@@ -1921,14 +1921,14 @@ public class OS {
    public static final int BKA_NEXT                 = 0x0008;  /* Insert/Query after page   */
    public static final int BKA_PREV                 = 0x0010;  /* Insert/Query before page  */
    public static final int BKA_TOP                  = 0x0020;  /* Query topmost page        */
-   
+
    /**********************************************************************/
    /* Notebook region types (usBookRegion, usType)                       */
    /**********************************************************************/
    public static final int BKA_MAJORTAB             = 0x0001;  /* Major Tab                 */
    public static final int BKA_MINORTAB             = 0x0002;  /* Minor Tab                 */
    public static final int BKA_PAGEBUTTON           = 0x0100;  /* Page Turning Button       */
-   
+
    /**********************************************************************/
    /* Page insertion/query styles (usPageStyle,usQueryEnd)               */
    /**********************************************************************/
@@ -1937,23 +1937,23 @@ public class OS {
    public static final int BKA_MINOR                = 0x0080;  /* Minor Tab                 */
    public static final int BKA_AUTOPAGESIZE         = 0x0100;  /* Page window position/size */
    public static final int BKA_END                  = 0x0200;  /* Query to end of book      */
-   
+
    /**********************************************************************/
    /* Tab window contents (usTabDisplay)                                 */
    /**********************************************************************/
    public static final int BKA_TEXT                 = 0x0400;  /* text data                 */
    public static final int BKA_BITMAP               = 0x0800;  /* bitmap                    */
-   
+
    /**********************************************************************/
    /* Tabbed dialog-specific constants                                   */
    /**********************************************************************/
    public static final int BKA_AUTOCOLOR            = (-1);    /* Automatically color tabs  */
    public static final int BKA_MAXBUTTONID          = 7999;    /* Max id for common buttons */
-   
+
    /**********************************************************************/
    /* Notebook window styles (ulNotebookStyles)                          */
    /**********************************************************************/
-   
+
    /**********************************************************************/
    /* Backpage Orientation                                               */
    /**********************************************************************/
@@ -1961,7 +1961,7 @@ public class OS {
    public static final int BKS_BACKPAGESBL          = 0x00000002;  /* Bottom left           */
    public static final int BKS_BACKPAGESTR          = 0x00000004;   /* Top right             */
    public static final int BKS_BACKPAGESTL          = 0x00000008;  /* Top left              */
-   
+
    /**********************************************************************/
    /* Major Tab Side                                                     */
    /**********************************************************************/
@@ -1969,40 +1969,40 @@ public class OS {
    public static final int BKS_MAJORTABLEFT         = 0x00000020;  /* Major tabs left       */
    public static final int BKS_MAJORTABTOP          = 0x00000040;  /* Major tabs top        */
    public static final int BKS_MAJORTABBOTTOM       = 0x00000080;  /* Major tabs bottom     */
-   
+
    /**********************************************************************/
    /* Tab Type                                                           */
    /**********************************************************************/
    public static final int BKS_SQUARETABS           = 0x00000000;  /* Square edged tabs     */
    public static final int BKS_ROUNDEDTABS          = 0x00000100;  /* Round edged tabs      */
    public static final int BKS_POLYGONTABS          = 0x00000200;  /* Polygon edged tabs    */
-   
+
    /**********************************************************************/
    /* Binding type                                                       */
    /**********************************************************************/
    public static final int BKS_SOLIDBIND            = 0x00000000;  /* Solid binding         */
    public static final int BKS_SPIRALBIND           = 0x00000400;  /* Spiral binding        */
-   
+
    /**********************************************************************/
    /* Status line text justification                                     */
    /**********************************************************************/
    public static final int BKS_STATUSTEXTLEFT       = 0x00000000;  /* Left justify text     */
    public static final int BKS_STATUSTEXTRIGHT      = 0x00001000;  /* Right justify text    */
    public static final int BKS_STATUSTEXTCENTER     = 0x00002000;  /* Center text           */
-   
+
    /**********************************************************************/
    /* Tab text justification                                             */
    /**********************************************************************/
    public static final int BKS_TABTEXTLEFT          = 0x00000000;  /* Left justify tab text */
    public static final int BKS_TABTEXTRIGHT         = 0x00004000;  /* Right justify tab text*/
    public static final int BKS_TABTEXTCENTER        = 0x00008000;  /* Center tab text       */
-   
+
    /**********************************************************************/
    /* Tabbed dialog styles                                               */
    /**********************************************************************/
    public static final int BKS_TABBEDDIALOG         = 0x00000800;  /* Tabbed dialog         */
    public static final int BKS_BUTTONAREA           = 0x00000200;  /* Reserve space for     */
-   
+
    /**********************************************************************/
    /* Notebook color presentation param attributes                       */
    /**********************************************************************/
@@ -2018,15 +2018,15 @@ public class OS {
    public static final int BKA_FOREGROUNDMINORCOLOR      = 0x000A;
 
       /* Menu control styles */
-   
+
    public static final int MS_ACTIONBAR               = 0x00000001;
    public static final int MS_TITLEBUTTON            =  0x00000002;
    public static final int MS_VERTICALFLIP            = 0x00000004;
-   
+
    public static final int MS_CONDITIONALCASCADE      = 0x00000040;
-           
+
    /* Menu control messages */
-   
+
    public static final int MM_INSERTITEM              = 0x0180;
    public static final int MM_DELETEITEM              = 0x0181;
    public static final int MM_QUERYITEM               = 0x0182;
@@ -2047,7 +2047,7 @@ public class OS {
    public static final int MM_SETITEMATTR             = 0x0192;
    public static final int MM_ISITEMVALID             = 0x0193;
    public static final int MM_QUERYITEMRECT           = 0x0194;
-   
+
    public static final int MM_QUERYDEFAULTITEMID      = 0x0431;
    public static final int MM_SETDEFAULTITEMID        = 0x0432;
 
@@ -2057,18 +2057,18 @@ public class OS {
    public static final int MIT_ERROR                  = -1;
    public static final int MIT_FIRST                  = -2;
    public static final int MIT_LAST                   = -3;
-//   public static final int MID_NONE                   
+//   public static final int MID_NONE
    public static final int MID_ERROR                  = -1;
-   
+
    /* Menu item styles & attributes */
-   
+
    public static final int MIS_TEXT                   = 0x0001;
-   
+
    public static final int MIS_BITMAP                 = 0x0002;
    public static final int MIS_SEPARATOR              = 0x0004;
-   
+
    public static final int MIS_OWNERDRAW             =  0x0008;
-   
+
    public static final int MIS_SUBMENU                = 0x0010;
    public static final int MIS_MULTMENU               = 0x0020;      /* multiple choice submenu     */
    public static final int MIS_SYSCOMMAND             = 0x0040;
@@ -2081,7 +2081,7 @@ public class OS {
    /* In multiple choice submenus a style of 'single' denotes the item is a
    ** radiobutton.  Absence of this style defaults the item to a checkbox.       */
    public static final int MIS_SINGLE                 = 0x2000;
-   
+
    public static final int MIA_NODISMISS              = 0x0020;
    public static final int MIA_FRAMED                 = 0x1000;
    public static final int MIA_CHECKED                = 0x2000;
@@ -2089,17 +2089,17 @@ public class OS {
    public static final int MIA_HILITED                = 0x8000;
 
    public static final int PU_POSITIONONITEM          = 0x0001; /* Need idItem parameter */
-   
+
    public static final int PU_HCONSTRAIN              = 0x0002; /* Keep menu on left and right edge */
    public static final int PU_VCONSTRAIN              = 0x0004; /* Keep menu on top and bottom edge */
-   
+
    public static final int PU_NONE                    = 0x0000; /* If invoked by keyboard */
    public static final int PU_MOUSEBUTTON1DOWN        = 0x0008; /* If invoked by button 1 */
    public static final int PU_MOUSEBUTTON2DOWN        = 0x0010; /* If invoked by button 2 */
    public static final int PU_MOUSEBUTTON3DOWN        = 0x0018; /* If invoked by button 3 */
-   
+
    public static final int PU_SELECTITEM              = 0x0020; /* Set selected item (use with kbd) */
-   
+
    public static final int PU_MOUSEBUTTON1            = 0x0040; /* If button1 use allowed */
    public static final int PU_MOUSEBUTTON2            = 0x0080; /* If button2 use allowed */
    public static final int PU_MOUSEBUTTON3            = 0x0100; /* If button3 use allowed */
@@ -2115,7 +2115,7 @@ public class OS {
   public static final int AF_LONEKEY                 = 0x0040;
   public static final int AF_SYSCOMMAND              = 0x0100;
   public static final int AF_HELP                    = 0x0200;
-  
+
 /* Standard WM_SYSCOMMAND command values */
   public static final int SC_SIZE                    = 0x8000;
   public static final int SC_MOVE                    = 0x8001;
@@ -2152,7 +2152,7 @@ public class OS {
    /*                            S L I D E R                             */
    /*                                                                    */
    /**********************************************************************/
-   
+
    /**********************************************************************/
    /* Define messages for the slider control                             */
    /**********************************************************************/
@@ -2194,7 +2194,7 @@ public class OS {
    public static final int SLS_HOMERIGHT        = 0x00000200; /* Set home position at right*/
    public static final int SLS_PRIMARYSCALE1    = 0x00000000; /* Scale 1 is primary scale  */
    public static final int SLS_PRIMARYSCALE2    = 0x00000400; /* Scale 2 is primary scale  */
-   
+
    /**********************************************************************/
    /* Message attributes for setting and querying slider components      */
    /**********************************************************************/
@@ -2207,7 +2207,7 @@ public class OS {
    public static final int SMA_RANGEVALUE           = 0x0000;
    public static final int SMA_INCREMENTVALUE       = 0x0001;
    public static final int SMA_SETALLTICKS          = 0xFFFF;
-   
+
    /**********************************************************************/
    /* Ownerdraw flag definitions                                         */
    /**********************************************************************/
@@ -2215,12 +2215,131 @@ public class OS {
    public static final int SDA_SLIDERSHAFT          = 0x0002;
    public static final int SDA_BACKGROUND           = 0x0003;
    public static final int SDA_SLIDERARM            = 0x0004;
-   
+
    /*** WM_HITTEST return codes ********************************************/
-   public static final int HT_NORMAL                   = 0;
-   public static final int HT_TRANSPARENT          = -1;
-   public static final int HT_DISCARD                  =-2;
-   public static final int HT_ERROR                      =-3;
+   public static final int HT_NORMAL                 =  0;
+   public static final int HT_TRANSPARENT            =  -1;
+   public static final int HT_DISCARD                =  -2;
+   public static final int HT_ERROR                  =  -3;
+
+  /**********************************************************************/
+   /* Progress Bar Control from eCO Soft                                         */
+  /**********************************************************************/
+
+ /* Resource type for PNG inmage in the resource module
+ * This type to be used to define sequences of the images
+ * for progress animations
+ */
+public static final int  RT_PNG     = 400;
+
+// Resource IDs of dialog frames
+public static final int ID_DLG_FRAME                    = 5000;
+public static final int ID_DLG_FRAME_NOMINBUTTON        = 5050;
+public static final int ID_DLG_NOFRAME                  = 5100;
+
+// Default IDs of the dialog controls
+public static final int ID_CAPTION_1            = 5201; // Caption 1
+public static final int ID_CAPTION_2           =  5202; // Caption 2
+public static final int ID_CAPTION_3            = 5203; // Caption 3
+public static final int ID_PROGRESS_BAR         = 5500; // Progress bar
+public static final int ID_PROGRESS_ICON        = 5501; // Progress icon
+
+public static final int ID_BUTTON_1                 = 3;
+public static final int ID_BUTTON_2                 = 4;
+public static final int ID_BUTTON_3                 = 5;
+public static final int ID_BUTTON_HELP              = 6;
+
+/* Constant to leave attributes unchanged. Used with prgSetuAttributes() call */
+public static final int LEAVE_AS_IS                             = -1;
+
+/* Constants, used to specify which caption is to be changed
+ * in the progress dialog
+ * Used with prgSetCaption() call
+ */
+public static final int CAPTION_SET_TITLE                       = 0; // Progress dialog's title
+public static final int CAPTION_SET_DIALOG                      = 0; // Progress dialog
+public static final int CAPTION_SET_1                           = 1; // First (topmost) caption - top aligned
+public static final int CAPTION_SET_2                           = 2; // Second caption          - center aligned
+public static final int CAPTION_SET_3                           = 3; // Third caption           - bottom aligned
+public static final int CAPTION_SET_BUTTON                      = 4; // Cancel button
+public static final int CAPTION_SET_PROGRESS_BAR                = 5; // Progress Bar
+public static final int CAPTION_SET_PROGRESS_ICON               = 6; // Progress Icon
+public static final int CAPTION_SET_BUT_1                       = 7; // Ok button
+public static final int CAPTION_SET_BUT_2                       = 8; // Retry button
+public static final int CAPTION_SET_BUT_3                       = 4; // Cancel button
+public static final int CAPTION_SET_BUT_HELP                    = 9; // Ignore button
+
+/* Progress dialog creation flags
+ * Used with prgShowDlg() call
+ */
+public static final int PRS_SHOW                = 0x0001;  // Show dialog. If not set progress dialog window will not be shown during creation. It must be shown later with WinShowIndow() call.
+public static final int PRS_NOMINBUTTON  = 0x0004;  // No minimize button will appear on the titlebar. Progress dialog will not appear in the window list. This flag is ignored, if progress dialog have no frame (pszTitle = NULL in the PrgShowDlg() call).
+public static final int PRS_ICON                = 0x0008;  // Progress icon exists
+public static final int PRS_ICONPERCENT = 0x0010;  // Progress icon shows percentage. If this flag is not set, icon shows either looped animation or a single image.
+public static final int PRS_BAR         = 0x0020;  // Progress bar exists.
+public static final int PRS_IMAGE       = 0x0040;  // Progress bar displayed using a pair PNG images from the resource file. If PRS_BAR flag is not set, this flag is ignored.
+public static final int PRS_SEGMENTED   = 0x0080;  // Progress basr is segmented. If PRS_BAR flag is not set, this flag is ignored.
+                                                            // PRS_SEGMENTED and PRS_IMAGE are mutually exclusive.
+                                                            // If neither PRS_SEGMENTED nor PRS_IMAGE flag is not set, solid progress bar displayed.
+public static final int PRS_BUT_2      = 0x0100;   // 1st button present
+public static final int PRS_BUT_3      = 0x0200;   // 1st button present
+public static final int PRS_BUT_HELP   = 0x0400;   // Help button present
+public static final int PRS_DISMISS    = 0x1000;   // Dismiss dialog on a button click
+public static final int PRS_OWNLANGE   = 0x2000;   // Use own LANGE handle
+
+public static final int PRL_DISMISS     = 0x00000001;  // Dismiss dialog on a button click
+
+
+public static final int MB_BIGICON		= 0x00010000;      // "Big icon" flag
+public static final int MB_ANIMATED     = 0x00020000;  // "Animated" flag
+public static final int MB_COMMENT      = 0x00040000;  // "Comment" flag
+public static final int MB_OWNCAPTIONS  = 0x00080000;  // "Own captions" flag
+public static final int MB_OWNLANGE		= 0x00100000;  // "Own LANGE" flag
+public static final int MB_MINBUTTON	= 0x00200000;  // "Own LANGE" flag
+public static final int MB_NODEFBUTTON  = 0x00000300;      // No default button
+
+public static final int ID_ANIMATION    = 0xA1F2;  // Animation timer ID
+
+/* IDs of the button captions */
+public static final int LID_OK          = 0;
+public static final int LID_CANCEL      = 1;
+public static final int LID_YES         = 2;
+public static final int LID_NO          = 3;
+public static final int LID_ENTER       = 4;
+public static final int LID_ABORT       = 5;
+public static final int LID_RETRY       = 6;
+public static final int LID_IGNORE      = 7;
+public static final int LID_HELP        = 8;
+
+/* Constant for the resource IDs of the default image sequences
+ * in the PROGRESS.DLL
+ * Used with prgShowDlg() call
+ */
+public static final int ID_PROGRESS_PNG_ICON_PERCENT    = 2000; // An image sequence, used to display icon with percentage. Minimum 2 images, maximum 101 image.
+public static final int ID_PROGRESS_PNG_ICON                    = 2100; // An image sequence used to display animated icon looop.
+public static final int ID_PROGRESS_PNG_ICON_STATIC     = 2111; // An image used to display one static icon.
+public static final int ID_PROGRESS_PNG_BAR             = 2500; // A pair of images, used to display graphical progress bar.
+
+public static final int IDP_ICON_ERROR_32               = 3000; // "Error" - "X" icon 32x32
+public static final int IDP_ICON_ERROR_40               = 3020; // "Error" - "X" icon 40x40
+public static final int IDP_ICON_ERROR_64               = 3040; // "Error" - "X" icon 64x64
+public static final int IDP_ICON_ERROR_80               = 3060; // "Error" - "X" icon 80x80
+
+public static final int IDP_ICON_INFO_32                = 3100; // "Information" - "i" icon 32x32
+public static final int IDP_ICON_INFO_40                = 3120; // "Information" - "i" icon 40x40
+public static final int IDP_ICON_INFO_64                = 3140; // "Information" - "i" icon 64x64
+public static final int IDP_ICON_INFO_80                = 3160; // "Information" - "i" icon 80x80
+
+public static final int IDP_ICON_QUERY_32               = 3200; // "Query" - "?" icon 32x32
+public static final int IDP_ICON_QUERY_40               = 3220; // "Query" - "?" icon 40x40
+public static final int IDP_ICON_QUERY_64               = 3240; // "Query" - "?" icon 64x64
+public static final int IDP_ICON_QUERY_80               = 3260; // "Query" - "?" icon 80x80
+
+public static final int IDP_ICON_WARNING_32             = 3300; // "Warning" - "!" icon 32x32
+public static final int IDP_ICON_WARNING_40             = 3320; // "Warning" - "!" icon 40x40
+public static final int IDP_ICON_WARNING_64             = 3340; // "Warning" - "!" icon 64x64
+public static final int IDP_ICON_WARNING_80             = 3360; // "Warning" - "!" icon 80x80
+
 
    public static final int SPTR_ARROW                  = 1;
    public static final int SPTR_TEXT                  = 2;
@@ -2414,7 +2533,7 @@ public class OS {
 
 /* PM macros */
 
-public static final short SHORT1FROMMP (int mp) { return (short)mp; }    
+public static final short SHORT1FROMMP (int mp) { return (short)mp; }
 public static final short SHORT2FROMMP (int mp) { return (short)(((mp & 0xFFFF0000)>>16) & 0xFFFF); }
 //((pixels & 0xFFFF0000)>>16) & 0xFFFF
 //public static final int MPFROM2SHORT(short s1, short s2){ return (((int)((short)s1)) | ((int)((short)s2)) << 16);}
@@ -2435,8 +2554,8 @@ public static final native void memset (int str, int ch, int n);
 public static final native int strlen (int str);
 
 /* Native<->Java Object copiers */
-    
-public static final native void objcpy (int to, int[] from);    
+
+public static final native void objcpy (int to, int[] from);
 public static final native void objcpy (int[] to, int from);
 
 public static final native void objcpy (int to, byte[] from);    
@@ -2445,16 +2564,16 @@ public static final native void objcpy (byte[] to, int from);
 public static final native void objcpy (int to, TIB from);    
 public static final native void objcpy (TIB to, int from);
 
-public static final native void objcpy (int to, PIB from);    
+public static final native void objcpy (int to, PIB from);
 public static final native void objcpy (PIB to, int from);
 
-public static final native void objcpy (int to, RECTL from);    
+public static final native void objcpy (int to, RECTL from);
 public static final native void objcpy (RECTL to, int from);
 
-public static final native void objcpy (int to, SWP from);    
+public static final native void objcpy (int to, SWP from);
 public static final native void objcpy (SWP to, int from);
 
-public static final native void objcpy (int to, OWNERITEM from);    
+public static final native void objcpy (int to, OWNERITEM from);
 public static final native void objcpy (OWNERITEM to, int from);
 
 public static final native void objcpy (int to, RECORDCORE from);    
@@ -2527,7 +2646,7 @@ public static final native boolean WinSetWindowPtr (int hwnd, int lb, int pp);
 public static final native boolean WinQueryWindowRect (int hwnd, RECTL prclDest);
 public static final native boolean WinMapWindowPoints (int hwndFrom, int hwndTo,
        int [] prgptl, int cwpt);
-       
+
 public static final native boolean WinQueryWindowPos (int hwnd, SWP pswp);
 public static final native boolean WinSetWindowPos (int hwnd, int hwndInsertBehind,
     int x, int y, int cx, int cy, int fl);
@@ -2564,7 +2683,7 @@ public static final native int WinGetScreenPS (int hwndDeskTop);
 public static final native boolean WinReleasePS (int hps);
 public static final native int WinBeginPaint (int hwnd, int hps, RECTL prclPaint);
 public static final native boolean WinEndPaint (int hps);
-public static final native boolean WinInvalidateRect (int hwnd, RECTL pwrc, 
+public static final native boolean WinInvalidateRect (int hwnd, RECTL pwrc,
     boolean fIncludeChildren);
 public static final native boolean WinUpdateWindow (int hwnd);
 public static final native int WinScrollWindow (int hwnd, int lDx, int lDy,
@@ -2585,9 +2704,9 @@ public static final native int WinRealizePalette (int hwnd, int hps, int[] pcclr
 
 public static final native int WinGetSysBitmap (int hwndDesktop, int ibm);
 
-public static final native boolean WinSetPresParam (int hwnd, int idAttrType, 
+public static final native boolean WinSetPresParam (int hwnd, int idAttrType,
     int cbAttrValueLen, int[] pAttrValue);
-public static final native boolean WinSetPresParam (int hwnd, int idAttrType, 
+public static final native boolean WinSetPresParam (int hwnd, int idAttrType,
     int cbAttrValueLen, byte[] pAttrValue);
 public static final native int WinQueryPresParam (int hwnd, int idAttrType1,
     int idAttrType2, int[] pidAttrTypeFound, int cbAttrValueLen, byte[] pAttrValue,
@@ -2602,12 +2721,12 @@ public static final native boolean WinDrawPointer (int hps, int lx, int ly,
     int hptrPointer, int ulHalftone);
 
 public static final native int WinDrawText (int hps, int cchText,
-//@@TODO (dmik): Unicode     
+//@@TODO (dmik): Unicode
 //    char[] lpchText, RECTL prcl, int clrFore, int clrBack, int flCmd);
     byte[] lpchText, RECTL prcl, int clrFore, int clrBack, int flCmd);
-    
+
 public static final native int WinGetKeyState (int hwndDesktop, int vkey);
-    
+
 public static final native int WinMessageBox (int hwndParent, int hwndOwner,
     PSZ pszMessage, PSZ pszTitle, int ulWinId, int flStyle);
 
@@ -2648,7 +2767,7 @@ public static final native boolean PrfQueryProfileSize (int hini, PSZ pszApp,
     PSZ pszKey, int[] pulDataLen);
 public static final native int PrfQueryProfileString (int hini, PSZ pszApp,
     PSZ pszKey, PSZ pszDefault, byte[] pBuffer, int ulBufferMax);
-    
+
 // PM helpers
 
 public static final native int WinCallWindowProc (int pWindowProc, int hwnd,
@@ -2737,7 +2856,7 @@ public static final native int GpiQueryAttrs (int hps, int lPrimType,
     int flAttrMask, int[] ppbunAttrs);
 public static final native boolean GpiSetAttrs (int hps, int lPrimType,
     int flAttrMask, int flDefMask, int[] ppbunAttrs);
-       
+
 public static final native boolean GpiQueryDefaultViewMatrix (int hps, int lCount,
     int[] pmatlfArray);
 public static final native boolean GpiSetDefaultViewMatrix (int hps, int lCount,
@@ -2762,11 +2881,11 @@ public static final native int GpiDrawBits (int hps, byte[] pBits, int[] pbmiInf
 
 public static final native boolean GpiSetTextAlignment (int hps, int lHoriz, int lVert);
 public static final native int GpiCharStringAt (int hps, int[] pptlPoint, int lCount,
-//@@TODO (dmik): Unicode     
+//@@TODO (dmik): Unicode
 //    char[] pchString);
     byte[] pchString);
 public static final native boolean GpiQueryTextBox (int hps, int lCount1,
-//@@TODO (dmik): Unicode     
+//@@TODO (dmik): Unicode
 //    char[] pchString, int lCount2, int[] aptlPoints);
     byte[] pchString, int lCount2, int[] aptlPoints);
 
@@ -2776,7 +2895,13 @@ public static final native int GpiQueryFonts (int hps, int flOptions,
 public static final native int GpiCreateLogFont (int hps, byte[] pName, int lLcid,
     FATTRS pfatAttrs);
 public static final native boolean GpiSetCharSet (int hps, int llcid);
-public static final native boolean GpiSetCharBox (int hps, int[] psizfxBox);                
+public static final native boolean GpiSetCharBox (int hps, int[] psizfxBox);
 public static final native boolean GpiQueryFontMetrics (int hps, int lMetricsLength, FONTMETRICS pfmMetrics);
+
+// Extended Controls eCo Toolkit
+public static final native int PrgShowDlg (int hwndParent, int hwndOwner, short fsFlags, int hmodResource, int ulIcon, int ulBar, short usId, PSZ pszTitle, PSZ pszButton1, PSZ pszCaption1, PSZ pszCaption2, PSZ pszCaption3);
+public static final native boolean PrgSetupAttributes(int hwndDlg, int  ulControlIndex, int[] pulForegroundColor, int[] pulBackgroundColor, PSZ pszFontNameSize, boolean flUpdate);
+public static final native int PrgSetPercentage(int hwndProgress, short usPercent);
+//public static final native boolean PrgSetupCaption(int hwndDlg, int  ulControlIndex, PSZ pszText, boolean flUpdate);
 }
 
