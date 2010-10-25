@@ -18,6 +18,7 @@
 #include "structs.h"
 #include "editcol.h"
 #include "ft2lib.h"
+#include "progress.h"
 #include <malloc.h>
 #include <memory.h>
 
@@ -2999,5 +3000,72 @@ JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_GpiQueryFontMetri
 
     return rc;
 }
+
+
+JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_PrgShowDlg
+        (JNIEnv *env, jclass that, jint hwndParent, jint hwndOwner, jshort fsFlags, jint hmodResource, jint ulIcon, jint ulBar, jshort usId, jobject pszTitle, jobject pszButton1, jobject pszCaption1, jobject pszCaption2, jobject pszCaption3)
+{
+    PSZ c_pszTitle = NULL;
+    PSZ c_pszButton1 = NULL;
+    PSZ c_pszCaption1 = NULL;
+    PSZ c_pszCaption2 = NULL;
+    PSZ c_pszCaption3 = NULL;
+    jint rc;
+
+    DEBUG_CALL("PrgShowDlg\n")
+    if (pszTitle) c_pszTitle = getPSZBytes(env, pszTitle);
+    if (pszButton1) c_pszButton1 = getPSZBytes(env, pszButton1);
+    if (pszCaption1) c_pszCaption1 = getPSZBytes(env, pszCaption1);
+    if (pszCaption2) c_pszCaption2 = getPSZBytes(env, pszCaption2);
+    if (pszCaption3) c_pszCaption3 = getPSZBytes(env, pszCaption3);
+    rc = (jint)PrgShowDlg((HWND)hwndParent, (HWND)hwndOwner, fsFlags, (HMODULE)hmodResource, ulIcon, ulBar, usId, c_pszTitle, c_pszButton1, c_pszCaption1, c_pszCaption2, c_pszCaption3);
+    if (pszTitle) releasePSZBytes(env, pszTitle, c_pszTitle);
+    if (pszButton1) releasePSZBytes(env, pszButton1, c_pszButton1);
+    if (pszCaption1) releasePSZBytes(env, pszCaption1, c_pszCaption1);
+    if (pszCaption2) releasePSZBytes(env, pszCaption2, c_pszCaption2);
+     if (pszCaption3) releasePSZBytes(env, pszCaption3, c_pszCaption3);
+
+    return rc;
+}
+
+JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_PrgSetupAttributes
+        (JNIEnv *env, jclass that, jint hwndDlg, jint ulControlIndex,jintArray pulForegroundColor, jintArray pulBackgroundColor, jobject pszFontNameSize, jboolean flUpdate)
+{
+    DECL_GLOB(pGlob)
+    jboolean rc;
+
+    jint *c_pulForegroundColor = NULL;
+    jint *c_pulBackgroundColor = NULL;
+    PSZ c_pszFontNameSize = NULL;
+
+    DEBUG_CALL("PrgSetupAttributes\n")
+
+    if (pulForegroundColor) c_pulForegroundColor = (*env)->GetIntArrayElements(env, pulForegroundColor, NULL);
+    if (pulBackgroundColor) c_pulBackgroundColor = (*env)->GetIntArrayElements(env, pulBackgroundColor, NULL);
+    if (pszFontNameSize) c_pszFontNameSize = getPSZBytes(env, pszFontNameSize);
+
+    rc = (jboolean)PrgSetupAttributes((HWND)hwndDlg, ulControlIndex, c_pulForegroundColor, c_pulBackgroundColor, c_pszFontNameSize, flUpdate);
+
+    if (pszFontNameSize) releasePSZBytes(env, pszFontNameSize, c_pszFontNameSize);
+    if (pulBackgroundColor) (*env)->ReleaseIntArrayElements(env, pulBackgroundColor, c_pulBackgroundColor, 0);
+    if (pulForegroundColor) (*env)->ReleaseIntArrayElements(env, pulForegroundColor, c_pulForegroundColor, 0);
+
+    return rc;
+}
+
+JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_PrgSetPercentage
+        (JNIEnv *env, jclass that, jint hwndProgress, jshort usPercent)
+{
+    DECL_GLOB(pGlob)
+    jint rc;
+
+    DEBUG_CALL("PrgSetPercentage\n")
+
+    rc = (jint)PrgSetPercentage((HWND)hwndProgress, usPercent);
+
+
+    return rc;
+}
+
 
 
