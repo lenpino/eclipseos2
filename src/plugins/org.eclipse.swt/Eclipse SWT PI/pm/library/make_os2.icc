@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002, 2004 EclipseOS2 Team.
+ * Copyright (c) 2002, 2009 EclipseOS2 Team.
  * This file is made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/cpl-v10.html
@@ -22,7 +22,7 @@ option ProjectOptions =
     {
         target $SWT_LIB
         {
-		source type(lib) "ft2lib.lib"
+		source type(lib) "ft2lib.lib","progress.lib"
             	source "editcol.c", "editcol.h", "editcol.rc", "swt.c", "structs.c", "callback.c"
         }
     }
