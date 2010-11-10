@@ -29,144 +29,127 @@ import org.eclipse.swt.graphics.*;
  * </p>
  */
 public class ProgressBar extends Control {
-        int maxRange;
-        int minRange;
+        int maxRange = 100;
+        int minRange = 0;
         int position;
-//	static final int ProgressBarProc;
-//	static final TCHAR ProgressBarClass = new TCHAR (0, OS.PROGRESS_CLASS, true);
-//	static {
-//		WNDCLASS lpWndClass = new WNDCLASS ();
-//		OS.GetClassInfo (0, ProgressBarClass, lpWndClass);
-//		ProgressBarProc = lpWndClass.lpfnWndProc;
-//	}
-//
-///**
-// * Constructs a new instance of this class given its parent
-// * and a style value describing its behavior and appearance.
-// * <p>
-// * The style value is either one of the style constants defined in
-// * class <code>SWT</code> which is applicable to instances of this
-// * class, or must be built by <em>bitwise OR</em>'ing together
-// * (that is, using the <code>int</code> "|" operator) two or more
-// * of those <code>SWT</code> style constants. The class description
-// * lists the style constants that are applicable to the class.
-// * Style bits are also inherited from superclasses.
-// * </p>
-// *
-// * @param parent a composite control which will be the parent of the new instance (cannot be null)
-// * @param style the style of control to construct
-// *
-// * @exception IllegalArgumentException <ul>
-// *    <li>ERROR_NULL_ARGUMENT - if the parent is null</li>
-// * </ul>
-// * @exception SWTException <ul>
-// *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the parent</li>
-// *    <li>ERROR_INVALID_SUBCLASS - if this class is not an allowed subclass</li>
-// * </ul>
-// *
-// * @see SWT#SMOOTH
-// * @see SWT#HORIZONTAL
-// * @see SWT#VERTICAL
-// * @see Widget#checkSubclass
-// * @see Widget#getStyle
-// */
+	static final int ProgressBarProc;
+        static final PSZ ProgressBarClass = PSZ.getAtom (OS.WC_SLIDER);
+	static {
+		CLASSINFO lpWndClass = new CLASSINFO ();
+		OS.WinQueryClassInfo (OS.NULLHANDLE, ProgressBarClass, lpWndClass);
+		ProgressBarProc = lpWndClass.pfnWindowProc;
+	}
+/**
+* Constructs a new instance of this class given its parent
+* and a style value describing its behavior and appearance.
+* <p>
+* The style value is either one of the style constants defined in
+* class <code>SWT</code> which is applicable to instances of this
+* class, or must be built by <em>bitwise OR</em>'ing together
+* (that is, using the <code>int</code> "|" operator) two or more
+* of those <code>SWT</code> style constants. The class description
+* lists the style constants that are applicable to the class.
+* Style bits are also inherited from superclasses.
+* </p>
+*
+* @param parent a composite control which will be the parent of the new instance (cannot be null)
+* @param style the style of control to construct
+*
+* @exception IllegalArgumentException <ul>
+*    <li>ERROR_NULL_ARGUMENT - if the parent is null</li>
+* </ul>
+* @exception SWTException <ul>
+*    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the parent</li>
+*    <li>ERROR_INVALID_SUBCLASS - if this class is not an allowed subclass</li>
+* </ul>
+*
+* @see SWT#SMOOTH
+* @see SWT#HORIZONTAL
+* @see SWT#VERTICAL
+* @see Widget#checkSubclass
+* @see Widget#getStyle
+*/
 public ProgressBar (Composite parent, int style) {
-//	super (parent, checkStyle (style));
-        PSZ pszTitle = new PSZ("u");
-        PSZ pszButton1 = new PSZ("Text 2");
-        PSZ pszCaption1 = new PSZ("Text 3");
-        PSZ pszCaption2 = new PSZ("Text 4");
-        PSZ pszCaption3 = new PSZ("Text 5");
-        PSZ pszFontNameSize = new PSZ("9.WarpSans Bold");
-        if ((handle=OS.PrgShowDlg(OS.HWND_DESKTOP, parent.handle, (short)(OS.PRS_SHOW | OS.PRS_BAR | OS.PRS_SEGMENTED), -1,0, 0, (short)1234, null, null, null, null, null)) != OS.NULLHANDLE){        
-            int[] pulForegroundColor = new int[1];
-            int[] pulBackgroundColor = new int[1];
-            pulForegroundColor[0] = OS.LEAVE_AS_IS;
-            pulBackgroundColor[0] = OS.LEAVE_AS_IS;
-//            if(!OS.PrgSetupAttributes(handle, OS.CAPTION_SET_1, pulForegroundColor, pulBackgroundColor, pszFontNameSize, true))
-//                System.out.println("Couldn't create progress dialog! ");
-        }
-        else{
-            System.out.println("Couldn't create progress dialog! ");
-        }
+	super (parent, checkStyle (style));
+	OS.WinSendMsg(handle, OS.SLM_SETSLIDERINFO, OS.MPFROM2SHORT((short)OS.SMA_SHAFTDIMENSIONS, (short)0), 15);
 }
 
 int callWindowProc (int msg, int mp1, int mp2) {
-	/* if (handle == 0)  */return 0;
-//	return OS.CallWindowProc (ProgressBarProc, handle, msg, wParam, lParam);
+	if (handle == 0) return 0;
+        return OS.WinCallWindowProc(ProgressBarProc, handle, msg, mp1, mp2);
 }
 
 static int checkStyle (int style) {
 	return checkBits (style, SWT.HORIZONTAL, SWT.VERTICAL, 0, 0, 0, 0);
 }
 
-//public Point computeSize (int wHint, int hHint, boolean changed) {
-//	checkWidget ();
-//	int border = getBorderWidth ();
-//	int width = border * 2, height = border * 2;
-//	if ((style & SWT.HORIZONTAL) != 0) {
-//		width += OS.GetSystemMetrics (OS.SM_CXHSCROLL) * 10;
-//		height += OS.GetSystemMetrics (OS.SM_CYHSCROLL);
-//	} else {
-//		width += OS.GetSystemMetrics (OS.SM_CXVSCROLL);
-//		height += OS.GetSystemMetrics (OS.SM_CYVSCROLL) * 10;
-//	}
-//	if (wHint != SWT.DEFAULT) width = wHint + (border * 2);
-//	if (hHint != SWT.DEFAULT) height = hHint + (border * 2);
-//	return new Point (width, height);
-//}
+public Point computeSize (int wHint, int hHint, boolean changed) {
+	checkWidget ();
+	int border = getBorderWidth ();
+	int width = border * 2, height = border * 2;
+        int shaftLength = OS.WinSendMsg(handle, OS.SLM_QUERYSLIDERINFO, OS.MPFROM2SHORT((short)OS.SMA_SHAFTDIMENSIONS, (short)OS.SMA_RANGEVALUE), 0);
+        int arm = OS.WinSendMsg(handle, OS.SLM_QUERYSLIDERINFO, OS.MPFROM2SHORT((short)OS.SMA_SLIDERARMDIMENSIONS, (short)OS.SMA_RANGEVALUE), 0);
+        int tick = OS.WinSendMsg(handle, OS.SLM_QUERYTICKSIZE, 1, 0);
+	if ((style & SWT.HORIZONTAL) != 0) {
+		width += OS.WinQuerySysValue (OS.HWND_DESKTOP, OS.SV_CXHSCROLLARROW ) * 10;
+		height += OS.WinQuerySysValue (OS.HWND_DESKTOP, OS.SV_CYHSCROLL) + tick + OS.SHORT2FROMMP(arm);
+	} else {
+		width += OS.WinQuerySysValue (OS.HWND_DESKTOP, OS.SV_CXVSCROLL) + tick + OS.SHORT2FROMMP(arm);
+		height += OS.WinQuerySysValue (OS.HWND_DESKTOP, OS.SV_CYVSCROLLARROW ) * 10;
+	}
+	if (wHint != SWT.DEFAULT) width = wHint + (border * 2);
+	if (hHint != SWT.DEFAULT) height = hHint + (border * 2);
+	return new Point (width, height);
+}
 
 void createHandle () {
 	super.createHandle ();
-//	OS.SendMessage (handle, OS.TBM_SETRANGEMAX, 0, 100);
-//	OS.SendMessage (handle, OS.TBM_SETPAGESIZE, 0, 10);
-//	OS.SendMessage (handle, OS.TBM_SETTICFREQ, 10, 0);
 }
 
-//int defaultForeground () {
-//	return OS.GetSysColor (OS.COLOR_HIGHLIGHT);
-//}
-//
-///**
-// * Returns the maximum value which the receiver will allow.
-// *
-// * @return the maximum
-// *
-// * @exception SWTException <ul>
-// *    <li>ERROR_WIDGET_DISPOSED - if the receiver has been disposed</li>
-// *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
-// * </ul>
-// */
+int defaultForeground () {
+	return OS.WinQuerySysColor(handle, OS.SYSCLR_WINDOWTEXT, 0);
+}
+
+/**
+* Returns the maximum value which the receiver will allow.
+*
+* @return the maximum
+*
+* @exception SWTException <ul>
+*    <li>ERROR_WIDGET_DISPOSED - if the receiver has been disposed</li>
+*    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
+* </ul>
+*/
 public int getMaximum () {
 	checkWidget ();
 	return maxRange;
 }
 
-///**
-// * Returns the minimum value which the receiver will allow.
-// *
-// * @return the minimum
-// *
-// * @exception SWTException <ul>
-// *    <li>ERROR_WIDGET_DISPOSED - if the receiver has been disposed</li>
-// *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
-// * </ul>
-// */
+/**
+* Returns the minimum value which the receiver will allow.
+*
+* @return the minimum
+*
+* @exception SWTException <ul>
+*    <li>ERROR_WIDGET_DISPOSED - if the receiver has been disposed</li>
+*    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
+* </ul>
+*/
 public int getMinimum () {
 	checkWidget ();
 	return minRange;
 }
 
-///**
-// * Returns the single <em>selection</em> that is the receiver's position.
-// *
-// * @return the selection
-// *
-// * @exception SWTException <ul>
-// *    <li>ERROR_WIDGET_DISPOSED - if the receiver has been disposed</li>
-// *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
-// * </ul>
-// */
+/**
+* Returns the single <em>selection</em> that is the receiver's position.
+*
+* @return the selection
+*
+* @exception SWTException <ul>
+*    <li>ERROR_WIDGET_DISPOSED - if the receiver has been disposed</li>
+*    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
+* </ul>
+*/
 public int getSelection () {
 	checkWidget ();
 	return position;
@@ -191,6 +174,10 @@ public boolean setFocus () {
 	return false;
 }
 
+public void setBounds (int x, int y, int width, int height) {
+	OS.WinSendMsg(handle, OS.SLM_SETSLIDERINFO, OS.MPFROM2SHORT((short)OS.SMA_SHAFTDIMENSIONS, (short)0), height);
+	super.setBounds(x, y, width, height);
+}
 //void setForegroundPixel (int pixel) {
 //	if (foreground == pixel) return;
 //	foreground = pixel;
@@ -224,18 +211,18 @@ public void setMaximum (int value) {
 	}
 }
 
-///**
-// * Sets the minimum value which the receiver will allow
-// * to be the argument which must be greater than or
-// * equal to zero.
-// *
-// * @param value the new minimum (must be zero or greater)
-// *
-// * @exception SWTException <ul>
-// *    <li>ERROR_WIDGET_DISPOSED - if the receiver has been disposed</li>
-// *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
-// * </ul>
-// */
+/**
+* Sets the minimum value which the receiver will allow
+* to be the argument which must be greater than or
+* equal to zero.
+*
+* @param value the new minimum (must be zero or greater)
+*
+* @exception SWTException <ul>
+*    <li>ERROR_WIDGET_DISPOSED - if the receiver has been disposed</li>
+*    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
+* </ul>
+*/
 public void setMinimum (int value) {
 	checkWidget ();
 	if (0 <= value && value < maxRange) {
@@ -243,54 +230,72 @@ public void setMinimum (int value) {
 	}
 }
 
-///**
-// * Sets the single <em>selection</em> that is the receiver's
-// * position to the argument which must be greater than or equal
-// * to zero.
-// *
-// * @param value the new selection (must be zero or greater)
-// *
-// * @exception SWTException <ul>
-// *    <li>ERROR_WIDGET_DISPOSED - if the receiver has been disposed</li>
-// *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
-// * </ul>
-// */
+/**
+* Sets the single <em>selection</em> that is the receiver's
+* position to the argument which must be greater than or equal
+* to zero.
+*
+* @param value the new selection (must be zero or greater)
+*
+* @exception SWTException <ul>
+*    <li>ERROR_WIDGET_DISPOSED - if the receiver has been disposed</li>
+*    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
+* </ul>
+*/
 public void setSelection (int value) {
 	checkWidget ();
 	if (value < 0) return;
-        position = value;
-	int percent = (value*(maxRange-minRange))/100;
-        OS.PrgSetPercentage(handle, (short)percent);
+        int pixels = OS.WinSendMsg(handle, OS.SLM_QUERYSLIDERINFO, OS.MPFROM2SHORT((short)OS.SMA_SHAFTDIMENSIONS, (short)OS.SMA_RANGEVALUE ), 0);
+	int totalPixels = OS.SHORT1FROMMP(pixels);
+        int pixelPos = ((value*totalPixels)/maxRange);
+        OS.WinSendMsg(handle, OS.SLM_SETSLIDERINFO, OS.MPFROM2SHORT((short)OS.SMA_SLIDERARMPOSITION, (short)OS.SMA_RANGEVALUE), pixelPos);
+}
+
+public void setSize (int width, int height) {
+	OS.WinSendMsg(handle, OS.SLM_SETSLIDERINFO, OS.MPFROM2SHORT((short)OS.SMA_SHAFTDIMENSIONS, (short)0), height);
+	super.setSize(width, height);
 }
 
 int widgetStyle () {
-	int bits = super.widgetStyle ();
-//	if ((style & SWT.SMOOTH) != 0) bits |= OS.PBS_SMOOTH;
-//	if ((style & SWT.VERTICAL) != 0) bits |= OS.PBS_VERTICAL;
-	return bits;
+	int bits = super.widgetStyle () | OS.SLS_CENTER | OS.WS_TABSTOP | OS.SLS_RIBBONSTRIP | OS.SLS_READONLY | OS.SLS_PRIMARYSCALE1 | OS.SLS_OWNERDRAW;
+	if ((style & SWT.HORIZONTAL) != 0) return bits | OS.SLS_HORIZONTAL | OS.SLS_HOMELEFT; 
+	return bits | OS.SLS_VERTICAL | OS.SLS_HOMETOP;
 }
 
 PSZ windowClass () {
-	return null;
+	return ProgressBarClass;
 }
 
 int windowProc () {
-	return 0;
+	return ProgressBarProc;
 }
-//
-//LRESULT WM_GETDLGCODE (int wParam, int lParam) {
-//	LRESULT result = super.WM_GETDLGCODE (wParam, lParam);
-//	if (result != null) return result;
-//	/*
-//	* Feature in Windows.  The progress bar does
-//	* not implement WM_GETDLGCODE.  As a result,
-//	* a progress bar takes focus and takes part
-//	* in tab traversal.  This behavior, while
-//	* unspecified, is unwanted.  The fix is to
-//	* implement WM_GETDLGCODE to behave like a
-//	* STATIC control.
-//	*/
-//	return new LRESULT (OS.DLGC_STATIC);
-//}
 
+MRESULT wmDrawChild (int mp1, int mp2) {
+    OWNERITEM struct = new OWNERITEM();
+    OS.objcpy(struct, mp2);
+    System.out.println("ProgressBar:WM_DRAWITEM");
+    return null;
+/*
+switch(SHORT1FROMMP(mp1)){
+case SLD_VOLUME:
+    powner = (POWNERITEM) mp2;
+    switch(powner->idItem)
+    {
+	case SDA_RIBBONSTRIP:
+	    sldmax = SHORT2FROMMR(WinSendDlgItemMsg (hwnd, SLD_VOLUME, SLM_QUERYSLIDERINFO, MPFROM2SHORT(SMA_SLIDERARMPOSITION, SMA_RANGEVALUE), MPVOID));
+	    sldwidth = SHORT1FROMMR(WinSendDlgItemMsg (hwnd, SLD_VOLUME, SLM_QUERYSLIDERINFO, MPFROMSHORT(SMA_SLIDERARMDIMENSIONS), MPVOID));
+	    rectmax = powner->rclItem;
+	    rectmax.xRight = rectmax.xLeft + sldmax;
+	    rectg = recty = rectr = rectmax;
+	    rectg.xRight = recty.xLeft = rectmax.xLeft + (sldmax * 4) / 5 + (sldwidth / 2);
+	    rectr.xLeft = recty.xRight = rectmax.xLeft + (sldmax * 8) / 9 + (sldwidth / 2);
+	    WinFillRect (powner->hps, &rectg, CLR_GREEN);
+	    WinFillRect (powner->hps, &recty, CLR_YELLOW);
+	    WinFillRect (powner->hps, &rectr, CLR_RED);
+	    return ((MRESULT) TRUE);
+    }
+}
+
+break; */
+}
 }
