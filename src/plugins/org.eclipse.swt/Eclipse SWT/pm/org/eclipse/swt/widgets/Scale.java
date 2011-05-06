@@ -2,7 +2,7 @@ package org.eclipse.swt.widgets;
 
 /*
  * OS/2 version.
- * Copyright (c) 2002, 2009 EclipseOS2 Team.
+ * Copyright (c) 2002, 2011 EclipseOS2 Team.
  */
 
 /*
@@ -81,22 +81,17 @@ public class Scale extends Control {
 public Scale (Composite parent, int style) {
     this.parent = parent;
     this.style = checkStyle (style);
-    maxRange = 100;
-    minRange = 0;
-    increment = 10;
 
     SLDCDATA sldcData = new SLDCDATA();
     sldcData.usScale1Increments = 10;
     sldcData.usScale1Spacing = 0;
-//    sldcData.usScale2Increments = 10;
-//    sldcData.usScale2Spacing = 0;
 
     handle = OS.WinCreateWindow (
         parent.handle,
         windowClass (),
         windowTitle (),
         widgetStyle (),
-        0, parent.getHeight (), 0, 0,
+        0, parent.getHeight (), 150, 80,
         parent.handle,
         OS.HWND_BOTTOM,
         0,
@@ -114,7 +109,6 @@ public Scale (Composite parent, int style) {
     super.setDefaultFont ();
     super.setForegroundPixel (OS.CLR_DEFAULT);
     super.setBackgroundPixel (OS.CLR_DEFAULT);
-
 }
 
 /**
@@ -212,49 +206,48 @@ public int getMaximum () {
         return maxRange;
 }
 
-///**
-// * Returns the minimum value which the receiver will allow.
-// *
-// * @return the minimum
-// *
-// * @exception SWTException <ul>
-// *    <li>ERROR_WIDGET_DISPOSED - if the receiver has been disposed</li>
-// *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
-// * </ul>
-// */
+/**
+ * Returns the minimum value which the receiver will allow.
+ *
+ * @return the minimum
+ *
+ * @exception SWTException <ul>
+ *    <li>ERROR_WIDGET_DISPOSED - if the receiver has been disposed</li>
+ *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
+ * </ul>
+ */
 public int getMinimum () {
 	checkWidget ();
 	return minRange;
 }
 
-///**
-// * Returns the amount that the receiver's value will be
-// * modified by when the page increment/decrement areas
-// * are selected.
-// *
-// * @return the page increment
-// *
-// * @exception SWTException <ul>
-// *    <li>ERROR_WIDGET_DISPOSED - if the receiver has been disposed</li>
-// *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
-// * </ul>
-// */
+/**
+ * Returns the amount that the receiver's value will be
+ * modified by when the page increment/decrement areas
+ * are selected.
+ *
+ * @return the page increment
+ *
+ * @exception SWTException <ul>
+ *    <li>ERROR_WIDGET_DISPOSED - if the receiver has been disposed</li>
+ *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
+ * </ul>
+*/
 public int getPageIncrement () {
 	checkWidget ();
         return increment;
-//	return OS.SendMessage (handle, OS.TBM_GETPAGESIZE, 0, 0);
 }
 
-///**
-// * Returns the single <em>selection</em> that is the receiver's position.
-// *
-// * @return the selection
-// *
-// * @exception SWTException <ul>
-// *    <li>ERROR_WIDGET_DISPOSED - if the receiver has been disposed</li>
-// *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
-// * </ul>
-// */
+/**
+ * Returns the single <em>selection</em> that is the receiver's position.
+ *
+ * @return the selection
+ *
+ * @exception SWTException <ul>
+ *    <li>ERROR_WIDGET_DISPOSED - if the receiver has been disposed</li>
+ *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
+ * </ul>
+*/
 public int getSelection () {
 	checkWidget ();
         int pixelInfo = OS.WinSendMsg(handle, OS.SLM_QUERYSLIDERINFO, OS.MPFROM2SHORT((short)OS.SMA_SLIDERARMPOSITION, (short)OS.SMA_RANGEVALUE ), 0);
@@ -264,23 +257,23 @@ public int getSelection () {
         return pos;
 }
 
-///**
-// * Removes the listener from the collection of listeners who will
-// * be notified when the receiver's value changes.
-// *
-// * @param listener the listener which should no longer be notified
-// *
-// * @exception IllegalArgumentException <ul>
-// *    <li>ERROR_NULL_ARGUMENT - if the listener is null</li>
-// * </ul>
-// * @exception SWTException <ul>
-// *    <li>ERROR_WIDGET_DISPOSED - if the receiver has been disposed</li>
-// *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
-// * </ul>
-// *
-// * @see SelectionListener
-// * @see #addSelectionListener
-// */
+/**
+ * Removes the listener from the collection of listeners who will
+ * be notified when the receiver's value changes.
+ *
+ * @param listener the listener which should no longer be notified
+ *
+ * @exception IllegalArgumentException <ul>
+ *    <li>ERROR_NULL_ARGUMENT - if the listener is null</li>
+ * </ul>
+ * @exception SWTException <ul>
+ *    <li>ERROR_WIDGET_DISPOSED - if the receiver has been disposed</li>
+ *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
+ * </ul>
+ *
+ * @see SelectionListener
+ * @see #addSelectionListener
+*/
 public void removeSelectionListener(SelectionListener listener) {
 	checkWidget ();
 	if (listener == null) error (SWT.ERROR_NULL_ARGUMENT);
@@ -289,19 +282,19 @@ public void removeSelectionListener(SelectionListener listener) {
 	eventTable.unhook (SWT.DefaultSelection,listener);	
 }
 
-///**
-// * Sets the amount that the receiver's value will be
-// * modified by when the up/down (or right/left) arrows
-// * are pressed to the argument, which must be at least 
-// * one.
-// *
-// * @param value the new increment (must be greater than zero)
-// *
-// * @exception SWTException <ul>
-// *    <li>ERROR_WIDGET_DISPOSED - if the receiver has been disposed</li>
-// *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
-// * </ul>
-// */
+/**
+ * Sets the amount that the receiver's value will be
+ * modified by when the up/down (or right/left) arrows
+ * are pressed to the argument, which must be at least 
+ * one.
+ *
+ * @param value the new increment (must be greater than zero)
+ *
+ * @exception SWTException <ul>
+ *    <li>ERROR_WIDGET_DISPOSED - if the receiver has been disposed</li>
+ *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
+ * </ul>
+*/
 public void setIncrement (int increment) {
 	checkWidget ();
 	if (increment < 1) return;
@@ -311,59 +304,57 @@ public void setIncrement (int increment) {
 	increment = increment;
 }
 
-///**
-// * Sets the maximum value which the receiver will allow
-// * to be the argument which must be greater than or
-// * equal to zero.
-// *
-// * @param value the new maximum (must be zero or greater)
-// *
-// * @exception SWTException <ul>
-// *    <li>ERROR_WIDGET_DISPOSED - if the receiver has been disposed</li>
-// *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
-// * </ul>
-// */
+/**
+ * Sets the maximum value which the receiver will allow
+ * to be the argument which must be greater than or
+ * equal to zero.
+ *
+ * @param value the new maximum (must be zero or greater)
+ *
+ * @exception SWTException <ul>
+ *    <li>ERROR_WIDGET_DISPOSED - if the receiver has been disposed</li>
+ *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
+ * </ul>
+ */
 public void setMaximum (int value) {
 	checkWidget ();
-//	int minimum = OS.SendMessage (handle, OS.TBM_GETRANGEMIN, 0, 0);
 	if (0 <= minRange && minRange < value) {
 		maxRange = value;
 	}
 }
 
-///**
-// * Sets the minimum value which the receiver will allow
-// * to be the argument which must be greater than or
-// * equal to zero.
-// *
-// * @param value the new minimum (must be zero or greater)
-// *
-// * @exception SWTException <ul>
-// *    <li>ERROR_WIDGET_DISPOSED - if the receiver has been disposed</li>
-// *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
-// * </ul>
-// */
+/**
+ * Sets the minimum value which the receiver will allow
+ * to be the argument which must be greater than or
+ * equal to zero.
+ *
+ * @param value the new minimum (must be zero or greater)
+ *
+ * @exception SWTException <ul>
+ *    <li>ERROR_WIDGET_DISPOSED - if the receiver has been disposed</li>
+ *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
+ * </ul>
+ */
 public void setMinimum (int value) {
 	checkWidget ();
-//	int maximum = OS.SendMessage (handle, OS.TBM_GETRANGEMAX, 0, 0);
 	if (0 <= value && value < maxRange) {
-		maxRange = value;
+		minRange = value;
 	}
 }
 
-///**
-// * Sets the amount that the receiver's value will be
-// * modified by when the page increment/decrement areas
-// * are selected to the argument, which must be at least
-// * one.
-// *
-// * @return the page increment (must be greater than zero)
-// *
-// * @exception SWTException <ul>
-// *    <li>ERROR_WIDGET_DISPOSED - if the receiver has been disposed</li>
-// *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
-// * </ul>
-// */
+/**
+ * Sets the amount that the receiver's value will be
+ * modified by when the page increment/decrement areas
+ * are selected to the argument, which must be at least
+ * one.
+ *
+ * @return the page increment (must be greater than zero)
+ *
+ * @exception SWTException <ul>
+ *    <li>ERROR_WIDGET_DISPOSED - if the receiver has been disposed</li>
+ *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
+ * </ul>
+*/
 public void setPageIncrement (int pageIncrement) {
 	checkWidget ();
 	if (pageIncrement < 1) return;
@@ -373,25 +364,25 @@ public void setPageIncrement (int pageIncrement) {
         increment = pageIncrement;
 }
 
-///**
-// * Sets the single <em>selection</em> that is the receiver's
-// * value to the argument which must be greater than or equal
-// * to zero.
-// *
-// * @param value the new selection (must be zero or greater)
-// *
-// * @exception SWTException <ul>
-// *    <li>ERROR_WIDGET_DISPOSED - if the receiver has been disposed</li>
-// *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
-// * </ul>
-// */
+/**
+ * Sets the single <em>selection</em> that is the receiver's
+ * value to the argument which must be greater than or equal
+ * to zero.
+ *
+ * @param value the new selection (must be zero or greater)
+ *
+ * @exception SWTException <ul>
+ *    <li>ERROR_WIDGET_DISPOSED - if the receiver has been disposed</li>
+ *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
+ * </ul>
+ */
 public void setSelection (int value) {
 	checkWidget ();
 	if (value < 0) return;
         int pixels = OS.WinSendMsg(handle, OS.SLM_QUERYSLIDERINFO, OS.MPFROM2SHORT((short)OS.SMA_SLIDERARMPOSITION, (short)OS.SMA_RANGEVALUE ), 0);
         int totalPixels = OS.SHORT2FROMMP(pixels) -1;
         int pixelPos = ((value*totalPixels)/maxRange);
-        OS.WinSendMsg(handle, OS.SLM_SETSLIDERINFO, OS.MPFROM2SHORT((short)OS.SMA_SLIDERARMPOSITION, (short)OS.SMA_RANGEVALUE), pixelPos);
+	OS.WinSendMsg(handle, OS.SLM_SETSLIDERINFO, OS.MPFROM2SHORT((short)OS.SMA_SLIDERARMPOSITION, (short)OS.SMA_RANGEVALUE), (short)pixelPos);
 }
 
 int widgetStyle () {
@@ -408,33 +399,26 @@ int windowProc () {
 	return TrackBarProc;
 }
 
-MRESULT wmControlChild (int mp1, int mp2) {
-    int code = OS.SHORT2FROMMP(mp1);
-    int pos = mp2;
-//    if (code == OS.SLN_KILLFOCUS || code == OS.SLN_SETFOCUS) return null;
-    Event event = new Event ();
-	switch (code) {
-//		/*
-//		* This line is intentionally commented.  Do not set the detail
-//		* field to DRAG to indicate that the dragging has ended when the
-//		* scroll bar is finally positioned in TB_THUMBPOSITION.
-//		*/
-////		case OS.TB_THUMBPOSITION: 	break;
-		case OS.SLN_SLIDERTRACK:		event.detail = SWT.DRAG;  break;
-//		case OS.TB_TOP: 			event.detail = SWT.HOME;  break;
-//		case OS.TB_BOTTOM:		event.detail = SWT.END;  break;
-//		case OS.TB_LINEDOWN:		event.detail = SWT.ARROW_DOWN;  break;
-//		case OS.TB_LINEUP: 		event.detail = SWT.ARROW_UP;  break;
-//		case OS.TB_PAGEDOWN: 		event.detail = SWT.PAGE_DOWN;  break;
-//		case OS.TB_PAGEUP: 		event.detail = SWT.PAGE_UP;  break;
-		case OS.SLN_SETFOCUS:
-		case OS.SLN_KILLFOCUS:
-			sendEvent(code == OS.SLN_SETFOCUS ? SWT.FocusIn : SWT.FocusOut);
-			if(isDisposed()) return MRESULT.ZERO;
+ MRESULT wmControlChild (int mp1, int mp2) {
+     int code = OS.SHORT2FROMMP(mp1);
+     int pos = mp2;
+     Event event = new Event ();
+     switch (code) {
+		case OS.SLN_SLIDERTRACK:
+			postEvent (SWT.Selection);
 			break;
-	}
-    sendEvent (SWT.Selection, event);
-    return null;
-}
+		 // case OS.SLN_CHANGE:
+			// // event.detail = SWT.DRAG;
+			// postEvent (SWT.Selection);
+			// break;
+
+		 case OS.SLN_SETFOCUS:
+		 case OS.SLN_KILLFOCUS:
+			 sendEvent(code == OS.SLN_SETFOCUS ? SWT.FocusIn : SWT.FocusOut);
+			 if(isDisposed()) return MRESULT.ZERO;
+			 break;
+	 }
+     return super.wmControlChild (mp1, mp2);;
+ }
 
 }
