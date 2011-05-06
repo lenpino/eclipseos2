@@ -91,7 +91,9 @@ Control () {
 public Control (Composite parent, int style) {
     super (parent, style);
     this.parent = parent;
+//    System.out.println("Control::Control-> check 1");
     createWidget ();
+//    System.out.println("Control::Control-> check 2");
 }
 
 /**
@@ -470,7 +472,7 @@ void createHandle () {
     OS.WinSetWindowUShort (handle, OS.QWS_ID, (short)(handle & 0xFFFF));
 
 //@@TODO (dmik): debug code, remove when no more necessary
-/* System.out.println (
+/*   System.out.println (
     "Control.createHandle(): Window has been created:\n" +
     "    hwnd = " + Integer.toHexString (handle) + "\n" +
     "    hwnd.parent = hwnd.owner = " + Integer.toHexString (parent.handle) + "\n" +
@@ -493,6 +495,7 @@ void createWidget () {
     setDefaultFont ();
     setForegroundPixel (OS.CLR_DEFAULT);
     setBackgroundPixel (OS.CLR_DEFAULT);
+//    System.out.println("Control::createWidget-> check");
 }
 
 int defaultBackground () {
@@ -1814,6 +1817,7 @@ void setBackgroundPixel (int pixel) {
     if (background == pixel) return;
     background = pixel;
     setPresBackground();
+
     /*
      *  OS/2 feature. Invalidate children also, because some of them
      *  can be using this parent's parameter when painting themselves.
@@ -3136,8 +3140,13 @@ MRESULT WM_DRAWITEM (int mp1, int mp2) {
         if (item == null) return null;
         return item.wmDrawChild (mp1, mp2);
     }
-//        System.out.println("Control:WM_DRAWITEM - HANDLE ATOM TABLE = " + Integer.toHexString(OS.WinFindAtom(OS.WinQuerySystemAtomTable(), PSZ.getAtom (OS.WC_MENU))));
-      return null;
+    if(buffer.toString().equalsIgnoreCase(PSZ.getAtom (OS.WC_SLIDER).toString())){
+      Control control = WidgetTable.get (mp1);
+//      System.out.println("Control:WM_DRAWITEM - MP1 = " + Integer.toHexString(mp1));
+      if (control == null) return null;
+      return control.wmDrawChild (mp1, mp2);
+    }
+     return null;
 }
 
 MRESULT WM_ERASEBACKGROUND (int mp1, int mp2) {
@@ -3459,7 +3468,6 @@ MRESULT WM_BUTTON3UP (int mp1, int mp2) {
 }
 
 MRESULT WM_MEASUREITEM (int mp1, int mp2) {
-    System.out.println("Control:WM_MEASUREITEM -> sListBox" + mp1);
 //      MEASUREITEMSTRUCT struct = new MEASUREITEMSTRUCT ();
 //      OS.MoveMemory (struct, lParam, MEASUREITEMSTRUCT.sizeof);
 //      if (struct.CtlType == OS.ODT_MENU) {
@@ -3723,24 +3731,21 @@ MRESULT WM_PAINT (int mp1, int mp2) {
 //}
 
 MRESULT WM_SETFOCUS (int mp1, int mp2) {
-//    System.out.println("Control::WM_SETFOCUS -> handle = " + Integer.toHexString(mp1));
-    // System.out.println("Control::WM_SETFOCUS -> mp2 = " + OS.SHORT1FROMMP (mp2));
     int code = callWindowProc (OS.WM_SETFOCUS, mp1, mp2);
     Shell shell = getShell ();
 
     boolean gotFocus = OS.SHORT1FROMMP (mp2) > 0;
-
     /*
     * It is possible (but unlikely), that application
     * code could have disposed the widget in the focus
     * in/out event.  If this happens keep going to send
     * the activate/deactivate events.
     */
-    if (gotFocus)
+     if (gotFocus)
         sendEvent (SWT.FocusIn);
     else
         sendEvent (SWT.FocusOut);
-    // widget could be disposed at this point
+// widget could be disposed at this point
 
     /*
     * It is possible that the shell may be
@@ -3971,11 +3976,11 @@ MRESULT WM_WINDOWPOSCHANGED (int mp1, int mp2) {
     return new MRESULT (result);
 }
 
-/* MRESULT WM_FOCUSCHANGE (int mp1, int mp2) {
+MRESULT WM_FOCUSCHANGE (int mp1, int mp2) {
     callWindowProc (OS.WM_FOCUSCHANGE, mp1, mp2);
     return MRESULT.ZERO;
 }
- */
+
 //@@TODO(lpino): Consider the process in Menu controls and ListBoxes
 //MRESULT WM_ADJUSTWINDOWPOS (int mp1, int mp2) {
 //    System.out.println("Control:WM_ADJUSTWINDOWPOS");

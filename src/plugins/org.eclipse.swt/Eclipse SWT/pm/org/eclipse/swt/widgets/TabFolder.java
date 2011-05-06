@@ -276,7 +276,7 @@ void destroyItem (TabItem item) {
 	}
 	if (index == count) return;
         int selectionIndex = itemsID[index];
-	if (OS.WinSendMsg (handle, OS.BKM_DELETEPAGE, selectionIndex, (short)OS.BKA_TAB) == 0) {
+	if (!OS.WinSendMsg (handle, OS.BKM_DELETEPAGE, selectionIndex, (short)OS.BKA_TAB)) {
 		error (SWT.ERROR_ITEM_NOT_REMOVED);
 	}
 	System.arraycopy (items, index + 1, items, index, --count - index);

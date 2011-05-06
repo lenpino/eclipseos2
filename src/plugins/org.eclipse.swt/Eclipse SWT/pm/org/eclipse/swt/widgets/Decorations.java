@@ -383,14 +383,15 @@ void createHandle () {
     );
     if (frameHandle == 0) error (SWT.ERROR_NO_HANDLES);
 //@@TODO (dmik): debug code, remove when no more necessary 
-//System.out.println (
-//    "Decorations.createHandle(): WC_FRAME has been created:\n" +
-//    "    hwnd = " + Integer.toHexString (frameHandle) + "\n" +
-//    "    hwnd.parent = " + Integer.toHexString (hwndParent) + "\n" +
-//    "    hwnd.owner = " + Integer.toHexString (hwndOwner) + "\n" +
-//    "    class = " + windowFrameClass() + "\n" +
-//    "    style = " + Integer.toHexString (widgetFrameStyle())
-//);
+/* System.out.println (
+    "Decorations.createHandle(): WC_FRAME has been created:\n" +
+    "    hwnd = " + Integer.toHexString (frameHandle) + "\n" +
+    "    hwnd.parent = " + Integer.toHexString (hwndParent) + "\n" +
+    "    hwnd.owner = " + Integer.toHexString (hwndOwner) + "\n" +
+    "    class = " + windowFrameClass() + "\n" +
+    "    style = " + Integer.toHexString (widgetFrameStyle())
+);
+ */
     FRAMECDATA fcdata = new FRAMECDATA ();
     fcdata.flCreateFlags = widgetFrameFlags ();
     OS.WinCreateFrameControls (frameHandle, fcdata, null);
@@ -413,14 +414,14 @@ void createHandle () {
     if (handle == 0) error (SWT.ERROR_NO_HANDLES);
     state |= CANVAS;
 //@@TODO (dmik): debug code, remove when no more necessary 
-//System.out.println (
-//    "Decorations.createHandle(): FID_CLIENT window has been created:\n" +
-//    "    hwnd = " + Integer.toHexString (handle) + "\n" +
-//    "    hwnd.parent = hwnd.owner = " + Integer.toHexString (frameHandle) + "\n" +
-//    "    class = " + windowClass() + "\n" +
-//    "    style = " + Integer.toHexString (widgetStyle())
-//);
-//@@TODO(dmik): do something for MDI windows if needed    
+/* System.out.println (
+    "Decorations.createHandle(): FID_CLIENT window has been created:\n" +
+    "    hwnd = " + Integer.toHexString (handle) + "\n" +
+    "    hwnd.parent = hwnd.owner = " + Integer.toHexString (frameHandle) + "\n" +
+    "    class = " + windowClass() + "\n" +
+    "    style = " + Integer.toHexString (widgetStyle())
+);
+ *///@@TODO(dmik): do something for MDI windows if needed    
     if (parent == null) return;
     setParent ();
     setSystemMenu ();
