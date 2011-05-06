@@ -2625,6 +2625,7 @@ public static final native int WinSendMsg (int hwnd, int ulMsgid, MENUITEM mpPar
 public static final native int WinSendMsg (int hwnd, int ulMsgid, RECORDCORE mpParam1, RECORDINSERT mpParam2);
 public static final native int WinSendMsg (int hwnd, int ulMsgid, RECORDCORE mpParam1, int mpParam2);
 public static final native int WinSendMsg (int hwnd, int ulMsgid, int[] mpParam1, int mpParam2);
+public static final native boolean WinSendMsg (int hwnd, int ulMsgid, int mpParam1, short mpParam2);
 public static final native boolean WinSendMsg (int hwnd, int ulMsgid, int mpParam1, MENUITEM mpParam2);
 public static final native boolean WinSendMsg (int hwnd, int ulMsgid, FATTRS mpParam1, int mpParam2);
 public static final native boolean WinSendMsg (int hwnd, int ulMsgid, CNRINFO mpParam1, int mpParam2);
