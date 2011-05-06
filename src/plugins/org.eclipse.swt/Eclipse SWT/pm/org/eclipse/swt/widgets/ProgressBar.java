@@ -70,8 +70,34 @@ public class ProgressBar extends Control {
 * @see Widget#getStyle
 */
 public ProgressBar (Composite parent, int style) {
-	super (parent, checkStyle (style));
-	OS.WinSendMsg(handle, OS.SLM_SETSLIDERINFO, OS.MPFROM2SHORT((short)OS.SMA_SHAFTDIMENSIONS, (short)0), 15);
+    this.parent = parent;
+    this.style = checkStyle (style);
+
+    SLDCDATA sldcData = new SLDCDATA();
+    sldcData.usScale1Increments = 10;
+    sldcData.usScale1Spacing = 0;
+
+    handle = OS.WinCreateWindow (
+        parent.handle,
+        windowClass (),
+        windowTitle (),
+        widgetStyle (),
+        0, parent.getHeight (), 150, 80,
+        parent.handle,
+        OS.HWND_BOTTOM,
+        0,
+        sldcData,
+        0
+    );
+    if (handle == 0) error (SWT.ERROR_NO_HANDLES);
+    
+    OS.WinSetWindowUShort (handle, OS.QWS_ID, (short)(handle & 0xFFFF));
+    OS.WinSendMsg(handle, OS.SLM_SETSLIDERINFO, OS.MPFROM2SHORT((short)OS.SMA_SHAFTDIMENSIONS, (short)0), 15);
+    super.register ();
+    super.subclass ();
+    super.setDefaultFont ();
+    super.setForegroundPixel (OS.CLR_DEFAULT);
+    super.setBackgroundPixel (OS.CLR_DEFAULT);
 }
 
 int callWindowProc (int msg, int mp1, int mp2) {
@@ -87,17 +113,14 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 	checkWidget ();
 	int border = getBorderWidth ();
 	int width = border * 2, height = border * 2;
-        int shaftLength = OS.WinSendMsg(handle, OS.SLM_QUERYSLIDERINFO, OS.MPFROM2SHORT((short)OS.SMA_SHAFTDIMENSIONS, (short)OS.SMA_RANGEVALUE), 0);
-        int arm = OS.WinSendMsg(handle, OS.SLM_QUERYSLIDERINFO, OS.MPFROM2SHORT((short)OS.SMA_SLIDERARMDIMENSIONS, (short)OS.SMA_RANGEVALUE), 0);
-        int tick = OS.WinSendMsg(handle, OS.SLM_QUERYTICKSIZE, 1, 0);
 	if ((style & SWT.HORIZONTAL) != 0) {
 		width += OS.WinQuerySysValue (OS.HWND_DESKTOP, OS.SV_CXHSCROLLARROW ) * 10;
-		height += OS.WinQuerySysValue (OS.HWND_DESKTOP, OS.SV_CYHSCROLL) + tick + OS.SHORT2FROMMP(arm);
+		height += OS.WinQuerySysValue (OS.HWND_DESKTOP, OS.SV_CYHSCROLL);
 	} else {
-		width += OS.WinQuerySysValue (OS.HWND_DESKTOP, OS.SV_CXVSCROLL) + tick + OS.SHORT2FROMMP(arm);
+		width += OS.WinQuerySysValue (OS.HWND_DESKTOP, OS.SV_CXVSCROLL);
 		height += OS.WinQuerySysValue (OS.HWND_DESKTOP, OS.SV_CYVSCROLLARROW ) * 10;
 	}
-	if (wHint != SWT.DEFAULT) width = wHint + (border * 2);
+ 	if (wHint != SWT.DEFAULT) width = wHint + (border * 2);
 	if (hHint != SWT.DEFAULT) height = hHint + (border * 2);
 	return new Point (width, height);
 }
@@ -151,8 +174,12 @@ public int getMinimum () {
 * </ul>
 */
 public int getSelection () {
-	checkWidget ();
-	return position;
+	 checkWidget ();
+         int pixelInfo = OS.WinSendMsg(handle, OS.SLM_QUERYSLIDERINFO, OS.MPFROM2SHORT((short)OS.SMA_SLIDERARMPOSITION, (short)OS.SMA_RANGEVALUE ), 0);
+         int posPixels = OS.SHORT1FROMMP(pixelInfo);
+         int totalPixels = OS.SHORT2FROMMP(pixelInfo) - 1;
+         int pos = ((maxRange*posPixels)/totalPixels);
+         return pos;	
 }
 
 //void setBackgroundPixel (int pixel) {
@@ -191,19 +218,19 @@ public void setBounds (int x, int y, int width, int height) {
 //	if (pixel == -1) pixel = defaultForeground ();
 //	OS.SendMessage (handle, OS.PBM_SETBARCOLOR, 0, pixel);
 //}
-//
-///**
-// * Sets the maximum value which the receiver will allow
-// * to be the argument which must be greater than or
-// * equal to zero.
-// *
-// * @param value the new maximum (must be zero or greater)
-// *
-// * @exception SWTException <ul>
-// *    <li>ERROR_WIDGET_DISPOSED - if the receiver has been disposed</li>
-// *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
-// * </ul>
-// */
+
+/**
+ * Sets the maximum value which the receiver will allow
+ * to be the argument which must be greater than or
+ * equal to zero.
+ *
+ * @param value the new maximum (must be zero or greater)
+ *
+ * @exception SWTException <ul>
+ *    <li>ERROR_WIDGET_DISPOSED - if the receiver has been disposed</li>
+ *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
+ * </ul>
+ */
 public void setMaximum (int value) {
 	checkWidget ();
 	if (0 <= minRange && minRange < value) {
@@ -257,8 +284,9 @@ public void setSize (int width, int height) {
 }
 
 int widgetStyle () {
-	int bits = super.widgetStyle () | OS.SLS_CENTER | OS.WS_TABSTOP | OS.SLS_RIBBONSTRIP | OS.SLS_READONLY | OS.SLS_PRIMARYSCALE1 | OS.SLS_OWNERDRAW;
-	if ((style & SWT.HORIZONTAL) != 0) return bits | OS.SLS_HORIZONTAL | OS.SLS_HOMELEFT; 
+	int bits = super.widgetStyle () | OS.SLS_CENTER | OS.WS_TABSTOP | OS.SLS_RIBBONSTRIP | OS.SLS_READONLY | OS.SLS_PRIMARYSCALE1;// | OS.SLS_OWNERDRAW;
+	if ((style & SWT.HORIZONTAL) != 0) 
+		return bits | OS.SLS_HORIZONTAL | OS.SLS_HOMELEFT; 
 	return bits | OS.SLS_VERTICAL | OS.SLS_HOMETOP;
 }
 
@@ -270,12 +298,12 @@ int windowProc () {
 	return ProgressBarProc;
 }
 
-MRESULT wmDrawChild (int mp1, int mp2) {
+/*MRESULT wmDrawChild (int mp1, int mp2) {
     OWNERITEM struct = new OWNERITEM();
     OS.objcpy(struct, mp2);
     System.out.println("ProgressBar:WM_DRAWITEM");
     return null;
-/*
+
 switch(SHORT1FROMMP(mp1)){
 case SLD_VOLUME:
     powner = (POWNERITEM) mp2;
@@ -296,6 +324,7 @@ case SLD_VOLUME:
     }
 }
 
-break; */
+break;
 }
+*/
 }
