@@ -539,8 +539,14 @@ JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_WinSendMsg__IIII
         (JNIEnv *env, jclass that, jint hwnd, jint ulMsgid, jint mpParam1, jint mpParam2)
 {
     DEBUG_CALL("WinSendMsg\n")
-
     return (jint)WinSendMsg((HWND)hwnd, ulMsgid, (MPARAM)mpParam1, (MPARAM)mpParam2);
+}
+
+JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinSendMsg__IIIS
+        (JNIEnv *env, jclass that, jint hwnd, jint ulMsgid, jint mpParam1, jshort mpParam2)
+{
+    DEBUG_CALL("WinSendMsg\n")
+    return (jboolean)WinSendMsg((HWND)hwnd, ulMsgid, (MPARAM)mpParam1, (MPARAM)mpParam2);
 }
 
 JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_WinSendMsg__II_3II
