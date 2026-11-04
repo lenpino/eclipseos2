@@ -2,8 +2,8 @@
 <project name="org.eclipse.platform" default="build.jars" basedir=".">
 
 	<property name="bootclasspath" value=""/>
-	<property name="ws" value="motif"/>
-	<property name="os" value="linux"/>
+	<property name="ws" value="pm"/>
+	<property name="os" value="os2"/>
 	<property name="arch" value="x86"/>
 
 	<target name="init" depends="properties">
@@ -43,7 +43,7 @@
 		<delete dir="${temp.folder}/startup.jar.bin"/>
 		<mkdir dir="${temp.folder}/startup.jar.bin"/>
 		<!-- compile the source code -->
-		<javac destdir="${temp.folder}/startup.jar.bin" failonerror="false" verbose="true" debug="on" includeAntRuntime="no" bootclasspath="${bootclasspath}" classpath="../org.eclipse.core.runtime/runtime.jar;../org.eclipse.core.boot/boot.jar">
+		<javac destdir="${temp.folder}/startup.jar.bin" failonerror="false" verbose="false" debug="on" includeAntRuntime="no" bootclasspath="${bootclasspath}" classpath="../org.eclipse.core.runtime/runtime.jar;../org.eclipse.core.boot/boot.jar">
 			<src path="src/"/>
 		</javac>
 		<!-- copy necessary resources -->

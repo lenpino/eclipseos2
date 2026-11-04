@@ -34,7 +34,7 @@ public class SWT009_08 extends SWTTestCase {
             Menu bar = new Menu(shell, SWT.BAR);
             shell.setMenuBar(bar);
             MenuItem fileItem = new MenuItem(bar, SWT.CASCADE);
-            fileItem.setText("File");
+            fileItem.setText("&File");
             Menu submenu = new Menu(shell, SWT.DROP_DOWN);
             fileItem.setMenu(submenu);
             MenuItem item = new MenuItem(submenu, SWT.PUSH);
@@ -43,7 +43,7 @@ public class SWT009_08 extends SWTTestCase {
                 System.out.println("Select All");
               }
             });
-            item.setText("Select & All\tCtrl+A");
+            item.setText("Select &All\tCtrl+A");
             item.setAccelerator(SWT.CTRL + 'A');
             
             //POP-UP

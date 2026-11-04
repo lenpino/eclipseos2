@@ -19,5 +19,3 @@ test.dependoncompile=false
 # if the project is being built under OS/2, this can be left
 # commented to be picked up from the current JVM environment
 #bootclasspath=C:/Java131/jre/lib/rt.jar
-
-        

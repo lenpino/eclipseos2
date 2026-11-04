@@ -51,8 +51,8 @@ public class SWT009_11 extends SWTTestCase {
     System.out.println("item: " + item.getParent() + ", " + item.getParentItem());
     System.out.println("item2: " + item2.getParent() + ", " + item2.getParentItem());
     
-    System.out.println(tree.getItemCount());
-    System.out.println(tree.getItems().length);
+//    System.out.println(tree.getItemCount());
+//    System.out.println(tree.getItems().length);
     
     shell.setSize(300, 200);
     shell.open();

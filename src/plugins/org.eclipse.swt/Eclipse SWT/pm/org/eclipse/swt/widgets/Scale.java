@@ -37,8 +37,8 @@ import org.eclipse.swt.events.*;
  */
 
 public class Scale extends Control {
-        int maxRange;
-        int minRange;
+        int maxRange = 100;
+        int minRange = 0;
         int increment;
         int pixelRange;
 	static final int TrackBarProc;

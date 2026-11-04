@@ -143,6 +143,7 @@ public class OS {
 //    public static final int WC_PRISTDDLGLAST =  0xffff0057;
 //    public static final int WC_PUBSTDDLGFIRST = 0xffff0058;
 //    public static final int WC_PUBSTDDLGLAST =  0xffff005f;
+    public static final int WC_ER_SPLITTER =  0xffff005f;
 
     /* Standard Window Styles */
     public static final int WS_VISIBLE =        0x80000000;
@@ -2530,6 +2531,27 @@ public static final int IDP_ICON_WARNING_80             = 3360; // "Warning" - "
    
    public static final int CMA_FLWINDOWATTR      = 0x0004;       /* Container attributes     */
    public static final int CMA_ITEMORDER        = 0x0001;       /* QueryRecord search flags */
+   
+ /* Splitter window style definitions. */
+  
+   public static final int SBS_VSPLIT          = 0x00000001;   /* Vertical splitter.             */
+   public static final int SBS_HSPLIT          = 0x00000002;   /* Horizontal splitter.           */
+   public static final int SBS_FIRSTFIXED    = 0x00000004;   /* First window with fixed size.  */
+   public static final int SBS_SECONDFIXED = 0x00000008;   /* Second window with fixed size. */
+   public static final int SBS_FIXED             = 0x0000000C;   /* Both fixed.                    */
+   public static final int SBS_2D                 = 0x00000010;   /* Draw a flat splitter bar.      */
+   
+/* Splitter messages. */
+
+   public static final int SBM_SETWINDOWS     =  ( WM_USER + 1 );
+   public static final int SBM_SETSPLITTERPOS  = ( WM_USER + 2 );
+   public static final int SBM_GETSPLITTERPOS  = ( WM_USER + 3 );
+   public static final int SBM_SETPOINTERS     = ( WM_USER + 4 );
+   public static final int SBM_SETFIXEDSIZE    = ( WM_USER + 5 );
+
+/* Control notification codes. */
+   public static final int SBN_POSITIONCHANGED  = 1;
+
 
 /* PM macros */
 

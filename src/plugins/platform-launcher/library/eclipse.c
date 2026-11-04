@@ -212,7 +212,7 @@ static char*  getInstallDir();
 
 int main( int argc, char* argv[] )
 {
-	char*   splashBitmap;	
+	char*   splashBitmap;
     char*   ch;
     char*   shippedVM    = NULL;
     char*   vmSearchPath = NULL;
@@ -230,7 +230,7 @@ int main( int argc, char* argv[] )
 	 {
 	     *ch = '\0';
 	 }
-	
+
 	/* Determine the full pathname of this program. */
     program = findCommand( argv[0] );
     if (program == NULL)
@@ -281,7 +281,7 @@ int main( int argc, char* argv[] )
     {
     	/* Determine which type of VM should be used. */
     	vmName = ((debug || needConsole) ? consoleVM : defaultVM);
-    	
+
         /* Try to find the VM shipped with eclipse. */
         shippedVM = malloc( strlen( homeDir ) + strlen( vmName ) + 10 );
         sprintf( shippedVM, "%s%s%s", homeDir, shippedVMDir, vmName );
@@ -293,14 +293,14 @@ int main( int argc, char* argv[] )
         free( shippedVM );
         shippedVM = NULL;
 	}
-	
+
 	/* If a Java VM has not been found yet */
 	if (javaVM == NULL)
 	{
 		/* Either verify the VM specified by the user or
 		   attempt to find the VM in the user's PATH. */
 		javaVM = findCommand( vmName );
-		
+
 		/* If the VM was not found, display a message and exit. */
 		if (javaVM == NULL)
 		{
@@ -316,7 +316,7 @@ int main( int argc, char* argv[] )
     /* Get the command to start the Java VM. */
     vmCommand = getVMCommand( argc, argv );
     vmCommandMsg = formatVmCommandMsg( vmCommand );
-
+    displayMessage( vmCommandMsg );
     /* While the Java VM should be restarted */
     exitCode = restartExitCode;
     while (exitCode == restartExitCode)
@@ -324,7 +324,7 @@ int main( int argc, char* argv[] )
     	/* Start the Java virtual machine and wait for it to exit. */
     	if (debug) printf( goVMMsg, vmCommandMsg );
     	exitCode = startJavaVM( vmCommand );
-    	
+
     	/* If the JVM exited abnormally (and was not a restart) */
     	if (exitCode != 0 && exitCode != restartExitCode)
     	{
@@ -385,14 +385,14 @@ static void parseArgs( int* pArgc, char* argv[] )
         	if (strcasecmp( argv[ index ], options[ i ].name ) == 0)
         	    option = &options[ i ];
        	}
-       	
+
        	/* If the option is recognized by the launcher */
        	if (option != NULL)
        	{
        		/* If the option requires a value and there is one, extract the value. */
        		if (option->value != NULL && (index+1) < *pArgc)
        			*option->value = argv[ index+1 ];
-       		
+
        		/* If the option requires a flag to be set, set it. */
        		if (option->flag != NULL)
        			*option->flag = 1;
@@ -522,7 +522,7 @@ char* findCommand( char* command )
     	    strcat( cmdPath, ".exe" );
     }
 #endif
-	
+
     /* Verify the resulting command actually exists. */
     if (stat( cmdPath, &stats ) != 0 || (stats.st_mode & S_IFREG) == 0)
     {
@@ -565,16 +565,16 @@ static char** getVMCommand( int argc, char* argv[] )
 	 	while (userVMarg[ nUserVMarg ] != NULL)
  			nUserVMarg++;
  	}
- 	
+
  	/* Calculate the number of default VM arguments. */
  	defVMarg = getArgVM( javaVM );
  	while (defVMarg[ nDefVMarg ] != NULL)
  		nDefVMarg++;
- 	
+
  	/* Calculate the number of required VM arguments. */
  	while (reqVMarg[ nReqVMarg ] != NULL)
  		nReqVMarg++;
- 		
+
     /* Allocate the arg list for the exec call.
        (VM + user VM args + default VM args  + required VM args + -os OS + -ws GUI + -osArch arch
            + SHOWSPLASH X + argv[] + NULL) */
@@ -594,7 +594,7 @@ static char** getVMCommand( int argc, char* argv[] )
     	for (src = 0; src < nDefVMarg; src++)
 	    	execArg[ dst++ ] = defVMarg[ src ];
 	}
-		
+
 
     /* For each required VM arg */
     for (src = 0; src < nReqVMarg; src++)
@@ -604,7 +604,7 @@ static char** getVMCommand( int argc, char* argv[] )
      	{
 	        execArg[ dst++ ] = reqVMarg[ src ];
 	    }
-	
+
 	    /* else use the absolute path of the jar file. */
 	    else
 	    {
@@ -622,7 +622,7 @@ static char** getVMCommand( int argc, char* argv[] )
     execArg[ dst++ ] = wsArg;
     execArg[ dst++ ] = OSARCH;
     execArg[ dst++ ] = osArchArg;
-	
+
 	/* Append the show splash window command, if defined. */
     if (!noSplash)
     {
@@ -662,7 +662,7 @@ static char* formatVmCommandMsg( char* args[] )
 		length += strlen(args[index]) + 1;
 	}
 	message = (char*) malloc( length + 5 );
-	
+
 	/* Format the message such that options (args starting with '-') begin
 	   on a new line. Otherwise, the Motif MessageBox does not automatically wrap
 	   the messages and the message window can extend beyond both sides of the display. */
@@ -676,7 +676,7 @@ static char* formatVmCommandMsg( char* args[] )
 		*ch++ = ' ';
 	}
 	*ch = '\0';
-	
+
 	return message;
 }
 
@@ -693,7 +693,7 @@ static char* getInstallDir( )
 	char*  installDir;
 	char   path[ MAX_PATH_LENGTH ];
     struct stat stats;
-	
+
 	/* Start with the directory where the executable resides. */
     installDir = (char*) malloc( strlen( program ) + 1 );
     strcpy( installDir, program );
@@ -705,7 +705,7 @@ static char* getInstallDir( )
     	/* Format the pathname of the startup jar file. */
     	*(ch+1) = '\0';
     	sprintf( path, "%s%s", installDir, startupJarName );
-    	
+
     	/* If the jar file exists */
     	if (stat( path, &stats ) == 0 && (stats.st_mode & S_IFREG) != 0)
     	{
@@ -714,7 +714,7 @@ static char* getInstallDir( )
     	else
     	{
     		/* Try the next directory up in the hierarchy. */
-    		*ch = '\0';		
+    		*ch = '\0';
     		ch = strrchr( installDir, (int)dirSeparator );
     	}
     }

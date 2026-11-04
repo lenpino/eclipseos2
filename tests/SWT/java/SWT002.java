@@ -45,7 +45,9 @@ protected void exec() {
     Display display = new Display ();
     Shell shell = new SWT002 ().open (display);
     while (!shell.isDisposed ()) {
-        if (!display.readAndDispatch ()) display.sleep ();
+        if (!display.readAndDispatch ()){
+            display.sleep ();
+        }
     }
     display.dispose ();
 }
@@ -70,10 +72,10 @@ public Shell open (Display display) {
     shell.setText ("SWT002: Top Shell");
     shell.open ();
     
-    Shell shell2 = new Shell (shell);
-    shell2.addDisposeListener(dl);
-    shell2.setText ("SWT002: Secondary Shell");
-    shell2.open ();
+//    Shell shell2 = new Shell (shell);
+//    shell2.addDisposeListener(dl);
+//    shell2.setText ("SWT002: Secondary Shell");
+//    shell2.open ();
     
     return shell;
 }

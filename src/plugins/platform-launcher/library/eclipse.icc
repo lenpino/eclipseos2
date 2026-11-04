@@ -1,0 +1,17 @@
+option
+incl(searchpath, "\\apps\\dev\\swt\\trunk\\src\\plugins\\platform-launcher\\library\\"), link(pmtype, pm), link(linkwithmultithreadlib), link(linkwithsharedlib),
+link(debug), gen(arch, "pentium2"), gen(debug, "yes"), opt(tune, "pentium2"), opt(level, "2")
+{
+   target type("exe") "eclipse.exe"
+   {
+      source type("rc") "pm\\eclipse.rc"
+      option gen(debug, "yes")
+      {
+         source type(c) "eclipse.c"
+      }
+      source type(h) "eclipseOS.h"
+      source type(c) "eclipseUtil.c"
+      source type(h) "eclipseUtil.h"
+      source type(c) "pm\\eclipseOs2.c"
+   }
+}

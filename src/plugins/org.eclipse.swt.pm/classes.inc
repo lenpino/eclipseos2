@@ -48,6 +48,8 @@ org\eclipse\swt\widgets\MenuItem.java
 org\eclipse\swt\widgets\Scale.java
 org\eclipse\swt\widgets\Tree.java
 org\eclipse\swt\widgets\TreeItem.java
+org\eclipse\swt\widgets\ProgressBar.java
+org\eclipse\swt\widgets\Sash.java
 
 # SWT Base
 

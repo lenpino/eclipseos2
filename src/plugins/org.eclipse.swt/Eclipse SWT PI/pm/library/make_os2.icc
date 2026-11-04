@@ -22,8 +22,8 @@ option ProjectOptions =
     {
         target $SWT_LIB
         {
-		source type(lib) "ft2lib.lib","progress.lib"
-            	source "editcol.c", "editcol.h", "editcol.rc", "swt.c", "structs.c", "callback.c"
+		source type(lib) "etoolbar.lib", "ft2lib.lib"
+            	source "editcol.c", "editcol.h", "editcol.rc", "swt.c", "structs.c", "callback.c","esplitter.h"
         }
     }
 }

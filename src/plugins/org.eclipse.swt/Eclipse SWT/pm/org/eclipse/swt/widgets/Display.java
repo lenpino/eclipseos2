@@ -1233,7 +1233,6 @@ boolean isValidThread () {
     return thread == Thread.currentThread ();
 }
 
-//@@TODO (dmik): not sure we need this
 boolean isVirtualKey (int key) {
     switch (key) {
         case OS.VK_TAB:

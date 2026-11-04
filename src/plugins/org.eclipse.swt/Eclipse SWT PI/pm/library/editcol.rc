@@ -1,7 +1,7 @@
 #ifndef OS2_INCLUDED
    #include <os2.h>
 #endif
-#include "e:\tmp\inst\dllsrc\editcol.h"
+#include "X:\apps\dev\swt\trunk\src\plugins\org.eclipse.swt\Eclipse SWT PI\pm\library\editcol.h"
 
 DLGTEMPLATE DLG_CWHEEL LOADONCALL MOVEABLE DISCARDABLE
 BEGIN

@@ -709,37 +709,25 @@ int getStringSize( int hps, PSZ szString )
     return pnts[8];
 }
 
+MRESULT WM_HITTEST (int mp1, int mp2) {
+	MRESULT result = super.WM_HITTEST (mp1, mp2);
+	if (result != null) return result;
+	/*
+	* Feature in Windows.  The tab control implements
+	* WM_NCHITTEST to return HTCLIENT when the cursor
+	* is inside the tab buttons.  This causes mouse
+	* events like WM_MOUSEMOVE to be delivered to the
+	* parent.  Also, tool tips for the tab control are
+	* never invoked because tool tips rely on mouse
+	* events to be delivered to the window that wants
+	* to display the tool tip.  The fix is to call the
+	* default window proc that returns HTCLIENT when
+	* the mouse is in the client area.
+	*/
+	int hittest = OS.WinDefWindowProc (handle, OS.WM_HITTEST, mp1, mp2);
+	return new MRESULT (hittest);
+}
 
-//LRESULT WM_GETDLGCODE (int wParam, int lParam) {
-//	LRESULT result = super.WM_GETDLGCODE (wParam, lParam);
-//	/*
-//	* Return DLGC_BUTTON so that mnemonics will be
-//	* processed without needing to press the ALT key
-//	* when the widget has focus.
-//	*/
-//	if (result != null) return result;
-//	return new LRESULT (OS.DLGC_BUTTON);
-//}
-//
-//LRESULT WM_NCHITTEST (int wParam, int lParam) {
-//	LRESULT result = super.WM_NCHITTEST (wParam, lParam);
-//	if (result != null) return result;
-//	/*
-//	* Feature in Windows.  The tab control implements
-//	* WM_NCHITTEST to return HTCLIENT when the cursor
-//	* is inside the tab buttons.  This causes mouse
-//	* events like WM_MOUSEMOVE to be delivered to the
-//	* parent.  Also, tool tips for the tab control are
-//	* never invoked because tool tips rely on mouse
-//	* events to be delivered to the window that wants
-//	* to display the tool tip.  The fix is to call the
-//	* default window proc that returns HTCLIENT when
-//	* the mouse is in the client area.
-//	*/
-//	int hittest = OS.DefWindowProc (handle, OS.WM_NCHITTEST, wParam, lParam);
-//	return new LRESULT (hittest);
-//}
-//
 MRESULT WM_SIZE (int mp1, int mp2) {
 	MRESULT result = super.WM_SIZE (mp1, mp2);
 //	/*

@@ -224,10 +224,20 @@
         <property name="test.step" value="009_09" />
         <antcall target="swt.test" />
     </target>
-
+    
+     <target name="swt009_10" depends="init,build.prp">
+        <property name="test.step" value="009_10" />
+        <antcall target="swt.test" />
+    </target>
+     <target name="swt009_12" depends="init,build.prp">
+        <property name="test.step" value="009_12" />
+        <antcall target="swt.test" />
+    </target>
     <!-- creates the default build.prp if nesessary -->
     <target name="build.prp" depends="init" unless="is.build.prp">
-        <echo file="${build.prp}"># build.prp: EclipseOS2 build options
+        <echo file="${build.prp}">
+            
+# build.prp: EclipseOS2 build options
 
 # path to the original Eclipse source distribution
 eclipsedir.orig=x:/apps/dev/fuentes/eclipse2.0.1
