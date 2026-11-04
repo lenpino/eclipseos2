@@ -1,0 +1,13 @@
+# Salidas de compilacion en la VM OS/2
+-classes-/
+*.obj
+*.log
+*.err
+*.map
+*.BK0
+*~
+out-img*
+hs_err*
+trunk.tar
+push.tar
+*.antes-build
