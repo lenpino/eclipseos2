@@ -3,8 +3,6 @@
 
 # Ficheros guardados en LF por SVN (eol-style=native u otros): LF en el repo,
 # CRLF en la copia de trabajo, igual que en OS/2
-.gitattributes text eol=crlf
-.gitignore text eol=crlf
 README-VM.md text eol=crlf
 src/plugins/org.eclipse.core.boot/.classpath text eol=crlf
 src/plugins/org.eclipse.core.boot/.project text eol=crlf

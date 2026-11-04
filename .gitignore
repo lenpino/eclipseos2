@@ -11,3 +11,8 @@ hs_err*
 trunk.tar
 push.tar
 *.antes-build
+*.RES
+*.LIB
+*.lib.r[0-9]*
+src/plugins/platform-launcher/library/eclipse.exe
+src/plugins/org.eclipse.platform/startup.jar
