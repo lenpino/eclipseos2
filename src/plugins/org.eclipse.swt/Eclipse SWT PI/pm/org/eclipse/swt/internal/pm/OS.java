@@ -143,7 +143,8 @@ public class OS {
 //    public static final int WC_PRISTDDLGLAST =  0xffff0057;
 //    public static final int WC_PUBSTDDLGFIRST = 0xffff0058;
 //    public static final int WC_PUBSTDDLGLAST =  0xffff005f;
-    public static final int WC_ER_SPLITTER =  0xffff005f;
+    /* Splitter del toolkit de eCS (esplitter.h); se registra con TBInitialize() */
+    public static final String WC_ER_SPLITTER = "er.splitter.class";
 
     /* Standard Window Styles */
     public static final int WS_VISIBLE =        0x80000000;
@@ -2613,6 +2614,7 @@ public static final native boolean DevQueryCaps (int hdc, int lStart, int lCount
 public static final native boolean WinAlarm (int hwndDeskTop, int flStyle);
 
 public static final native int WinInitialize (int flOptions);
+public static final native boolean TBInitialize ();
 public static final native boolean WinTerminate (int hab);
 public static final native int WinGetLastError (int hab);
 public static final native int WinCreateMsgQueue (int hab, int lQueuesize);

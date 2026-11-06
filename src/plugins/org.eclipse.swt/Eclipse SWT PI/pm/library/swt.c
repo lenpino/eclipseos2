@@ -19,6 +19,7 @@
 #include "editcol.h"
 #include "ft2lib.h"
 #include "progress.h"
+#include "esplitter.h"
 #include <malloc.h>
 #include <memory.h>
 
@@ -350,6 +351,14 @@ JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_WinInitialize
     DEBUG_CALL("WinInitialize\n")
 
     return (jint)WinInitialize(flOptions);
+}
+
+JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_TBInitialize
+        (JNIEnv *env, jclass that)
+{
+    DEBUG_CALL("TBInitialize\n")
+
+    return (jboolean)TBInitialize();
 }
 
 JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinTerminate

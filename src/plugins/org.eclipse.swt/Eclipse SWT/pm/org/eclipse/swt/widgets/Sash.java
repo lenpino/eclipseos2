@@ -41,12 +41,18 @@ public class Sash extends Control {
 	final static int PAGE_INCREMENT = 9;
  */
 	static final int SplitterProc;
-        static final PSZ SplitterClass = PSZ.getAtom (OS.WC_ER_SPLITTER);
+        static final PSZ SplitterClass = new PSZ (OS.WC_ER_SPLITTER);
 	static {
+		OS.TBInitialize ();
 		CLASSINFO lpWndClass = new CLASSINFO ();
 		OS.WinQueryClassInfo (OS.NULLHANDLE, SplitterClass, lpWndClass);
 		SplitterProc = lpWndClass.pfnWindowProc;
 	}
+
+	/* Drag state: the eCS splitter is a container and does not report the
+	 * pointer displacement, so the tracking is done here (as in the Win32 port). */
+	boolean dragging;
+	int startX, startY, lastX, lastY;
 
 /**
  * Constructs a new instance of this class given its parent
@@ -188,6 +194,83 @@ PSZ windowClass () {
 
 int windowProc () {
 	return SplitterProc;
+}
+
+int windowProc (int msg, int mp1, int mp2) {
+	switch (msg) {
+		case OS.WM_BUTTON1DOWN: return wmButton1Down (mp1, mp2);
+		case OS.WM_MOUSEMOVE: if (dragging) return wmMouseMove (mp1, mp2); break;
+		case OS.WM_BUTTON1UP: if (dragging) return wmButton1Up (mp1, mp2); break;
+	}
+	return super.windowProc (msg, mp1, mp2);
+}
+
+/*
+ * Pointer position of a mouse message (given in the sash window
+ * coordinates) expressed in SWT coordinates of the parent.
+ */
+int [] pointInParent (int mp1) {
+	int [] pt = new int [] {(short) (mp1 & 0xFFFF), (short) (mp1 >> 16)};
+	OS.WinMapWindowPoints (handle, parent.handle, pt, 1);
+	pt [1] = parent.getClientArea ().height - pt [1];
+	return pt;
+}
+
+Event dragEvent (int x, int y, Rectangle bounds, int detail) {
+	Event event = new Event ();
+	event.x = x;  event.y = y;
+	event.width = bounds.width;  event.height = bounds.height;
+	event.detail = detail;
+	return event;
+}
+
+int wmButton1Down (int mp1, int mp2) {
+	Rectangle bounds = getBounds ();
+	int [] pt = pointInParent (mp1);
+	startX = pt [0] - bounds.x;  startY = pt [1] - bounds.y;
+	lastX = bounds.x;  lastY = bounds.y;
+
+	/* The event must be sent because doit flag is used */
+	Event event = dragEvent (lastX, lastY, bounds, SWT.DRAG);
+	sendEvent (SWT.Selection, event);
+	if (isDisposed ()) return 1;
+	if (event.doit) {
+		dragging = true;
+		OS.WinSetCapture (OS.HWND_DESKTOP, handle);
+	}
+	return 1;
+}
+
+int wmMouseMove (int mp1, int mp2) {
+	Rectangle bounds = getBounds ();
+	Rectangle area = parent.getClientArea ();
+	int [] pt = pointInParent (mp1);
+	int newX = lastX, newY = lastY;
+	if ((style & SWT.VERTICAL) != 0) {
+		newX = Math.min (Math.max (0, pt [0] - startX), area.width - bounds.width);
+	} else {
+		newY = Math.min (Math.max (0, pt [1] - startY), area.height - bounds.height);
+	}
+	if (newX == lastX && newY == lastY) return 1;
+
+	Event event = dragEvent (newX, newY, bounds, SWT.DRAG);
+	sendEvent (SWT.Selection, event);
+	if (isDisposed ()) return 1;
+
+	/* The sash follows the pointer while it is dragged */
+	if (event.doit) {
+		lastX = event.x;  lastY = event.y;
+		setBounds (lastX, lastY, bounds.width, bounds.height);
+	}
+	return 1;
+}
+
+int wmButton1Up (int mp1, int mp2) {
+	dragging = false;
+	OS.WinSetCapture (OS.HWND_DESKTOP, OS.NULLHANDLE);
+	Event event = dragEvent (lastX, lastY, getBounds (), 0);
+	sendEvent (SWT.Selection, event);
+	return 1;
 }
 
 /* LRESULT WM_ERASEBKGND (int wParam, int lParam) {
