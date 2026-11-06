@@ -388,6 +388,24 @@ href="eclipseos2-xxe.css"
     apply to every source directory (we cannot change this behavior in Ant)
     and unnecessary files can be included.</p>
 
+    <h3><a name="toolkit.notes">Toolkit dependencies of the DLL</a></h3>
+
+    <p>The native library (<kbd>make_os2.icc</kbd>) uses headers and libraries
+    of the eComStation toolkit which are not part of this repository:
+    <kbd>esplitter.h</kbd> (the splitter used by <code>Sash</code>),
+    <kbd>etoolbar.h</kbd>, <kbd>progress.h</kbd>, <kbd>etoolbar.lib</kbd> and
+    <kbd>progress.lib</kbd>. They are found in <kbd>C:\ECSTK\h</kbd> and
+    <kbd>C:\ECSTK\lib</kbd>. <kbd>X:\os2tk45\h\esplitter.h</kbd> is an older
+    copy that does not declare <code>TBInitialize()</code> (nor
+    <code>SBS_2D</code>), so <kbd>C:\ECSTK\h</kbd> must come first in the
+    <kbd>INCLUDE</kbd> path.</p>
+
+    <p><kbd>ant.cmd dll</kbd> runs <kbd>vacbld</kbd>, which rebuilds only what
+    is out of date: when <kbd>swtp2049.dll</kbd> is newer than the sources
+    nothing is compiled and the build still reports success (so it does when
+    <kbd>nmake</kbd> fails). Check the date of the DLL, and delete
+    <kbd>swt.obj</kbd> and <kbd>swtp2049.dll</kbd> to force a rebuild.</p>
+
     <h2>SWT porting roadmap</h2>
 
     <p>Below is the plan and the progress of the SWT porting process. Each

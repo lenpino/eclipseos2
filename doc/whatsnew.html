@@ -516,5 +516,30 @@ href="eclipseos2-xxe.css"
       <a href="mailto:kruseldaniel@iowatelecom.net">Daniel Lee Kruse</a>). No
       test case yet.</li>
     </ul>
+
+    <h3>2026-11-06</h3>
+
+    <h4>[lpino]</h4>
+
+    <ul>
+      <li><code>o.e.swt.widgets.Sash</code> now uses the splitter window class
+      of the eCS toolkit. <code>OS.WC_ER_SPLITTER</code> is the class name
+      (<kbd>er.splitter.class</kbd>) instead of an atom, and the class is
+      registered with the new native <code>OS.TBInitialize()</code>. The
+      mouse tracking is implemented in <code>Sash</code> itself, see <a
+      href="diff.html">difference 011</a> for the reasons.</li>
+
+      <li>The SWT DLL now links <kbd>progress.lib</kbd> and is compiled with
+      <kbd>esplitter.h</kbd> from the eCS toolkit, see <a
+      href="swt.html#toolkit.notes">SWT compilation notes</a>.</li>
+
+      <li>New test case <kbd>SWT009_13</kbd> (<kbd>ant.cmd swt009_13</kbd>):
+      automatic checks of the window class registration and of the horizontal
+      and vertical <code>Sash</code>, followed by an interactive part (drag the
+      bar, both text controls must resize and keep their proportion when the
+      window is resized). The system property
+      <code>swt.test.autoclose=&lt;ms&gt;</code> closes the window by itself
+      for unattended runs.</li>
+    </ul>
   </body>
 </html>

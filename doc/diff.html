@@ -233,6 +233,34 @@ href="eclipseos2-xxe.css"
 
         <td>This seems not to essential.</td>
       </tr>
+
+      <tr>
+        <td>011</td>
+
+        <td>The <code>Sash</code> widget lets the user drag a rubber-band
+        outline. The widget itself is not moved until the application does it
+        in the final <code>SWT.Selection</code> event; the events sent while
+        dragging (<code>detail == SWT.DRAG</code>) carry the position of the
+        band.</td>
+
+        <td><code>Sash</code> is built on the splitter window class of the eCS
+        toolkit (<code>er.splitter.class</code>, <kbd>esplitter.h</kbd>),
+        which is used for the look of the bar and the resize pointer only. No
+        band is drawn: while dragging the sash itself follows the pointer
+        (unless <code>event.doit</code> is set to <code>false</code> by the
+        <code>SWT.DRAG</code> event), and the final <code>SWT.Selection</code>
+        is sent when the button is released.</td>
+
+        <td>The mouse tracking is done in <code>Sash</code> because the
+        splitter is a container, not a thin bar: its window is supposed to
+        cover the area it divides, and it moves the two windows given by
+        <code>SBM_SETWINDOWS</code> by itself. For a 4 px wide sash it reports
+        <code>SBN_POSITIONCHANGED</code> with positions of 0 or -1 whatever the
+        pointer displacement, <code>SBM_SETSPLITTERPOS</code> does not notify
+        at all, and <code>SBM_SETWINDOWS</code> resizes the given windows to
+        garbage. So the native notifications cannot be used to implement the
+        <code>SWT.Selection</code> contract.</td>
+      </tr>
     </table>
 
     <h2>Other differences</h2>

@@ -21,6 +21,61 @@ href="eclipseos2-xxe.css"
 
     <h2>Task notes</h2>
 
-    <p>&lt;none yet&gt;</p>
+    <p>The <code>Sash</code> class (test case <kbd>SWT009_12</kbd> and
+    <kbd>SWT009_13</kbd>) is implemented on top of the splitter window class
+    of the eCS toolkit. It behaves differently from the Windows one, see <a
+    href="diff.html">difference 011</a>.</p>
+
+    <h2>Step checklist</h2>
+
+    <table>
+      <col width="40%" />
+
+      <col />
+
+      <col width="50%" />
+
+      <thead>
+        <tr>
+          <th>Operation</th>
+
+          <th>Status</th>
+
+          <th>Remarks</th>
+        </tr>
+      </thead>
+
+      <tr>
+        <td>Add <code>OS.TBInitialize()</code>; <code>OS.WC_ER_SPLITTER</code>
+        is the class name, not an atom</td>
+
+        <td>Done [lpino]</td>
+
+        <td><code>Sash</code> calls it in its static initializer, before
+        <code>WinQueryClassInfo()</code>. The class does not exist until
+        then.</td>
+      </tr>
+
+      <tr>
+        <td>Mouse tracking in <code>Sash</code> (<code>SWT.Selection</code>
+        with <code>SWT.DRAG</code>, final event on button release)</td>
+
+        <td>Done [lpino]</td>
+
+        <td>Verified by hand with the vertical sash only. The horizontal one
+        shares the code (the <code>y</code> axis is inverted to SWT
+        coordinates) but has not been dragged yet.</td>
+      </tr>
+
+      <tr>
+        <td>Test case <kbd>SWT009_13</kbd></td>
+
+        <td>Done [lpino]</td>
+
+        <td>The automatic part cannot simulate the mouse. The splitter does
+        not notify <code>SBM_SETSPLITTERPOS</code>, so the drag is checked
+        only in the interactive part.</td>
+      </tr>
+    </table>
   </body>
 </html>
