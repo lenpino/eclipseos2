@@ -456,11 +456,9 @@ public void removeSelectionListener(SelectionListener listener) {
 void resizeControl () {
 	if (control != null && !control.isDisposed ()) {
 		/*
-		* Place the control with Control.setBounds() only: setSize()
-		* and setLocation() move and enlarge a Text with a border
-		* (see difference 013 in the project notes). If the control
-		* did not take the requested size (a combo box, for example)
-		* it is centered in the item with the size it has.
+		* Place the control in one step. If it did not take the
+		* requested size (a combo box, for example) it is centered
+		* in the item with the size it has.
 		*/
 		control.setBounds (x, y, w, h);
 		Rectangle rect = control.getBounds ();

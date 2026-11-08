@@ -288,24 +288,6 @@ href="eclipseos2-xxe.css"
         the implementation is that <code>ToolBar.getChildren()</code> returns
         the internal buttons together with the controls of the separators.</td>
       </tr>
-
-      <tr>
-        <td>013</td>
-
-        <td><code>Control.setSize()</code> and <code>Control.setLocation()</code>
-        move and resize a control exactly as asked.</td>
-
-        <td>On a <code>Text</code> with <code>SWT.BORDER</code>,
-        <code>setSize(77, 26)</code> gives a control of 83x32 placed at
-        (-6, -6), and <code>setLocation()</code> moves it 3 pixels off, while
-        <code>setBounds()</code> is exact. The border seems to be added twice,
-        once for each way of setting the position or the size.</td>
-
-        <td>Found while placing a <code>Text</code> in a tool bar separator,
-        which now uses <code>setBounds()</code> only. The cause in
-        <code>Control</code>/<code>Text</code> has not been investigated, other
-        code that uses <code>setSize()</code> on bordered texts is affected.</td>
-      </tr>
     </table>
 
     <h2>Other differences</h2>

@@ -556,9 +556,15 @@ href="eclipseos2-xxe.css"
       <kbd>etoolbar.h</kbd> only adds the <code>TBS_2D</code> style and
       <kbd>esplitter.h</kbd> is identical.</li>
 
-      <li>Found that <code>Control.setSize()/setLocation()</code> misplace a
-      <code>Text</code> with a border, see <a href="diff.html">difference
-      013</a>.</li>
+      <li>Fixed the placement of a single line <code>Text</code>. With a
+      border (the PM entry field with <code>ES_MARGIN</code>) PM moves it by 3
+      pixels and makes it 6 larger each time it is positioned, and only
+      <code>setBounds()</code> compensated for it, so <code>setSize()</code>
+      and <code>setLocation()</code> misplaced it and repeated calls made it
+      drift. Without a border, the compensation of <code>setBounds()</code>
+      was wrong and made every plain text 6 pixels smaller and moved. It is
+      now done in the internal <code>setBounds()</code>, once, and only for a
+      single line text with a border. Test case <kbd>SWT009_17</kbd>.</li>
 
       <li>Fixed the VM abort on every empty string
       (<code>Text/Button/Label.setText("")</code>): a <code>PSZ</code> is

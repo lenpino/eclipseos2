@@ -262,38 +262,32 @@ public void clearSelection () {
             OS.WinSendMsg(handle, OS.EM_SETSEL, 0, 0);
 }
 
-/**
- * Sets the receiver's size and location to the rectangular
- * area specified by the arguments. The <code>x</code> and
- * <code>y</code> arguments are relative to the receiver's
- * parent (or its display if its parent is null).
- * <p>
- * Note: Attempting to set the width or height of the
- * receiver to a negative number will cause that
- * value to be set to zero instead.
- * </p>
- *
- * @param x the new x coordinate for the receiver
- * @param y the new y coordinate for the receiver
- * @param width the new width for the receiver
- * @param height the new height for the receiver
- *
- * @exception SWTException <ul>
- *    <li>ERROR_WIDGET_DISPOSED - if the receiver has been disposed</li>
- *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
- * </ul>
+/*
+ * A single line Text with a border is a PM entry field with the ES_MARGIN
+ * style, which does not stay where it is put: each time its window is
+ * positioned PM moves its origin by 3 pels (to the left and down, the PM
+ * origin being the lower left corner) and, if the size is set, makes it
+ * 6 pels larger in both directions. All the ways of placing the control
+ * (setBounds(), setSize(), setLocation()) end here, so this is the only
+ * place to compensate for it. The other kinds of Text are not affected.
  */
-public void setBounds (int x, int y, int width, int height) {
-    checkWidget ();
-    if ((style & SWT.MULTI) != 0){        
-        setBounds (x, y, Math.max (0, width), Math.max (0, height),OS.SWP_MOVE | OS.SWP_SIZE);
-    }
-    else{
-         //@@TODO(lpino): Find out why the control doesn't honor the position and sizes
-        //                          For now fix it with the values that seem to be consistent
-        
-        setBounds (x+3, y+3, Math.max (0, width-6), Math.max (0, height-6),OS.SWP_MOVE | OS.SWP_SIZE);
-    }
+void setBounds (int x, int y, int width, int height, int flags) {
+	if ((style & (SWT.MULTI | SWT.BORDER)) == SWT.BORDER) {
+		if ((flags & OS.SWP_SIZE) != 0) {
+			if ((flags & OS.SWP_MOVE) == 0) {
+				/* Only the size is asked for: the location is the current one */
+				Rectangle rect = getBounds ();
+				x = rect.x;  y = rect.y;
+				flags |= OS.SWP_MOVE;
+			}
+			x += 3;  y += 3;
+			width = Math.max (0, width - 6);
+			height = Math.max (0, height - 6);
+		} else if ((flags & OS.SWP_MOVE) != 0) {
+			x += 3;  y -= 3;
+		}
+	}
+	super.setBounds (x, y, width, height, flags);
 }
 
 
