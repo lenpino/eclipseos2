@@ -559,6 +559,18 @@ href="eclipseos2-xxe.css"
       <li>Found that <code>Control.setSize()/setLocation()</code> misplace a
       <code>Text</code> with a border, see <a href="diff.html">difference
       013</a>.</li>
+
+      <li>Fixed the VM abort on every empty string
+      (<code>Text/Button/Label.setText("")</code>): a <code>PSZ</code> is
+      never a one-element array any more, see the <a
+      href="swt.html">notes on ASCIIZ strings</a>.</li>
+
+      <li>Fixed <code>Text.setText()</code> of a multi line text, which
+      inserted the string at the cursor instead of replacing the text. Test
+      case <kbd>SWT009_14</kbd>.</li>
+
+      <li><kbd>SWT010_01</kbd>: the arrow of the drop down item opens a pop up
+      menu under the button, the usual way to use it.</li>
     </ul>
   </body>
 </html>

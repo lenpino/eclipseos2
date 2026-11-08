@@ -1412,6 +1412,13 @@ public void setText (String string) {
 	}
 	PSZ buffer = new PSZ (string);
         if ((style & SWT.MULTI) != 0){
+	    /*
+	    * MLM_INSERT inserts at the cursor and keeps the existing text, so
+	    * select all of it first: the new text replaces it, as in the other
+	    * platforms (an empty string clears the control).
+	    */
+	    int length = OS.WinSendMsg (handle, OS.MLM_QUERYTEXTLENGTH, 0, 0);
+	    OS.WinSendMsg (handle, OS.MLM_SETSEL, 0, length);
             OS.WinSendMsg(handle, OS.MLM_INSERT, buffer, 0);
 	    /* SWT places the I-beam before the inserted text */
 	    OS.WinSendMsg(handle, OS.MLM_SETSEL, 0, 0);

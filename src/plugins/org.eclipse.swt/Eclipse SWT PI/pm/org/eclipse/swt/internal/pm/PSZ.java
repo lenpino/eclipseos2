@@ -20,7 +20,15 @@ public class PSZ {
     
 byte[] bytes;
 
-static byte[] EMPTY = new byte[1];
+/*
+ * Arrays of exactly one element are never used: the VM aborts ("Passed wrong
+ * C array to Release<type>ArrayElements") when the JNI wrappers release such
+ * an array, which happened with every empty string, e.g. Text.setText("").
+ * An ASCIIZ string is cut at the first zero byte, so an extra one is harmless.
+ */
+static final int MIN_SIZE = 2;
+
+static byte[] EMPTY = new byte[MIN_SIZE];
 
 public PSZ() {
     bytes = EMPTY;
@@ -42,13 +50,13 @@ public PSZ (String string) {
         bytes = EMPTY;
     } else {
         int length = string.length();
-        bytes = new byte [length + 1];
+        bytes = new byte [Math.max (length + 1, MIN_SIZE)];
         System.arraycopy (string.getBytes(), 0, bytes, 0, length);
     }
 }
 
 public PSZ (int length) {
-    bytes = new byte [length + 1];
+    bytes = new byte [Math.max (length + 1, MIN_SIZE)];
 }
 
 public PSZ (byte[] bytes) {

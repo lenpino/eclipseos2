@@ -21,6 +21,8 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.ToolBar;
@@ -337,7 +339,29 @@ public class SWT010_01 extends SWTTestCase {
 		new ToolItem(flat, SWT.SEPARATOR);
 		ToolItem drop = new ToolItem(flat, SWT.DROP_DOWN);
 		drop.setText("Drop");
-		drop.addSelectionListener(report);
+		/* The arrow only sends Selection (detail ARROW): showing the menu is up to the application */
+		final Menu menu = new Menu(shell, SWT.POP_UP);
+		String[] choices = {"First choice", "Second choice", "Third choice"};
+		for (int i = 0; i < choices.length; i++) {
+			MenuItem choice = new MenuItem(menu, SWT.PUSH);
+			choice.setText(choices[i]);
+			final String name = choices[i];
+			choice.addSelectionListener(new SelectionAdapter() {
+				public void widgetSelected(SelectionEvent e) {
+					say("Menu: " + name);
+					log.setText("Menu: " + name);
+				}
+			});
+		}
+		drop.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				say("Selection: Drop" + (e.detail == SWT.ARROW ? " (arrow) at " + e.x + "," + e.y : ""));
+				if (e.detail != SWT.ARROW) return;
+				Point p = flat.toDisplay(new Point(e.x, e.y));
+				menu.setLocation(p.x, p.y);
+				menu.setVisible(true);
+			}
+		});
 		ToolItem sep = new ToolItem(flat, SWT.SEPARATOR);
 		Text field = new Text(flat, SWT.BORDER);
 		field.setText("control");

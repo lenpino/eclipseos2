@@ -722,13 +722,8 @@ void updateButton () {
 	if (image != null) {
 		button.setImage (image);
 	} else {
-		/*
-		* An empty string cannot be passed to WinSetWindowText()
-		* through the JNI layer (it aborts the VM), so a button
-		* without text shows a single blank.
-		*/
 		String text = getText ();
-		button.setText (text == null || text.length () == 0 ? " " : text);
+		button.setText (text == null ? "" : text);
 	}
 }
 
