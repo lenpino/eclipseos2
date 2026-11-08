@@ -852,34 +852,39 @@ public void setLocation (int x, int y) {
 public void setVisible (boolean visible) {
 	checkWidget ();
 	if ((style & (SWT.BAR | SWT.DROP_DOWN)) != 0) return;
-	int hwndParent = parent.handle;
-//	if (!visible) {
-//		OS.SendMessage (hwndParent, OS.WM_CANCELMODE, 0, 0);
-//		return;
-//	}
-//	int flags = OS.TPM_LEFTBUTTON | OS.TPM_RIGHTBUTTON | OS.TPM_LEFTALIGN;
-//	int nX = x, nY = y;
-//	if (!hasLocation) {
-//		int pos = OS.GetMessagePos ();
-//		nX = (short) (pos & 0xFFFF);
-//		nY = (short) (pos >> 16);
-//	}
+	if (!visible) {
+		OS.WinSendMsg (handle, OS.MM_ENDMENUMODE, 1, 0);
+		return;
+	}
 	/*
-	* Feature in Windows.  It is legal use TrackPopupMenu ()
-	* to display an empty menu as long as menu items are added
-	* inside of WM_INITPOPUPMENU.  If no items are added, then
-	* TrackPopupMenu () fails and does not send an indication
-	* that the menu has been closed.  This is not strictly a
-	* bug but leads to unwanted behavior when application code
-	* assumes that every WM_INITPOPUPMENU will eventually result
-	* in a WM_MENUSELECT, wParam=0xFFFF0000, lParam=0 to indicate
-	* that the menu has been closed.  The fix is to detect the
-	* case when TrackPopupMenu fails and the number of items in
-	* the menu is zero and issue a fake WM_MENUSELECT.
+	* The position is in display coordinates, where y grows downwards,
+	* while WinPopupMenu() takes desktop coordinates with the origin in
+	* the lower left corner. Without a position set with setLocation()
+	* the menu is shown at the pointer.
 	*/
-//	boolean success = OS.TrackPopupMenu (handle, flags, nX, nY, 0, hwndParent, null);
-//	if (!success && GetMenuItemCount (handle) == 0) {
-//		OS.SendMessage (hwndParent, OS.WM_MENUSELECT, 0xFFFF0000, 0);
-//	}
+	int popupX, popupY;
+	if (hasLocation) {
+		popupX = x;
+		popupY = OS.WinQuerySysValue (OS.HWND_DESKTOP, OS.SV_CYSCREEN) - y;
+	} else {
+		int [] pnt = new int [] {0, 0};
+		OS.WinQueryMsgPos (0, pnt);
+		popupX = pnt [0];
+		popupY = pnt [1];
+	}
+	short flOptions = (short) (OS.PU_HCONSTRAIN | OS.PU_VCONSTRAIN | OS.PU_KEYBOARD | OS.PU_MOUSEBUTTON1);
+	OS.WinPopupMenu (OS.HWND_DESKTOP, parent.handle, handle, popupX, popupY, 0, flOptions);
+	/*
+	* WinPopupMenu() puts the lower left corner of the menu at the given
+	* point, while the location of an SWT menu is its upper left corner.
+	* The height of the menu is known only after it has been shown, so
+	* it is moved down by that height (but not off the screen).
+	*/
+	if (hasLocation) {
+		SWP swp = new SWP ();
+		if (OS.WinQueryWindowPos (handle, swp) && swp.cy > 0) {
+			OS.WinSetWindowPos (handle, 0, swp.x, Math.max (0, popupY - swp.cy), 0, 0, OS.SWP_MOVE);
+		}
+	}
 }
 }

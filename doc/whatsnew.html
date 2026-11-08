@@ -569,6 +569,15 @@ href="eclipseos2-xxe.css"
       inserted the string at the cursor instead of replacing the text. Test
       case <kbd>SWT009_14</kbd>.</li>
 
+      <li><code>Menu.setVisible(true)</code> of a pop up menu was an empty
+      method (the Windows code was commented out), so nothing was shown. It
+      now uses <code>WinPopupMenu()</code>, at the pointer or at the location
+      set with <code>setLocation()</code>. PM puts the <em>lower</em> left
+      corner of the menu at the given point while SWT wants the upper left one,
+      so the menu is moved down by its own height once it is shown (its size is
+      not known before). <code>getVisible()</code> still returns
+      <code>false</code> for a pop up menu. Test case <kbd>SWT009_15</kbd>.</li>
+
       <li><kbd>SWT010_01</kbd>: the arrow of the drop down item opens a pop up
       menu under the button, the usual way to use it.</li>
     </ul>
