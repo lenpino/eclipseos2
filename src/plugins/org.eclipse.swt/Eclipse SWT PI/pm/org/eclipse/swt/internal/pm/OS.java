@@ -2536,6 +2536,10 @@ public static final int IDP_ICON_WARNING_80             = 3360; // "Warning" - "
    /* Container: CM_QUERYRECORD, CM_REMOVERECORD, CM_INVALIDATERECORD flags and the emphasis of records (pmstddlg.h) */
    public static final int CMA_PARENT                = 0x0001;
    public static final int CMA_LASTCHILD             = 0x0004;
+   public static final int CMA_LINESPACING           = 0x0008;
+   public static final int CMA_SLBITMAPORICON        = 0x0080;
+   public static final int CMA_CXTREEINDENT          = 0x1000;
+   public static final int CMA_SLTREEBITMAPORICON    = 0x4000;
    public static final int CMA_NOREPOSITION          = 0x0001;
    public static final int CMA_REPOSITION            = 0x0002;
    public static final int CMA_TEXTCHANGED           = 0x0004;

@@ -154,6 +154,7 @@ public class SWT011_01 extends SWTTestCase {
 		check(cb.width > 0 && cb.height > 0 && cb.y > rb.y, "an expanded child is shown below its parent: " + cb);
 		check(other.getBounds().y > cb.y, "the next root moves down: " + other.getBounds());
 		check(tree.getItemHeight() > 0 && tree.getItemHeight() <= rb.height + 2, "getItemHeight: " + tree.getItemHeight());
+		say("  info  row height " + rb.height + " (the icon cell is 16x16)");
 
 		Point inside = new Point(rb.x + rb.width / 2, rb.y + rb.height / 2);
 		check(tree.getItem(inside) == root, "getItem(Point) finds the root");
@@ -273,7 +274,13 @@ public class SWT011_01 extends SWTTestCase {
 		check(counts[0] == 0, "setSelection sends no Selection event");
 		check(tree.getSelection().length == 1 && tree.getSelection()[0] == childItem, "the child is selected (its parent is expanded by setSelection)");
 
-		/* NOTIFYRECORDEMPHASIS: hwndCnr, pRecord, fEmphasisMask */
+		/*
+		 * A click of the user: the container selects the record (here with the message,
+		 * without going through Tree, which would note the selection) and then sends
+		 * the notification. NOTIFYRECORDEMPHASIS: hwndCnr, pRecord, fEmphasisMask.
+		 */
+		tree.setSelection(new TreeItem[] {parentItem});
+		OS.WinSendMsg(tree.handle, OS.CM_SETRECORDEMPHASIS, childItem.handle, OS.MPFROM2SHORT((short) 1, (short) OS.CRA_SELECTED));
 		int emphasis = Tree_allocate(12);
 		poke(emphasis, tree.handle);
 		poke(emphasis + 4, childItem.handle);
@@ -281,10 +288,14 @@ public class SWT011_01 extends SWTTestCase {
 		notifyParent(tree, OS.CN_EMPHASIS, emphasis);
 		pump();
 		check(counts[0] == 1 && selected[0] == childItem, "CN_EMPHASIS of a selected record sends Selection with the item (events: " + counts[0] + ", item: " + (selected[0] == null ? "none" : selected[0].getText()) + ")");
+		notifyParent(tree, OS.CN_EMPHASIS, emphasis);
+		notifyParent(tree, OS.CN_EMPHASIS, emphasis);
+		pump();
+		check(counts[0] == 1, "the same notification again is not reported twice (events: " + counts[0] + ")");
 		tree.setSelection(new TreeItem[] {parentItem});
 		notifyParent(tree, OS.CN_EMPHASIS, emphasis);
 		pump();
-		check(counts[0] == 1, "CN_EMPHASIS of a record that is not selected sends nothing");
+		check(counts[0] == 1, "CN_EMPHASIS of a record that is not selected sends nothing (events: " + counts[0] + ")");
 		OS.free(emphasis);
 
 		/* NOTIFYRECORDENTER: hwndCnr, fKey, pRecord */

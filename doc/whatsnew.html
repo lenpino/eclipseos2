@@ -638,6 +638,13 @@ href="eclipseos2-xxe.css"
       the interactive part of <kbd>SWT011_01</kbd>, which the automatic checks
       did not cover; they do now.</li>
 
+      <li>First look at <kbd>SWT011_01</kbd> on the screen: the tree works with
+      real clicks. Fixed: the images were not drawn (the container needs
+      <code>CA_DRAWBITMAP</code> to draw bitmaps, and its icon cell is 32x32:
+      it is 16x16 now and the rows are 16 pixels high instead of 32), and a
+      click sent the <code>Selection</code> event twice. The tree repositions
+      its records less often after a resize.</li>
+
       <li><code>Scrollable.widgetStyle()</code> adds <code>SBS_VERT</code> to
       any control with a vertical scroll bar; in the container that bit is
       <code>CCS_EXTENDSEL</code>, which <code>Tree</code> removes.</li>

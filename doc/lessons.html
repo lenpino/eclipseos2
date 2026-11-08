@@ -212,6 +212,22 @@ href="eclipseos2-xxe.css"
       after sizing the tree, not by looking at it: the automatic checks created
       the tree with its size and the interactive part did not.</li>
 
+      <li>The container draws <em>icons</em> only, unless
+      <code>CA_DRAWBITMAP</code> is set in the attributes of the container:
+      the images of SWT are bitmaps. And the cell of the icon is 32x32 by
+      default (rows of 32 pixels, a blank square where the image should be):
+      <code>CNRINFO.slBitmapOrIcon</code> with <code>CMA_SLBITMAPORICON</code>
+      sets it, 16x16 gives rows as high as the text (16). An image that is an
+      icon (<code>SWT.ICON</code>) is not drawn this way. This one was reported
+      from the screen: the automatic checks only saw that the bounds of the item
+      grew by the width of the cell.</li>
+
+      <li>For one click the container sends more than one
+      <code>CN_EMPHASIS</code> (for the record that gets the selection and for
+      the one that loses it) and also when the plus sign of a record is
+      clicked, which selects that record. <code>Tree</code> keeps the record
+      whose selection it reported and reports only a change.</li>
+
       <li>A record that is not shown (inside a collapsed item) is not selected:
       <code>setSelection()</code> expands the ancestors first.</li>
 
@@ -222,9 +238,10 @@ href="eclipseos2-xxe.css"
       to date in it.</li>
     </ul>
 
-    <p>Not yet seen with the eyes: the look of the tree (lines, mini icons),
-    the real clicks, the Enter key and the plus signs (the notifications were
-    simulated in the automatic test), and the scrolling of
+    <p>Seen on the screen (<kbd>SWT011_01</kbd>): the tree with its lines, plus
+    and minus signs, text, selection and cursor, the scroll bar, and the events
+    of the real clicks. Not seen yet: the images (after the fix of the
+    attribute that draws them), the Enter key and the scrolling of
     <code>showItem()</code>. One more thing to review:
     <code>OS.objcpy(int, int[])</code> and <code>objcpy(int[], int)</code> copy
     as many <em>bytes</em> as the array has <em>elements</em>, a quarter of the

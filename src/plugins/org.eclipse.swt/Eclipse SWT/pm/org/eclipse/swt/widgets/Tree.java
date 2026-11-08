@@ -55,6 +55,8 @@ public class Tree extends Composite {
 	TreeItem [] items;
 	/* Programmatic changes must not send the events of the user's ones */
 	boolean ignoreSelect, ignoreExpand;
+	/* The record of the selection that was last reported, to report a change once */
+	int selectedHandle;
 
 	static final int TreeProc;
 	static final PSZ TreeClass =  PSZ.getAtom (OS.WC_CONTAINER);
@@ -289,11 +291,17 @@ void createHandle () {
 	super.createHandle ();
 	state &= ~CANVAS;
 
-	/* The tree view of the container, with the lines and the mini icons */
+	/*
+	* The tree view of the container, with the lines and the mini icons. Without
+	* CA_DRAWBITMAP it draws icons only, and the images are bitmaps; the icon
+	* cell is 32x32 by default, 16x16 makes the rows as high as the text.
+	*/
 	CNRINFO cnrInfo = new CNRINFO ();
 	cnrInfo.cb = CNRINFO.sizeof;
-	cnrInfo.flWindowAttr = OS.CV_TREE | OS.CV_ICON | OS.CV_MINI | OS.CA_TREELINE;
-	OS.WinSendMsg (handle, OS.CM_SETCNRINFO, cnrInfo, OS.CMA_FLWINDOWATTR);
+	cnrInfo.flWindowAttr = OS.CV_TREE | OS.CV_ICON | OS.CV_MINI | OS.CA_TREELINE | OS.CA_DRAWBITMAP;
+	cnrInfo.slBitmapOrIcon.cx = 16;
+	cnrInfo.slBitmapOrIcon.cy = 16;
+	OS.WinSendMsg (handle, OS.CM_SETCNRINFO, cnrInfo, OS.CMA_FLWINDOWATTR | OS.CMA_SLBITMAPORICON);
 }
 
 void createItem (TreeItem item, int hParent, int hInsertAfter) {
@@ -332,6 +340,7 @@ void createItem (TreeItem item, int hParent, int hInsertAfter) {
 	int count = send (OS.CM_INSERTRECORD, hItem, insert);
 	OS.free (insert);
 	ignoreSelect = oldIgnore;
+	if (count != 0 && (peek (hItem + REC_FLAGS) & OS.CRA_SELECTED) != 0) selectedHandle = hItem;
 	if (count == 0) {
 		item.freeText ();
 		item.handle = 0;
@@ -364,6 +373,7 @@ void destroyItem (TreeItem item) {
 	OS.free (array);
 	int id = peek (item.handle + REC_SIZE);
 	if (0 <= id && id < items.length && items [id] == item) items [id] = null;
+	if (selectedHandle == item.handle) selectedHandle = 0;
 }
 
 /**
@@ -568,6 +578,7 @@ public void removeAll () {
 		}
 	}
 	items = new TreeItem [4];
+	selectedHandle = 0;
 }
 
 /**
@@ -700,6 +711,8 @@ public void setSelection (TreeItem [] items) {
 		send (OS.CM_SETRECORDEMPHASIS, items [i].handle, OS.MPFROM2SHORT ((short) 1, (short) emphasis));
 	}
 	ignoreSelect = oldIgnore;
+	int selected = send (OS.CM_QUERYRECORDEMPHASIS, OS.CMA_FIRST, OS.CRA_SELECTED);
+	selectedHandle = selected == -1 ? 0 : selected;
 }
 
 /**
@@ -807,9 +820,11 @@ int windowProc (int msg, int mp1, int mp2) {
 	* place, and when it grows they go out of the visible part (they are
 	* moved by the old height). It has to be told, once it has taken the
 	* new size: no array of records and a count of 0 stand for all of them.
+	* Nothing is done for an empty container, and the texts are not measured
+	* again (they do not depend on the size), to repaint as little as possible.
 	*/
-	if (msg == OS.WM_SIZE && items != null && handle != 0 && !isDisposed ()) {
-		send (OS.CM_INVALIDATERECORD, 0, OS.MPFROM2SHORT ((short) 0, (short) (OS.CMA_REPOSITION | OS.CMA_TEXTCHANGED)));
+	if (msg == OS.WM_SIZE && items != null && handle != 0 && !isDisposed () && firstChild (0) != 0) {
+		send (OS.CM_INVALIDATERECORD, 0, OS.MPFROM2SHORT ((short) 0, (short) OS.CMA_REPOSITION));
 	}
 	return result;
 }
@@ -824,9 +839,16 @@ MRESULT wmControlChild (int mp1, int mp2) {
 			/* NOTIFYRECORDEMPHASIS: hwndCnr, pRecord, fEmphasisMask */
 			int hRecord = peek (mp2 + 4);
 			int mask = peek (mp2 + 8);
-			if (!ignoreSelect && (mask & OS.CRA_SELECTED) != 0 && hRecord != 0) {
+			/*
+			* The container sends several notifications for one click (for
+			* the record that is selected and for the one that was), and it
+			* selects the record whose plus sign is clicked: report only a
+			* change of the selected record.
+			*/
+			if (!ignoreSelect && (mask & OS.CRA_SELECTED) != 0 && hRecord != 0 && hRecord != selectedHandle) {
 				TreeItem item = itemOf (hRecord);
 				if (item != null && (peek (hRecord + REC_FLAGS) & OS.CRA_SELECTED) != 0) {
+					selectedHandle = hRecord;
 					Event event = new Event ();
 					event.item = item;
 					postEvent (SWT.Selection, event);

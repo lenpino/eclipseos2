@@ -306,7 +306,11 @@ href="eclipseos2-xxe.css"
         program: <code>getSelection()</code> never gives more than one item.
         <code>SWT.CHECK</code> has no effect (the container has no check
         boxes, the state is only kept), and the colors of an item are only
-        kept. <code>setInsertMark()</code> does nothing.</td>
+        kept. <code>setInsertMark()</code> does nothing. Clicking the plus or
+        minus sign of an item also selects it (a <code>Selection</code> event is
+        sent after the <code>Expand</code> or <code>Collapse</code> one), and an
+        image that is an icon (<code>SWT.ICON</code>) is not drawn, only bitmaps
+        are.</td>
 
         <td>All of it was measured on the container: with
         <code>CM_SETRECORDEMPHASIS</code> deselecting the selected record
