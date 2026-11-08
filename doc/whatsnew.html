@@ -574,9 +574,13 @@ href="eclipseos2-xxe.css"
       now uses <code>WinPopupMenu()</code>, at the pointer or at the location
       set with <code>setLocation()</code>. PM puts the <em>lower</em> left
       corner of the menu at the given point while SWT wants the upper left one,
-      so the menu is moved down by its own height once it is shown (its size is
-      not known before). <code>getVisible()</code> still returns
-      <code>false</code> for a pop up menu. Test case <kbd>SWT009_15</kbd>.</li>
+      and the size of the menu is known only after it has been shown. To avoid
+      seeing it at the wrong place for an instant (which happened from time to
+      time) the menu is first shown below the screen, then moved: its upper
+      left corner goes to the point, or its lower left one if it does not fit
+      below, and it is kept inside the screen. <code>getVisible()</code> still
+      returns <code>false</code> for a pop up menu. Test case
+      <kbd>SWT009_15</kbd>.</li>
 
       <li>Fixed the direction of the y axis in <code>Control.toDisplay()</code>,
       <code>toControl()</code> and <code>Display.getCursorLocation()</code> /

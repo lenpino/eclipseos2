@@ -862,29 +862,35 @@ public void setVisible (boolean visible) {
 	* the lower left corner. Without a position set with setLocation()
 	* the menu is shown at the pointer.
 	*/
+	int screenWidth = OS.WinQuerySysValue (OS.HWND_DESKTOP, OS.SV_CXSCREEN);
+	int screenHeight = OS.WinQuerySysValue (OS.HWND_DESKTOP, OS.SV_CYSCREEN);
 	int popupX, popupY;
 	if (hasLocation) {
 		popupX = x;
-		popupY = OS.WinQuerySysValue (OS.HWND_DESKTOP, OS.SV_CYSCREEN) - y;
+		popupY = screenHeight - y;
 	} else {
 		int [] pnt = new int [] {0, 0};
 		OS.WinQueryMsgPos (0, pnt);
 		popupX = pnt [0];
 		popupY = pnt [1];
 	}
-	short flOptions = (short) (OS.PU_HCONSTRAIN | OS.PU_VCONSTRAIN | OS.PU_KEYBOARD | OS.PU_MOUSEBUTTON1);
-	OS.WinPopupMenu (OS.HWND_DESKTOP, parent.handle, handle, popupX, popupY, 0, flOptions);
 	/*
 	* WinPopupMenu() puts the lower left corner of the menu at the given
-	* point, while the location of an SWT menu is its upper left corner.
-	* The height of the menu is known only after it has been shown, so
-	* it is moved down by that height (but not off the screen).
+	* point, while the location of an SWT menu is its upper left corner,
+	* and the size of the menu is known only after it has been shown. To
+	* avoid showing it at the wrong place first, it is shown below the
+	* screen, then moved: its upper left corner goes to the point, or its
+	* lower left one if it does not fit below, and it is kept in the screen.
 	*/
-	if (hasLocation) {
-		SWP swp = new SWP ();
-		if (OS.WinQueryWindowPos (handle, swp) && swp.cy > 0) {
-			OS.WinSetWindowPos (handle, 0, swp.x, Math.max (0, popupY - swp.cy), 0, 0, OS.SWP_MOVE);
-		}
+	short flOptions = (short) (OS.PU_KEYBOARD | OS.PU_MOUSEBUTTON1);
+	OS.WinPopupMenu (OS.HWND_DESKTOP, parent.handle, handle, popupX, -screenHeight, 0, flOptions);
+	SWP swp = new SWP ();
+	if (OS.WinQueryWindowPos (handle, swp) && swp.cy > 0) {
+		int left = Math.max (0, Math.min (popupX, screenWidth - swp.cx));
+		int bottom = popupY - swp.cy;
+		if (bottom < 0) bottom = popupY;
+		bottom = Math.max (0, Math.min (bottom, screenHeight - swp.cy));
+		OS.WinSetWindowPos (handle, 0, left, bottom, 0, 0, OS.SWP_MOVE);
 	}
 }
 }

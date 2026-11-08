@@ -54,6 +54,22 @@ public class SWT009_15 extends SWTTestCase {
 		check(top == 200, "the top edge is at the requested y: " + top);
 
 		menu.setVisible(false);
+
+		/* The menu does not go out of the screen: it opens upwards when it does not fit below */
+		int screenWidth = OS.WinQuerySysValue(OS.HWND_DESKTOP, OS.SV_CXSCREEN);
+		menu.setLocation(300, screenHeight - 10);
+		menu.setVisible(true);
+		check(OS.WinQueryWindowPos(menu.handle, swp), "the menu can be queried again after hiding it");
+		check(swp.y >= 0 && swp.y + swp.cy <= screenHeight, "a menu near the bottom stays in the screen: y=" + swp.y);
+		check(swp.y + swp.cy > 10 && swp.y < screenHeight - 10, "and it opens upwards from the point: y=" + swp.y);
+		menu.setVisible(false);
+
+		menu.setLocation(screenWidth - 5, 200);
+		menu.setVisible(true);
+		check(OS.WinQueryWindowPos(menu.handle, swp), "the menu can be queried a third time");
+		check(swp.x >= 0 && swp.x + swp.cx <= screenWidth, "a menu near the right edge stays in the screen: x=" + swp.x);
+		menu.setVisible(false);
+
 		say("\nAll checks passed.\n");
 		/* SWTTestCase opens the shell after initComponents(), so close it afterwards */
 		display.asyncExec(new Runnable() {
