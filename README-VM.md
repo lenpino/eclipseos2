@@ -37,7 +37,7 @@ variables de entorno `VM_HOST`, `VM_USER`, `VM_PASS`, `VM_SWT_DIR`).
 - `dir /s` sobre `X:\` recorre todo el disco y tarda minutos: acotar siempre
   la ruta (`X:\apps\dev\...`). Los comandos `date /t` y `time /t` de OS/2
   esperan entrada y dejan `vm.sh` colgado.
-- La IP por defecto de la VM es `192.168.1.90` (antes `.92`). Con una IP
+- La IP por defecto de la VM es `192.168.1.98` (antes `.90` y `.92`). Con una IP
   nueva, `vm.sh` se cuelga sin mostrar nada: usa `ssh -q` dentro de `expect`,
   que solo contesta a `password:`, así que la pregunta `yes/no` de la clave del
   host queda sin responder. Se diagnostica con `ssh -vv ...` (acaba en

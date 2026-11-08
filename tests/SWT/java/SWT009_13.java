@@ -41,10 +41,11 @@ public class SWT009_13 extends SWTTestCase {
 		DESC = "Sash (esplitter)";
 	}
 
-	Text left, right;
-	Sash vsash;
+	Text left, right, bottom;
+	Sash vsash, hsash;
 	int checks;
 	double ratio = 0.5;	/* left pane share of the client width */
+	double ratioH = 0.5;	/* top-right pane share of the client height */
 
 	Shell createTopShell(Display display) {
 		return new Shell(display, SWT.SHELL_TRIM | SWT.NO_REDRAW_RESIZE);
@@ -148,13 +149,16 @@ public class SWT009_13 extends SWTTestCase {
 		checkSelectionEvent();
 		say("\n" + checks + " checks passed.\n");
 
-		sayObjective("Interactive: drag the vertical sash, both texts must resize");
+		sayObjective("Interactive: drag both sashes, the neighbour texts must resize");
 		shell.setLayout(null);
 		left = new Text(shell, SWT.BORDER | SWT.MULTI);
 		left.setText("left");
 		right = new Text(shell, SWT.BORDER | SWT.MULTI);
-		right.setText("right");
+		right.setText("top right");
+		bottom = new Text(shell, SWT.BORDER | SWT.MULTI);
+		bottom.setText("bottom right");
 		vsash = new Sash(shell, SWT.VERTICAL);
+		hsash = new Sash(shell, SWT.HORIZONTAL);
 		vsash.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				say("Selection: x=" + e.x + " y=" + e.y
@@ -167,12 +171,24 @@ public class SWT009_13 extends SWTTestCase {
 				layoutPanes();
 			}
 		});
+		hsash.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				say("Selection (horizontal): x=" + e.x + " y=" + e.y
+						+ " w=" + e.width + " h=" + e.height
+						+ (e.detail == SWT.DRAG ? " (drag)" : ""));
+				if (e.detail == SWT.DRAG) return;
+				Rectangle area = shell.getClientArea();
+				int y = Math.max(20, Math.min(e.y, area.height - 20));
+				ratioH = (double) y / area.height;
+				layoutPanes();
+			}
+		});
 		shell.addListener(SWT.Resize, new org.eclipse.swt.widgets.Listener() {
 			public void handleEvent(org.eclipse.swt.widgets.Event e) {
 				layoutPanes();
 			}
 		});
-		shell.setSize(400, 250);
+		shell.setSize(450, 300);
 		layoutPanes();
 		setTitle(null);
 
@@ -189,7 +205,11 @@ public class SWT009_13 extends SWTTestCase {
 		int x = (int) (area.width * ratio);
 		vsash.setBounds(x, 0, 4, area.height);
 		left.setBounds(0, 0, x, area.height);
-		right.setBounds(x + 4, 0, area.width - x - 4, area.height);
+		int x2 = x + 4, w = area.width - x2;
+		int y = (int) (area.height * ratioH);
+		hsash.setBounds(x2, y, w, 4);
+		right.setBounds(x2, 0, w, y);
+		bottom.setBounds(x2, y + 4, w, area.height - y - 4);
 	}
 
 	void setTitle(String title) {
