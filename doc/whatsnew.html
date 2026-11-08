@@ -631,6 +631,13 @@ href="eclipseos2-xxe.css"
       have several or none, see <a href="diff.html">difference 013</a>. 19
       constants of the container were added to <code>OS</code>.</li>
 
+      <li>The container did not place its records again when it changed of
+      size, so a tree whose items were added before it had a size looked empty
+      (the items were on top of each other and then out of the visible part).
+      <code>Tree</code> asks it to reposition them after every resize. Seen in
+      the interactive part of <kbd>SWT011_01</kbd>, which the automatic checks
+      did not cover; they do now.</li>
+
       <li><code>Scrollable.widgetStyle()</code> adds <code>SBS_VERT</code> to
       any control with a vertical scroll bar; in the container that bit is
       <code>CCS_EXTENDSEL</code>, which <code>Tree</code> removes.</li>

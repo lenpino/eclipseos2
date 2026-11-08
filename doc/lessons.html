@@ -201,6 +201,17 @@ href="eclipseos2-xxe.css"
       selection style. The properties of the tree view that differ from
       Windows are in <a href="diff.html">difference 013</a>.</li>
 
+      <li>The container does not place its records again when it changes of
+      size. The ones inserted while it had no size (a tree is created without
+      one) are all at the same place, and when it grows they go out of the
+      visible part, moved by the old height: the tree looks empty.
+      <code>Tree</code> sends <code>CM_INVALIDATERECORD</code> with
+      <code>CMA_REPOSITION</code> for all the records (no array and a count of
+      0) after each <code>WM_SIZE</code>, once the container has taken the new
+      size. It was found by asking for the bounds of the items before and
+      after sizing the tree, not by looking at it: the automatic checks created
+      the tree with its size and the interactive part did not.</li>
+
       <li>A record that is not shown (inside a collapsed item) is not selected:
       <code>setSelection()</code> expands the ancestors first.</li>
 

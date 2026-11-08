@@ -167,6 +167,36 @@ public class SWT011_01 extends SWTTestCase {
 		tree.dispose();
 	}
 
+	/*
+	 * The container did not place its records again when it changed of size: the
+	 * ones inserted while it had no size were all in the same place and, when it
+	 * got one, they went out of the visible part (the tree seemed empty).
+	 */
+	void checkSizeAfterItems() {
+		saySubObjective("Items added before the tree has a size");
+		Tree tree = new Tree(shell, SWT.BORDER);
+		TreeItem[] roots = new TreeItem[4];
+		for (int i = 0; i < roots.length; i++) {
+			roots[i] = new TreeItem(tree, SWT.NONE);
+			roots[i].setText("Root " + i);
+			new TreeItem(roots[i], SWT.NONE).setText("Child " + i);
+		}
+		tree.setBounds(0, 0, 300, 200);
+		for (int pass = 0; pass < 2; pass++) {
+			boolean apart = true, inside = true;
+			for (int i = 0; i < roots.length; i++) {
+				Rectangle b = roots[i].getBounds();
+				if (i > 0) apart &= b.y >= roots[i - 1].getBounds().y + roots[i - 1].getBounds().height;
+				inside &= b.y >= 0 && b.y + b.height <= 200 + pass * 100;
+			}
+			check(apart, "the roots are one below the other after the tree gets a size (pass " + pass + "): "
+					+ roots[0].getBounds() + " " + roots[1].getBounds() + " " + roots[3].getBounds());
+			check(inside, "and they are in the visible part (pass " + pass + ")");
+			tree.setBounds(0, 0, 350, 300);
+		}
+		tree.dispose();
+	}
+
 	void checkSelection() {
 		saySubObjective("Selection");
 		Tree single = new Tree(shell, SWT.SINGLE | SWT.BORDER);
@@ -364,6 +394,7 @@ public class SWT011_01 extends SWTTestCase {
 		sayObjective("Automatic checks");
 		checkHierarchy();
 		checkExpandAndBounds();
+		checkSizeAfterItems();
 		checkSelection();
 		checkEvents();
 		checkDispose();

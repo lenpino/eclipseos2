@@ -799,6 +799,21 @@ int windowProc () {
 	return TreeProc;
 }
 
+int windowProc (int msg, int mp1, int mp2) {
+	int result = super.windowProc (msg, mp1, mp2);
+	/*
+	* The container does not place its records again when it changes of
+	* size: the ones inserted while it had no size are all in the same
+	* place, and when it grows they go out of the visible part (they are
+	* moved by the old height). It has to be told, once it has taken the
+	* new size: no array of records and a count of 0 stand for all of them.
+	*/
+	if (msg == OS.WM_SIZE && items != null && handle != 0 && !isDisposed ()) {
+		send (OS.CM_INVALIDATERECORD, 0, OS.MPFROM2SHORT ((short) 0, (short) (OS.CMA_REPOSITION | OS.CMA_TEXTCHANGED)));
+	}
+	return result;
+}
+
 /*
  * Notifications of the container (WM_CONTROL): mp1 = (id, code) and mp2
  * is a pointer to a structure that depends on the code.
