@@ -42,6 +42,8 @@ org\eclipse\swt\widgets\Combo.java
 org\eclipse\swt\widgets\Slider.java
 org\eclipse\swt\widgets\TabFolder.java
 org\eclipse\swt\widgets\TabItem.java
+org\eclipse\swt\widgets\ToolBar.java
+org\eclipse\swt\widgets\ToolItem.java
 org\eclipse\swt\widgets\Group.java
 org\eclipse\swt\widgets\Menu.java
 org\eclipse\swt\widgets\MenuItem.java

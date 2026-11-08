@@ -541,5 +541,24 @@ href="eclipseos2-xxe.css"
       <code>swt.test.autoclose=&lt;ms&gt;</code> closes the window by itself
       for unattended runs.</li>
     </ul>
+
+    <h3>2026-11-08</h3>
+
+    <h4>[lpino]</h4>
+
+    <ul>
+      <li>New <a href="swt010.html">SWT Step 010</a> (tool bars):
+      <code>o.e.swt.widgets.ToolBar</code> and <code>ToolItem</code>, with the
+      <kbd>SWT010_01</kbd> test case (<kbd>ant.cmd swt010_01</kbd>). They do not
+      use the eCS <code>etoolbar</code> control, see <a
+      href="diff.html">difference 012</a> for the reasons. The latest eCo
+      Software toolkit (2024) was compared with the installed one: its
+      <kbd>etoolbar.h</kbd> only adds the <code>TBS_2D</code> style and
+      <kbd>esplitter.h</kbd> is identical.</li>
+
+      <li>Found that <code>Control.setSize()/setLocation()</code> misplace a
+      <code>Text</code> with a border, see <a href="diff.html">difference
+      013</a>.</li>
+    </ul>
   </body>
 </html>

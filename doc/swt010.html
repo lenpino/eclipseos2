@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/css"
+href="eclipseos2-xxe.css"
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"xhtml1-strict.dtd">
+<html>
+  <head>
+    <link href="eclipseos2.css" rel="stylesheet" type="text/css" />
+
+    <title>Eclipse for OS/2 Transitional Project Notes</title>
+  </head>
+
+  <body>
+    <h1>SWT Step 010. Tool bars</h1>
+
+    <h2>Objective</h2>
+
+    <p>Implement the <code>o.e.swt.widgets.ToolBar</code> and
+    <code>ToolItem</code> classes. The test case (<kbd>SWT010_01</kbd>) checks
+    the item list, the layout, the selection and radio behavior, the events and
+    the controls placed in separators automatically, and then shows several tool
+    bars to be used by hand.</p>
+
+    <h2>Task notes</h2>
+
+    <p>The tool bar control of the eCS toolkit (<kbd>etoolbar.h</kbd>,
+    <code>er.toolbar.class</code>) is not used: it can only append buttons, and
+    it cannot remove or insert them nor report their bounds, which
+    <code>ToolItem.dispose()</code>, <code>ToolItem(parent, style, index)</code>,
+    <code>getBounds()</code> and <code>ToolBar.getItem(Point)</code> need. The
+    2024 version of the toolkit has the same messages (it only adds the
+    <code>TBS_2D</code> style). So each item is a <code>Button</code> (flat for a
+    <code>SWT.FLAT</code> tool bar) that the <code>ToolBar</code> lays out in
+    rows. See <a href="diff.html">differences 012 and 013</a>.</p>
+
+    <h2>Step checklist</h2>
+
+    <table>
+      <col width="40%" />
+
+      <col />
+
+      <col width="50%" />
+
+      <thead>
+        <tr>
+          <th>Operation</th>
+
+          <th>Status</th>
+
+          <th>Remarks</th>
+        </tr>
+      </thead>
+
+      <tr>
+        <td><code>ToolBar</code>: item list, <code>computeSize()</code>, rows
+        for <code>SWT.WRAP</code>, <code>SWT.VERTICAL</code></td>
+
+        <td>Done [lpino]</td>
+
+        <td>Checked by the automatic part of <kbd>SWT010_01</kbd>.</td>
+      </tr>
+
+      <tr>
+        <td><code>ToolItem</code>: <code>PUSH</code>, <code>CHECK</code>,
+        <code>RADIO</code> (group of consecutive items), <code>SEPARATOR</code>
+        (width, control), <code>DROP_DOWN</code> (<code>SWT.ARROW</code>
+        detail)</td>
+
+        <td>Done [lpino]</td>
+
+        <td>Clicks are simulated by sending <code>SWT.Selection</code> to the
+        internal button. The real mouse has to be tried in the interactive
+        part.</td>
+      </tr>
+
+      <tr>
+        <td>Images and tool tips</td>
+
+        <td>Partly done [lpino]</td>
+
+        <td>Image or text (not both), disabled image; the hot image and the tool
+        tip text are only kept (<code>Control</code> has no tool tips yet).</td>
+      </tr>
+    </table>
+  </body>
+</html>

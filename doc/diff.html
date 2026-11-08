@@ -261,6 +261,51 @@ href="eclipseos2-xxe.css"
         garbage. So the native notifications cannot be used to implement the
         <code>SWT.Selection</code> contract.</td>
       </tr>
+
+      <tr>
+        <td>012</td>
+
+        <td>The tool bar is the native <code>ToolbarWindow32</code> control: it
+        draws the buttons, keeps the list of items, inserts and removes them,
+        reports their rectangles and builds the radio groups
+        (<code>BTNS_CHECKGROUP</code>) and the drop down arrows
+        (<code>BTNS_DROPDOWN</code>) by itself.</td>
+
+        <td><code>ToolBar</code> lays out the buttons of its items itself. Each
+        <code>ToolItem</code> is a <code>Button</code> child of the tool bar
+        (<code>PUSH</code>, or <code>TOGGLE</code> for <code>CHECK</code> and
+        <code>RADIO</code>; <code>FLAT</code> if the tool bar is
+        <code>SWT.FLAT</code>), a drop down item has an extra arrow button, and
+        a separator is a gap that can hold a control. A <code>RADIO</code>
+        item clears the other items of its group of consecutive radio items.
+        An item shows its image or, without one, its text, never both, and the
+        hot image and the tool tip text are only stored.</td>
+
+        <td>The eCS <code>etoolbar</code> control (<kbd>etoolbar.h</kbd>) only
+        appends buttons (<code>TBM_ADDBUTTON</code>): there is no message to
+        remove or insert one, to get its rectangle, nor radio or drop down
+        buttons, and the 2024 toolkit has the same messages. A side effect of
+        the implementation is that <code>ToolBar.getChildren()</code> returns
+        the internal buttons together with the controls of the separators.</td>
+      </tr>
+
+      <tr>
+        <td>013</td>
+
+        <td><code>Control.setSize()</code> and <code>Control.setLocation()</code>
+        move and resize a control exactly as asked.</td>
+
+        <td>On a <code>Text</code> with <code>SWT.BORDER</code>,
+        <code>setSize(77, 26)</code> gives a control of 83x32 placed at
+        (-6, -6), and <code>setLocation()</code> moves it 3 pixels off, while
+        <code>setBounds()</code> is exact. The border seems to be added twice,
+        once for each way of setting the position or the size.</td>
+
+        <td>Found while placing a <code>Text</code> in a tool bar separator,
+        which now uses <code>setBounds()</code> only. The cause in
+        <code>Control</code>/<code>Text</code> has not been investigated, other
+        code that uses <code>setSize()</code> on bordered texts is affected.</td>
+      </tr>
     </table>
 
     <h2>Other differences</h2>
