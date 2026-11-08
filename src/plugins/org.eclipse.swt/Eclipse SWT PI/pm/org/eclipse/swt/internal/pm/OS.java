@@ -2560,7 +2560,11 @@ public static final short SHORT1FROMMP (int mp) { return (short)mp; }
 public static final short SHORT2FROMMP (int mp) { return (short)(((mp & 0xFFFF0000)>>16) & 0xFFFF); }
 //((pixels & 0xFFFF0000)>>16) & 0xFFFF
 //public static final int MPFROM2SHORT(short s1, short s2){ return (((int)((short)s1)) | ((int)((short)s2)) << 16);}
-public static final int MPFROM2SHORT(short s1, short s2){ return ((s2 << 16) + s1);}
+/*
+ * Both shorts are masked: a negative s1 is sign extended to an int, and adding
+ * it (as this macro used to do) borrowed from the high word.
+ */
+public static final int MPFROM2SHORT(short s1, short s2){ return ((s2 & 0xFFFF) << 16) | (s1 & 0xFFFF);}
 //public static final int MAKELONG (short l, short h) {
 //    return ((int)l) | (((int)h) << 16);
 //}

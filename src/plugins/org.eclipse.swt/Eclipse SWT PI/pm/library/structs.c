@@ -1936,7 +1936,7 @@ void cacheCNRINFOFids(JNIEnv *env, jobject lpObject, PCNRINFO_FID_CACHE lpCache)
     lpCache->pszCnrTitle = (*env)->GetFieldID(env, lpCache->clazz, "pszCnrTitle", "Lorg/eclipse/swt/internal/pm/PSZ;");
     lpCache->flWindowAttr = (*env)->GetFieldID(env, lpCache->clazz, "flWindowAttr", "I");
     lpCache->ptlOrigin = (*env)->GetFieldID(env, lpCache->clazz, "ptlOrigin", "Lorg/eclipse/swt/internal/pm/POINTL;");
-    lpCache->cDelta  = (*env)->GetFieldID(env, lpCache->clazz, "cDelta ", "I");
+    lpCache->cDelta  = (*env)->GetFieldID(env, lpCache->clazz, "cDelta", "I");
     lpCache->cRecords = (*env)->GetFieldID(env, lpCache->clazz, "cRecords", "I");
     lpCache->slBitmapOrIcon = (*env)->GetFieldID(env, lpCache->clazz, "slBitmapOrIcon", "Lorg/eclipse/swt/internal/pm/SIZEL;");
     lpCache->slTreeBitmapOrIcon = (*env)->GetFieldID(env, lpCache->clazz, "slTreeBitmapOrIcon", "Lorg/eclipse/swt/internal/pm/SIZEL;");
