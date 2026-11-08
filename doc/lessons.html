@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/css"
+href="eclipseos2-xxe.css"
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"xhtml1-strict.dtd">
+<html>
+  <head>
+    <link href="eclipseos2.css" rel="stylesheet" type="text/css" />
+
+    <title>Eclipse for OS/2 Transitional Project Notes</title>
+  </head>
+
+  <body>
+    <h1>Lessons learned and known problems</h1>
+
+    <p>What has been found out while porting and testing the widgets on the
+    OS/2 virtual machine (see <kbd>README-VM.md</kbd> for the way of working),
+    kept together so that it is not discovered twice. The changes themselves
+    are in <a href="whatsnew.html">what's new</a>, the behavior that differs
+    from Windows in <a href="diff.html">known differences</a>.</p>
+
+    <h2>The runtime</h2>
+
+    <ul>
+      <li>The JVM is <samp>IBM Java 1.3.1, build co131-20060605 (SR10), Classic
+      VM, JIT enabled (jitc)</samp>. <kbd>-Xint</kbd> does not exist in it, and
+      <kbd>-Djava.compiler=NONE</kbd> (no JIT) does not change the crash of the
+      tree, so the JIT is not the cause.</li>
+
+      <li>The JNI wrappers abort the VM, with <samp>FATAL ERROR in native
+      method: Passed wrong C array to Release&lt;type&gt;ArrayElements</samp>,
+      in two situations: when they release an array of <em>one</em> element
+      (an empty <code>PSZ</code> was one, see <a
+      href="swt.html">ASCIIZ strings</a>), and when they release an array with
+      a pointer that was not obtained from it (see the <code>RECORDCORE</code>
+      case below).</li>
+
+      <li>The JVM does not check the <code>jfieldID</code> it is given: a
+      field name that is not found makes <code>GetFieldID()</code> return
+      <code>NULL</code> and the next <code>GetIntField()</code> ends in
+      <samp>General Protection Fault ... EIP = 00000000</samp> and
+      <samp>SYS1808</samp>, with no Java stack.</li>
+
+      <li>Posted events (<code>postEvent()</code>) run after a window message
+      has been dispatched, so a loop with nothing to dispatch does not deliver
+      them: a test has to post a message (<code>WM_NULL</code>) first.</li>
+    </ul>
+
+    <h2>Defects found and fixed</h2>
+
+    <table>
+      <col width="30%" />
+
+      <col width="45%" />
+
+      <col width="25%" />
+
+      <thead>
+        <tr>
+          <th>Where</th>
+
+          <th>What was wrong</th>
+
+          <th>Test case</th>
+        </tr>
+      </thead>
+
+      <tr>
+        <td><code>PSZ</code></td>
+
+        <td>Empty strings made a one-element array and aborted the VM
+        (<code>Text/Button/Label.setText("")</code>).</td>
+
+        <td><kbd>SWT009_14</kbd></td>
+      </tr>
+
+      <tr>
+        <td><code>Text.setText()</code>, multi line</td>
+
+        <td><code>MLM_INSERT</code> inserts at the cursor: the new text went in
+        front of the old one.</td>
+
+        <td><kbd>SWT009_14</kbd></td>
+      </tr>
+
+      <tr>
+        <td><code>Text</code> single line</td>
+
+        <td>The 3 pixel margin of an entry field with <code>ES_MARGIN</code>
+        was compensated only by <code>setBounds()</code>, and also for texts
+        without a border.</td>
+
+        <td><kbd>SWT009_17</kbd></td>
+      </tr>
+
+      <tr>
+        <td><code>Control.toDisplay()/toControl()</code>, <code>Display</code>
+        cursor</td>
+
+        <td>The y axis was not inverted (PM grows upwards), and the cursor was
+        asked with <code>WinQueryCursorInfo()</code>, which is about the text
+        cursor.</td>
+
+        <td><kbd>SWT009_16</kbd></td>
+      </tr>
+
+      <tr>
+        <td><code>Menu.setVisible()</code></td>
+
+        <td>It was an empty method. <code>WinPopupMenu()</code> anchors the
+        <em>lower</em> left corner of the menu and its size is known after it
+        is shown: it is shown below the screen and then moved, to avoid seeing
+        it at the wrong place for an instant.</td>
+
+        <td><kbd>SWT009_15</kbd></td>
+      </tr>
+
+      <tr>
+        <td><code>OS</code>: <code>CCS_*</code>, <code>CV_*</code>,
+        <code>CA_*</code></td>
+
+        <td>24 hexadecimal values written as decimal numbers
+        (<code>CV_TREE = 40</code>).</td>
+
+        <td>audit script</td>
+      </tr>
+
+      <tr>
+        <td><kbd>structs.c</kbd>, <code>CNRINFO</code></td>
+
+        <td><code>GetFieldID(..., "cDelta ", ...)</code>: a space at the end of
+        the name. Any message with a <code>CNRINFO</code> killed the VM, that
+        was the crash of <code>new Tree()</code>.</td>
+
+        <td>audit script</td>
+      </tr>
+
+      <tr>
+        <td><code>OS.MPFROM2SHORT()</code></td>
+
+        <td>It added the first short, sign extended, to the shifted second one:
+        a negative value changed the high word. It is used in 81 places.</td>
+
+        <td><kbd>SWT009_18</kbd></td>
+      </tr>
+    </table>
+
+    <h2>Audits that can be repeated</h2>
+
+    <ul>
+      <li><kbd>tools/audit-constants.py &lt;headers&gt;</kbd> compares the
+      constants of <kbd>OS.java</kbd> with the toolkit headers
+      (<kbd>pmstddlg.h</kbd>, <kbd>pmwin.h</kbd>, <kbd>pmgpi.h</kbd>,
+      <kbd>pmdev.h</kbd>, taken from <kbd>X:\os2tk45\h</kbd>): 953 are in
+      common and, once the 24 above were fixed, all of them agree. A
+      <code>static final int</code> is copied into the classes that use it when
+      they are compiled, so those have to be recompiled after changing a
+      constant (delete their <kbd>.class</kbd>).</li>
+
+      <li><kbd>tools/audit-jni-fields.py</kbd> checks every
+      <code>GetFieldID()</code> of <kbd>structs.c</kbd> against the Java class
+      (305 of them). Six warnings are known and harmless:
+      <code>QMSG.ptl_x/ptl_y</code> are declared on one line,
+      <code>PIB.pib_pchcmd/pib_pchenv</code> are commented out in Java but not
+      in C (a problem only if <code>DosGetInfoBlocks()</code> is used) and
+      <code>TREERECORD</code> has no Java class and is not used.</li>
+    </ul>
+
+    <h2>The tree (<code>Tree</code>, <kbd>SWT009_11</kbd>)</h2>
+
+    <p>Still aborts the VM, but now further on. <code>new Tree()</code> works
+    after the two fixes above, and the first <code>TreeItem</code> fails:</p>
+
+    <ul>
+      <li><code>OS.objcpy(RECORDCORE, int)</code> copies a record of the
+      container into a Java object with <code>setRECORDCOREFields()</code>,
+      which calls <code>releasePSZBytes()</code> on the strings of the record
+      (<code>pszIcon</code>, <code>pszText</code>, <code>pszName</code>,
+      <code>pszTree</code>): it releases Java arrays with pointers that belong
+      to the record. That is the <samp>Passed wrong C array</samp> abort.</li>
+
+      <li><code>Tree.createItem()</code> sends <code>CM_INSERTRECORD</code>
+      with the Java copy of the record, and the wrapper builds a temporary C
+      structure from it, but the container needs the record it allocated with
+      <code>CM_ALLOCRECORD</code> (<code>hItem</code>).</li>
+    </ul>
+
+    <p>So the native layer of the tree is unfinished and not a single bug: the
+    records should be handled through their pointers, with the strings in
+    native memory. The author of the port already reported in 2010 that the
+    tree crashed and that he knew little about the container control (see the
+    blog below).</p>
+
+    <h2>Things learned about PM</h2>
+
+    <ul>
+      <li>The origin of PM coordinates (desktop, windows,
+      <code>WinPopupMenu</code>, <code>WinSetWindowPos</code>, the pointer) is
+      the <em>lower</em> left corner, and y grows upwards. SWT and Windows use
+      the upper left corner. A point is <code>height - 1 - y</code>, the top
+      edge of a rectangle is <code>height - (y + cy)</code>.</li>
+
+      <li>A single line <code>Text</code> with a border moves its origin by 3
+      pixels (left and down) each time it is positioned and gets 6 larger when
+      the size is set. A <code>Text</code> that is asked for 77x26 ends up
+      83x32 if nothing compensates for it.</li>
+
+      <li><code>WinQueryCursorInfo()</code> is the text cursor, the pointer is
+      <code>WinQueryPointerPos()</code>. <code>WinQueryMsgPos()</code> is the
+      pointer when the last message was retrieved.</li>
+
+      <li>The eCS toolbar control (<kbd>etoolbar.h</kbd>) can only append
+      buttons; the 2024 toolkit has the same messages as the installed one
+      and only adds the <code>TBS_2D</code> style.
+      <kbd>esplitter.h</kbd> is identical in both. The splitter is a
+      container, not a thin bar: it reports no pointer displacement for a
+      sash. See <a href="diff.html">differences 011 and 012</a>.</li>
+    </ul>
+
+    <h2>The blog of the port</h2>
+
+    <p>The development of the port is told in <a
+    href="http://os2advocacy.blogspot.com">os2advocacy.blogspot.com</a> (The
+    OS2Diary), by Leonardo Pino (LeoPino), between 2007 and 2010. This is what
+    was read there (36 posts, the last ones of 2007 not completely):</p>
+
+    <ul>
+      <li>No post describes a bug of the IBM Java 1.3.1 as such. The closest
+      ones: <em>Tales from Java</em> (2007-09-07), the toolkit installer
+      refuses to install on Java 1.3 and 1.3.1 and its files are copied by
+      hand; and <em>Almost there</em> (2010-06-09): <q>The only show stopper is
+      a BUG on the system that prevents the JVM to work properly</q>, <q>I
+      believe the problems lays on the kernel+CPU+Java version I'm using</q>,
+      <q>I keep getting SYS1808 and all sorts of silly exceptions on the Java
+      runtime</q>, the tools worked 2 times out of 10. We also get
+      <samp>SYS1808</samp> with the crashes above.</li>
+
+      <li><em>Fixing things</em> (2008-07-03): on a branch with another C
+      compiler only the first test case ran, the others <q>freeze the system
+      when the window comes up</q>.</li>
+
+      <li><em>Update</em> (2010-04-22): the tree was written and crashes,
+      <q>I'm pretty ignorant on the Container control, a complex beast</q>.
+      <em>Next moves</em> (2009-11-27) had planned the tree and the table
+      next, after a <q>bug with the MLM_QUERYLINECOUNT message</q> in
+      <code>Text</code>.</li>
+
+      <li>Other things the blog says that are confirmed here:
+      <em>Old errors coming back</em> (2008-04-24) doubts a PM macro used all
+      over the port (<code>MPFROM2SHORT</code>, which really was wrong for
+      negative values); <em>Popups working, sort of</em> (2008-06-18), a bad
+      flag combination in <code>WinPopupMenu</code>; <em>Habemus icons</em>
+      (2009-11-03), <code>WinCreatePointerIndirect</code> ignores mini icons;
+      <em>Fixing more things</em> (2009-10-26), the font code is tweaked to go
+      around PM bugs.</li>
+    </ul>
+
+    <h2>Still to do</h2>
+
+    <ul>
+      <li>The tree (above). Its cost is the native layer.</li>
+
+      <li>The sources of Eclipse 2.0.1 already include emulated, pure Java
+      versions of <code>Table</code> (with <code>TableItem</code> and
+      <code>TableColumn</code>), <code>CoolBar</code> and <code>CoolItem</code>
+      (<kbd>Eclipse SWT/emulated</kbd>), not compiled yet.</li>
+
+      <li>Not ported: <code>DirectoryDialog</code>, <code>Tracker</code>,
+      <code>Caret</code>, tool tips (<code>Control</code> only keeps the
+      text), AWT, drag and drop, printing, OLE.</li>
+    </ul>
+  </body>
+</html>

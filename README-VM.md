@@ -59,3 +59,25 @@ variables de entorno `VM_HOST`, `VM_USER`, `VM_PASS`, `VM_SWT_DIR`).
 - Publicar en GitHub desde Claude Code: `!` no tiene terminal, así que
   `git push` por HTTPS no puede pedir usuario/token. Hacerlo desde Terminal.app,
   o configurar una clave SSH.
+- `vm-push.sh` solo envía los ficheros que difieren de `HEAD`: si se revierte un
+  cambio en el Mac (por ejemplo un `println` de depuración) el fichero vuelve a
+  ser igual a `HEAD` y **la VM se queda con la versión modificada**. Forzarlo con
+  `tools/vm-push.sh -f <ruta relativa al repo>...`.
+- `vm.sh` oculta las líneas que empiezan por dos espacios y `palabra=` (es el
+  filtro para quitar la salida de `SET`): una prueba que imprima `  getText='x'`
+  parece no imprimir nada. Usar otro prefijo.
+- `ant.cmd compile` solo recompila los `.java` más nuevos que su `.class`. Una
+  constante `static final int` se copia en las clases que la usan al compilar,
+  así que tras cambiar `OS.java` hay que borrar el `.class` de esas clases
+  (`tools/audit-constants.py` las detecta con las constantes mal escritas).
+- Cortar con `TaskStop` o por tiempo agotado una orden `vm.sh` deja la sesión a
+  medias en el `sshd` de la VM; con varias, el servidor deja de aceptar
+  conexiones (`kex_exchange_identification: Connection closed by remote host`)
+  y hay que reiniciar el `sshd` en la VM.
+- La JVM de la VM es IBM Java 1.3.1 SR10 (Classic VM con JIT). Aborta con
+  `Passed wrong C array to Release<type>ArrayElements` al liberar un arreglo de
+  un solo elemento o con un puntero que no salió de él, y con una General
+  Protection Fault (`EIP = 00000000`, `SYS1808`) si se usa un `jfieldID` nulo.
+  Ver `doc/lessons.html`.
+- Auditorías: `tools/audit-constants.py <dir con los headers>` y
+  `tools/audit-jni-fields.py` (ver `doc/lessons.html`).

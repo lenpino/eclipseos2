@@ -609,10 +609,17 @@ href="eclipseos2-xxe.css"
       <kbd>pmgpi.h</kbd>, <kbd>pmdev.h</kbd>): the other 929 are right. Note
       that a <code>static final int</code> is copied into the classes that use
       it when they are compiled, so those classes (<code>Tree</code>) have to be
-      recompiled after changing a constant. <code>SWT009_11</code> (the tree)
-      still aborts the VM: any <code>CM_*</code> message sent to a container
-      with a <code>CNRINFO</code> structure does, which is under
-      investigation.</li>
+      recompiled after changing a constant.</li>
+
+      <li>Found why <code>new Tree()</code> aborted the VM: <kbd>structs.c</kbd>
+      asked for the field <code>"cDelta "</code> (a space at the end) of
+      <code>CNRINFO</code>, which does not exist, and the JVM does not check a
+      null <code>jfieldID</code>. <code>OS.MPFROM2SHORT()</code> was also wrong
+      for negative values. Test case <kbd>SWT009_18</kbd>. The tree still
+      fails at its first item, and its native layer is unfinished: see <a
+      href="lessons.html">lessons learned</a>, which also records the audits
+      (<kbd>tools/audit-constants.py</kbd>, <kbd>tools/audit-jni-fields.py</kbd>)
+      and what was read in the blog of the port.</li>
 
       <li><kbd>SWT010_01</kbd>: the arrow of the drop down item opens a pop up
       menu under the button, the usual way to use it. The
