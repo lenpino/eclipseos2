@@ -2657,6 +2657,7 @@ public static final native int WinSendMsg (int hwnd, int ulMsgid, CNRINFO mpPara
 public static final native boolean WinPostMsg (int hwnd, int ulMsgid,int mpParam1, int mpParam2);
 public static final native int WinQueryMsgTime (int hab);
 public static final native boolean WinQueryMsgPos (int hab, int[] pptl);
+public static final native boolean WinQueryPointerPos (int hwndDeskTop, int[] pptl);
 
 public static final native int WinQueryWindowTextLength (int hwnd);
 public static final native int WinQueryWindowText (int hwnd, int lLength,

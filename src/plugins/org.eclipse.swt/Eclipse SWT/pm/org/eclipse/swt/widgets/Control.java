@@ -2562,11 +2562,15 @@ void subclass () {
 public Point toControl (Point point) {
     checkWidget ();
     if (point == null) error (SWT.ERROR_NULL_ARGUMENT);
+    /*
+    * SWT coordinates grow downwards, while the PM ones, of the desktop
+    * and of the window, grow upwards from the lower left corner.
+    */
     int[] pnt = new int [] {0, 0};
-    pnt[0] = point.x;  pnt[1] = point.y;
+    pnt[0] = point.x;
+    pnt[1] = OS.WinQuerySysValue (OS.HWND_DESKTOP, OS.SV_CYSCREEN) - 1 - point.y;
     OS.WinMapWindowPoints (OS.HWND_DESKTOP, handle, pnt, 1);
-//    OS.ScreenToClient (handle, pt);
-    return new Point (pnt[0], pnt[1]);
+    return new Point (pnt[0], getHeight () - 1 - pnt[1]);
 }
 
 /**
@@ -2588,10 +2592,12 @@ public Point toControl (Point point) {
 public Point toDisplay (Point point) {
     checkWidget ();
     if (point == null) error (SWT.ERROR_NULL_ARGUMENT);
+    /* See toControl() about the direction of the y axis */
     int[] pnt = new int [] {0, 0};
-    pnt[0] = point.x;  pnt[1] = point.y;
+    pnt[0] = point.x;
+    pnt[1] = getHeight () - 1 - point.y;
     OS.WinMapWindowPoints (handle, OS.HWND_DESKTOP, pnt, 1);
-    return new Point (pnt[0], pnt[1]);
+    return new Point (pnt[0], OS.WinQuerySysValue (OS.HWND_DESKTOP, OS.SV_CYSCREEN) - 1 - pnt[1]);
 }
 
 boolean translateAccelerator (QMSG qmsg) {

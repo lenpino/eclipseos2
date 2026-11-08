@@ -578,6 +578,17 @@ href="eclipseos2-xxe.css"
       not known before). <code>getVisible()</code> still returns
       <code>false</code> for a pop up menu. Test case <kbd>SWT009_15</kbd>.</li>
 
+      <li>Fixed the direction of the y axis in <code>Control.toDisplay()</code>,
+      <code>toControl()</code> and <code>Display.getCursorLocation()</code> /
+      <code>setCursorLocation()</code>: PM grows upwards from the lower left
+      corner and SWT downwards, and the PM value was passed through. A pop up
+      menu placed with <code>toDisplay()</code> appeared at the bottom of the
+      screen. Besides, <code>getCursorLocation()</code> asked for the text
+      cursor (<code>WinQueryCursorInfo()</code>) and returned
+      <code>null</code>: it uses the new native
+      <code>OS.WinQueryPointerPos()</code> now (the DLL has to be rebuilt).
+      Test case <kbd>SWT009_16</kbd>.</li>
+
       <li><kbd>SWT010_01</kbd>: the arrow of the drop down item opens a pop up
       menu under the button, the usual way to use it.</li>
     </ul>

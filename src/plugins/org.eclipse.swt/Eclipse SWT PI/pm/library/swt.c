@@ -821,6 +821,23 @@ JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinQueryMsgPos
     return rc;
 }
 
+JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinQueryPointerPos
+        (JNIEnv *env, jclass that, jint hwndDeskTop, jintArray pptl)
+{
+    jint *c_pptl = NULL;
+    jboolean rc;
+
+    DEBUG_CALL("WinQueryPointerPos\n")
+
+    if (pptl) c_pptl = (*env)->GetIntArrayElements(env, pptl, NULL);
+
+    rc = (jboolean)WinQueryPointerPos((HWND)hwndDeskTop, (PPOINTL)c_pptl);
+
+    if (pptl) (*env)->ReleaseIntArrayElements(env, pptl, c_pptl, 0);
+
+    return rc;
+}
+
 JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_WinQueryWindowTextLength
         (JNIEnv *env, jclass that, jint hwnd)
 {

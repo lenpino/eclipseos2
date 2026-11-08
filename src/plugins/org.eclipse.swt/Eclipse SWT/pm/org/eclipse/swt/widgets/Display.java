@@ -696,12 +696,14 @@ public Control getCursorControl () {
  */  
 public Point getCursorLocation () {
     checkDevice ();
-    POINTL pt = new POINTL ();
-    CURSORINFO cursor = new CURSORINFO();
-    if (!OS.WinQueryCursorInfo(OS.HWND_DESKTOP, cursor)) return null;
-    pt.x = cursor.x;
-    pt.y = cursor.y;
-    return new Point (pt.x, pt.y);
+    /*
+    * WinQueryCursorInfo() is about the text cursor (the caret), not the
+    * mouse pointer. The y axis of the screen grows upwards in PM, and
+    * downwards in SWT.
+    */
+    int[] pnt = new int [] {0, 0};
+    if (!OS.WinQueryPointerPos (OS.HWND_DESKTOP, pnt)) return null;
+    return new Point (pnt [0], OS.WinQuerySysValue (OS.HWND_DESKTOP, OS.SV_CYSCREEN) - 1 - pnt [1]);
 }
 
 /**
@@ -1615,7 +1617,8 @@ void sendEvent (int eventType, Event event) {
 public void setCursorLocation (Point point) {
     checkDevice ();
     if (point == null) error (SWT.ERROR_NULL_ARGUMENT);
-    OS.WinSetPointerPos(OS.HWND_DESKTOP, point.x, point.y);
+    OS.WinSetPointerPos(OS.HWND_DESKTOP, point.x,
+        OS.WinQuerySysValue (OS.HWND_DESKTOP, OS.SV_CYSCREEN) - 1 - point.y);
 }
 
 /**
