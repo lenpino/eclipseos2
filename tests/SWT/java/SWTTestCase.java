@@ -63,6 +63,15 @@ protected void exec () {
     shell = createTopShell (display);
 	initComponents ();
     shell.open ();
+    /* Unattended runs: -Dswt.test.autoclose=<milliseconds> closes the window */
+    String auto = System.getProperty ("swt.test.autoclose");
+    if (auto != null) {
+        display.timerExec (Integer.parseInt (auto), new Runnable () {
+            public void run () {
+                if (!shell.isDisposed ()) shell.dispose ();
+            }
+        });
+    }
     while (!shell.isDisposed ()) {
         if (!display.readAndDispatch ()) display.sleep ();
     }

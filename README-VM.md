@@ -54,6 +54,8 @@ variables de entorno `VM_HOST`, `VM_USER`, `VM_PASS`, `VM_SWT_DIR`).
   `ant.cmd swt009_13`. Para una ejecución sin supervisión:
   `java -Djava.library.path=src\plugins\org.eclipse.swt.pm\os\os2\x86 -Dswt.test.autoclose=3000 -cp -classes- SWT009_13`
   desde `trunk` (cierra la ventana a los 3 s y muestra `PASSED`/`FAILED`).
+  Vale para cualquier prueba que extienda `SWTTestCase`, incluidas las visuales
+  originales (`SWT009_01` a `_12`).
 - Publicar en GitHub desde Claude Code: `!` no tiene terminal, así que
   `git push` por HTTPS no puede pedir usuario/token. Hacerlo desde Terminal.app,
   o configurar una clave SSH.
