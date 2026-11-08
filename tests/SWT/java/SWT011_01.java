@@ -416,6 +416,11 @@ public class SWT011_01 extends SWTTestCase {
 		shell.setLayout(null);
 		final Tree tree = new Tree(shell, SWT.SINGLE | SWT.BORDER);
 		final Text log = new Text(shell, SWT.BORDER | SWT.MULTI | SWT.READ_ONLY);
+		/* Size first, and no redrawing while the items are added: nothing is painted twice */
+		Rectangle area = shell.getClientArea();
+		tree.setBounds(0, 0, area.width, Math.max(20, area.height - 40));
+		log.setBounds(0, Math.max(20, area.height - 40), area.width, 40);
+		tree.setRedraw(false);
 		String[] names = {"Documents", "Pictures", "Music", "Empty"};
 		for (int i = 0; i < names.length; i++) {
 			TreeItem root = new TreeItem(tree, SWT.NONE);
@@ -424,9 +429,15 @@ public class SWT011_01 extends SWTTestCase {
 			for (int j = 0; j < (i == 3 ? 0 : 3); j++) {
 				TreeItem child = new TreeItem(root, SWT.NONE);
 				child.setText(names[i] + " / item " + (j + 1));
-				if (j == 1) new TreeItem(child, SWT.NONE).setText("a grandchild");
+				child.setImage(image);
+				if (j == 1) {
+					TreeItem grandchild = new TreeItem(child, SWT.NONE);
+					grandchild.setText("a grandchild");
+					grandchild.setImage(image);
+				}
 			}
 		}
+		tree.setRedraw(true);
 		tree.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				String msg = "Selection: " + ((TreeItem) e.item).getText();
