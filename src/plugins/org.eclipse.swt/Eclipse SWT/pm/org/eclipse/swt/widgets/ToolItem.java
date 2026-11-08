@@ -128,7 +128,9 @@ public ToolItem (ToolBar parent, int style, int index) {
  * interface.
  * <p>
  * When <code>widgetSelected</code> is called when the mouse is over the arrow portion of a drop-down tool,
- * the event object detail field contains the value <code>SWT.ARROW</code>.
+ * the event object detail field contains the value <code>SWT.ARROW</code>, and
+ * its x and y fields the lower left corner of the arrow, in the coordinates of
+ * the tool bar, the place where a menu is usually opened.
  * <code>widgetDefaultSelected</code> is not called.
  * </p>
  *
@@ -196,8 +198,12 @@ void click (boolean dropDown) {
 	if (!dropDown && (style & SWT.RADIO) != 0) selectRadio ();
 	Event event = new Event ();
 	if (dropDown) {
+		/*
+		* The lower left corner of the arrow, in the coordinates of the
+		* tool bar (y grows downwards): where to open the menu.
+		*/
 		event.detail = SWT.ARROW;
-		event.x = x;
+		event.x = x + w - ARROW_WIDTH;
 		event.y = y + h;
 	}
 	postEvent (SWT.Selection, event);

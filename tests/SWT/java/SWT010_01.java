@@ -231,14 +231,22 @@ public class SWT010_01 extends SWTTestCase {
 		check(hits[0] == 1 && detail[0] == 0, "clicking a PUSH item sends Selection (hits=" + hits[0] + ")");
 
 		final int[] arrowDetail = new int[] {-1};
+		final int[] arrowAt = new int[] {-1, -1};
 		drop.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				arrowDetail[0] = e.detail;
+				arrowAt[0] = e.x;
+				arrowAt[1] = e.y;
 			}
 		});
 		check(buttonOf(bar, drop, true) != null, "drop down item has an arrow");
 		click(bar, drop, true);
 		check(arrowDetail[0] == SWT.ARROW, "clicking the arrow sends Selection with detail ARROW");
+		Rectangle arrowBounds = buttonOf(bar, drop, true).getBounds();
+		Rectangle dropBounds = drop.getBounds();
+		check(arrowAt[0] == arrowBounds.x && arrowAt[1] == dropBounds.y + dropBounds.height,
+				"the event gives the lower left corner of the arrow: " + arrowAt[0] + "," + arrowAt[1]
+				+ " (arrow at " + arrowBounds.x + ", item bottom " + (dropBounds.y + dropBounds.height) + ")");
 
 		push.setEnabled(false);
 		check(!push.getEnabled() && !push.isEnabled(), "setEnabled(false)");
@@ -358,11 +366,11 @@ public class SWT010_01 extends SWTTestCase {
 				say("Selection: Drop" + (e.detail == SWT.ARROW ? " (arrow) at " + e.x + "," + e.y : ""));
 				if (e.detail != SWT.ARROW) return;
 				/*
-				* Display coordinates, y grows downwards (not as in PM): the upper
-				* left corner of the menu touches the upper right one of the item.
+				* The event gives the lower left corner of the arrow in the coordinates of
+				* the tool bar (y grows downwards, not as in PM): the upper left corner of
+				* the menu goes there, in display coordinates.
 				*/
-				Rectangle r = ((ToolItem) e.widget).getBounds();
-				Point p = flat.toDisplay(new Point(r.x + r.width, r.y));
+				Point p = flat.toDisplay(new Point(e.x, e.y));
 				menu.setLocation(p.x, p.y);
 				menu.setVisible(true);
 			}

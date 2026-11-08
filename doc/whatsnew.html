@@ -590,7 +590,11 @@ href="eclipseos2-xxe.css"
       Test case <kbd>SWT009_16</kbd>.</li>
 
       <li><kbd>SWT010_01</kbd>: the arrow of the drop down item opens a pop up
-      menu under the button, the usual way to use it.</li>
+      menu under the button, the usual way to use it. The
+      <code>SWT.Selection</code> event with <code>detail == SWT.ARROW</code> of
+      a <code>ToolItem</code> gives, in <code>x</code> and <code>y</code>, the
+      lower left corner of the arrow in the coordinates of the tool bar (y
+      grows downwards), where the upper left corner of the menu goes.</li>
     </ul>
   </body>
 </html>
