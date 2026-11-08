@@ -357,7 +357,12 @@ public class SWT010_01 extends SWTTestCase {
 			public void widgetSelected(SelectionEvent e) {
 				say("Selection: Drop" + (e.detail == SWT.ARROW ? " (arrow) at " + e.x + "," + e.y : ""));
 				if (e.detail != SWT.ARROW) return;
-				Point p = flat.toDisplay(new Point(e.x, e.y));
+				/*
+				* Display coordinates, y grows downwards (not as in PM): the upper
+				* left corner of the menu touches the upper right one of the item.
+				*/
+				Rectangle r = ((ToolItem) e.widget).getBounds();
+				Point p = flat.toDisplay(new Point(r.x + r.width, r.y));
 				menu.setLocation(p.x, p.y);
 				menu.setVisible(true);
 			}
