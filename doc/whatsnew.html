@@ -599,6 +599,21 @@ href="eclipseos2-xxe.css"
       <code>OS.WinQueryPointerPos()</code> now (the DLL has to be rebuilt).
       Test case <kbd>SWT009_16</kbd>.</li>
 
+      <li>Fixed 24 constants of <code>OS</code> of the container control
+      (<code>CCS_*</code>, <code>CV_*</code> and <code>CA_*</code>): they were
+      written as decimal numbers though the value is hexadecimal
+      (<code>CV_TREE = 40</code> instead of <code>0x40</code>,
+      <code>CCS_READONLY = 20</code> instead of <code>0x20</code>, ...). They
+      were found by comparing the 953 constants that <kbd>OS.java</kbd> shares
+      with the toolkit headers (<kbd>pmstddlg.h</kbd>, <kbd>pmwin.h</kbd>,
+      <kbd>pmgpi.h</kbd>, <kbd>pmdev.h</kbd>): the other 929 are right. Note
+      that a <code>static final int</code> is copied into the classes that use
+      it when they are compiled, so those classes (<code>Tree</code>) have to be
+      recompiled after changing a constant. <code>SWT009_11</code> (the tree)
+      still aborts the VM: any <code>CM_*</code> message sent to a container
+      with a <code>CNRINFO</code> structure does, which is under
+      investigation.</li>
+
       <li><kbd>SWT010_01</kbd>: the arrow of the drop down item opens a pop up
       menu under the button, the usual way to use it. The
       <code>SWT.Selection</code> event with <code>detail == SWT.ARROW</code> of

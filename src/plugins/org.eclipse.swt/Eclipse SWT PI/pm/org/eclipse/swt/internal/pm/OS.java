@@ -2394,13 +2394,13 @@ public static final int IDP_ICON_WARNING_80             = 3360; // "Warning" - "
    public static final int CCS_MULTIPLESEL           = 2;
    public static final int CCS_SINGLESEL             = 4;
    public static final int CCS_AUTOPOSITION          = 8;
-   public static final int CCS_VERIFYPOINTERS        = 10;
-   public static final int CCS_READONLY              = 20;
-   public static final int CCS_MINIRECORDCORE        = 40;
+   public static final int CCS_VERIFYPOINTERS        = 0x10;
+   public static final int CCS_READONLY              = 0x20;
+   public static final int CCS_MINIRECORDCORE        = 0x40;
    /* Style to have container support mini icons with the minirecord. */
-   public static final int CCS_MINIICONS             = 800;
+   public static final int CCS_MINIICONS             = 0x800;
    /* don't send WM_CONTROLPOINTER on WM_MOUSEMOVE                    */
-   public static final int CCS_NOCONTROLPTR          = 1000;
+   public static final int CCS_NOCONTROLPTR          = 0x1000;
    
    /**********************************************************************/
    /* view identifiers           (flWindowAttr)                          */
@@ -2409,29 +2409,29 @@ public static final int IDP_ICON_WARNING_80             = 3360; // "Warning" - "
    public static final int CV_NAME                  = 2;  /* name view            */
    public static final int CV_ICON                  = 4;  /* icon view            */
    public static final int CV_DETAIL                = 8;  /* detail view          */
-   public static final int CV_FLOW                  = 10;  /* flow items           */
-   public static final int CV_MINI                  = 20;  /* use mini icon        */
-   public static final int CV_TREE                  = 40;  /* tree view            */
-   public static final int CV_GRID                  = 80;  /* gridded icon view    */
-   public static final int CV_EXACTLENGTH           = 10000000;  /* Exact match for SearchString */
+   public static final int CV_FLOW                  = 0x10;  /* flow items           */
+   public static final int CV_MINI                  = 0x20;  /* use mini icon        */
+   public static final int CV_TREE                  = 0x40;  /* tree view            */
+   public static final int CV_GRID                  = 0x80;  /* gridded icon view    */
+   public static final int CV_EXACTLENGTH           = 0x10000000;  /* Exact match for SearchString */
    
    /**********************************************************************/
    /* Container Attributes        (flWindowAttr)                         */
    /**********************************************************************/
-   public static final int CA_CONTAINERTITLE        = 200;
-   public static final int CA_TITLESEPARATOR        = 400;
-   public static final int CA_TITLELEFT             = 800;
-   public static final int CA_TITLERIGHT            = 1000;
-   public static final int CA_TITLECENTER           = 2000;
-   public static final int CA_OWNERDRAW             = 4000;
-   public static final int CA_DETAILSVIEWTITLES     = 8000;
-   public static final int CA_ORDEREDTARGETEMPH     = 10000;
-   public static final int CA_DRAWBITMAP            = 20000;
-   public static final int CA_DRAWICON              = 40000;
-   public static final int CA_TITLEREADONLY         = 80000;
-   public static final int CA_OWNERPAINTBACKGROUND  = 100000;
-   public static final int CA_MIXEDTARGETEMPH       = 200000;
-   public static final int CA_TREELINE              = 400000;
+   public static final int CA_CONTAINERTITLE        = 0x200;
+   public static final int CA_TITLESEPARATOR        = 0x400;
+   public static final int CA_TITLELEFT             = 0x800;
+   public static final int CA_TITLERIGHT            = 0x1000;
+   public static final int CA_TITLECENTER           = 0x2000;
+   public static final int CA_OWNERDRAW             = 0x4000;
+   public static final int CA_DETAILSVIEWTITLES     = 0x8000;
+   public static final int CA_ORDEREDTARGETEMPH     = 0x10000;
+   public static final int CA_DRAWBITMAP            = 0x20000;
+   public static final int CA_DRAWICON              = 0x40000;
+   public static final int CA_TITLEREADONLY         = 0x80000;
+   public static final int CA_OWNERPAINTBACKGROUND  = 0x100000;
+   public static final int CA_MIXEDTARGETEMPH       = 0x200000;
+   public static final int CA_TREELINE              = 0x400000;
    
    /**********************************************************************/
    /* child window IDs                                                   */
