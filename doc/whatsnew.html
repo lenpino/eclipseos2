@@ -615,11 +615,25 @@ href="eclipseos2-xxe.css"
       asked for the field <code>"cDelta "</code> (a space at the end) of
       <code>CNRINFO</code>, which does not exist, and the JVM does not check a
       null <code>jfieldID</code>. <code>OS.MPFROM2SHORT()</code> was also wrong
-      for negative values. Test case <kbd>SWT009_18</kbd>. The tree still
-      fails at its first item, and its native layer is unfinished: see <a
+      for negative values. Test case <kbd>SWT009_18</kbd>. See <a
       href="lessons.html">lessons learned</a>, which also records the audits
       (<kbd>tools/audit-constants.py</kbd>, <kbd>tools/audit-jni-fields.py</kbd>)
       and what was read in the blog of the port.</li>
+
+      <li>New <a href="swt011.html">SWT Step 011</a> (trees):
+      <code>o.e.swt.widgets.Tree</code> and <code>TreeItem</code> on the
+      container control of PM, written again because the old classes were
+      almost all commented Windows code and the way they handled the records
+      (copies in Java objects) cannot work. The records are handled through
+      their addresses. Test cases <kbd>SWT011_01</kbd> (66 automatic checks
+      and an interactive part) and the old <kbd>SWT009_11</kbd>, which had never
+      run on this machine. The container keeps one selected item and cannot
+      have several or none, see <a href="diff.html">difference 013</a>. 19
+      constants of the container were added to <code>OS</code>.</li>
+
+      <li><code>Scrollable.widgetStyle()</code> adds <code>SBS_VERT</code> to
+      any control with a vertical scroll bar; in the container that bit is
+      <code>CCS_EXTENDSEL</code>, which <code>Tree</code> removes.</li>
 
       <li><kbd>SWT010_01</kbd>: the arrow of the drop down item opens a pop up
       menu under the button, the usual way to use it. The

@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/css"
+href="eclipseos2-xxe.css"
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"xhtml1-strict.dtd">
+<html>
+  <head>
+    <link href="eclipseos2.css" rel="stylesheet" type="text/css" />
+
+    <title>Eclipse for OS/2 Transitional Project Notes</title>
+  </head>
+
+  <body>
+    <h1>SWT Step 011. Trees</h1>
+
+    <h2>Objective</h2>
+
+    <p>Implement the <code>o.e.swt.widgets.Tree</code> and
+    <code>TreeItem</code> classes. The test case <kbd>SWT011_01</kbd> checks
+    the hierarchy, the indexes, the texts, the expansion, the bounds, the
+    selection, the events, <code>dispose()</code> and <code>removeAll()</code>,
+    the images and the colors automatically, and then shows a tree to be used
+    by hand. <kbd>SWT009_11</kbd> is the old visual test.</p>
+
+    <h2>Task notes</h2>
+
+    <p>The tree is the <b>container control of PM</b> (<code>WC_CONTAINER</code>,
+    class #37) in its tree view, as the Workplace Shell uses it. The records
+    of the container live in native memory and have pointers, so the previous
+    approach, to copy them into Java objects (<code>RECORDCORE</code>) and
+    send the copy, did not work: it released Java arrays with pointers that did
+    not come from them and the VM aborted. Now:</p>
+
+    <ul>
+      <li>A record is handled through its address (<code>TreeItem.handle</code>)
+      with <code>OS.malloc()</code>, <code>OS.free()</code>,
+      <code>OS.memset()</code> and <code>OS.objcpy()</code> with
+      <code>byte[]</code>, through <code>Tree.peek()</code> and
+      <code>poke()</code>; <code>CM_INSERTRECORD</code> gets the address of the
+      record that <code>CM_ALLOCRECORD</code> returned and of a
+      <code>RECORDINSERT</code> built in memory.</li>
+
+      <li>The container keeps <em>pointers</em> to the texts of a record, so
+      each text is allocated apart (the same one for the four views of the
+      record) and freed when it is replaced and when the item is disposed.</li>
+
+      <li>The id of a <code>TreeItem</code> is stored in the extra bytes of
+      its record (<code>CM_ALLOCRECORD</code> with 4), to find the item from a
+      record when a notification arrives.</li>
+
+      <li>The events come as <code>WM_CONTROL</code>: <code>CN_EMPHASIS</code>
+      is <code>Selection</code>, <code>CN_ENTER</code> is
+      <code>DefaultSelection</code>, <code>CN_EXPANDTREE</code> and
+      <code>CN_COLLAPSETREE</code> are <code>Expand</code> and
+      <code>Collapse</code>. The container does not send them for what the
+      program does, and a flag avoids it when the container does.</li>
+    </ul>
+
+    <p>Three problems that were found on the way and are not tree specific are
+    in <a href="lessons.html">lessons learned</a>: 24 constants of
+    <kbd>OS.java</kbd> written in decimal, <code>"cDelta "</code> in
+    <kbd>structs.c</kbd>, and the <code>SBS_VERT</code> that
+    <code>Scrollable</code> adds. The behavior that differs from Windows is in
+    <a href="diff.html">difference 013</a>.</p>
+
+    <h2>Step checklist</h2>
+
+    <table>
+      <col width="40%" />
+
+      <col />
+
+      <col width="50%" />
+
+      <thead>
+        <tr>
+          <th>Operation</th>
+
+          <th>Status</th>
+
+          <th>Remarks</th>
+        </tr>
+      </thead>
+
+      <tr>
+        <td><code>Tree</code>: items, <code>getItem(Point)</code>,
+        <code>getItemHeight()</code>, <code>removeAll()</code>,
+        <code>showItem()</code>, <code>showSelection()</code></td>
+
+        <td>Done [lpino]</td>
+
+        <td>Checked by the automatic part of <kbd>SWT011_01</kbd>.
+        <code>showItem()</code> expands the parents and scrolls, the scrolling
+        has not been looked at on the screen.</td>
+      </tr>
+
+      <tr>
+        <td><code>TreeItem</code>: the four constructors with their indexes,
+        text, expansion, bounds, parent and children</td>
+
+        <td>Done [lpino]</td>
+
+        <td>A tree of 301 items was tested.</td>
+      </tr>
+
+      <tr>
+        <td>Selection and <code>Selection</code>, <code>DefaultSelection</code>,
+        <code>Expand</code>, <code>Collapse</code> events</td>
+
+        <td>Done [lpino], with limits</td>
+
+        <td>One selected item at a time, see <a href="diff.html">difference
+        013</a>. The notifications of the container were <em>simulated</em> to
+        check the routing: the clicks, the Enter key and the plus signs have to
+        be tried by hand in the interactive part.</td>
+      </tr>
+
+      <tr>
+        <td>Images, <code>SWT.CHECK</code>, colors</td>
+
+        <td>Partly done [lpino]</td>
+
+        <td>The image is the mini icon of the record (checked that it has
+        bounds, not how it looks). No check boxes, and the colors are only
+        kept.</td>
+      </tr>
+    </table>
+  </body>
+</html>

@@ -167,30 +167,57 @@ href="eclipseos2-xxe.css"
       <code>TREERECORD</code> has no Java class and is not used.</li>
     </ul>
 
-    <h2>The tree (<code>Tree</code>, <kbd>SWT009_11</kbd>)</h2>
+    <h2>The tree (<code>Tree</code>, <kbd>SWT009_11</kbd>, <kbd>SWT011_01</kbd>)</h2>
 
-    <p>Still aborts the VM, but now further on. <code>new Tree()</code> works
-    after the two fixes above, and the first <code>TreeItem</code> fails:</p>
+    <p>It works now (<a href="swt011.html">step 011</a>). What had to be found
+    out, in the order it showed up:</p>
 
     <ul>
-      <li><code>OS.objcpy(RECORDCORE, int)</code> copies a record of the
-      container into a Java object with <code>setRECORDCOREFields()</code>,
-      which calls <code>releasePSZBytes()</code> on the strings of the record
-      (<code>pszIcon</code>, <code>pszText</code>, <code>pszName</code>,
-      <code>pszTree</code>): it releases Java arrays with pointers that belong
-      to the record. That is the <samp>Passed wrong C array</samp> abort.</li>
+      <li>24 constants of the container written in decimal, and the
+      <code>"cDelta "</code> of <kbd>structs.c</kbd> (above): the first one
+      made <code>CM_SETCNRINFO</code> ask for incompatible views, the second
+      killed the VM on any <code>CNRINFO</code>.</li>
 
-      <li><code>Tree.createItem()</code> sends <code>CM_INSERTRECORD</code>
-      with the Java copy of the record, and the wrapper builds a temporary C
-      structure from it, but the container needs the record it allocated with
-      <code>CM_ALLOCRECORD</code> (<code>hItem</code>).</li>
+      <li><code>OS.objcpy(RECORDCORE, int)</code> copied a record of the
+      container into a Java object with <code>setRECORDCOREFields()</code>,
+      which calls <code>releasePSZBytes()</code> on the strings of the record:
+      it releases Java arrays with pointers that belong to the record, and the
+      JVM aborts with <samp>Passed wrong C array</samp>. A Java object cannot
+      hold a record that has pointers; the same goes for <code>CM_INSERTRECORD</code>
+      with the Java copy, which needs the record that
+      <code>CM_ALLOCRECORD</code> returned. The tree now handles the records
+      through their addresses (see <kbd>Tree.java</kbd>). The marshalling of
+      <code>RECORDCORE</code> and <code>RECORDINSERT</code> in <kbd>structs.c</kbd>
+      is still there and still wrong for this use.</li>
+
+      <li><code>Scrollable.widgetStyle()</code> adds <code>SBS_VERT</code>, whose
+      value (1) is <code>CCS_EXTENDSEL</code> in the container. That bit was
+      always set whatever the selection style was asked.</li>
+
+      <li>The container selects the first record that is inserted and from
+      then on always has one selected record, which cannot be deselected
+      (<code>CM_SETRECORDEMPHASIS</code> returns <code>FALSE</code>), and
+      selecting another one replaces it, also by program and with every
+      selection style. The properties of the tree view that differ from
+      Windows are in <a href="diff.html">difference 013</a>.</li>
+
+      <li>A record that is not shown (inside a collapsed item) is not selected:
+      <code>setSelection()</code> expands the ancestors first.</li>
+
+      <li><code>CM_QUERYRECORDEMPHASIS</code> with a record gives the <em>next</em>
+      record with that emphasis, not whether that one has it: the flags of the
+      record (<code>flRecordAttr</code>, at offset 4) are read for that, and the
+      container keeps <code>CRA_EXPANDED</code> and <code>CRA_SELECTED</code> up
+      to date in it.</li>
     </ul>
 
-    <p>So the native layer of the tree is unfinished and not a single bug: the
-    records should be handled through their pointers, with the strings in
-    native memory. The author of the port already reported in 2010 that the
-    tree crashed and that he knew little about the container control (see the
-    blog below).</p>
+    <p>Not yet seen with the eyes: the look of the tree (lines, mini icons),
+    the real clicks, the Enter key and the plus signs (the notifications were
+    simulated in the automatic test), and the scrolling of
+    <code>showItem()</code>. One more thing to review:
+    <code>OS.objcpy(int, int[])</code> and <code>objcpy(int[], int)</code> copy
+    as many <em>bytes</em> as the array has <em>elements</em>, a quarter of the
+    data; they are not used by the tree.</p>
 
     <h2>Things learned about PM</h2>
 
@@ -259,8 +286,6 @@ href="eclipseos2-xxe.css"
     <h2>Still to do</h2>
 
     <ul>
-      <li>The tree (above). Its cost is the native layer.</li>
-
       <li>The sources of Eclipse 2.0.1 already include emulated, pure Java
       versions of <code>Table</code> (with <code>TableItem</code> and
       <code>TableColumn</code>), <code>CoolBar</code> and <code>CoolItem</code>

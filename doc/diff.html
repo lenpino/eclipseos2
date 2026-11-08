@@ -288,6 +288,36 @@ href="eclipseos2-xxe.css"
         the implementation is that <code>ToolBar.getChildren()</code> returns
         the internal buttons together with the controls of the separators.</td>
       </tr>
+
+      <tr>
+        <td>013</td>
+
+        <td>The tree is the native <code>SysTreeView32</code> control. It has
+        no selected item until the user or the program selects one, <code>deselectAll()</code> clears
+        the selection, a <code>SWT.MULTI</code> tree can have several, and
+        <code>SWT.CHECK</code> shows a check box in each item. The colors of an
+        item are drawn.</td>
+
+        <td><code>Tree</code> is the container control of PM in its tree view.
+        It always has one selected item once it has items, which is the first
+        one that is added (no <code>Selection</code> event is sent for it),
+        <code>deselectAll()</code> does not remove it, and selecting another
+        item replaces it, also in a <code>SWT.MULTI</code> tree and also from the
+        program: <code>getSelection()</code> never gives more than one item.
+        <code>SWT.CHECK</code> has no effect (the container has no check
+        boxes, the state is only kept), and the colors of an item are only
+        kept. <code>setInsertMark()</code> does nothing.</td>
+
+        <td>All of it was measured on the container: with
+        <code>CM_SETRECORDEMPHASIS</code> deselecting the selected record
+        returns <code>FALSE</code>, and <code>CCS_SINGLESEL</code>,
+        <code>CCS_EXTENDSEL</code>, <code>CCS_MULTIPLESEL</code> and none of
+        them give the same result. To have no selection, or several, the
+        highlight would have to be drawn by the application (owner draw).
+        <code>Scrollable</code> adds <code>SBS_VERT</code> (1) to the style
+        of any control with a vertical scroll bar, which in the container is
+        <code>CCS_EXTENDSEL</code>: <code>Tree</code> removes it.</td>
+      </tr>
     </table>
 
     <h2>Other differences</h2>

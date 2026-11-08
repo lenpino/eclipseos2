@@ -2532,6 +2532,27 @@ public static final int IDP_ICON_WARNING_80             = 3360; // "Warning" - "
    
    public static final int CMA_FLWINDOWATTR      = 0x0004;       /* Container attributes     */
    public static final int CMA_ITEMORDER        = 0x0001;       /* QueryRecord search flags */
+
+   /* Container: CM_QUERYRECORD, CM_REMOVERECORD, CM_INVALIDATERECORD flags and the emphasis of records (pmstddlg.h) */
+   public static final int CMA_PARENT                = 0x0001;
+   public static final int CMA_LASTCHILD             = 0x0004;
+   public static final int CMA_NOREPOSITION          = 0x0001;
+   public static final int CMA_REPOSITION            = 0x0002;
+   public static final int CMA_TEXTCHANGED           = 0x0004;
+   public static final int CMA_ERASE                 = 0x0008;
+   public static final int CMA_FREE                  = 0x0001;
+   public static final int CMA_INVALIDATE            = 0x0002;
+   public static final int CMA_ICON                  = 0x0800;
+   public static final int CMA_TEXT                  = 0x1000;
+   public static final int CMA_WINDOW                = 0x0002;
+   public static final int CMA_WORKSPACE             = 0x0004;
+   public static final int CMA_VERTICAL              = 0x0400;
+   public static final int CMA_HORIZONTAL            = 0x0200;
+   public static final int CRA_SELECTED              = 0x0001;
+   public static final int CRA_TARGET                = 0x0002;
+   public static final int CRA_CURSORED              = 0x0004;
+   public static final int CRA_EXPANDED              = 0x0080;
+   public static final int CRA_COLLAPSED             = 0x0100;
    
  /* Splitter window style definitions. */
   
