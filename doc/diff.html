@@ -322,6 +322,36 @@ href="eclipseos2-xxe.css"
         of any control with a vertical scroll bar, which in the container is
         <code>CCS_EXTENDSEL</code>: <code>Tree</code> removes it.</td>
       </tr>
+
+      <tr>
+        <td>014</td>
+
+        <td>The table is the native <code>SysListView32</code> control in its
+        report view: a column is a header item and its width, an item can have an
+        image in every column, and the items have check boxes with
+        <code>SWT.CHECK</code>. The user can click a column header
+        (<code>Selection</code> of the <code>TableColumn</code>), and move and
+        resize the columns, with <code>Move</code> and <code>Resize</code> events.</td>
+
+        <td><code>Table</code> is the container control of PM in its detail view.
+        A column is a <code>FIELDINFO</code>, and there are at most 32 of them. Only
+        the image of the first column is shown (the icon of the record), the others
+        are kept. <code>SWT.CHECK</code> has no effect (the state is only kept), the
+        colors of an item and the images of a column header are only kept, and the
+        <code>Selection</code>, <code>Move</code> and <code>Resize</code> listeners
+        of a <code>TableColumn</code> are never called: the container does not
+        report a click on a header or a change of the width. Inserting a column
+        before others does not move the texts of the items: they stay with their
+        column. A table without columns has one implicit column that takes all the
+        width, and the first <code>TableColumn</code> takes its place.
+        <code>setResizable()</code> is only kept.</td>
+
+        <td>The detail view allows what the tree view does not: with
+        <code>CCS_EXTENDSEL</code> the selection can be empty and be set to several
+        items by program, and the user gets the usual click, Ctrl and Shift
+        selection. A <code>SWT.SINGLE</code> table is kept to one selected item by
+        <code>Table</code> itself.</td>
+      </tr>
     </table>
 
     <h2>Other differences</h2>

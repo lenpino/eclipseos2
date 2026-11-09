@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/css"
+href="eclipseos2-xxe.css"
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"xhtml1-strict.dtd">
+<html>
+  <head>
+    <link href="eclipseos2.css" rel="stylesheet" type="text/css" />
+
+    <title>Eclipse for OS/2 Transitional Project Notes</title>
+  </head>
+
+  <body>
+    <h1>SWT Step 012. Tables</h1>
+
+    <h2>Objective</h2>
+
+    <p>Implement the <code>o.e.swt.widgets.Table</code>, <code>TableItem</code>
+    and <code>TableColumn</code> classes. The test case <kbd>SWT012_01</kbd>
+    checks the columns, the texts of the cells, the bounds, the header and
+    the lines, the selection (single and multiple), the events, removing,
+    scrolling, the placement of items added before the table has a size and with
+    the redrawing off, and the images and colors automatically, and then shows a
+    table to be used by hand.</p>
+
+    <h2>Task notes</h2>
+
+    <p>The table is the <b>container control of PM</b> in its detail view, as
+    <code>Tree</code> is in its tree view (see <a href="swt011.html">step 011</a>
+    and <a href="lessons.html">lessons learned</a> for the way the records are
+    handled in native memory). What is new:</p>
+
+    <ul>
+      <li>A column is a <code>FIELDINFO</code> (32 bytes), allocated with
+      <code>CM_ALLOCDETAILFIELDINFO</code> and put in the container with
+      <code>CM_INSERTDETAILFIELDINFO</code>. Its <code>offStruct</code> points to
+      a slot of the record, where each cell has the pointer to its string
+      (<code>CFA_STRING</code>), so a record has the extra bytes for 32 columns
+      (the id of the item and 32 pointers).</li>
+
+      <li>The slot belongs to the <em>column</em>: another column that is
+      inserted before does not move the texts. While there are no columns an
+      implicit one shows the text of the items, and the first
+      <code>TableColumn</code> takes its place, as the Windows port does.</li>
+
+      <li>Every cell of a new record points to an empty string <em>before</em>
+      the record is inserted: the container paints at once and does not accept a
+      null pointer.</li>
+
+      <li>The container with <code>CCS_EXTENDSEL</code> lets the selection be
+      empty and be several items by program, and a <code>SWT.SINGLE</code> table
+      is kept to one by <code>Table</code>. The other modes of selection cannot
+      be empty (<code>CCS_SINGLESEL</code>) or select by toggling
+      (<code>CCS_MULTIPLESEL</code>).</li>
+
+      <li>After a resize the container places its records wrongly (they go up
+      by the height it gains): <code>Table</code> asks it to place them again
+      right after the resize, see <a href="lessons.html">lessons</a>.</li>
+
+      <li>The height of the header is the height of the window minus the top of
+      the viewport of the records; the order of the items, for the access by
+      index, is kept in a vector.</li>
+    </ul>
+
+    <p>The behavior that differs from Windows is in <a href="diff.html">difference
+    014</a>.</p>
+
+    <h2>Step checklist</h2>
+
+    <table>
+      <col width="40%" />
+
+      <col />
+
+      <col width="50%" />
+
+      <thead>
+        <tr>
+          <th>Operation</th>
+
+          <th>Status</th>
+
+          <th>Remarks</th>
+        </tr>
+      </thead>
+
+      <tr>
+        <td><code>TableColumn</code>: text, width, alignment, <code>pack()</code>,
+        insertion by index, removing</td>
+
+        <td>Done [lpino]</td>
+
+        <td>Checked by <kbd>SWT012_01</kbd>. No events (difference 014).</td>
+      </tr>
+
+      <tr>
+        <td><code>TableItem</code>: texts by column, bounds of the cells, images,
+        colors</td>
+
+        <td>Done [lpino], with limits</td>
+
+        <td>Only the image of the first column is shown.</td>
+      </tr>
+
+      <tr>
+        <td><code>Table</code>: items, header, lines, selection, scrolling,
+        <code>getItem(Point)</code>, <code>setRedraw()</code></td>
+
+        <td>Done [lpino]</td>
+
+        <td>Seen on the screen: <em>to be confirmed</em>. The notifications of
+        the container (click, Enter) were simulated.</td>
+      </tr>
+    </table>
+  </body>
+</html>

@@ -267,6 +267,50 @@ href="eclipseos2-xxe.css"
     as many <em>bytes</em> as the array has <em>elements</em>, a quarter of the
     data; they are not used by the tree.</p>
 
+    <h2>The table (<code>Table</code>, <kbd>SWT012_01</kbd>)</h2>
+
+    <p>The detail view of the same container (<a href="swt012.html">step 012</a>),
+    measured before writing it:</p>
+
+    <ul>
+      <li>With <code>CCS_EXTENDSEL</code> the selection can be empty and be
+      several records by program (the first record that is inserted is selected,
+      and can be deselected, unlike in the tree view); <code>CCS_MULTIPLESEL</code>
+      starts with nothing selected but a click toggles; <code>CCS_SINGLESEL</code>
+      cannot be empty. <code>EXTENDSEL</code> is used for single and multiple
+      selection, and a single selection table is kept to one record by
+      <code>Table</code>.</li>
+
+      <li>The viewport of the records starts under the titles: the header is
+      28 pixels in a window of 200 (<code>CM_QUERYVIEWPORTRECT</code> with
+      <code>CMA_WINDOW</code>), and a row is 15 to 18.</li>
+
+      <li>The cells are pointers to strings in the record and the container
+      paints a record at once when it is inserted: all the pointers have to be
+      valid (an empty string) <em>before</em> <code>CM_INSERTRECORD</code>.</li>
+
+      <li>When the window grows, the records go up by the height it gains
+      (<code>y</code> becomes <code>-60</code> for 60 pixels more) and the
+      viewport that the container reports does not follow. What puts them back
+      (tried one by one on a table that was already wrong): the
+      <code>CM_INVALIDATERECORD</code> for all the records with
+      <code>CMA_REPOSITION | CMA_TEXTCHANGED | CMA_ERASE</code>, or sending
+      <code>WM_SIZE</code> again, <em>once the resize is over</em>; scrolling,
+      <code>CM_ARRANGE</code>, hiding and showing, invalidating the window or
+      changing the origin of the workspace do not. Doing it inside the
+      <code>WM_SIZE</code> is too early, and calling the container with
+      <code>WM_SIZE</code> there again makes it worse. <code>Table</code> does it
+      in <code>setBounds()</code> and posts a message to itself from
+      <code>WM_SIZE</code> for the resizes that a layout defers. The lighter
+      <code>CMA_REPOSITION</code> that is enough for the tree view is not enough
+      here.</li>
+
+      <li>Java: the initializers of the fields run <em>after</em> the constructor
+      of the superclass, which creates the container, so the fields that
+      <code>createHandle()</code> uses are set in <code>createWidget()</code>
+      before calling the superclass.</li>
+    </ul>
+
     <h2>Things learned about PM</h2>
 
     <ul>

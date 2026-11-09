@@ -654,6 +654,17 @@ href="eclipseos2-xxe.css"
       the same placement with the redrawing off as with it on; seen on the
       screen: <em>to be confirmed</em>. <kbd>SWT011_01</kbd> has 74 checks.</li>
 
+      <li>New <a href="swt012.html">SWT Step 012</a> (tables):
+      <code>Table</code>, <code>TableItem</code> and <code>TableColumn</code> on
+      the container control in its detail view. Test case <kbd>SWT012_01</kbd>
+      (124 automatic checks and an interactive part). Not seen on the screen yet.
+      Up to 32 columns, one implicit column while there are none, the selection
+      can be empty or multiple (unlike the tree), and the records have to be
+      placed again after each resize, with a message that is not the one of the
+      tree. See <a href="diff.html">difference 014</a> and <a
+      href="lessons.html">lessons learned</a>. 19 constants of the columns
+      (<code>CFA_*</code>) were added to <code>OS</code>.</li>
+
       <li><code>Scrollable.widgetStyle()</code> adds <code>SBS_VERT</code> to
       any control with a vertical scroll bar; in the container that bit is
       <code>CCS_EXTENDSEL</code>, which <code>Tree</code> removes.</li>
