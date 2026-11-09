@@ -57,6 +57,7 @@ public class Tree extends Composite {
 	boolean ignoreSelect, ignoreExpand;
 	/* The record of the selection that was last reported, to report a change once */
 	int selectedHandle;
+	int cnrInfoPtr;
 
 	static final int TreeProc;
 	static final PSZ TreeClass =  PSZ.getAtom (OS.WC_CONTAINER);
@@ -296,12 +297,18 @@ void createHandle () {
 	* CA_DRAWBITMAP it draws icons only, and the images are bitmaps; the icon
 	* cell is 32x32 by default, 16x16 makes the rows as high as the text.
 	*/
-	CNRINFO cnrInfo = new CNRINFO ();
-	cnrInfo.cb = CNRINFO.sizeof;
-	cnrInfo.flWindowAttr = OS.CV_TREE | OS.CV_ICON | OS.CV_MINI | OS.CA_TREELINE | OS.CA_DRAWBITMAP;
-	cnrInfo.slBitmapOrIcon.cx = 16;
-	cnrInfo.slBitmapOrIcon.cy = 16;
-	OS.WinSendMsg (handle, OS.CM_SETCNRINFO, cnrInfo, OS.CMA_FLWINDOWATTR | OS.CMA_SLBITMAPORICON);
+	/*
+	* The container keeps the pointer to the structure of CM_SETCNRINFO, it does
+	* not copy it: it must live as long as the container does (freeing it, or
+	* passing a structure of the stack, made the records of a container that was
+	* resized be placed wrongly). It is built in memory of the process.
+	*/
+	cnrInfoPtr = allocate (92);
+	poke (cnrInfoPtr, 92);
+	poke (cnrInfoPtr + 20, OS.CV_TREE | OS.CV_ICON | OS.CV_MINI | OS.CA_TREELINE | OS.CA_DRAWBITMAP);
+	poke (cnrInfoPtr + 40, 16);
+	poke (cnrInfoPtr + 44, 16);
+	send (OS.CM_SETCNRINFO, cnrInfoPtr, OS.CMA_FLWINDOWATTR | OS.CMA_SLBITMAPORICON);
 }
 
 void createItem (TreeItem item, int hParent, int hInsertAfter) {
@@ -555,6 +562,8 @@ void releaseWidget () {
 		}
 	}
 	items = null;
+	if (cnrInfoPtr != 0) OS.free (cnrInfoPtr);
+	cnrInfoPtr = 0;
 	super.releaseWidget ();
 }
 
@@ -772,6 +781,35 @@ public void showSelection () {
 	checkWidget ();
 	TreeItem [] selection = getSelection ();
 	if (selection.length > 0) showItem (selection [0]);
+}
+
+/**
+ * If the argument is <code>false</code>, causes the receiver to have
+ * all drawing operations ignored until it is called again with
+ * the argument <code>true</code>.
+ * <p>
+ * OS/2 note: the container paints what is added to it even if its updating
+ * is disabled (each item, without the images that come after), so it is hidden
+ * meanwhile, and shown, with its records placed again, when the drawing is on.
+ * </p>
+ *
+ * @param redraw the new redraw state
+ *
+ * @exception SWTException <ul>
+ *    <li>ERROR_WIDGET_DISPOSED - if the receiver has been disposed</li>
+ *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
+ * </ul>
+ */
+public void setRedraw (boolean redraw) {
+	checkWidget ();
+	if (!redraw && drawCount == 0) OS.WinShowWindow (handle, false);
+	super.setRedraw (redraw);
+	if (redraw && drawCount == 0) {
+		if (items != null && firstChild (0) != 0) {
+			send (OS.CM_INVALIDATERECORD, 0, OS.MPFROM2SHORT ((short) 0, (short) OS.CMA_REPOSITION));
+		}
+		OS.WinShowWindow (handle, true);
+	}
 }
 
 /*

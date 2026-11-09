@@ -222,6 +222,26 @@ href="eclipseos2-xxe.css"
       from the screen: the automatic checks only saw that the bounds of the item
       grew by the width of the cell.</li>
 
+      <li><b>The container keeps the pointer</b> to the structure of
+      <code>CM_SETCNRINFO</code>, it does not copy it. Freeing the block just
+      after the call, or passing a structure of the stack (which is what the
+      marshalling of <code>CNRINFO</code> does), made the records of a
+      container that was resized be placed wrongly (<code>y = -194</code>),
+      while it worked by luck as long as that memory was not reused.
+      <code>Tree</code> builds the structure in memory of the process and frees
+      it when the tree goes. The same marshalling is not safe for
+      <code>CM_QUERYCNRINFO</code> either: the container writes its own string
+      pointer in the structure and the wrapper releases a Java array with it.</li>
+
+      <li>The container paints each record as it is inserted, even when the
+      updating of its window is disabled (<code>WinEnableWindowUpdate()</code>,
+      what <code>setRedraw(false)</code> does), so a tree that is filled while
+      it is visible shows its items one by one, without the images that are set
+      after. Not asking it to paint (<code>fInvalidateRecord</code> false) is no
+      way out: it then does not measure the records either. <code>Tree</code>
+      hides the window of the container while the redrawing is off and shows it,
+      with the records placed again, when it is on.</li>
+
       <li>For one click the container sends more than one
       <code>CN_EMPHASIS</code> (for the record that gets the selection and for
       the one that loses it) and also when the plus sign of a record is

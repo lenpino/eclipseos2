@@ -645,6 +645,15 @@ href="eclipseos2-xxe.css"
       click sent the <code>Selection</code> event twice. The tree repositions
       its records less often after a resize.</li>
 
+      <li>The container keeps the pointer to the structure of
+      <code>CM_SETCNRINFO</code>: <code>Tree</code> builds it in memory of its
+      own and frees it with the tree. And <code>Tree.setRedraw()</code> hides
+      the container while the redrawing is off, because it paints each record as
+      it is inserted whatever the updating state is (the tree that is filled
+      while visible was drawn twice, the second time with the images). Checked:
+      the same placement with the redrawing off as with it on; seen on the
+      screen: <em>to be confirmed</em>. <kbd>SWT011_01</kbd> has 74 checks.</li>
+
       <li><code>Scrollable.widgetStyle()</code> adds <code>SBS_VERT</code> to
       any control with a vertical scroll bar; in the container that bit is
       <code>CCS_EXTENDSEL</code>, which <code>Tree</code> removes.</li>

@@ -198,6 +198,41 @@ public class SWT011_01 extends SWTTestCase {
 		tree.dispose();
 	}
 
+	/*
+	 * With the redrawing off the container is not asked to paint what is added: it
+	 * is painted once when the redrawing is on again (the user saw the items drawn
+	 * one by one, without images, and then all again). The placement must be the
+	 * same as with the redrawing on.
+	 */
+	void checkRedrawOff() {
+		saySubObjective("Filling the tree with the redrawing off");
+		Tree on = new Tree(shell, SWT.BORDER);
+		Tree off = new Tree(shell, SWT.BORDER);
+		on.setBounds(0, 0, 300, 200);
+		off.setBounds(0, 0, 300, 200);
+		TreeItem[] a = new TreeItem[3], b = new TreeItem[3];
+		off.setRedraw(false);
+		for (int i = 0; i < 3; i++) {
+			a[i] = new TreeItem(on, SWT.NONE);
+			a[i].setText("Root " + i);
+			a[i].setImage(image);
+			new TreeItem(a[i], SWT.NONE).setText("Child");
+			b[i] = new TreeItem(off, SWT.NONE);
+			b[i].setText("Root " + i);
+			b[i].setImage(image);
+			new TreeItem(b[i], SWT.NONE).setText("Child");
+		}
+		off.setRedraw(true);
+		boolean same = true;
+		for (int i = 0; i < 3; i++) same &= a[i].getBounds().equals(b[i].getBounds());
+		check(same, "the same placement with the redrawing off as with it on: " + a[2].getBounds() + " and " + b[2].getBounds());
+		check(b[0].getBounds().width > 0 && b[2].getBounds().y > b[0].getBounds().y, "the items are placed one below the other");
+		b[1].setExpanded(true);
+		check(b[1].getExpanded(), "the items work after being added with the redrawing off");
+		on.dispose();
+		off.dispose();
+	}
+
 	void checkSelection() {
 		saySubObjective("Selection");
 		Tree single = new Tree(shell, SWT.SINGLE | SWT.BORDER);
@@ -406,6 +441,7 @@ public class SWT011_01 extends SWTTestCase {
 		checkHierarchy();
 		checkExpandAndBounds();
 		checkSizeAfterItems();
+		checkRedrawOff();
 		checkSelection();
 		checkEvents();
 		checkDispose();
