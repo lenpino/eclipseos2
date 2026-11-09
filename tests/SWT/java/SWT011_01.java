@@ -435,8 +435,12 @@ public class SWT011_01 extends SWTTestCase {
 		gc.fillRectangle(1, 1, 14, 14);
 		gc.dispose();
 
+		/*
+		 * The window is not shown during the automatic checks (SWTTestCase shows it after
+		 * initComponents): the trees of the checks, with their 301 items and their scroll
+		 * bars, appeared and went away in it, before the one of the interactive part.
+		 */
 		shell.setSize(420, 320);
-		shell.open();
 		sayObjective("Automatic checks");
 		checkHierarchy();
 		checkExpandAndBounds();
