@@ -657,8 +657,10 @@ href="eclipseos2-xxe.css"
       <li>New <a href="swt012.html">SWT Step 012</a> (tables):
       <code>Table</code>, <code>TableItem</code> and <code>TableColumn</code> on
       the container control in its detail view. Test case <kbd>SWT012_01</kbd>
-      (124 automatic checks and an interactive part). Not seen on the screen yet.
-      Up to 32 columns, one implicit column while there are none, the selection
+      (124 automatic checks and an interactive part). First seen on the screen: it
+      showed two defects that were fixed (the second click gave an event
+      without an item, and 300 items took seconds to be added because of the
+      refresh of each record, now once for all of them). Up to 32 columns, one implicit column while there are none, the selection
       can be empty or multiple (unlike the tree), and the records have to be
       placed again after each resize, with a message that is not the one of the
       tree. See <a href="diff.html">difference 014</a> and <a

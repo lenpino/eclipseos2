@@ -305,6 +305,24 @@ href="eclipseos2-xxe.css"
       <code>CMA_REPOSITION</code> that is enough for the tree view is not enough
       here.</li>
 
+      <li>Every <code>CM_INSERTRECORD</code> with invalidation and every
+      <code>CM_INVALIDATERECORD</code> of a record with text costs time in
+      proportion to the <em>number of records</em>: 300 items with text took
+      5.6 seconds, 400 took 10 (a quadratic growth; with empty cells it was 19
+      milliseconds). <code>Table</code> inserts without invalidating and refreshes
+      the whole table <em>once</em>, with a message that it posts to itself; the
+      methods that ask for geometry (<code>getBounds()</code>, the top index,
+      the header) do the pending refresh first, because a record that was
+      inserted without it has no place yet. 400 items now take 15 to 35
+      milliseconds. <code>String.getBytes()</code> was not the cause.</li>
+
+      <li>The container reports <code>CN_EMPHASIS</code> of a record that
+      is selected <em>before</em> it has marked it, and after clearing the
+      previous one, so asking for the selection at that moment can give nothing:
+      the item of the notification is the one to use (it gave a
+      <code>NullPointerException</code> in the application's listener when
+      the second row was clicked).</li>
+
       <li>Java: the initializers of the fields run <em>after</em> the constructor
       of the superclass, which creates the container, so the fields that
       <code>createHandle()</code> uses are set in <code>createWidget()</code>

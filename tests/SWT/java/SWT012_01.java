@@ -49,6 +49,7 @@ public class SWT012_01 extends SWTTestCase {
 	}
 
 	int checks;
+	long t0 = System.currentTimeMillis();
 	Image image;
 
 	Shell createTopShell(Display display) {
@@ -57,7 +58,7 @@ public class SWT012_01 extends SWTTestCase {
 
 	void check(boolean ok, String what) {
 		checks++;
-		say((ok ? "  ok    " : "  FAIL  ") + what);
+		say((ok ? "  ok    " : "  FAIL  ") + what + (Boolean.getBoolean("swt.test.time") ? "   [" + (System.currentTimeMillis() - t0) + " ms]" : ""));
 		if (!ok) throw new RuntimeException("Check failed: " + what);
 	}
 
@@ -342,6 +343,15 @@ public class SWT012_01 extends SWTTestCase {
 		pump();
 		check(counts[0] == 2 && selected[0] == first, "a click on another item is a new Selection (events: " + counts[0] + ")");
 		check(table.getSelectionCount() == 1 && table.isSelected(0), "and only that item stays selected: " + table.getSelectionCount());
+
+		/* The container may report a record before it marks it as selected: the event still has the item (it was null) */
+		table.setSelection(0);
+		OS.WinSendMsg(table.handle, OS.CM_SETRECORDEMPHASIS, third_handle(table, 0), OS.MPFROM2SHORT((short) 0, (short) OS.CRA_SELECTED));
+		poke(emphasis + 4, third_handle(table, 2));
+		notifyParent(table, OS.CN_EMPHASIS, emphasis);
+		pump();
+		/* The container itself also notifies when the record is deselected here, so only that the item is never null counts */
+		check(counts[0] >= 3 && selected[0] != null, "a notification before the record is marked selected still gives an item (events: " + counts[0] + ", item " + (selected[0] == null ? "null" : selected[0].getText()) + ")");
 		OS.free(emphasis);
 
 		/* NOTIFYRECORDENTER: hwndCnr, fKey, pRecord */
@@ -555,12 +565,12 @@ public class SWT012_01 extends SWTTestCase {
 		table.setRedraw(true);
 		table.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				String msg = "Selection: " + ((TableItem) e.item).getText() + " (" + table.getSelectionCount() + " selected)";
+				String msg = "Selection: " + (e.item == null ? "(none)" : ((TableItem) e.item).getText()) + " (" + table.getSelectionCount() + " selected)";
 				say(msg);
 				log.setText(msg);
 			}
 			public void widgetDefaultSelected(SelectionEvent e) {
-				String msg = "DefaultSelection: " + ((TableItem) e.item).getText();
+				String msg = "DefaultSelection: " + (e.item == null ? "(none)" : ((TableItem) e.item).getText());
 				say(msg);
 				log.setText(msg);
 			}

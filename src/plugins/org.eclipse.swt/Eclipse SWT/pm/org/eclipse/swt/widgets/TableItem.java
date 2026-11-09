@@ -176,6 +176,7 @@ Rectangle getRowBounds () {
 	Tree.poke (query + 4, handle);
 	Tree.poke (query + 12, OS.CMA_ICON | OS.CMA_TEXT);
 	Rectangle result = new Rectangle (0, 0, 0, 0);
+	parent.flush ();
 	if (parent.send (OS.CM_QUERYRECORDRECT, rect, query) != 0) {
 		int left = Tree.peek (rect), bottom = Tree.peek (rect + 4);
 		int right = Tree.peek (rect + 8), top = Tree.peek (rect + 12);

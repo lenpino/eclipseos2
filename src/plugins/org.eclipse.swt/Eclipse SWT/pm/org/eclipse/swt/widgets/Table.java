@@ -56,6 +56,7 @@ public class Table extends Composite {
 	java.util.Vector columns;
 	Field implicit;
 	boolean [] slotUsed;
+	boolean refreshPending;
 	boolean linesVisible, headerVisible;
 	/* Programmatic changes do not send the events of the user's ones */
 	boolean ignoreSelect;
@@ -309,7 +310,11 @@ void createItem (TableItem item, int index) {
 	int insert = Tree.allocate (24);
 	Tree.poke (insert, 24);
 	Tree.poke (insert + 4, hAfter);
-	Tree.poke (insert + 12, OS.TRUE);
+	/*
+	* Every invalidation of a record costs time in proportion to the number of records
+	* (300 items took 5 seconds): the table is refreshed once, see refresh().
+	*/
+	Tree.poke (insert + 12, OS.FALSE);
 	Tree.poke (insert + 16, OS.CMA_TOP);
 	Tree.poke (insert + 20, 1);
 	boolean oldIgnore = ignoreSelect;
@@ -328,6 +333,7 @@ void createItem (TableItem item, int index) {
 	items [id] = item;
 	order.insertElementAt (item, index);
 	selectionKey = selectionKey ();
+	refresh ();
 }
 
 void createWidget () {
@@ -490,10 +496,23 @@ void setFieldWidth (Field field, int width) {
 }
 
 void invalidateRecord (int hRecord, int flags) {
-	int array = Tree.allocate (4);
-	Tree.poke (array, hRecord);
-	send (OS.CM_INVALIDATERECORD, array, OS.MPFROM2SHORT ((short) 1, (short) flags));
-	OS.free (array);
+	refresh ();
+}
+
+/*
+ * Asks to paint all the records again once the message queue gets to it, whatever the
+ * number of changes that were made until then.
+ */
+void flush () {
+	if (!refreshPending) return;
+	refreshPending = false;
+	reposition ();
+}
+
+void refresh () {
+	if (drawCount != 0 || refreshPending || handle == 0) return;
+	refreshPending = true;
+	OS.WinPostMsg (handle, WM_REPOSITION, 0, 0);
 }
 
 /* The width of the column with the given index (the implicit one, when there are none) */
@@ -678,6 +697,7 @@ public int getHeaderHeight () {
 	if (!headerVisible) return 0;
 	/* The visible part of the records starts under the titles (the y axis of PM grows upwards) */
 	int rect = Tree.allocate (16);
+	flush ();
 	int result = send (OS.CM_QUERYVIEWPORTRECT, rect, OS.MPFROM2SHORT ((short) OS.CMA_WINDOW, (short) 0));
 	int height = result != 0 ? getHeight () - Tree.peek (rect + 12) : 0;
 	OS.free (rect);
@@ -1303,7 +1323,7 @@ public void setRedraw (boolean redraw) {
 	super.setRedraw (redraw);
 	if (redraw && drawCount == 0) {
 		if (order.size () > 0) {
-			send (OS.CM_INVALIDATERECORD, 0, OS.MPFROM2SHORT ((short) 0, (short) OS.CMA_REPOSITION));
+			send (OS.CM_INVALIDATERECORD, 0, OS.MPFROM2SHORT ((short) 0, (short) (OS.CMA_REPOSITION | OS.CMA_TEXTCHANGED)));
 		}
 		OS.WinShowWindow (handle, true);
 	}
@@ -1526,6 +1546,7 @@ static final int WM_REPOSITION = OS.WM_USER + 0x321;
 
 int windowProc (int msg, int mp1, int mp2) {
 	if (msg == WM_REPOSITION) {
+		refreshPending = false;
 		reposition ();
 		return 0;
 	}
@@ -1579,14 +1600,21 @@ MRESULT wmControlChild (int mp1, int mp2) {
 				int key = selectionKey ();
 				if (key != selectionKey) {
 					selectionKey = key;
+					/*
+					* The container may report the record before it has marked it as selected
+					* (the previous one is cleared first), so the record of the notification
+					* is the item, and the selection is only a fallback.
+					*/
 					TableItem item = itemOf (hRecord);
-					if (item == null || !isRecordSelected (hRecord)) {
+					if (item == null) {
 						TableItem [] selection = getSelection ();
 						item = selection.length > 0 ? selection [0] : null;
 					}
-					Event event = new Event ();
-					event.item = item;
-					postEvent (SWT.Selection, event);
+					if (item != null) {
+						Event event = new Event ();
+						event.item = item;
+						postEvent (SWT.Selection, event);
+					}
 				}
 			}
 			break;

@@ -137,7 +137,19 @@ static int allocate (int size) {
 }
 
 static int allocateString (String string) {
-	byte [] bytes = string.getBytes ();
+	/*
+	* String.getBytes() takes about 9 ms for each call in the Java 1.3.1 of OS/2 (it
+	* looks the converter up again): ASCII, which is nearly all of it, is converted here.
+	*/
+	byte [] bytes = new byte [string.length ()];
+	for (int i=0; i<bytes.length; i++) {
+		char c = string.charAt (i);
+		if (c >= 0x80) {
+			bytes = string.getBytes ();
+			break;
+		}
+		bytes [i] = (byte) c;
+	}
 	int block = allocate (bytes.length + 1);
 	if (bytes.length > 0) OS.objcpy (block, bytes);
 	return block;
