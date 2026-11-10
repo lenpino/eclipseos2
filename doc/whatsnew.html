@@ -685,5 +685,27 @@ href="eclipseos2-xxe.css"
       lower left corner of the arrow in the coordinates of the tool bar (y
       grows downwards), where the upper left corner of the menu goes.</li>
     </ul>
+
+    <h3>2026-11-10</h3>
+
+    <h4>[lpino]</h4>
+
+    <ul>
+      <li>New <a href="swt014.html">SWT Step 014</a> (tracker):
+      <code>Tracker</code>, the class of Windows with its own loop of
+      <code>WinGetMsg</code>, the capture of the pointer instead of a transparent
+      window, and the bands inverted with <code>GpiBitBlt</code>. Test case
+      <kbd>SWT014_01</kbd> (62 automatic checks: the keys and the mouse messages
+      are posted to the queue before <code>open()</code>, whose loop reads them)
+      and an interactive part. Not seen on the screen yet. New natives
+      <code>WinQuerySysPointer</code> and <code>WinSetPointer</code>, and the
+      constant <code>ROP_PATINVERT</code>. See <a href="diff.html">difference
+      016</a>.</li>
+
+      <li><kbd>tools/vm-pull.sh</kbd> synchronizes with <code>rsync
+      --delete</code>, and the <code>doc</code> folder of the VM is old: a pull
+      reverts the pages of this folder. Commit before pulling, or bring back only
+      the DLL (see <code>README-VM.md</code>).</li>
+    </ul>
   </body>
 </html>

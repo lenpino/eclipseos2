@@ -372,6 +372,27 @@ href="eclipseos2-xxe.css"
         filter path does not exist the deepest directory that exists is selected,
         or the first drive, and OK accepts it.</td>
       </tr>
+
+      <tr>
+        <td>016</td>
+
+        <td>The tracker gets the mouse over the desktop with a transparent
+        window that covers the screen. A key pressed with Alt
+        (<code>WM_SYSKEYDOWN</code>) cancels it. <code>setCursor()</code> sets
+        the pointer while it works. A rectangle without width or height makes
+        <code>setRectangles()</code> divide by zero.</td>
+
+        <td><code>Tracker</code> captures the pointer instead
+        (<code>WinSetCapture</code>), and draws on the presentation space of the
+        parent or of the screen. A <code>WM_CHAR</code> with <code>KC_ALT</code>
+        cancels it. <code>setCursor()</code> is missing because the
+        <code>Cursor</code> class is not ported; the pointers of the resize are
+        the system ones. An empty rectangle is accepted (its proportions are
+        computed as if it were one pixel wide or high).</td>
+
+        <td>A <code>WM_QUIT</code> read by the loop of the tracker cancels it and
+        is posted again.</td>
+      </tr>
     </table>
 
     <h2>Other differences</h2>

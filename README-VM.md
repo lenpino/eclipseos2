@@ -81,6 +81,9 @@ variables de entorno `VM_HOST`, `VM_USER`, `VM_PASS`, `VM_SWT_DIR`).
   un solo elemento o con un puntero que no salió de él, y con una General
   Protection Fault (`EIP = 00000000`, `SYS1808`) si se usa un `jfieldID` nulo.
   Ver `doc/lessons.html`.
+- `vm-pull.sh` sincroniza con `rsync --delete` y la carpeta `doc/` de la VM es
+  antigua: un pull revierte y borra páginas de la documentación, también las
+  ediciones sin commitear. Commitear antes, o traer solo la DLL y la `.lib`.
 - Auditorías: `tools/audit-constants.py <dir con los headers>` y
   `tools/audit-jni-fields.py` (ver `doc/lessons.html`).
 - Si `vm.sh` no devuelve ni `ver` en 20-30 s, parar: más sesiones sobre un

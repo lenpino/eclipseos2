@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/css"
+href="eclipseos2-xxe.css"
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"xhtml1-strict.dtd">
+<html>
+  <head>
+    <link href="eclipseos2.css" rel="stylesheet" type="text/css" />
+
+    <title>Eclipse for OS/2 Transitional Project Notes</title>
+  </head>
+
+  <body>
+    <h1>SWT Step 014. Tracker</h1>
+
+    <h2>Objective</h2>
+
+    <p>Implement the <code>o.e.swt.widgets.Tracker</code> class: rubber band
+    rectangles, drawn on a composite or on the screen, that the user moves or
+    resizes with the mouse or the keys. The test case <kbd>SWT014_01</kbd>
+    posts to the queue the keys and the mouse messages that the user would send
+    and then calls <code>open()</code>, whose loop reads them (62 automatic
+    checks); then it shows boxes to drag and buttons that move and resize them by
+    hand.</p>
+
+    <h2>Task notes</h2>
+
+    <p>The class is the one of Windows with the calls to the system changed.
+    <code>WinTrackRect</code> was not used: it tracks one rectangle and sends no
+    message while it moves it, and SWT needs several rectangles and a
+    <code>Move</code> or <code>Resize</code> event for each step.</p>
+
+    <ul>
+      <li><code>open()</code> runs a loop of its own with
+      <code>WinGetMsg</code>. The mouse messages and <code>WM_CHAR</code> are
+      read and not dispatched while the tracker works; the rest (paint, timers)
+      are dispatched. A <code>WM_QUIT</code> cancels the tracker and is posted
+      again for the loop of the application.</li>
+
+      <li>Windows creates a transparent window that covers the screen to get the
+      mouse over the desktop. PM sends all the mouse messages to the window that
+      has the capture of the pointer, wherever the pointer is: the tracker takes
+      it with the parent (or the hidden window of the <code>Display</code>) and
+      releases it at the end. If a control has it already (the tracker is opened
+      from a <code>MouseDown</code>), it is left there, and that control gets the
+      release of the button.</li>
+
+      <li>The position comes from the message (<code>mp1</code> mapped from its
+      window to the desktop), not from the pointer, so that posted messages work
+      too. As everywhere, the y axis is turned: SWT grows downwards and PM
+      upwards.</li>
+
+      <li>The rectangles are drawn by inverting four bands with
+      <code>GpiBitBlt</code> and <code>ROP_DSTINVERT</code>; stippled, 3 pixels
+      wide with <code>PATSYM_HALFTONE</code>, the colors <code>CLR_TRUE</code> and
+      <code>CLR_FALSE</code> and <code>ROP_PATINVERT</code>. Drawing twice
+      restores the screen. The presentation space is the one of the parent
+      (<code>WinGetPS</code>): it covers its children, because SWT composites do
+      not have <code>WS_CLIPCHILDREN</code>, but not the windows that are above
+      it. On the display it is the screen (<code>WinGetScreenPS</code>).</li>
+
+      <li>When the button is not down, the pointer is put at the middle of the
+      top side (moving) or at the side being resized, as on Windows, and a resize
+      shows the system pointer of that side or corner. Two natives were added for
+      that: <code>WinQuerySysPointer</code> and <code>WinSetPointer</code>, and the
+      constant <code>ROP_PATINVERT</code>.</li>
+
+      <li>The automatic checks post <code>WM_CHAR</code>,
+      <code>WM_MOUSEMOVE</code> and <code>WM_BUTTON1UP</code> before
+      <code>open()</code>. PM gives the posted messages before the input ones, so
+      the mouse moves that <code>WinSetPointerPos</code> causes come after the
+      tracker has finished; the test empties the queue between checks.</li>
+    </ul>
+
+    <p>The differences with Windows are in <a href="diff.html">difference
+    016</a>.</p>
+
+    <h2>Step checklist</h2>
+
+    <table>
+      <col width="40%" />
+
+      <col />
+
+      <col width="50%" />
+
+      <thead>
+        <tr>
+          <th>Operation</th>
+
+          <th>Status</th>
+
+          <th>Remarks</th>
+        </tr>
+      </thead>
+
+      <tr>
+        <td><code>Tracker</code>: move and resize with the keys and the mouse,
+        Enter, Esc, Alt, directions, several rectangles, <code>close()</code>,
+        on a composite and on the display</td>
+
+        <td>Done [lpino]</td>
+
+        <td>Checked by <kbd>SWT014_01</kbd> (62 checks), including where the
+        pointer is left and the release of the capture.</td>
+      </tr>
+
+      <tr>
+        <td>Drawing of the rectangles, plain and stippled; pointers of the
+        resize</td>
+
+        <td>Done [lpino]</td>
+
+        <td>Not checked automatically. Seen on the screen: <em>to be
+        confirmed</em>.</td>
+      </tr>
+
+      <tr>
+        <td><code>setCursor()</code></td>
+
+        <td>Not done</td>
+
+        <td>The <code>Cursor</code> class is not ported yet.</td>
+      </tr>
+    </table>
+  </body>
+</html>
