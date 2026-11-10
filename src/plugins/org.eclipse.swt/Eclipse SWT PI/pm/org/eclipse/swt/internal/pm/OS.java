@@ -1214,7 +1214,7 @@ public class OS {
 //    public static final int ROP_MERGEPAINT          = 0x00BB;
 //    public static final int ROP_PATCOPY             = 0x00F0;
 //    public static final int ROP_PATPAINT            = 0x00FB;
-//    public static final int ROP_PATINVERT           = 0x005A;
+    public static final int ROP_PATINVERT           = 0x005A;
     public static final int ROP_DSTINVERT           = 0x0055;
     public static final int ROP_ZERO                = 0x0000;
     public static final int ROP_ONE                 = 0x00FF;
@@ -2787,6 +2787,8 @@ public static final native int WinQueryPresParam (int hwnd, int idAttrType1,
 public static final native int WinCreatePointerIndirect (int hwndDesktop,
     POINTERINFO pptri);
 public static final native boolean WinDestroyPointer (int hptrPointer);
+public static final native int WinQuerySysPointer (int hwndDeskTop, int iptr, boolean fCopy);
+public static final native boolean WinSetPointer (int hwndDeskTop, int hptrNew);
 public static final native boolean WinQueryPointerInfo (int hptr,
     POINTERINFO pptriPointerInfo);
 public static final native boolean WinDrawPointer (int hps, int lx, int ly,
