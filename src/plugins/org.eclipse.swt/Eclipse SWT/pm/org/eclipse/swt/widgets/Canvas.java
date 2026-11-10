@@ -37,8 +37,7 @@ import org.eclipse.swt.graphics.*;
  */
 
 public class Canvas extends Composite {
-//@@TODO(dmik)    
-//	Caret caret;
+	Caret caret;
 	
 /**
  * Prevents uninitialized instances from being created outside the package.
@@ -92,34 +91,34 @@ public Canvas (Composite parent, int style) {
 //	OS.ReleaseDC (handle, hDC);
 //}
 //
-///**
-// * Returns the caret.
-// * <p>
-// * The caret for the control is automatically hidden
-// * and shown when the control is painted or resized,
-// * when focus is gained or lost and when an the control
-// * is scrolled.  To avoid drawing on top of the caret,
-// * the programmer must hide and show the caret when
-// * drawing in the window any other time.
-// * </p>
-// *
-// * @return the caret
-// *
-// * @exception SWTException <ul>
-// *    <li>ERROR_WIDGET_DISPOSED - if the receiver has been disposed</li>
-// *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
-// * </ul>
-// */
-//public Caret getCaret () {
-//	checkWidget ();
-//	return caret;
-//}
-//
-//void releaseWidget () {
-//	if (caret != null) caret.releaseWidget ();
-//	caret = null;
-//	super.releaseWidget ();
-//}
+/**
+ * Returns the caret.
+ * <p>
+ * The caret for the control is automatically hidden
+ * and shown when the control is painted or resized,
+ * when focus is gained or lost and when an the control
+ * is scrolled.  To avoid drawing on top of the caret,
+ * the programmer must hide and show the caret when
+ * drawing in the window any other time.
+ * </p>
+ *
+ * @return the caret
+ *
+ * @exception SWTException <ul>
+ *    <li>ERROR_WIDGET_DISPOSED - if the receiver has been disposed</li>
+ *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
+ * </ul>
+ */
+public Caret getCaret () {
+	checkWidget ();
+	return caret;
+}
+
+void releaseWidget () {
+	if (caret != null) caret.releaseWidget ();
+	caret = null;
+	super.releaseWidget ();
+}
 //
 ///**
 // * Scrolls a rectangular area of the receiver by first copying 
@@ -168,56 +167,61 @@ public Canvas (Composite parent, int style) {
 //	if (isFocus) caret.setFocus ();
 //}
 //
-///**
-// * Sets the receiver's caret.
-// * <p>
-// * The caret for the control is automatically hidden
-// * and shown when the control is painted or resized,
-// * when focus is gained or lost and when an the control
-// * is scrolled.  To avoid drawing on top of the caret,
-// * the programmer must hide and show the caret when
-// * drawing in the window any other time.
-// * </p>
-// * @param caret the new caret for the receiver, may be null
-// *
-// * @exception IllegalArgumentException <ul>
-// *    <li>ERROR_INVALID_ARGUMENT - if the caret has been disposed</li>
-// * </ul>
-// * @exception SWTException <ul>
-// *    <li>ERROR_WIDGET_DISPOSED - if the receiver has been disposed</li>
-// *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
-// * </ul>
-// */
-//public void setCaret (Caret caret) {
-//	checkWidget ();
-//	Caret newCaret = caret;
-//	Caret oldCaret = this.caret;
-//	this.caret = newCaret;
-//	if (isFocusControl ()) {
-//		if (oldCaret != null) oldCaret.killFocus ();
-//		if (newCaret != null) {
-//			if (newCaret.isDisposed()) error(SWT.ERROR_INVALID_ARGUMENT);
-//			newCaret.setFocus ();
-//		}
-//	}
-//}
+/**
+ * Sets the receiver's caret.
+ * <p>
+ * The caret for the control is automatically hidden
+ * and shown when the control is painted or resized,
+ * when focus is gained or lost and when an the control
+ * is scrolled.  To avoid drawing on top of the caret,
+ * the programmer must hide and show the caret when
+ * drawing in the window any other time.
+ * </p>
+ * @param caret the new caret for the receiver, may be null
+ *
+ * @exception IllegalArgumentException <ul>
+ *    <li>ERROR_INVALID_ARGUMENT - if the caret has been disposed</li>
+ * </ul>
+ * @exception SWTException <ul>
+ *    <li>ERROR_WIDGET_DISPOSED - if the receiver has been disposed</li>
+ *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
+ * </ul>
+ */
+public void setCaret (Caret caret) {
+	checkWidget ();
+	Caret newCaret = caret;
+	Caret oldCaret = this.caret;
+	this.caret = newCaret;
+	if (isFocusControl ()) {
+		if (oldCaret != null) oldCaret.killFocus ();
+		if (newCaret != null) {
+			if (newCaret.isDisposed()) error(SWT.ERROR_INVALID_ARGUMENT);
+			newCaret.setFocus ();
+		}
+	}
+}
+
+public void setFont (Font font) {
+	checkWidget ();
+	super.setFont (font);
+	if (caret != null) caret.setFont (font);
+}
 //
-//public void setFont (Font font) {
-//	checkWidget ();
-//	super.setFont (font);
-//	if (caret != null) caret.setFont (font);
-//}
-//
-//LRESULT WM_KILLFOCUS (int wParam, int lParam) {
-//	LRESULT result  = super.WM_KILLFOCUS (wParam, lParam);
-//	if (caret != null) caret.killFocus ();
-//	return result;
-//}
-//
-//LRESULT WM_SETFOCUS (int wParam, int lParam) {
-//	LRESULT result  = super.WM_SETFOCUS (wParam, lParam);
-//	if (caret != null) caret.setFocus ();
-//	return result;
-//}
+/*
+* PM has one message for both: the cursor of PM is created when the
+* canvas gets the focus and destroyed when it loses it, as Windows does
+* with WM_SETFOCUS and WM_KILLFOCUS.
+*/
+MRESULT WM_SETFOCUS (int mp1, int mp2) {
+	MRESULT result = super.WM_SETFOCUS (mp1, mp2);
+	if (caret != null && !caret.isDisposed ()) {
+		if (OS.SHORT1FROMMP (mp2) > 0) {
+			caret.setFocus ();
+		} else {
+			caret.killFocus ();
+		}
+	}
+	return result;
+}
 
 }

@@ -1479,6 +1479,39 @@ JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_WinQueryPointer
     return (jint)WinQueryPointer((HWND)hwndDeskTop);
 }
 
+JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinCreateCursor
+        (JNIEnv *env, jclass that, jint hwnd, jint x, jint y, jint cx, jint cy, jint fs, jintArray prclClip)
+{
+    jint *c_prclClip = NULL;
+    jboolean rc;
+
+    DEBUG_CALL("WinCreateCursor\n")
+
+    if (prclClip) c_prclClip = (*env)->GetIntArrayElements(env, prclClip, NULL);
+
+    rc = (jboolean)WinCreateCursor((HWND)hwnd, x, y, cx, cy, fs, (PRECTL)c_prclClip);
+
+    if (prclClip) (*env)->ReleaseIntArrayElements(env, prclClip, c_prclClip, 0);
+
+    return rc;
+}
+
+JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinShowCursor
+        (JNIEnv *env, jclass that, jint hwnd, jboolean fShow)
+{
+    DEBUG_CALL("WinShowCursor\n")
+
+    return (jboolean)WinShowCursor((HWND)hwnd, (BOOL)fShow);
+}
+
+JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinDestroyCursor
+        (JNIEnv *env, jclass that, jint hwnd)
+{
+    DEBUG_CALL("WinDestroyCursor\n")
+
+    return (jboolean)WinDestroyCursor((HWND)hwnd);
+}
+
 JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinQueryPointerInfo
         (JNIEnv *env, jclass that, jint hptr, jobject pptri)
 {

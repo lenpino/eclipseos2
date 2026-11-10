@@ -512,6 +512,13 @@ public class OS {
     public static final int SV_CXHSCROLLARROW =     25;
     public static final int SV_CXBORDER =           26;
     public static final int SV_CYBORDER =           27;
+
+    /* WinCreateCursor() options */
+    public static final int CURSOR_SOLID =          0x0000;
+    public static final int CURSOR_HALFTONE =       0x0001;
+    public static final int CURSOR_FRAME =          0x0002;
+    public static final int CURSOR_FLASH =          0x0004;
+    public static final int CURSOR_SETPOS =         0x8000;
 //    public static final int SV_CXDLGFRAME =         28;
 //    public static final int SV_CYDLGFRAME =         29;
 //    public static final int SV_CYTITLEBAR =         30;
@@ -2822,6 +2829,9 @@ public static final native int WinQuerySystemAtomTable();
 public static final native int WinFindAtom(int hatomtblAtomTbl, PSZ pszAtomName);
 public static final native int WinQueryClassName(int hwnd, int lLength, PSZ PCHBuffer);
 public static final native boolean WinQueryCursorInfo(int hwndDeskTop, CURSORINFO pcsriCursorInfo);
+public static final native boolean WinCreateCursor (int hwnd, int x, int y, int cx, int cy, int fs, int[] prclClip);
+public static final native boolean WinShowCursor (int hwnd, boolean fShow);
+public static final native boolean WinDestroyCursor (int hwnd);
 public static final native int WinWindowFromPoint(int hwndParent, int[] pptlPoint, boolean fEnumChildren);
 public static final native boolean WinSetPointerPos(int hwndDeskTop, int lx, int ly);
 public static final native boolean WinSetCapture(int hwndDeskTop, int hwnd);

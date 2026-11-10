@@ -36,6 +36,7 @@ org\eclipse\swt\widgets\FontDialog.java
 org\eclipse\swt\widgets\FileDialog.java
 org\eclipse\swt\widgets\DirectoryDialog.java
 org\eclipse\swt\widgets\Tracker.java
+org\eclipse\swt\widgets\Caret.java
 org\eclipse\swt\widgets\ColorDialog.java
 org\eclipse\swt\widgets\Label.java
 org\eclipse\swt\widgets\ScrollBar.java
