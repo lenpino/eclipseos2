@@ -377,6 +377,55 @@ href="eclipseos2-xxe.css"
       version, only <code>getItems()</code>.</li>
     </ul>
 
+    <h2>The tracker, the cursors and the mouse (<kbd>SWT014_01</kbd> to <kbd>SWT016_01</kbd>)</h2>
+
+    <ul>
+      <li>Driving a modal loop of the system without a user: the messages that
+      the user would send (<code>WM_CHAR</code>, <code>WM_MOUSEMOVE</code>,
+      <code>WM_BUTTON1UP</code>) are posted before <code>Tracker.open()</code>,
+      and its loop reads them. The posted messages come before the input ones, so
+      the mouse moves caused by <code>WinSetPointerPos</code> arrive after the
+      tracker has ended. The queue is emptied between checks, and a
+      <code>timerExec</code> closes the tracker if the messages were not enough,
+      so that a failure does not hang the test.</li>
+
+      <li>The position of a mouse message is taken from the message
+      (<code>mp1</code> mapped to the desktop), not from the pointer or from
+      <code>WinQueryMsgPos()</code>: then a posted or sent message works like a
+      real one.</li>
+
+      <li>What is on the screen can be checked: a timer runs inside the modal
+      loop (the loop dispatches <code>WM_TIMER</code>) and reads the pixels with
+      <code>GpiQueryPel</code> while the rectangles are shown, before and after.
+      That told that the stippled band is drawn (a checkerboard of one pixel,
+      which the eye takes for a thicker line) and that nothing is left behind.
+      The pointers made by SWT are drawn with <code>WinDrawPointer</code> into an
+      image and read back in the same way.</li>
+
+      <li>The pointer that a control sets is read with
+      <code>WinQueryPointer</code> after sending it a <code>WM_MOUSEMOVE</code>
+      (<code>WinSendMsg</code>, which runs at once).</li>
+
+      <li>The timer of the display that sends <code>MouseExit</code> looks at the
+      real pointer: with the window hidden it sends Exit in the middle of a
+      sequence of checks whenever the VM is slow. For those checks the window is
+      shown and the pointer is put over the control with
+      <code>WinSetPointerPos</code> before each message; the control that has the
+      capture counts as having the pointer, which is how <code>MouseHover</code>
+      is checked with the window hidden.</li>
+
+      <li>A check that prints what it got finds the cause sooner: the first
+      failure of <kbd>SWT016_01</kbd> said only that nothing came (the events
+      were waiting for a message), and the next ones printed the handles that
+      showed the native cut to one byte.</li>
+
+      <li>In the VM with the integration of the mouse the pointer that is seen
+      is the one of the host: <code>WinSetPointerPos</code> moves the pointer of
+      PM (<code>WinQueryPointerPos</code> says so) but not the one on the screen,
+      which only changes its shape. The tracker seems not to jump to the
+      rectangle; without the integration (Host+I in VirtualBox) it does.</li>
+    </ul>
+
     <h2>The tools and the virtual machine</h2>
 
     <ul>
@@ -406,6 +455,34 @@ href="eclipseos2-xxe.css"
 
       <li><code>-Dswt.test.time=true</code> in <kbd>SWT012_01</kbd> prints the
       milliseconds of each check, which is what showed the slow one.</li>
+
+      <li><kbd>tools/vm-pull.sh</kbd> copies the trunk of the VM over the
+      repository with <code>rsync --delete</code>. The <kbd>doc</kbd> folder of
+      the VM was old, and a pull reverted the pages and deleted the new ones,
+      also edits that were not committed. Everything is committed before a pull,
+      and the pages are sent to the VM after they are committed
+      (<code>git ls-files doc | xargs tools/vm-push.sh -f</code>; in zsh a list
+      in a variable is not split into words, so <code>$F</code> does not
+      work).</li>
+
+      <li>The <code>sshd</code> of the VM offers only <code>ssh-rsa</code> keys: the
+      key of a new IP is accepted with <code>-o HostKeyAlgorithms=+ssh-rsa -o
+      StrictHostKeyChecking=accept-new</code>. When the VM does not answer at all
+      (<code>vm.sh</code> ends with 255 and nothing printed), <code>nc -z</code>
+      on port 22 of the known addresses tells whether it moved; on 2026-11-10 it
+      went to another network (<code>172.20.10.11</code>).</li>
+
+      <li><code>ant.cmd dll</code> builds the DLL but cannot copy it while a test
+      that uses it is open (<code>SYS0032</code>, and still
+      <code>BUILD SUCCESSFUL</code>): the window of the test has to be closed
+      first. A <code>cd</code> to a folder with spaces inside a
+      <code>vm.sh</code> command fails (<code>SYS0003</code>) and the commands
+      after it run in the wrong folder.</li>
+
+      <li>The Java of the port can be checked on the Mac before sending it:
+      <code>javac --release 8</code> with the sources of <kbd>pm</kbd> and the
+      common ones of Eclipse 2.0.1 in the source path finds the compile errors
+      while the VM is away.</li>
     </ul>
 
     <h2>Things learned about PM</h2>

@@ -87,6 +87,15 @@ variables de entorno `VM_HOST`, `VM_USER`, `VM_PASS`, `VM_SWT_DIR`).
 - `vm-pull.sh` sincroniza con `rsync --delete` y la carpeta `doc/` de la VM es
   antigua: un pull revierte y borra páginas de la documentación, también las
   ediciones sin commitear. Commitear antes, o traer solo la DLL y la `.lib`.
+- `ant.cmd dll` no puede copiar la DLL si una prueba la tiene abierta
+  (`SYS0032`, y aun así `BUILD SUCCESSFUL`): cerrar antes la ventana de la
+  prueba. Un `cd` a una carpeta con espacios dentro de `vm.sh` falla
+  (`SYS0003`) y lo que sigue se ejecuta en otra carpeta.
+- Si la VM no contesta (`vm.sh` termina con 255 sin imprimir nada), mirar con
+  `nc -z -G 2 <ip> 22` en las IPs conocidas si cambió de dirección.
+- Tras commitear páginas de `doc/`, enviarlas a la VM:
+  `git ls-files doc | xargs tools/vm-push.sh -f` (en zsh `$F` no se parte en
+  palabras).
 - Auditorías: `tools/audit-constants.py <dir con los headers>`,
   `tools/audit-jni-fields.py` y `tools/audit-native-types.py` (ver `doc/lessons.html`).
 - Si `vm.sh` no devuelve ni `ver` en 20-30 s, parar: más sesiones sobre un
