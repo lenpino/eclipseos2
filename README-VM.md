@@ -37,7 +37,9 @@ variables de entorno `VM_HOST`, `VM_USER`, `VM_PASS`, `VM_SWT_DIR`).
 - `dir /s` sobre `X:\` recorre todo el disco y tarda minutos: acotar siempre
   la ruta (`X:\apps\dev\...`). Los comandos `date /t` y `time /t` de OS/2
   esperan entrada y dejan `vm.sh` colgado.
-- La IP por defecto de la VM es `192.168.1.98` (antes `.90` y `.92`). Con una IP
+- La IP de la VM cambia (`.90`, `.92`, `.98`, `.85`): se fija con
+  `export VM_HOST=192.168.1.85` sin editar `vmenv.sh`.
+  La IP por defecto de la VM es `192.168.1.98` (antes `.90` y `.92`). Con una IP
   nueva, `vm.sh` se cuelga sin mostrar nada: usa `ssh -q` dentro de `expect`,
   que solo contesta a `password:`, así que la pregunta `yes/no` de la clave del
   host queda sin responder. Se diagnostica con `ssh -vv ...` (acaba en
@@ -81,3 +83,13 @@ variables de entorno `VM_HOST`, `VM_USER`, `VM_PASS`, `VM_SWT_DIR`).
   Ver `doc/lessons.html`.
 - Auditorías: `tools/audit-constants.py <dir con los headers>` y
   `tools/audit-jni-fields.py` (ver `doc/lessons.html`).
+- Si `vm.sh` no devuelve ni `ver` en 20-30 s, parar: más sesiones sobre un
+  `sshd` saturado lo empeoran (pasó dos veces al lanzar bucles con varias
+  pruebas y tiempos largos). Reiniciar `sshd` en la VM. Las baterías se
+  ejecutan una prueba por llamada con `VM_TIMEOUT` de 60-100 s, tras un `ver`.
+- Mientras una prueba abre ventanas reales en la parte automática, se ven
+  destellos. PM no oculta una ventana colocada fuera de la pantalla (la lleva a
+  la esquina superior izquierda); `SWT013_01` usa
+  `-Dswt.dialog.invisible=true` (`DirectoryDialog.open()` no muestra el
+  diálogo pero ejecuta su bucle). `-Dswt.test.time=true` en `SWT012_01`
+  imprime los milisegundos de cada comprobación.

@@ -336,6 +336,72 @@ href="eclipseos2-xxe.css"
       before calling the superclass.</li>
     </ul>
 
+    <h2>The directory dialog (<code>DirectoryDialog</code>, <kbd>SWT013_01</kbd>)</h2>
+
+    <ul>
+      <li>PM has no dialog to choose a directory: <code>WinFileDlg</code> chooses
+      files. The dialog is made of widgets (a modal <code>Shell</code>, a
+      <code>Tree</code>, two buttons), see <a href="swt013.html">step 013</a>.
+      A directory is shown with a placeholder child until it is expanded: it
+      gives the plus sign without reading the disk, and reading a floppy drive
+      would stop the program.</li>
+
+      <li>The tree keeps one item selected, so a missing filter path selects the
+      deepest directory that exists (or the first drive), not nothing.</li>
+
+      <li>Testing a modal dialog: the dialog's loop never returns to the test, so
+      the checks run in an <code>asyncExec</code> task that looks the shell up
+      with <code>display.getShells()</code>, reads its widgets, presses the
+      buttons with <code>notifyListeners(SWT.Selection, ...)</code> and closes the
+      window if something fails. The dialogs of the automatic checks flashed on
+      the screen. A window placed out of the screen is <em>not</em> hidden: PM
+      moves it to the top left corner (tried with -5000, -5000). What worked is
+      not showing it: the system property <code>swt.dialog.invisible=true</code>
+      makes <code>open()</code> skip <code>shell.open()</code> and run the loop
+      all the same; the test sets it only during the automatic part.</li>
+
+      <li>Drawing the pictures of the tree (a folder and a drive) with
+      <code>GC</code> on an <code>Image</code>: the image has to be filled with
+      the background color first (the border of a new image is not the color of
+      the tree), and the images are disposed when the dialog closes. Without any
+      image the container still reserves the 16x16 cell, and the focus rectangle
+      of the selected item shows as an empty frame.</li>
+
+      <li><code>TreeItem</code> has no <code>getItem(int)</code> in this
+      version, only <code>getItems()</code>.</li>
+    </ul>
+
+    <h2>The tools and the virtual machine</h2>
+
+    <ul>
+      <li>One <code>vm.sh</code> that hangs is worth a stop: more sessions on a
+      saturated <code>sshd</code> make it worse. Loops that run several tests with
+      long timeouts left it saturated twice; the batteries are run one test at a
+      time with short timeouts (60 to 100 seconds), after one <code>ver</code> that
+      shows the connection answers.</li>
+
+      <li>A VM with a new IP hangs <code>vm.sh</code> without any message (the
+      <code>yes/no</code> question about the host key is not answered): the key
+      is accepted once by hand with <code>ssh ... test@&lt;ip&gt; ver</code>.
+      <code>VM_HOST</code> can be set in the environment instead of editing
+      <kbd>vmenv.sh</kbd>.</li>
+
+      <li>Measure before guessing. The 5 seconds of adding 300 items to the table
+      were not <code>String.getBytes()</code> (a guess that was checked and
+      dropped) but the invalidation of each record; variants of the code chosen by
+      a system property (<code>-Dswt.table.mode=N</code>) in one run of each told
+      what mattered, and were taken out afterwards. A temporary probe class
+      (<code>ProbeXxx</code>) goes to the VM and is removed from the VM and from
+      the repository when it has answered.</li>
+
+      <li>The automatic part of a test must not show its widgets: the window is
+      opened after <code>initComponents()</code>, and a widget that is asked for
+      sizes while it is hidden has its geometry computed all the same.</li>
+
+      <li><code>-Dswt.test.time=true</code> in <kbd>SWT012_01</kbd> prints the
+      milliseconds of each check, which is what showed the slow one.</li>
+    </ul>
+
     <h2>Things learned about PM</h2>
 
     <ul>
@@ -404,11 +470,12 @@ href="eclipseos2-xxe.css"
 
     <ul>
       <li>The sources of Eclipse 2.0.1 already include emulated, pure Java
-      versions of <code>Table</code> (with <code>TableItem</code> and
-      <code>TableColumn</code>), <code>CoolBar</code> and <code>CoolItem</code>
-      (<kbd>Eclipse SWT/emulated</kbd>), not compiled yet.</li>
+      versions of <code>CoolBar</code> and <code>CoolItem</code>
+      (<kbd>Eclipse SWT/emulated</kbd>), not compiled yet. <code>Table</code>
+      (<a href="swt012.html">step 012</a>) and <code>DirectoryDialog</code>
+      (<a href="swt013.html">step 013</a>) are done.</li>
 
-      <li>Not ported: <code>DirectoryDialog</code>, <code>Tracker</code>,
+      <li>Not ported: <code>Tracker</code>,
       <code>Caret</code>, tool tips (<code>Control</code> only keeps the
       text), AWT, drag and drop, printing, OLE.</li>
     </ul>
