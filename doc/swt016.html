@@ -46,6 +46,11 @@ href="eclipseos2-xxe.css"
       rests 400 ms on it, <code>MouseHover</code>, once until it moves again. The
       control that has the capture keeps the pointer.</li>
 
+      <li>The automatic part shows the window twice and waits about three
+      seconds in all (the 400 ms of the hover, the exits that the timer finds):
+      the pauses and the window that appears and goes at the start are the test,
+      not a defect.</li>
+
       <li>As on Windows the events are posted, and they run after the next
       message is dispatched. The test sends its messages
       (<code>WinSendMsg</code>), so it posts a <code>WM_NULL</code> to have them
@@ -110,7 +115,7 @@ href="eclipseos2-xxe.css"
         <td>Done [lpino]</td>
 
         <td>Checked by <kbd>SWT016_01</kbd>, with the pointer put over the
-        controls. Seen on the screen: <em>to be confirmed</em>.</td>
+        controls. Seen on the screen: it works (2026-11-10).</td>
       </tr>
 
       <tr>
