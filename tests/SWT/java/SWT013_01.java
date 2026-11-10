@@ -242,6 +242,7 @@ public class SWT013_01 extends SWTTestCase {
 				for (int i = 0; i < roots.length; i++) if (same(((File) roots[i].getData()).getPath(), drive.getPath())) item = roots[i];
 				check(item != null, "the drive of the current directory is in the tree: " + drive);
 				check(item.getItemCount() == 1 && item.getItems()[0].getText().equals("..."), "a drive has a placeholder before it is expanded");
+				check(item.getImage() != null, "a drive has a picture");
 				Event event = new Event();
 				event.item = item;
 				tree.notifyListeners(SWT.Expand, event);
@@ -255,6 +256,9 @@ public class SWT013_01 extends SWTTestCase {
 					if (i > 0) sorted &= item.getItems()[i - 1].getText().compareToIgnoreCase(item.getItems()[i].getText()) <= 0;
 				}
 				check(real && sorted, "they are directories and sorted");
+				boolean pictures = true;
+				for (int i = 0; i < item.getItemCount(); i++) pictures &= item.getItems()[i].getImage() != null && item.getItems()[i].getImage() != item.getImage();
+				check(pictures, "each directory has the picture of a folder, not the one of a drive");
 				if (item.getItemCount() > 0) check(item.getItems()[0].getItemCount() == 1, "each one has its own placeholder");
 				tree.notifyListeners(SWT.Expand, event);
 				check(item.getItemCount() == dirs, "expanding again does not repeat them");

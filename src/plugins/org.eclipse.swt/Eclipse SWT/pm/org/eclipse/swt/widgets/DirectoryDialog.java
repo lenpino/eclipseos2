@@ -15,6 +15,9 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.TreeAdapter;
 import org.eclipse.swt.events.TreeEvent;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle;
 
 /**
@@ -41,6 +44,7 @@ public class DirectoryDialog extends Dialog {
 	String message = "";
 	String result;
 	int laidOutWidth = -1, laidOutHeight = -1;
+	Image folderImage, driveImage;
 
 	static final int WIDTH = 340, HEIGHT = 380, MARGIN = 8, BUTTON_WIDTH = 80, BUTTON_HEIGHT = 26, LABEL_HEIGHT = 34;
 
@@ -170,12 +174,15 @@ public String open () {
 	* shown yet, but the container repaints at every change (see Tree.setRedraw()).
 	*/
 	tree.setRedraw (false);
+	folderImage = createImage (display, false);
+	driveImage = createImage (display, true);
 	File [] roots = File.listRoots ();
 	if (roots != null) {
 		for (int i=0; i<roots.length; i++) {
 			TreeItem item = new TreeItem (tree, SWT.NONE);
 			item.setText (roots [i].getPath ());
 			item.setData (roots [i]);
+			item.setImage (driveImage);
 			new TreeItem (item, SWT.NONE).setText (PENDING);
 		}
 	}
@@ -216,8 +223,38 @@ public String open () {
 	while (!shell.isDisposed ()) {
 		if (!display.readAndDispatch ()) display.sleep ();
 	}
+	folderImage.dispose ();
+	driveImage.dispose ();
+	folderImage = driveImage = null;
 	if (result != null) filterPath = result;
 	return result;
+}
+
+/* The little pictures of the tree: a folder, and a drive (a gray box with a green light) */
+Image createImage (Display display, boolean drive) {
+	Image image = new Image (display, 16, 16);
+	GC gc = new GC (image);
+	Color black = display.getSystemColor (SWT.COLOR_BLACK);
+	gc.setBackground (display.getSystemColor (SWT.COLOR_WHITE));
+	gc.fillRectangle (0, 0, 16, 16);
+	gc.setForeground (black);
+	if (drive) {
+		gc.setBackground (display.getSystemColor (SWT.COLOR_GRAY));
+		gc.fillRectangle (1, 4, 14, 8);
+		gc.drawRectangle (1, 4, 13, 7);
+		gc.setBackground (display.getSystemColor (SWT.COLOR_GREEN));
+		gc.fillRectangle (3, 8, 3, 2);
+		gc.setForeground (display.getSystemColor (SWT.COLOR_DARK_GRAY));
+		gc.drawLine (2, 6, 13, 6);
+	} else {
+		gc.setBackground (display.getSystemColor (SWT.COLOR_YELLOW));
+		gc.fillRectangle (1, 3, 6, 3);
+		gc.drawRectangle (1, 3, 5, 2);
+		gc.fillRectangle (1, 5, 14, 8);
+		gc.drawRectangle (1, 5, 13, 7);
+	}
+	gc.dispose ();
+	return image;
 }
 
 void layout (Shell shell, Label label, Tree tree, Button ok, Button cancel) {
@@ -257,6 +294,7 @@ void populate (TreeItem item) {
 		TreeItem child = new TreeItem (item, SWT.NONE);
 		child.setText (names [i]);
 		child.setData (file);
+		child.setImage (folderImage);
 		new TreeItem (child, SWT.NONE).setText (PENDING);
 	}
 }
