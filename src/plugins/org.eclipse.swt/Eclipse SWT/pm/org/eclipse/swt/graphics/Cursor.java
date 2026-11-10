@@ -1,7 +1,7 @@
 package org.eclipse.swt.graphics;
 
 /*
- * Copyright (c) 2000, 2002 IBM Corp.  All rights reserved.
+ * Copyright (c) 2000, 2026 IBM Corp. and the EclipseOS2 Team.  All rights reserved.
  * This file is made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/cpl-v10.html
@@ -47,6 +47,12 @@ public final class Cursor {
 	 * the device where this cursor was created
 	 */
 	Device device;
+
+	/*
+	 * The system pointers (WinQuerySysPointer) belong to PM and
+	 * must not be destroyed; the ones created here must.
+	 */
+	boolean created;
 	
 	/**
 	 * data used to create a HAND cursor.
@@ -129,6 +135,97 @@ public final class Cursor {
 /**
  * Prevents uninitialized instances from being created outside the package.
  */
+/*
+ * The shapes of the pointers that PM does not have, 32x32: '#' is black
+ * and is surrounded by white, so that it is seen on any background.
+ */
+static final String[] CROSS_SHAPE = {
+	"15,0,1,31", "0,15,31,1",
+};
+static final String[] UPARROW_SHAPE = {
+	"15,1,1,1", "14,2,3,1", "13,3,5,1", "12,4,7,1", "11,5,9,1", "10,6,11,1",
+	"9,7,13,1", "8,8,15,1", "13,9,5,21",
+};
+
+/*
+ * Returns the AND and the XOR planes (32x32, 4 bytes a row) of a shape
+ * given as rectangles "x,y,width,height".
+ */
+static byte[][] drawShape(String[] shape) {
+	boolean[][] black = new boolean[32][32];
+	for (int i = 0; i < shape.length; i++) {
+		java.util.StringTokenizer t = new java.util.StringTokenizer(shape[i], ",");
+		int x = Integer.parseInt(t.nextToken()), y = Integer.parseInt(t.nextToken());
+		int w = Integer.parseInt(t.nextToken()), h = Integer.parseInt(t.nextToken());
+		for (int r = y; r < y + h; r++) for (int c = x; c < x + w; c++) black[r][c] = true;
+	}
+	byte[] and = new byte[32 * 4], xor = new byte[32 * 4];
+	for (int r = 0; r < 32; r++) {
+		for (int c = 0; c < 32; c++) {
+			boolean white = false;
+			for (int dr = -1; dr <= 1 && !black[r][c]; dr++) {
+				for (int dc = -1; dc <= 1; dc++) {
+					int rr = r + dr, cc = c + dc;
+					if (rr >= 0 && rr < 32 && cc >= 0 && cc < 32 && black[rr][cc]) white = true;
+				}
+			}
+			int bit = 0x80 >> (c % 8), index = r * 4 + c / 8;
+			/* Transparent: AND 1, XOR 0. Black: 0, 0. White: 0, 1 */
+			if (!black[r][c] && !white) and[index] |= bit;
+			if (white) xor[index] |= bit;
+		}
+	}
+	return new byte[][] {and, xor};
+}
+
+/*
+ * Creates a pointer from the AND and XOR planes of Windows (rows from the
+ * top). PM keeps both in one monochrome bitmap of double height, made
+ * of rows from the bottom: the XOR plane in the lower half and the AND
+ * plane in the upper one. Its hot spot is also counted from the bottom.
+ */
+static int createPointer(int width, int height, byte[] and, int andBpl, byte[] xor, int xorBpl, int hotspotX, int hotspotY) {
+	int bpl = (width + 31) / 32 * 4;
+	byte[] data = new byte[bpl * height * 2];
+	for (int y = 0; y < height; y++) {
+		System.arraycopy(xor, y * xorBpl, data, (height - 1 - y) * bpl, Math.min(bpl, xorBpl));
+		System.arraycopy(and, y * andBpl, data, (2 * height - 1 - y) * bpl, Math.min(bpl, andBpl));
+	}
+	BITMAPINFOHEADER2 hdr = new BITMAPINFOHEADER2();
+	hdr.cx = width;
+	hdr.cy = height * 2;
+	hdr.cPlanes = 1;
+	hdr.cBitCount = 1;
+	hdr.ulCompression = OS.BCA_UNCOMP;
+	hdr.usUnits = OS.BRU_METRIC;
+	hdr.usRecording = OS.BRA_BOTTOMUP;
+	hdr.usRendering = OS.BRH_NOTHALFTONED;
+	hdr.ulColorEncoding = OS.BCE_RGB;
+	int[] bmi = new int[BITMAPINFOHEADER2.int_sizeof + 2];
+	bmi[0] = BITMAPINFOHEADER2.sizeof;
+	bmi[1] = width;
+	bmi[2] = height * 2;
+	bmi[3] = (1 << 16) | 1;
+	bmi[4] = OS.BCA_UNCOMP;
+	bmi[8] = 2;
+	bmi[14] = OS.BCE_RGB;
+	bmi[BITMAPINFOHEADER2.int_sizeof] = 0x000000;
+	bmi[BITMAPINFOHEADER2.int_sizeof + 1] = 0xFFFFFF;
+	int hps = OS.WinGetScreenPS(OS.HWND_DESKTOP);
+	int hbm = OS.GpiCreateBitmap(hps, hdr, OS.CBM_INIT, data, bmi);
+	OS.WinReleasePS(hps);
+	if (hbm == 0) return 0;
+	POINTERINFO info = new POINTERINFO();
+	info.fPointer = 1;
+	info.xHotSpot = hotspotX;
+	info.yHotSpot = height - 1 - hotspotY;
+	info.hbmPointer = hbm;
+	int hptr = OS.WinCreatePointerIndirect(OS.HWND_DESKTOP, info);
+	/* PM keeps a copy of the bitmap */
+	OS.GpiDeleteBitmap(hbm);
+	return hptr;
+}
+
 Cursor() {
 }
 
@@ -177,47 +274,58 @@ public Cursor(Device device, int style) {
 	if (device == null) device = Device.getDevice();
 	if (device == null) SWT.error(SWT.ERROR_NULL_ARGUMENT);
 	this.device = device;
-	int lpCursorName = 0;
+	int id = 0;
 	switch (style) {
-//		case SWT.CURSOR_HAND: 		lpCursorName = OS.SPTR_HAND; break;
-		case SWT.CURSOR_ARROW: 		lpCursorName = OS.SPTR_ARROW; break;
-		case SWT.CURSOR_WAIT: 		lpCursorName = OS.SPTR_WAIT; break;
-//		case SWT.CURSOR_CROSS: 		lpCursorName = OS.IDC_CROSS; break;
-//		case SWT.CURSOR_APPSTARTING: 	lpCursorName = OS.IDC_APPSTARTING; break;
-		case SWT.CURSOR_HELP: 		lpCursorName = OS.SPTR_ICONQUESTION; break;
-		case SWT.CURSOR_SIZEALL: 	lpCursorName = OS.SPTR_SIZE; break;
-		case SWT.CURSOR_SIZENESW: 	lpCursorName = OS.SPTR_SIZENESW; break;
-		case SWT.CURSOR_SIZENS: 	lpCursorName = OS.SPTR_SIZENS; break;
-		case SWT.CURSOR_SIZENWSE: 	lpCursorName = OS.SPTR_SIZENWSE; break;
-		case SWT.CURSOR_SIZEWE: 	lpCursorName = OS.SPTR_SIZEWE; break;
-		case SWT.CURSOR_SIZEN: 		lpCursorName = SPTR_SIZENS; break;
-		case SWT.CURSOR_SIZES: 		lpCursorName = SPTR_SIZENS; break;
-		case SWT.CURSOR_SIZEE: 		lpCursorName = OS.SPTR_SIZEWE; break;
-		case SWT.CURSOR_SIZEW: 		lpCursorName = OS.SPTR_SIZEWE; break;
-		case SWT.CURSOR_SIZENE: 	lpCursorName = OS.SPTR_SIZENESW; break;
-		case SWT.CURSOR_SIZESE: 	lpCursorName = OS.SPTR_SIZENWSE; break;
-		case SWT.CURSOR_SIZESW: 	lpCursorName = OS.SPTR_SIZENESW; break;
-		case SWT.CURSOR_SIZENW: 	lpCursorName = OS.SPTR_SIZENWSE; break;
-//		case SWT.CURSOR_UPARROW: 	lpCursorName = OS.IDC_UPARROW; break;
-		case SWT.CURSOR_IBEAM: 		lpCursorName = SPTR_TEXT; break;
-		case SWT.CURSOR_NO: 		lpCursorName = SPTR_ILLEGAL; break;
+		case SWT.CURSOR_HAND: 		break;
+		case SWT.CURSOR_ARROW: 		id = OS.SPTR_ARROW; break;
+		case SWT.CURSOR_WAIT: 		id = OS.SPTR_WAIT; break;
+		case SWT.CURSOR_CROSS: 		break;
+		case SWT.CURSOR_APPSTARTING: 	id = OS.SPTR_WAIT; break;
+		case SWT.CURSOR_HELP: 		id = OS.SPTR_ARROW; break;
+		case SWT.CURSOR_SIZEALL: 	id = OS.SPTR_MOVE; break;
+		case SWT.CURSOR_SIZENESW: 	id = OS.SPTR_SIZENESW; break;
+		case SWT.CURSOR_SIZENS: 	id = OS.SPTR_SIZENS; break;
+		case SWT.CURSOR_SIZENWSE: 	id = OS.SPTR_SIZENWSE; break;
+		case SWT.CURSOR_SIZEWE: 	id = OS.SPTR_SIZEWE; break;
+		case SWT.CURSOR_SIZEN: 		id = OS.SPTR_SIZENS; break;
+		case SWT.CURSOR_SIZES: 		id = OS.SPTR_SIZENS; break;
+		case SWT.CURSOR_SIZEE: 		id = OS.SPTR_SIZEWE; break;
+		case SWT.CURSOR_SIZEW: 		id = OS.SPTR_SIZEWE; break;
+		case SWT.CURSOR_SIZENE: 	id = OS.SPTR_SIZENESW; break;
+		case SWT.CURSOR_SIZESE: 	id = OS.SPTR_SIZENWSE; break;
+		case SWT.CURSOR_SIZESW: 	id = OS.SPTR_SIZENESW; break;
+		case SWT.CURSOR_SIZENW: 	id = OS.SPTR_SIZENWSE; break;
+		case SWT.CURSOR_UPARROW: 	break;
+		case SWT.CURSOR_IBEAM: 		id = OS.SPTR_TEXT; break;
+		case SWT.CURSOR_NO: 		id = OS.SPTR_ILLEGAL; break;
 		default:
 			SWT.error(SWT.ERROR_INVALID_ARGUMENT);
 	}
-	handle = OS.LoadCursor(0, lpCursorName);
-	/*
-	* IDC_HAND is supported only on Windows 2000 and Windows 98.
-	* Create a hand cursor if running in other Windows platforms.
-	*/
-	if (handle == 0 && style == SWT.CURSOR_HAND) {
-		int width = OS.GetSystemMetrics(OS.SM_CXCURSOR);
-		int height = OS.GetSystemMetrics(OS.SM_CYCURSOR);
-		if (width == 32 && height == 32) {
-			int hInst = OS.GetModuleHandle(null);
-			if (OS.IsWinCE) SWT.error(SWT.ERROR_NOT_IMPLEMENTED);
-			handle = OS.CreateCursor(hInst, 5, 0, 32, 32, HAND_SOURCE, HAND_MASK);
-
+	if (id != 0) {
+		handle = OS.WinQuerySysPointer(OS.HWND_DESKTOP, id, false);
+	} else {
+		/*
+		* PM has no hand, cross or up arrow pointer: they are made
+		* from the planes of Windows (see createPointer()).
+		*/
+		byte[][] planes;
+		int hotspotX, hotspotY;
+		switch (style) {
+			case SWT.CURSOR_HAND:
+				planes = new byte[][] {HAND_SOURCE, HAND_MASK};
+				hotspotX = 5;  hotspotY = 0;
+				break;
+			case SWT.CURSOR_CROSS:
+				planes = drawShape(CROSS_SHAPE);
+				hotspotX = 15;  hotspotY = 15;
+				break;
+			default:
+				planes = drawShape(UPARROW_SHAPE);
+				hotspotX = 15;  hotspotY = 1;
+				break;
 		}
+		handle = createPointer(32, 32, planes[0], 4, planes[1], 4, hotspotX, hotspotY);
+		created = true;
 	}
 	if (handle == 0) SWT.error(SWT.ERROR_NO_HANDLES);
 	if (device.tracking) device.new_Object(this);
@@ -279,10 +387,10 @@ public Cursor(Device device, ImageData source, ImageData mask, int hotspotX, int
 		SWT.error(SWT.ERROR_INVALID_ARGUMENT);
 	}
 	/* Create the cursor */
-	int hInst = OS.GetModuleHandle(null);
-	if (OS.IsWinCE) SWT.error (SWT.ERROR_NOT_IMPLEMENTED);
-	handle = OS.CreateCursor(hInst, hotspotX, hotspotY, source.width, source.height, source.data, mask.data);
+	handle = createPointer(source.width, source.height, source.data, source.bytesPerLine,
+		mask.data, mask.bytesPerLine, hotspotX, hotspotY);
 	if (handle == 0) SWT.error(SWT.ERROR_NO_HANDLES);
+	created = true;
 	if (device.tracking) device.new_Object(this);
 }
 
@@ -293,29 +401,13 @@ public Cursor(Device device, ImageData source, ImageData mask, int hotspotX, int
  */
 public void dispose () {
 	if (handle == 0) return;
-	
-	/*
-	* It is an error in Windows to destroy the current
-	* cursor.  Check that the cursor that is about to
-	* be destroyed is the current cursor.  If so, set
-	* the current cursor to be IDC_ARROW.  Note that
-	* Windows shares predefined cursors so the call to
-	* LoadCursor() does not leak.
-	*/
-	// TEMPORARY CODE
-//	if (OS.GetCursor() == handle) {
-//		OS.SetCursor(OS.LoadCursor(0, OS.IDC_ARROW));
-//	}
-	
-	/*
-	 * The MSDN states that one should not destroy a shared
-	 * cursor, that is, one obtained from LoadCursor.
-	 * However, it does not appear to do any harm, so rather
-	 * than keep track of how a cursor was created, we just
-	 * destroy them all. If this causes problems in the future,
-	 * put the flag back in.
-	 */
-	if (!OS.IsWinCE) OS.DestroyCursor(handle);
+	if (created) {
+		/* Do not leave PM showing a pointer that does not exist any more */
+		if (OS.WinQueryPointer(OS.HWND_DESKTOP) == handle) {
+			OS.WinSetPointer(OS.HWND_DESKTOP, OS.WinQuerySysPointer(OS.HWND_DESKTOP, OS.SPTR_ARROW, false));
+		}
+		OS.WinDestroyPointer(handle);
+	}
 	handle = 0;
 	if (device.tracking) device.dispose_Object(this);
 	device = null;
@@ -392,7 +484,7 @@ public String toString () {
  * 
  * @private
  */
-public static Cursor win32_new(Device device, int handle) {
+public static Cursor pm_new(Device device, int handle) {
 	if (device == null) device = Device.getDevice();
 	Cursor cursor = new Cursor();
 	cursor.handle = handle;

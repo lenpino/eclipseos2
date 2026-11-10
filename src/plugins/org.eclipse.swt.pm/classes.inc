@@ -15,6 +15,7 @@ org\eclipse\swt\graphics\GCData.java
 org\eclipse\swt\graphics\Color.java
 org\eclipse\swt\graphics\Region.java
 org\eclipse\swt\graphics\Image.java
+org\eclipse\swt\graphics\Cursor.java
 org\eclipse\swt\graphics\Font.java
 org\eclipse\swt\graphics\FontData.java
 org\eclipse\swt\graphics\FontMetrics.java

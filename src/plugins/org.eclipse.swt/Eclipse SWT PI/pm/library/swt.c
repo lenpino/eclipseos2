@@ -1471,6 +1471,14 @@ JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinSetPointer
     return (jboolean)WinSetPointer((HWND)hwndDeskTop, (HPOINTER)hptrNew);
 }
 
+JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_WinQueryPointer
+        (JNIEnv *env, jclass that, jint hwndDeskTop)
+{
+    DEBUG_CALL("WinQueryPointer\n")
+
+    return (jint)WinQueryPointer((HWND)hwndDeskTop);
+}
+
 JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinQueryPointerInfo
         (JNIEnv *env, jclass that, jint hptr, jobject pptri)
 {

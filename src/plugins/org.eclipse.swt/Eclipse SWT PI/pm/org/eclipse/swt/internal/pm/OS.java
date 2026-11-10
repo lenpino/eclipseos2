@@ -2789,6 +2789,7 @@ public static final native int WinCreatePointerIndirect (int hwndDesktop,
 public static final native boolean WinDestroyPointer (int hptrPointer);
 public static final native int WinQuerySysPointer (int hwndDeskTop, int iptr, boolean fCopy);
 public static final native boolean WinSetPointer (int hwndDeskTop, int hptrNew);
+public static final native int WinQueryPointer (int hwndDeskTop);
 public static final native boolean WinQueryPointerInfo (int hptr,
     POINTERINFO pptriPointerInfo);
 public static final native boolean WinDrawPointer (int hps, int lx, int ly,

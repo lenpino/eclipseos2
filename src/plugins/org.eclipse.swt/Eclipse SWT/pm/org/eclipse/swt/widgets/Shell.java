@@ -496,10 +496,9 @@ public void dispose () {
 //	return hBrush;
 //}
 
-//@@TODO(dmik)
-//int findCursor () {
-//	return hCursor;
-//}
+int findCursor () {
+	return hCursor;
+}
 
 /**
  * Moves the receiver to the top of the drawing order for

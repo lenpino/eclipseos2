@@ -560,11 +560,10 @@ void drawBackground (int hps, RECTL rcl) {
 //      return parent.findBrush (pixel);
 //}
 
-//@@TODO(dmik)
-//int findCursor () {
-//      if (hCursor != 0) return hCursor;
-//      return parent.findCursor ();
-//}
+int findCursor () {
+    if (hCursor != 0) return hCursor;
+    return parent.findCursor ();
+}
 
 char findMnemonic (String string) {
     int index = 0;
@@ -2037,26 +2036,40 @@ public void setCapture (boolean capture) {
  *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
  * </ul>
  */
-/* public void setCursor (Cursor cursor) {
+public void setCursor (Cursor cursor) {
     checkWidget ();
     hCursor = 0;
     if (cursor != null) {
         if (cursor.isDisposed()) SWT.error(SWT.ERROR_INVALID_ARGUMENT);
         hCursor = cursor.handle;
     }
- *///    int hwndCursor = OS.GetCapture ();
-//    if (hwndCursor == 0) {
-//        POINT pt = new POINT ();
-//        if (!OS.GetCursorPos (pt)) return;
-//        int hwnd = hwndCursor = OS.WindowFromPoint (pt);
-//        while (hwnd != 0 && hwnd != handle) {
-//            hwnd = OS.GetParent (hwnd);
-//        }
-//        if (hwnd == 0) return;
-//    }
-//    int lParam = OS.HTCLIENT | (OS.WM_MOUSEMOVE << 16);
-//    OS.SendMessage (hwndCursor, OS.WM_SETCURSOR, hwndCursor, lParam);
-//}
+    /*
+    * Windows sends WM_SETCURSOR to the window under the pointer when
+    * it is the receiver or one of its children. In PM the pointer
+    * is set here, with the cursor of the control under it.
+    */
+    int hwndCursor = OS.WinQueryCapture (OS.HWND_DESKTOP);
+    if (hwndCursor == 0) {
+        int[] pt = new int [] {0, 0};
+        if (!OS.WinQueryPointerPos (OS.HWND_DESKTOP, pt)) return;
+        POINTL ptl = new POINTL ();
+        ptl.x = pt [0];  ptl.y = pt [1];
+        hwndCursor = OS.WinWindowFromPoint (OS.HWND_DESKTOP, ptl, true);
+    }
+    int hwnd = hwndCursor;
+    while (hwnd != 0 && hwnd != handle) {
+        hwnd = OS.WinQueryWindow (hwnd, OS.QW_PARENT);
+    }
+    if (hwnd == 0) return;
+    Control control = null;
+    for (hwnd = hwndCursor; control == null && hwnd != 0; hwnd = OS.WinQueryWindow (hwnd, OS.QW_PARENT)) {
+        control = WidgetTable.get (hwnd);
+    }
+    if (control == null) return;
+    int hptr = control.findCursor ();
+    if (hptr == 0) hptr = OS.WinQuerySysPointer (OS.HWND_DESKTOP, OS.SPTR_ARROW, false);
+    OS.WinSetPointer (OS.HWND_DESKTOP, hptr);
+}
 
 void setDefaultFont () {
     Display display = getDisplay ();
@@ -2981,6 +2994,7 @@ int windowProc (int msg, int mp1, int mp2) {
 //        case OS.WM_MOUSEHOVER: result = WM_MOUSEHOVER (wParam, lParam); break;
 //        case OS.WM_MOUSELEAVE: result = WM_MOUSELEAVE (wParam, lParam); break;
 //        case OS.WM_MOUSEMOVE: result = WM_MOUSEMOVE (mp1, mp2); break;
+        case OS.WM_MOUSEMOVE: result = wmPointer (mp1, mp2); break;
 //        case OS.WM_MOUSEWHEEL: result = WM_MOUSEWHEEL (wParam, lParam); break;
 //        case OS.WM_NCACTIVATE: result = WM_NCACTIVATE (wParam, lParam); break;
 //        case OS.WM_NCCALCSIZE: result = WM_NCCALCSIZE (wParam, lParam); break;
@@ -3633,6 +3647,20 @@ MRESULT WM_MOUSEMOVE (int mp1, int mp2) {
 //LRESULT WM_NCCALCSIZE (int wParam, int lParam) {
 //      return null;
 //}
+
+/*
+ * The default processing of WM_MOUSEMOVE sets the pointer of the window
+ * (the arrow, or the one of a native control) and does the rest of the
+ * work of the control, like selecting text. When the control or one of
+ * its parents has a cursor, it is set after that processing.
+ */
+MRESULT wmPointer (int mp1, int mp2) {
+    int hptr = findCursor ();
+    if (hptr == 0) return null;
+    int code = callWindowProc (OS.WM_MOUSEMOVE, mp1, mp2);
+    OS.WinSetPointer (OS.HWND_DESKTOP, hptr);
+    return new MRESULT (code);
+}
 
 MRESULT WM_HITTEST (int mp1, int mp2) {
       if (!isActive ()) return new MRESULT (OS.HT_TRANSPARENT );

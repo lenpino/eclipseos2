@@ -36,7 +36,7 @@ public class Tracker extends Widget {
 	Display display;
 	boolean tracking, stippled;
 	Rectangle [] rectangles, proportions;
-	int resizePointer, cursorOrientation = SWT.NONE;
+	int resizePointer, clientCursor, cursorOrientation = SWT.NONE;
 	boolean inEvent = false;
 
 	/*
@@ -200,11 +200,13 @@ Point adjustResizeCursor () {
 	Point pt = setPointerPos (newX, newY);
 
 	/*
-	* Choose the pointer of the edge or corner that is being resized.
-	* The system pointers belong to PM: they are not copied, so there
-	* is nothing to destroy. The pointer stays while the tracker does
-	* not dispatch the mouse messages (see open()).
+	* If the client has not provided a custom cursor then choose the
+	* pointer of the edge or corner that is being resized. The system
+	* pointers belong to PM: they are not copied, so there is nothing
+	* to destroy. The pointer stays while the tracker does not dispatch
+	* the mouse messages (see open()).
 	*/
+	if (clientCursor != 0) return pt;
 	int id;
 	switch (cursorOrientation) {
 		case SWT.UP:
@@ -437,6 +439,7 @@ public boolean open () {
 	boolean mouseDown = (OS.WinGetKeyState (OS.HWND_DESKTOP, OS.VK_BUTTON1) & 0x8000) != 0;
 
 	drawRectangles (rectangles);
+	if (clientCursor != 0) OS.WinSetPointer (OS.HWND_DESKTOP, clientCursor);
 	Point cursorPos;
 	if (mouseDown) {
 		cursorPos = display.getCursorLocation ();
@@ -656,10 +659,25 @@ void resizeRectangles (int xChange, int yChange) {
 	rectangles = newRects;
 }
 
-/*
- * setCursor (Cursor) is not here: the Cursor class is not ported yet
- * (difference 016). The resize pointers are set by adjustResizeCursor().
+/**
+ * Sets the <code>Cursor</code> of the Tracker.  If this cursor is <code>null</code>
+ * then the cursor reverts to the default.
+ *
+ * @param newCursor the new <code>Cursor</code> to display
+ * 
+ * @exception SWTException <ul>
+ *    <li>ERROR_WIDGET_DISPOSED - if the receiver has been disposed</li>
+ *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
+ * </ul>
  */
+public void setCursor(Cursor newCursor) {
+	checkWidget();
+	clientCursor = 0;
+	if (newCursor != null) {
+		clientCursor = newCursor.handle;
+		if (inEvent) OS.WinSetPointer (OS.HWND_DESKTOP, clientCursor);
+	}
+}
 
 /**
  * Specifies the rectangles that should be drawn, expressed relative to the parent
