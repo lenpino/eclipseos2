@@ -2822,7 +2822,7 @@ public static final native int WinQuerySystemAtomTable();
 public static final native int WinFindAtom(int hatomtblAtomTbl, PSZ pszAtomName);
 public static final native int WinQueryClassName(int hwnd, int lLength, PSZ PCHBuffer);
 public static final native boolean WinQueryCursorInfo(int hwndDeskTop, CURSORINFO pcsriCursorInfo);
-public static final native int WinWindowFromPoint(int hwndParent, POINTL pptlPoint, boolean fEnumChildren);
+public static final native int WinWindowFromPoint(int hwndParent, int[] pptlPoint, boolean fEnumChildren);
 public static final native boolean WinSetPointerPos(int hwndDeskTop, int lx, int ly);
 public static final native boolean WinSetCapture(int hwndDeskTop, int hwnd);
 public static final native int WinQueryCapture(int hwndDeskTop);

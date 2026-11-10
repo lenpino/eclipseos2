@@ -1756,7 +1756,7 @@ JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_WinQueryClassName
 
     return rc;
 }
-JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_WinQueryCursorInfo
+JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinQueryCursorInfo
         (JNIEnv *env, jclass that, jint hwndDeskTop, jobject pcsriCursorInfo)
 {
     CURSORINFO c_pcsriCursorInfo, *c_ppcsriCursorInfo = NULL;
@@ -1771,18 +1771,19 @@ JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_WinQueryCursorInfo
 
     return rc;
 }
-JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinWindowFromPoint
-        (JNIEnv *env, jclass that, jint hwndParent, jobject pptlPoint, jboolean fEnumChildren)
+JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_WinWindowFromPoint
+        (JNIEnv *env, jclass that, jint hwndParent, jintArray pptlPoint, jboolean fEnumChildren)
 {
-    POINTL c_pptlPoint, *c_ppptlPoint = NULL;
+    jint *c_pptlPoint = NULL;
     jint rc;
+
     DEBUG_CALL("WinWindowFromPoint\n")
 
-    if (pptlPoint) c_ppptlPoint = getPOINTLFields(env, pptlPoint, &c_pptlPoint, &PGLOB(POINTLFc));
+    if (pptlPoint) c_pptlPoint = (*env)->GetIntArrayElements(env, pptlPoint, NULL);
 
-    rc = (jint)WinWindowFromPoint((HWND)hwndParent, c_ppptlPoint, fEnumChildren);
+    rc = (jint)WinWindowFromPoint((HWND)hwndParent, (PPOINTL)c_pptlPoint, (BOOL)fEnumChildren);
 
-    if (pptlPoint) setPOINTLFields(env, pptlPoint, c_ppptlPoint, &PGLOB(POINTLFc));
+    if (pptlPoint) (*env)->ReleaseIntArrayElements(env, pptlPoint, c_pptlPoint, 0);
 
     return rc;
 
@@ -1885,7 +1886,7 @@ JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinStopTimer
     return (jboolean)WinStopTimer((HAB)hab, (HWND)hwnd, idTimer);
 }
 
-JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinBeginEnumWindows
+JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_WinBeginEnumWindows
         (JNIEnv *env, jclass that, jint hwnd)
 {
     DEBUG_CALL("WinBeginEnumWindows\n")
@@ -1899,7 +1900,7 @@ JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinEndEnumWindows
 
     return (jboolean)WinEndEnumWindows((HENUM)henum);
 }
-JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinGetNextWindow
+JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_WinGetNextWindow
         (JNIEnv *env, jclass that, jint henum)
 {
     DEBUG_CALL("WinGetNextWindow\n")

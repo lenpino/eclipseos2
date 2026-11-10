@@ -135,6 +135,22 @@ public class Display extends Device {
     boolean lastVirtual;
     boolean lockActiveWindow;
     int lastKey, lastAscii, lastMouse;
+
+    /*
+    * MouseEnter, MouseExit and MouseHover. Windows has TrackMouseEvent;
+    * PM has nothing like it, so the display keeps the control that got
+    * the last WM_MOUSEMOVE and a timer looks whether the pointer left it
+    * or rests on it (see mouseMoved() and checkMouse()).
+    */
+    Control mouseControl;
+    long mouseTime;
+    boolean mouseHovered, mouseChecking;
+    static final int HOVER_TIME = 400, MOUSE_CHECK_TIME = 100;
+    Runnable mouseCheck = new Runnable () {
+        public void run () {
+            checkMouse ();
+        }
+    };
     byte [] keyboard = new byte [256];
     boolean accelKeyHit, mnemonicKeyHit;
 
@@ -676,12 +692,10 @@ public Rectangle getClientArea () {
 
 public Control getCursorControl () {
     checkDevice ();
-    POINTL pt = new POINTL ();
-    CURSORINFO cursor = new CURSORINFO();
-    if (!OS.WinQueryCursorInfo(OS.HWND_DESKTOP, cursor)) return null;
-    pt.x = cursor.x;
-    pt.y = cursor.y;
-    return findControl (OS.WinWindowFromPoint (OS.HWND_DESKTOP, pt, true));
+    /* WinQueryCursorInfo() is the text cursor: see getCursorLocation() */
+    int[] pt = new int [] {0, 0};
+    if (!OS.WinQueryPointerPos (OS.HWND_DESKTOP, pt)) return null;
+    return controlAt (pt [0], pt [1]);
 }
 
 /**
@@ -1887,6 +1901,72 @@ public void timerExec (int milliseconds, Runnable runnable) {
     if (newTimerID != 0) {
         timerList [index] = runnable;
         timerIds [index] = newTimerID;
+    }
+}
+
+/*
+ * Called by the control that gets a WM_MOUSEMOVE, with the position in
+ * its coordinates. The control that had the pointer before gets
+ * MouseExit and this one MouseEnter, as on Windows when the pointer goes
+ * from a window to another, also from a parent to its child.
+ */
+void mouseMoved (Control control, int x, int y) {
+    if (control != mouseControl) {
+        Control old = mouseControl;
+        mouseControl = control;
+        if (old != null && !old.isDisposed ()) old.postMouseEvent (SWT.MouseExit);
+        if (control.isDisposed ()) return;
+        Event event = new Event ();
+        event.x = x;  event.y = y;
+        control.postEvent (SWT.MouseEnter, event);
+    }
+    mouseTime = System.currentTimeMillis ();
+    mouseHovered = false;
+    if (!mouseChecking && (control.hooks (SWT.MouseExit) || control.hooks (SWT.MouseHover))) {
+        mouseChecking = true;
+        timerExec (MOUSE_CHECK_TIME, mouseCheck);
+    }
+}
+
+/*
+ * The control that is under a point of the screen (PM coordinates): the
+ * window there, or the first of its parents that is a control.
+ */
+Control controlAt (int x, int y) {
+    return findControl (OS.WinWindowFromPoint (OS.HWND_DESKTOP, new int [] {x, y}, true));
+}
+
+/*
+ * Runs while a control that hooks MouseExit or MouseHover has the
+ * pointer. When the pointer is not over the control any more (it went to
+ * a window of another program, or to the desktop) the control gets
+ * MouseExit; a control that has the capture keeps the pointer. When the
+ * pointer rests HOVER_TIME on it, the control gets MouseHover, once until
+ * the pointer moves again.
+ */
+void checkMouse () {
+    mouseChecking = false;
+    Control control = mouseControl;
+    if (control == null) return;
+    if (control.isDisposed ()) {
+        mouseControl = null;
+        return;
+    }
+    int[] pt = new int [] {0, 0};
+    OS.WinQueryPointerPos (OS.HWND_DESKTOP, pt);
+    boolean inside = OS.WinQueryCapture (OS.HWND_DESKTOP) == control.handle || controlAt (pt [0], pt [1]) == control;
+    if (!inside) {
+        mouseControl = null;
+        control.postMouseEvent (SWT.MouseExit);
+        return;
+    }
+    if (!mouseHovered && System.currentTimeMillis () - mouseTime >= HOVER_TIME) {
+        mouseHovered = true;
+        control.postMouseEvent (SWT.MouseHover);
+    }
+    if (control.hooks (SWT.MouseExit) || control.hooks (SWT.MouseHover)) {
+        mouseChecking = true;
+        timerExec (MOUSE_CHECK_TIME, mouseCheck);
     }
 }
 

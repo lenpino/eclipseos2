@@ -1236,7 +1236,8 @@ boolean mnemonicMatch (char key) {
 
 public void moveAbove (Control control) {
     checkWidget ();
-    int hwndAbove = getPreviousSibling(control);
+    /* Without a control the receiver goes to the top, as on Windows */
+    int hwndAbove = control == null ? OS.HWND_TOP : getPreviousSibling(control);
     if (hwndAbove == 0) return;
     OS.WinSetWindowPos (handle, hwndAbove, 0, 0, 0, 0, OS.SWP_ZORDER);
 }
@@ -1252,6 +1253,7 @@ int getPreviousSibling(Control control){
 		int henum = OS.WinBeginEnumWindows(parent.handle);
 		while((next = OS.WinGetNextWindow(henum)) != OS.NULLHANDLE){
 			if(next == control.handle){
+				OS.WinEndEnumWindows(henum);
 				if(previous == 0) return OS.HWND_TOP;
 				return previous;
 			}
@@ -1752,9 +1754,8 @@ boolean sendMouseEvent (int type, int button, int msg, int mp1, int mp2) {
     Event event = new Event ();
     event.button = button;
     event.x = (short) (mp1 & 0xFFFF);
-    SWP swp = new SWP ();
-    OS.WinQueryWindowPos (handle, swp);    
-    event.y = swp.cy - (short) (mp1 >> 16);
+    /* The top row of the window is y = cy - 1 in PM and 0 in SWT */
+    event.y = getHeight () - 1 - (short) (mp1 >> 16);
     int keyState = mp2 >> 16;
     //@@TODO(lpino): Remove debug
 //    System.out.println("Control::sendMouseEvent -> X= " + event.x + " Y= " + event.y);
@@ -1765,6 +1766,12 @@ boolean sendMouseEvent (int type, int button, int msg, int mp1, int mp2) {
     if (button == 1) event.stateMask |= SWT.BUTTON1;
     if (button == 3) event.stateMask |= SWT.BUTTON2;
     if (button == 2) event.stateMask |= SWT.BUTTON3;
+    /* The mouse messages of PM do not say which buttons are down (Windows does, with MK_*) */
+    if (type == SWT.MouseMove) {
+        if ((OS.WinGetKeyState (OS.HWND_DESKTOP, OS.VK_BUTTON1) & 0x8000) != 0) event.stateMask |= SWT.BUTTON1;
+        if ((OS.WinGetKeyState (OS.HWND_DESKTOP, OS.VK_BUTTON3) & 0x8000) != 0) event.stateMask |= SWT.BUTTON2;
+        if ((OS.WinGetKeyState (OS.HWND_DESKTOP, OS.VK_BUTTON2) & 0x8000) != 0) event.stateMask |= SWT.BUTTON3;
+    }
     switch (type) {
         case SWT.MouseDown:
         case SWT.MouseDoubleClick:
@@ -2052,9 +2059,7 @@ public void setCursor (Cursor cursor) {
     if (hwndCursor == 0) {
         int[] pt = new int [] {0, 0};
         if (!OS.WinQueryPointerPos (OS.HWND_DESKTOP, pt)) return;
-        POINTL ptl = new POINTL ();
-        ptl.x = pt [0];  ptl.y = pt [1];
-        hwndCursor = OS.WinWindowFromPoint (OS.HWND_DESKTOP, ptl, true);
+        hwndCursor = OS.WinWindowFromPoint (OS.HWND_DESKTOP, pt, true);
     }
     int hwnd = hwndCursor;
     while (hwnd != 0 && hwnd != handle) {
@@ -2993,8 +2998,7 @@ int windowProc (int msg, int mp1, int mp2) {
 //        case OS.WM_MOUSEACTIVATE: result = WM_MOUSEACTIVATE (wParam, lParam); break;
 //        case OS.WM_MOUSEHOVER: result = WM_MOUSEHOVER (wParam, lParam); break;
 //        case OS.WM_MOUSELEAVE: result = WM_MOUSELEAVE (wParam, lParam); break;
-//        case OS.WM_MOUSEMOVE: result = WM_MOUSEMOVE (mp1, mp2); break;
-        case OS.WM_MOUSEMOVE: result = wmPointer (mp1, mp2); break;
+        case OS.WM_MOUSEMOVE: result = WM_MOUSEMOVE (mp1, mp2); break;
 //        case OS.WM_MOUSEWHEEL: result = WM_MOUSEWHEEL (wParam, lParam); break;
 //        case OS.WM_NCACTIVATE: result = WM_NCACTIVATE (wParam, lParam); break;
 //        case OS.WM_NCCALCSIZE: result = WM_NCCALCSIZE (wParam, lParam); break;
@@ -3623,16 +3627,38 @@ MRESULT WM_MENUSELECT (int mp1, int mp2) {
 //}
 
 MRESULT WM_MOUSEMOVE (int mp1, int mp2) {
-      Display display = getDisplay ();
-      int[] pnt = new int [] {0, 0};
-      OS.WinQueryMsgPos (0, pnt);
-      //@@TODO(dmik): Mapping coordinates to use lastMouse variable (x low order, y high order like windows)
-      int pos = (pnt[1] << 16) + pnt[0];
-      if (pos != display.lastMouse) {
-              display.lastMouse = pos;
-              sendMouseEvent (SWT.MouseMove, 0, OS.WM_MOUSEMOVE, mp1, mp2);
-      }
-      return MRESULT.FALSE;
+    Display display = getDisplay ();
+    int x = (short) (mp1 & 0xFFFF), y = (short) (mp1 >> 16);
+    display.mouseMoved (this, x, getHeight () - 1 - y);
+    if (isDisposed ()) return MRESULT.TRUE;
+    /*
+    * PM sends WM_MOUSEMOVE also when the pointer does not move (when a
+    * window changes under it). The position is taken from the message,
+    * in screen coordinates, as Windows does with GetMessagePos().
+    */
+    int[] pnt = new int [] {x, y};
+    OS.WinMapWindowPoints (handle, OS.HWND_DESKTOP, pnt, 1);
+    int pos = (pnt [1] << 16) | (pnt [0] & 0xFFFF);
+    if (pos != display.lastMouse) {
+        display.lastMouse = pos;
+        sendMouseEvent (SWT.MouseMove, 0, OS.WM_MOUSEMOVE, mp1, mp2);
+        if (isDisposed ()) return MRESULT.TRUE;
+    }
+    return wmPointer (mp1, mp2);
+}
+
+/*
+ * MouseExit and MouseHover come from a timer of the display and not from
+ * a message: the position is the one of the pointer.
+ */
+void postMouseEvent (int type) {
+    int[] pnt = new int [] {0, 0};
+    OS.WinQueryPointerPos (OS.HWND_DESKTOP, pnt);
+    OS.WinMapWindowPoints (OS.HWND_DESKTOP, handle, pnt, 1);
+    Event event = new Event ();
+    event.x = pnt [0];
+    event.y = getHeight () - 1 - pnt [1];
+    postEvent (type, event);
 }
 
 //LRESULT WM_MOUSEWHEEL (int wParam, int lParam) {
