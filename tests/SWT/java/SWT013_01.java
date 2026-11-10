@@ -45,7 +45,7 @@ public class SWT013_01 extends SWTTestCase {
 	}
 
 	int checks;
-	/* Parent of the dialogs of the automatic checks: out of the screen, so they are not seen */
+	/* Parent of the dialogs of the automatic checks */
 	Shell owner;
 	String failure;
 
@@ -63,7 +63,7 @@ public class SWT013_01 extends SWTTestCase {
 	Shell dialogShell(String title) {
 		Shell[] shells = display.getShells();
 		for (int i = 0; i < shells.length; i++) {
-			if (shells[i] != shell && shells[i] != owner && title.equals(shells[i].getText())) return shells[i];
+			if (shells[i] != shell && title.equals(shells[i].getText())) return shells[i];
 		}
 		return null;
 	}
@@ -280,9 +280,9 @@ public class SWT013_01 extends SWTTestCase {
 		/* The window is not shown during the automatic checks (see SWT012_01) */
 		shell.setSize(420, 150);
 		sayObjective("Automatic checks");
-		owner = new Shell(display, SWT.NO_TRIM);
-		owner.setBounds(-5000, -5000, 100, 100);
-		owner.open();
+		/* The dialogs are driven without being shown: PM keeps a window that is out of the screen at its corner */
+		owner = shell;
+		System.setProperty("swt.dialog.invisible", "true");
 		try {
 			checkApi();
 			checkOpenAndAccept();
@@ -290,7 +290,7 @@ public class SWT013_01 extends SWTTestCase {
 			checkMissingPath();
 			checkExpand();
 		} finally {
-			owner.dispose();
+			System.setProperty("swt.dialog.invisible", "false");
 		}
 		say("\n" + checks + " checks passed.\n");
 	}

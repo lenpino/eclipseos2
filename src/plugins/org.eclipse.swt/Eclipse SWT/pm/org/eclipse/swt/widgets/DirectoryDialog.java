@@ -208,7 +208,11 @@ public String open () {
 	Rectangle size = shell.getBounds ();
 	shell.setLocation (area.x + Math.max (0, (area.width - size.width) / 2), area.y + Math.max (0, (area.height - size.height) / 2));
 
-	shell.open ();
+	/*
+	* The tests of the dialog drive it without showing it (PM keeps a window with
+	* coordinates out of the screen at the corner, and every dialog was seen flashing).
+	*/
+	if (!Boolean.getBoolean ("swt.dialog.invisible")) shell.open ();
 	while (!shell.isDisposed ()) {
 		if (!display.readAndDispatch ()) display.sleep ();
 	}
