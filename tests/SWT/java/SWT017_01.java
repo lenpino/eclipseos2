@@ -198,7 +198,12 @@ public class SWT017_01 extends SWTTestCase {
 		sayObjective("Interactive: type in the white box, use the arrows and Backspace, go to the text with the mouse and come back");
 		final StringBuffer text = new StringBuffer("Text: ");
 		final int[] position = new int[] {text.length()};
-		final Canvas box = new Canvas(shell, SWT.BORDER);
+		/*
+		 * The box paints its own background (NO_BACKGROUND) and each key repaints
+		 * only from the changed letter on: repainting all of it after every key
+		 * (erasing first) made the text flicker.
+		 */
+		final Canvas box = new Canvas(shell, SWT.BORDER | SWT.NO_BACKGROUND);
 		box.setBackground(display.getSystemColor(SWT.COLOR_WHITE));
 		box.setBounds(10, 10, 300, 40);
 		final Caret caret = new Caret(box, SWT.NONE);
@@ -213,18 +218,25 @@ public class SWT017_01 extends SWTTestCase {
 		};
 		box.addPaintListener(new PaintListener() {
 			public void paintControl(PaintEvent e) {
+				e.gc.fillRectangle(e.x, e.y, e.width, e.height);
 				e.gc.drawString(text.toString(), 4, 6);
 			}
 		});
 		box.addListener(SWT.KeyDown, new Listener() {
 			public void handleEvent(Event e) {
-				if (e.keyCode == SWT.ARROW_LEFT && position[0] > 0) position[0]--;
-				else if (e.keyCode == SWT.ARROW_RIGHT && position[0] < text.length()) position[0]++;
+				boolean changed = true;
+				if (e.keyCode == SWT.ARROW_LEFT && position[0] > 0) { position[0]--; changed = false; }
+				else if (e.keyCode == SWT.ARROW_RIGHT && position[0] < text.length()) { position[0]++; changed = false; }
 				else if (e.character == SWT.BS && position[0] > 0) text.deleteCharAt(--position[0]);
 				else if (e.character >= ' ') text.insert(position[0]++, e.character);
 				else return;
+				int from = caret.getLocation().x;
 				place.run();
-				box.redraw();
+				if (!changed) return;
+				/* Only from the first letter that changed to the end */
+				from = Math.min(from, caret.getLocation().x) - 1;
+				Rectangle area = box.getClientArea();
+				box.redraw(from, 0, area.width - from, area.height, false);
 			}
 		});
 		box.addListener(SWT.MouseDown, new Listener() {

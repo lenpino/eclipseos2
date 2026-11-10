@@ -51,6 +51,11 @@ href="eclipseos2-xxe.css"
       of the focus are skipped there, and say so; from a console of the VM they
       run. See <a href="lessons.html">lessons learned</a>.</li>
 
+      <li>The first interactive part repainted the whole box after every key
+      (erasing it first), and its text flickered. That was the test, not the
+      caret: the box now paints its own background (<code>NO_BACKGROUND</code>,
+      which the port honours) and repaints only from the changed letter on.</li>
+
       <li><code>Canvas.scroll()</code> is not ported yet; on Windows it hides the
       caret while it scrolls.</li>
 
@@ -97,9 +102,8 @@ href="eclipseos2-xxe.css"
 
         <td>Done [lpino]</td>
 
-        <td>Checked by <kbd>SWT017_01</kbd> only when it runs from a console of
-        the VM: <em>to be confirmed</em>. Seen on the screen: <em>to be
-        confirmed</em>.</td>
+        <td>Checked by <kbd>SWT017_01</kbd> when it runs from a console of the
+        VM (25 checks, 2026-11-10). Seen on the screen: it works.</td>
       </tr>
     </table>
   </body>
