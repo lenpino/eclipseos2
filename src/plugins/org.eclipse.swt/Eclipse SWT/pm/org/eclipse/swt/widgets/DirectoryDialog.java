@@ -40,6 +40,7 @@ public class DirectoryDialog extends Dialog {
 	String filterPath = "";
 	String message = "";
 	String result;
+	int laidOutWidth = -1, laidOutHeight = -1;
 
 	static final int WIDTH = 340, HEIGHT = 380, MARGIN = 8, BUTTON_WIDTH = 80, BUTTON_HEIGHT = 26, LABEL_HEIGHT = 34;
 
@@ -144,8 +145,9 @@ public void setMessage (String string) {
  */
 public String open () {
 	result = null;
+	laidOutWidth = laidOutHeight = -1;
 	final Display display = parent.getDisplay ();
-	final Shell shell = new Shell (parent, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
+	final Shell shell = new Shell (parent, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL | SWT.NO_REDRAW_RESIZE);
 	shell.setText (title);
 	final Label label = new Label (shell, SWT.WRAP);
 	label.setText (message);
@@ -163,6 +165,11 @@ public String open () {
 		}
 	});
 
+	/*
+	* The tree is filled, expanded and scrolled while it is not drawn: the window is not
+	* shown yet, but the container repaints at every change (see Tree.setRedraw()).
+	*/
+	tree.setRedraw (false);
 	File [] roots = File.listRoots ();
 	if (roots != null) {
 		for (int i=0; i<roots.length; i++) {
@@ -178,6 +185,7 @@ public String open () {
 		}
 	});
 	showPath (tree, filterPath);
+	tree.setRedraw (true);
 
 	tree.addSelectionListener (new SelectionAdapter () {
 		public void widgetDefaultSelected (SelectionEvent e) {
@@ -210,6 +218,10 @@ public String open () {
 
 void layout (Shell shell, Label label, Tree tree, Button ok, Button cancel) {
 	Rectangle area = shell.getClientArea ();
+	/* Opening the window sends a Resize with the size that it already has: every setBounds repaints */
+	if (area.width == laidOutWidth && area.height == laidOutHeight) return;
+	laidOutWidth = area.width;
+	laidOutHeight = area.height;
 	int width = Math.max (area.width - 2 * MARGIN, 10);
 	int buttons = area.height - MARGIN - BUTTON_HEIGHT;
 	label.setBounds (MARGIN, MARGIN, width, LABEL_HEIGHT);
