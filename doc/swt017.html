@@ -46,10 +46,12 @@ href="eclipseos2-xxe.css"
       <code>WinShowCursor</code> and <code>WinDestroyCursor</code>, and the
       <code>CURSOR_*</code> constants.</li>
 
-      <li>A program started from the SSH session of the VM cannot take the focus
-      (<code>WinSetFocus</code> fails and there is no active window). The checks
-      of the focus are skipped there, and say so; from a console of the VM they
-      run. See <a href="lessons.html">lessons learned</a>.</li>
+      <li>The first runs from the SSH session could not take the focus:
+      <code>WinSetFocus</code> failed and no window of the desktop was active
+      (the VM had just been started). After a run from a console of the VM, the
+      same command from SSH took it and passed the 25 checks. When the focus
+      cannot be taken the checks of the focus are skipped and say so. See
+      <a href="lessons.html">lessons learned</a>.</li>
 
       <li>The first interactive part repainted the whole box after every key
       (erasing it first), and its text flickered. That was the test, not the

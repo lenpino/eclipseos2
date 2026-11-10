@@ -465,10 +465,12 @@ href="eclipseos2-xxe.css"
       in a variable is not split into words, so <code>$F</code> does not
       work).</li>
 
-      <li>A program started from the SSH session of the VM cannot take the
-      focus: <code>WinSetFocus</code> fails and no window is active. A test that
-      needs the focus has to run from a console of the VM; when it cannot get it,
-      it says SKIPPED instead of failing or passing
+      <li>A program started from the SSH session of the VM could not take the
+      focus while no window of the desktop was active (just after starting the
+      VM): <code>WinSetFocus</code> failed. After a run from a console of the VM
+      it could. The cause is not known for sure. A test that needs the focus says
+      SKIPPED when it cannot get it, instead of failing or passing; running it
+      once from a console of the VM is the way out
       (<a href="swt017.html">step 017</a>).</li>
 
       <li>The <code>sshd</code> of the VM offers only <code>ssh-rsa</code> keys: the
