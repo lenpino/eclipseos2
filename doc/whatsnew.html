@@ -702,6 +702,14 @@ href="eclipseos2-xxe.css"
       constant <code>ROP_PATINVERT</code>. See <a href="diff.html">difference
       016</a>.</li>
 
+      <li><kbd>SWT014_01</kbd> reads the pixels of the bands with the new native
+      <code>GpiQueryPel</code> while the tracker is open: plain line whole,
+      stippled band in a checkerboard, nothing left afterwards (72 checks).
+      Seen on the screen: it works; the stippled band looks like a thicker
+      line because its checkerboard is of one pixel. With the integration of
+      the mouse of the VM the pointer is not seen to jump to the rectangle
+      (see <a href="swt014.html">step 014</a>).</li>
+
       <li><kbd>tools/vm-pull.sh</kbd> synchronizes with <code>rsync
       --delete</code>, and the <code>doc</code> folder of the VM is old: a pull
       reverts the pages of this folder. Commit before pulling, or bring back only

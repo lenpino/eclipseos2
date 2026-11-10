@@ -20,7 +20,7 @@ href="eclipseos2-xxe.css"
     rectangles, drawn on a composite or on the screen, that the user moves or
     resizes with the mouse or the keys. The test case <kbd>SWT014_01</kbd>
     posts to the queue the keys and the mouse messages that the user would send
-    and then calls <code>open()</code>, whose loop reads them (62 automatic
+    and then calls <code>open()</code>, whose loop reads them (72 automatic
     checks); then it shows boxes to drag and buttons that move and resize them by
     hand.</p>
 
@@ -71,6 +71,19 @@ href="eclipseos2-xxe.css"
       <code>open()</code>. PM gives the posted messages before the input ones, so
       the mouse moves that <code>WinSetPointerPos</code> causes come after the
       tracker has finished; the test empties the queue between checks.</li>
+
+      <li>The drawing is checked too: a timer of the test (the loop of the
+      tracker dispatches the timers) reads the pixels of the screen with
+      <code>GpiQueryPel</code> while the rectangle is shown. The plain line is
+      inverted whole, corners included; the stippled band is inverted in a
+      checkerboard, half of its pixels; nothing changes inside, and the screen
+      is the same afterwards. On the screen the checkerboard of one pixel looks
+      like a thicker gray line, as on Windows.</li>
+
+      <li>In the VM with the integration of the mouse the pointer that is seen
+      is the one of the host: PM changes its shape but not its place, so the
+      pointer does not seem to jump to the rectangle when the tracker opens,
+      although <code>WinQueryPointerPos</code> says it did.</li>
     </ul>
 
     <p>The differences with Windows are in <a href="diff.html">difference
@@ -102,7 +115,7 @@ href="eclipseos2-xxe.css"
 
         <td>Done [lpino]</td>
 
-        <td>Checked by <kbd>SWT014_01</kbd> (62 checks), including where the
+        <td>Checked by <kbd>SWT014_01</kbd> (72 checks), including where the
         pointer is left and the release of the capture.</td>
       </tr>
 
@@ -112,8 +125,8 @@ href="eclipseos2-xxe.css"
 
         <td>Done [lpino]</td>
 
-        <td>Not checked automatically. Seen on the screen: <em>to be
-        confirmed</em>.</td>
+        <td>The pixels are checked by <kbd>SWT014_01</kbd>. Seen on the
+        screen: it works and leaves no traces (2026-11-10).</td>
       </tr>
 
       <tr>
