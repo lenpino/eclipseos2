@@ -87,8 +87,8 @@ variables de entorno `VM_HOST`, `VM_USER`, `VM_PASS`, `VM_SWT_DIR`).
 - `vm-pull.sh` sincroniza con `rsync --delete` y la carpeta `doc/` de la VM es
   antigua: un pull revierte y borra páginas de la documentación, también las
   ediciones sin commitear. Commitear antes, o traer solo la DLL y la `.lib`.
-- Auditorías: `tools/audit-constants.py <dir con los headers>` y
-  `tools/audit-jni-fields.py` (ver `doc/lessons.html`).
+- Auditorías: `tools/audit-constants.py <dir con los headers>`,
+  `tools/audit-jni-fields.py` y `tools/audit-native-types.py` (ver `doc/lessons.html`).
 - Si `vm.sh` no devuelve ni `ver` en 20-30 s, parar: más sesiones sobre un
   `sshd` saturado lo empeoran (pasó dos veces al lanzar bucles con varias
   pruebas y tiempos largos). Reiniciar `sshd` en la VM. Las baterías se
