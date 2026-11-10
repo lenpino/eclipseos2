@@ -465,6 +465,12 @@ href="eclipseos2-xxe.css"
       in a variable is not split into words, so <code>$F</code> does not
       work).</li>
 
+      <li>A program started from the SSH session of the VM cannot take the
+      focus: <code>WinSetFocus</code> fails and no window is active. A test that
+      needs the focus has to run from a console of the VM; when it cannot get it,
+      it says SKIPPED instead of failing or passing
+      (<a href="swt017.html">step 017</a>).</li>
+
       <li>The <code>sshd</code> of the VM offers only <code>ssh-rsa</code> keys: the
       key of a new IP is accepted with <code>-o HostKeyAlgorithms=+ssh-rsa -o
       StrictHostKeyChecking=accept-new</code>. When the VM does not answer at all
@@ -596,7 +602,14 @@ href="eclipseos2-xxe.css"
 
       <li>The mouse events (<a href="swt016.html">step 016</a>) are done.</li>
 
-      <li>Not ported: <code>Caret</code>, tool tips (<code>Control</code> only keeps the
+      <li><code>Caret</code> (<a href="swt017.html">step 017</a>) is done;
+      <code>Canvas.scroll()</code> is not.</li>
+
+      <li><code>Font.equals()</code> compares the <code>FATTRS</code> objects and
+      <code>Control.getFont()</code> makes a new one each time: two calls are not
+      equal.</li>
+
+      <li>Not ported: tool tips (<code>Control</code> only keeps the
       text), AWT, drag and drop, printing, OLE.</li>
     </ul>
   </body>

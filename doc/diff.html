@@ -433,6 +433,23 @@ href="eclipseos2-xxe.css"
 
         <td></td>
       </tr>
+
+      <tr>
+        <td>019</td>
+
+        <td>The caret can be an image (<code>CreateCaret</code> with a bitmap).
+        Its font goes to the input method window (for the languages of East
+        Asia).</td>
+
+        <td>The text cursor of PM is a rectangle that inverts what is under it:
+        a caret with an image gets the size of the image but not its picture.
+        There is no input method window: <code>setFont()</code> only keeps the
+        font, and <code>getFont()</code> without one is the font of the
+        canvas.</td>
+
+        <td><code>Canvas.scroll()</code>, which hides the caret while it
+        scrolls, is not ported yet.</td>
+      </tr>
     </table>
 
     <h2>Other differences</h2>

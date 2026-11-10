@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/css"
+href="eclipseos2-xxe.css"
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"xhtml1-strict.dtd">
+<html>
+  <head>
+    <link href="eclipseos2.css" rel="stylesheet" type="text/css" />
+
+    <title>Eclipse for OS/2 Transitional Project Notes</title>
+  </head>
+
+  <body>
+    <h1>SWT Step 017. Caret</h1>
+
+    <h2>Objective</h2>
+
+    <p>Implement the <code>o.e.swt.widgets.Caret</code> class and
+    <code>getCaret()</code>/<code>setCaret()</code> of <code>Canvas</code>. The
+    test case <kbd>SWT017_01</kbd> checks the API, then shows the window, gives
+    the focus to a canvas and reads the text cursor of PM with
+    <code>WinQueryCursorInfo</code> after each change; its interactive part is a
+    box to type in.</p>
+
+    <h2>Task notes</h2>
+
+    <ul>
+      <li>The caret is the text cursor of PM, which belongs to the window that
+      has the focus. <code>Canvas</code> handles <code>WM_SETFOCUS</code> (PM has
+      one message for getting and losing the focus): it creates the cursor with
+      <code>WinCreateCursor</code> when it gets it and destroys it with
+      <code>WinDestroyCursor</code> when it loses it, as the samples of PM do.
+      Moving it is <code>WinCreateCursor</code> with
+      <code>CURSOR_SETPOS</code>; a new size creates it again. It blinks
+      (<code>CURSOR_FLASH</code>) and inverts what is under it
+      (<code>CURSOR_SOLID</code>).</li>
+
+      <li><code>WinShowCursor</code> is called only when the state changes; the
+      cursor is created hidden.</li>
+
+      <li>The y of PM is the lower edge of the cursor, from the bottom of the
+      window: <code>height - (y + cy)</code>.</li>
+
+      <li>New natives <code>WinCreateCursor</code>,
+      <code>WinShowCursor</code> and <code>WinDestroyCursor</code>, and the
+      <code>CURSOR_*</code> constants.</li>
+
+      <li>A program started from the SSH session of the VM cannot take the focus
+      (<code>WinSetFocus</code> fails and there is no active window). The checks
+      of the focus are skipped there, and say so; from a console of the VM they
+      run. See <a href="lessons.html">lessons learned</a>.</li>
+
+      <li><code>Canvas.scroll()</code> is not ported yet; on Windows it hides the
+      caret while it scrolls.</li>
+
+      <li>Found on the way: <code>Font.equals()</code> compares the
+      <code>FATTRS</code> objects, and <code>Control.getFont()</code> makes a new
+      one each time, so <code>c.getFont().equals(c.getFont())</code> is
+      false.</li>
+    </ul>
+
+    <p>The differences with Windows are in <a href="diff.html">difference
+    019</a>.</p>
+
+    <h2>Step checklist</h2>
+
+    <table>
+      <col width="40%" />
+
+      <col />
+
+      <col width="50%" />
+
+      <thead>
+        <tr>
+          <th>Operation</th>
+
+          <th>Status</th>
+
+          <th>Remarks</th>
+        </tr>
+      </thead>
+
+      <tr>
+        <td><code>Caret</code>: API, <code>Canvas.getCaret()</code> and
+        <code>setCaret()</code></td>
+
+        <td>Done [lpino]</td>
+
+        <td>Checked by <kbd>SWT017_01</kbd> (11 checks, also from SSH).</td>
+      </tr>
+
+      <tr>
+        <td>The cursor of PM with the focus: create, move, resize, hide,
+        destroy</td>
+
+        <td>Done [lpino]</td>
+
+        <td>Checked by <kbd>SWT017_01</kbd> only when it runs from a console of
+        the VM: <em>to be confirmed</em>. Seen on the screen: <em>to be
+        confirmed</em>.</td>
+      </tr>
+    </table>
+  </body>
+</html>
