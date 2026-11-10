@@ -2908,6 +2908,7 @@ public static final native int GpiRectInRegion (int hps, int hrgn, RECTL prclRec
 public static final native boolean GpiQueryCurrentPosition (int hps, int[] pptlPoint);
 public static final native int GpiSetPel (int hps, int[] pptlPoint);
 public static final native boolean GpiMove (int hps, int[] pptlPoint);
+public static final native int GpiQueryPel (int hps, int[] pptlPoint);
 public static final native int GpiLine (int hps, int[] pptlEndPoint);
 public static final native int GpiBox (int hps, int lControl, int[] pptlPoint,
     int lHRound, int lVRound);

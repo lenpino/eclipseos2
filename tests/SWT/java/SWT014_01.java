@@ -316,6 +316,76 @@ public class SWT014_01 extends SWTTestCase {
 		t.dispose();
 	}
 
+	/* The pixels of a rectangle of the screen (SWT coordinates), as RGB */
+	int[][] pels(Rectangle r) {
+		int cy = OS.WinQuerySysValue(OS.HWND_DESKTOP, OS.SV_CYSCREEN);
+		int hps = OS.WinGetScreenPS(OS.HWND_DESKTOP);
+		OS.GpiCreateLogColorTable(hps, 0, OS.LCOLF_RGB, 0, 0, null);
+		int[][] result = new int[r.height][r.width];
+		for (int y = 0; y < r.height; y++) {
+			for (int x = 0; x < r.width; x++) {
+				result[y][x] = OS.GpiQueryPel(hps, new int[] {r.x + x, cy - 1 - (r.y + y)});
+			}
+		}
+		OS.WinReleasePS(hps);
+		return result;
+	}
+
+	/**
+	 * Opens a tracker on the screen and reads the pixels while it shows the rectangle.
+	 * The pointer goes to the middle of the top side: the columns where it is drawn are left out.
+	 */
+	void checkBands(boolean stippled) {
+		final Rectangle r = new Rectangle(20, 20, 200, 30);
+		int band = stippled ? 3 : 1;
+		flush();
+		int[][] before = pels(r);
+		final Tracker t = tracker(null, SWT.NONE, new Rectangle[] {new Rectangle(r.x, r.y, r.width, r.height)});
+		t.setStippled(stippled);
+		final int[][][] during = new int[1][][];
+		display.timerExec(300, new Runnable() {
+			public void run() {
+				during[0] = pels(r);
+				t.close();
+			}
+		});
+		check(open(t) && during[0] != null, (stippled ? "stippled" : "plain") + ": the pixels are read while the tracker is open");
+		int[][] after = pels(r);
+		int bandPels = 0, changed = 0, inside = 0, odd = 0, even = 0, traces = 0;
+		for (int y = 0; y < r.height; y++) {
+			for (int x = 0; x < r.width; x++) {
+				if (x >= r.width / 2 - 4 && x < r.width / 2 + 40) continue;
+				boolean inBand = x < band || y < band || x >= r.width - band || y >= r.height - band;
+				boolean diff = during[0][y][x] != before[y][x];
+				if (after[y][x] != before[y][x]) traces++;
+				if (!inBand) {
+					if (diff) inside++;
+					continue;
+				}
+				bandPels++;
+				if (diff) {
+					changed++;
+					if ((x + y) % 2 == 0) even++; else odd++;
+				}
+			}
+		}
+		check(inside == 0, "nothing is drawn inside the rectangle: " + inside + " pixels");
+		if (stippled) {
+			check(changed * 2 >= bandPels - 2 && changed * 2 <= bandPels + 2 && (even == 0 || odd == 0),
+					"half of the band is inverted, in a checkerboard: " + changed + " of " + bandPels + " (even " + even + ", odd " + odd + ")");
+		} else {
+			check(changed == bandPels, "the whole line is inverted, corners included: " + changed + " of " + bandPels);
+		}
+		check(traces == 0, "the screen is as it was afterwards: " + traces + " pixels differ");
+		t.dispose();
+	}
+
+	void checkDrawing() {
+		saySubObjective("The pixels of the bands");
+		checkBands(false);
+		checkBands(true);
+	}
+
 	void initComponents() {
 		automatic();
 		interactive();
@@ -331,6 +401,7 @@ public class SWT014_01 extends SWTTestCase {
 		checkMouse();
 		checkListeners();
 		checkScreen();
+		checkDrawing();
 		flush();
 		say("\n" + checks + " checks passed.\n");
 	}

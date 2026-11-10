@@ -2493,6 +2493,23 @@ JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_GpiMove
     return rc;
 }
 
+JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_GpiQueryPel
+        (JNIEnv *env, jclass that, jint hps, jintArray pptlPoint)
+{
+    jint *c_pptlPoint = NULL;
+    jint rc;
+
+    DEBUG_CALL("GpiQueryPel\n")
+
+    if (pptlPoint) c_pptlPoint = (*env)->GetIntArrayElements(env, pptlPoint, NULL);
+
+    rc = (jint)GpiQueryPel((HPS)hps, (PPOINTL)c_pptlPoint);
+
+    if (pptlPoint) (*env)->ReleaseIntArrayElements(env, pptlPoint, c_pptlPoint, 0);
+
+    return rc;
+}
+
 JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_GpiLine
         (JNIEnv *env, jclass that, jint hps, jintArray pptlEndPoint)
 {
