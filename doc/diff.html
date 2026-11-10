@@ -412,6 +412,27 @@ href="eclipseos2-xxe.css"
         <td>The look of the pointers of the system is the one of the Workplace
         Shell.</td>
       </tr>
+
+      <tr>
+        <td>018</td>
+
+        <td><code>MouseEnter</code>, <code>MouseExit</code> and
+        <code>MouseHover</code> come from <code>TrackMouseEvent</code>: Exit is
+        sent at once when the pointer leaves the window, Hover after the hover
+        time of the system.</td>
+
+        <td>PM has no such thing: the <code>Display</code> remembers the control
+        with the pointer, and a timer of 100 ms finds that it left (Exit comes up
+        to 100 ms late when the pointer goes to another program or to the
+        desktop; between two controls of the program it is at once) and that it
+        rests (Hover after 400 ms, the default of Windows). The buttons that are
+        down in a <code>MouseMove</code> come from <code>WinGetKeyState</code>.
+        The windows inside a native control that are not SWT controls (the entry
+        field of a <code>Combo</code>, the parts of the container) do not give
+        mouse events.</td>
+
+        <td></td>
+      </tr>
     </table>
 
     <h2>Other differences</h2>

@@ -165,6 +165,12 @@ href="eclipseos2-xxe.css"
       <code>PIB.pib_pchcmd/pib_pchenv</code> are commented out in Java but not
       in C (a problem only if <code>DosGetInfoBlocks()</code> is used) and
       <code>TREERECORD</code> has no Java class and is not used.</li>
+
+      <li><kbd>tools/audit-native-types.py</kbd> compares the type that every
+      native of <kbd>OS.java</kbd> returns with the one of its C function. Three
+      functions that return a window were <code>jboolean</code> in C, and Java
+      got the handle cut to one byte plus garbage
+      (<a href="swt016.html">step 016</a>). Now there are no differences.</li>
     </ul>
 
     <h2>The tree (<code>Tree</code>, <kbd>SWT009_11</kbd>, <kbd>SWT011_01</kbd>)</h2>
@@ -435,6 +441,17 @@ href="eclipseos2-xxe.css"
       the default processing of <code>WM_MOUSEMOVE</code> sets the pointer, and
       a window that wants another one sets it after that.</li>
 
+      <li>The SWT events of the mouse are posted (<code>postEvent</code>) and
+      run after the next message that <code>readAndDispatch()</code>
+      dispatches. A test that sends a message (<code>WinSendMsg</code>) does not
+      go through the queue: it has to post something (a <code>WM_NULL</code>)
+      for the events to run. <code>Display.wake()</code> does nothing from the
+      thread of the display.</li>
+
+      <li>A native that has never been called may be wrong. A handle that only
+      shares its last digits with the right one is a value returned with a
+      smaller type (<code>jboolean</code> instead of <code>jint</code>).</li>
+
       <li>A message that is posted (<code>WinPostMsg</code>) is read before the
       input of the mouse and the keyboard: a test can put keys and mouse
       messages in the queue before a modal loop and the loop reads them as if
@@ -500,10 +517,9 @@ href="eclipseos2-xxe.css"
       <li><code>Cursor</code> and <code>setCursor()</code> (<a href="swt015.html">step
       015</a>) are done.</li>
 
-      <li>Not ported: <code>Caret</code>, the <code>MouseMove</code> events
-      (<code>WM_MOUSEMOVE</code> is not given to
-      <code>Control.WM_MOUSEMOVE()</code>, which sends them; it has been so
-      since the import), tool tips (<code>Control</code> only keeps the
+      <li>The mouse events (<a href="swt016.html">step 016</a>) are done.</li>
+
+      <li>Not ported: <code>Caret</code>, tool tips (<code>Control</code> only keeps the
       text), AWT, drag and drop, printing, OLE.</li>
     </ul>
   </body>

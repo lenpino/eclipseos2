@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/css"
+href="eclipseos2-xxe.css"
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"xhtml1-strict.dtd">
+<html>
+  <head>
+    <link href="eclipseos2.css" rel="stylesheet" type="text/css" />
+
+    <title>Eclipse for OS/2 Transitional Project Notes</title>
+  </head>
+
+  <body>
+    <h1>SWT Step 016. Mouse events</h1>
+
+    <h2>Objective</h2>
+
+    <p>Send the <code>MouseMove</code>, <code>MouseEnter</code>,
+    <code>MouseExit</code> and <code>MouseHover</code> events of
+    <code>Control</code>, which were never sent. The test case
+    <kbd>SWT016_01</kbd> sends mouse messages to the controls and compares the
+    events that come out (25 automatic checks); then it shows two boxes, one
+    inside the other, and a list with their events.</p>
+
+    <h2>Task notes</h2>
+
+    <ul>
+      <li><code>WM_MOUSEMOVE</code> did not reach
+      <code>Control.WM_MOUSEMOVE()</code>: its <code>case</code> was commented
+      since the import. Now it sends <code>MouseMove</code> when the position
+      changes (PM sends <code>WM_MOUSEMOVE</code> also when a window changes
+      under a pointer that does not move), with the position taken from the
+      message, and then sets the cursor of <a href="swt015.html">step
+      015</a>. PM does not tell which buttons are down in a mouse message: the
+      state of a <code>MouseMove</code> asks <code>WinGetKeyState</code>.</li>
+
+      <li>Windows has <code>TrackMouseEvent</code>; PM has nothing like it. The
+      <code>Display</code> keeps the control that got the last
+      <code>WM_MOUSEMOVE</code>: when another one gets it, the first gets
+      <code>MouseExit</code> and the second <code>MouseEnter</code>; also between
+      a parent and its child, as on Windows. While the control hooks
+      <code>MouseExit</code> or <code>MouseHover</code>, a timer of 100 ms looks
+      where the pointer is: if it is not over the control (another program, the
+      desktop, a hidden window) the control gets <code>MouseExit</code>; if it
+      rests 400 ms on it, <code>MouseHover</code>, once until it moves again. The
+      control that has the capture keeps the pointer.</li>
+
+      <li>As on Windows the events are posted, and they run after the next
+      message is dispatched. The test sends its messages
+      (<code>WinSendMsg</code>), so it posts a <code>WM_NULL</code> to have them
+      run.</li>
+
+      <li>The y of all the mouse events was one more than it should
+      (<code>cy - y</code> instead of <code>cy - 1 - y</code>): the top row of a
+      control gave <code>MouseDown</code> at y 1.</li>
+
+      <li>Three natives declared <code>jboolean</code> in C returned a window
+      handle: <code>WinWindowFromPoint</code>, <code>WinBeginEnumWindows</code>
+      and <code>WinGetNextWindow</code>. Java got only the lowest byte and the
+      rest of the register, so the handles were garbage:
+      <code>moveAbove()</code> did nothing and <code>setCursor()</code> did not
+      change the pointer at once. Found because the test printed a handle that
+      shared only its last digits with the right one. A script compared the
+      types of all the natives in <code>OS.java</code> and <code>swt.c</code>:
+      <code>WinQueryCursorInfo</code> had the opposite mistake (harmless). See
+      <a href="lessons.html">lessons learned</a>.</li>
+
+      <li>Also fixed: <code>Display.getCursorControl()</code> used the text
+      cursor (<code>WinQueryCursorInfo</code>) instead of the pointer;
+      <code>moveAbove(null)</code> did nothing (it goes to the top);
+      <code>getPreviousSibling()</code> left the enumeration of windows
+      open.</li>
+    </ul>
+
+    <p>The differences with Windows are in <a href="diff.html">difference
+    018</a>.</p>
+
+    <h2>Step checklist</h2>
+
+    <table>
+      <col width="40%" />
+
+      <col />
+
+      <col width="50%" />
+
+      <thead>
+        <tr>
+          <th>Operation</th>
+
+          <th>Status</th>
+
+          <th>Remarks</th>
+        </tr>
+      </thead>
+
+      <tr>
+        <td><code>MouseMove</code>, coordinates of the mouse events</td>
+
+        <td>Done [lpino]</td>
+
+        <td>Checked by <kbd>SWT016_01</kbd>.</td>
+      </tr>
+
+      <tr>
+        <td><code>MouseEnter</code>, <code>MouseExit</code>,
+        <code>MouseHover</code></td>
+
+        <td>Done [lpino]</td>
+
+        <td>Checked by <kbd>SWT016_01</kbd>, with the pointer put over the
+        controls. Seen on the screen: <em>to be confirmed</em>.</td>
+      </tr>
+
+      <tr>
+        <td><code>getCursorControl()</code>, <code>moveAbove()</code></td>
+
+        <td>Fixed [lpino]</td>
+
+        <td>Checked by <kbd>SWT016_01</kbd>.</td>
+      </tr>
+    </table>
+  </body>
+</html>

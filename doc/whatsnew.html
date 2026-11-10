@@ -724,6 +724,17 @@ href="eclipseos2-xxe.css"
       button and a text). Seen on the screen: it works. New native
       <code>WinQueryPointer</code>. See <a href="diff.html">difference
       017</a>.</li>
+
+      <li>New <a href="swt016.html">SWT Step 016</a> (mouse events):
+      <code>MouseMove</code>, <code>MouseEnter</code>, <code>MouseExit</code> and
+      <code>MouseHover</code>, which were never sent. Test case
+      <kbd>SWT016_01</kbd> (25 automatic checks). Not seen on the screen yet.
+      See <a href="diff.html">difference 018</a>. Fixed on the way: the y of
+      all the mouse events was one too many; three natives returned window
+      handles cut to one byte (<code>moveAbove()</code> and the immediate change
+      of <code>setCursor()</code> did not work); <code>getCursorControl()</code>
+      used the text cursor; <code>moveAbove(null)</code> did nothing. New audit
+      <kbd>tools/audit-native-types.py</kbd>.</li>
     </ul>
   </body>
 </html>
