@@ -714,6 +714,16 @@ href="eclipseos2-xxe.css"
       --delete</code>, and the <code>doc</code> folder of the VM is old: a pull
       reverts the pages of this folder. Commit before pulling, or bring back only
       the DLL (see <code>README-VM.md</code>).</li>
+
+      <li>New <a href="swt015.html">SWT Step 015</a> (cursors):
+      <code>Cursor</code> with the pointers of the system and the hand, the cross
+      and the up arrow made by SWT; <code>Control.setCursor()</code>, inherited
+      by the children, and <code>Tracker.setCursor()</code>. Test case
+      <kbd>SWT015_01</kbd> (72 automatic checks: the pointers are drawn into an
+      image and its pixels read; <code>WM_MOUSEMOVE</code> is sent to a canvas, a
+      button and a text). Not seen on the screen yet. New native
+      <code>WinQueryPointer</code>. See <a href="diff.html">difference
+      017</a>.</li>
     </ul>
   </body>
 </html>

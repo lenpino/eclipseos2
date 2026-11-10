@@ -44,7 +44,10 @@ variables de entorno `VM_HOST`, `VM_USER`, `VM_PASS`, `VM_SWT_DIR`).
   que solo contesta a `password:`, así que la pregunta `yes/no` de la clave del
   host queda sin responder. Se diagnostica con `ssh -vv ...` (acaba en
   `Host key verification failed`) y se resuelve una vez con
-  `ssh -o StrictHostKeyChecking=accept-new test@<ip> exit`.
+  `ssh -o HostKeyAlgorithms=+ssh-rsa -o StrictHostKeyChecking=accept-new test@<ip> exit`
+  (el `sshd` de la VM solo ofrece claves `ssh-rsa`; sin la opción contesta
+  `no matching host key type found`). El 2026-11-10 la VM pasó a otra red:
+  `172.20.10.11`.
 - En la sesión SSH `INCLUDE` y `LIB` salen vacíos; el entorno de compilación
   se define en otro sitio. El toolkit de eCS está en `C:\ECSTK` (`h`, `lib`);
   `X:\os2tk45` es una copia antigua (su `esplitter.h` no declara

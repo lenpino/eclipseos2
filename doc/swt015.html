@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/css"
+href="eclipseos2-xxe.css"
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"xhtml1-strict.dtd">
+<html>
+  <head>
+    <link href="eclipseos2.css" rel="stylesheet" type="text/css" />
+
+    <title>Eclipse for OS/2 Transitional Project Notes</title>
+  </head>
+
+  <body>
+    <h1>SWT Step 015. Cursors</h1>
+
+    <h2>Objective</h2>
+
+    <p>Implement the <code>o.e.swt.graphics.Cursor</code> class,
+    <code>Control.setCursor()</code> and <code>Tracker.setCursor()</code>. The
+    test case <kbd>SWT015_01</kbd> creates every style, draws the pointers made
+    by SWT into an image and reads its pixels, and sends
+    <code>WM_MOUSEMOVE</code> to the controls to see which pointer they set (72
+    automatic checks); then it shows a button for each style.</p>
+
+    <h2>Task notes</h2>
+
+    <ul>
+      <li>A cursor is a PM pointer (<code>HPOINTER</code>). The styles that PM
+      has are its system pointers (<code>WinQuerySysPointer</code> without a
+      copy): they belong to PM, are the same for every cursor of that style and
+      are not destroyed by <code>dispose()</code>.</li>
+
+      <li>PM has no hand, cross nor up arrow: they are made by SWT. The hand
+      comes from the data of the Windows source; the cross and the arrow are
+      drawn black with a white border, to be seen on any background.</li>
+
+      <li>The constructor with <code>ImageData</code> takes, as on Windows, the
+      source as the AND plane and the mask as the XOR plane (transparent: 1, 0;
+      black: 0, 0; white: 0, 1). PM wants both in one monochrome bitmap of double
+      height, made of rows from the bottom: the XOR plane in the lower half and
+      the AND plane in the upper one; the bitmap goes to
+      <code>WinCreatePointerIndirect</code> and is deleted (PM keeps a copy).
+      The hot spot is counted from the bottom too.</li>
+
+      <li><code>Control.setCursor()</code> keeps the pointer in
+      <code>hCursor</code>, and <code>findCursor()</code> looks for it in the
+      parents, as on Windows. Windows sets it with <code>WM_SETCURSOR</code>; PM
+      has nothing like it: the default processing of <code>WM_MOUSEMOVE</code>
+      sets the arrow, or the pointer of the native control (the I-beam of an
+      entry field). <code>Control</code> lets that processing run, because the
+      native controls do more work with the mouse, and then sets its cursor. When
+      the cursor is set while the pointer is over the control, it is changed at
+      once.</li>
+
+      <li>New native <code>WinQueryPointer</code>, used by
+      <code>dispose()</code> (PM is not left showing a pointer that was
+      destroyed) and by the test.</li>
+
+      <li>The test draws a pointer with <code>WinDrawPointer</code> on the
+      presentation space of a <code>GC</code> and reads it with
+      <code>GpiQueryPel</code>. The first one works in device coordinates and the
+      second one in world coordinates, which the <code>GC</code> turns upside
+      down with its default view matrix: the first run read the picture upside
+      down and the cross seemed one row lower. See
+      <a href="lessons.html">lessons learned</a>.</li>
+    </ul>
+
+    <p>The differences with Windows are in <a href="diff.html">difference
+    017</a>.</p>
+
+    <h2>Step checklist</h2>
+
+    <table>
+      <col width="40%" />
+
+      <col />
+
+      <col width="50%" />
+
+      <thead>
+        <tr>
+          <th>Operation</th>
+
+          <th>Status</th>
+
+          <th>Remarks</th>
+        </tr>
+      </thead>
+
+      <tr>
+        <td><code>Cursor</code>: styles, image data, hot spot,
+        <code>dispose()</code></td>
+
+        <td>Done [lpino]</td>
+
+        <td>Checked by <kbd>SWT015_01</kbd>, including the pixels of the
+        pointers made by SWT.</td>
+      </tr>
+
+      <tr>
+        <td><code>Control.setCursor()</code>, inherited by the children; native
+        controls</td>
+
+        <td>Done [lpino]</td>
+
+        <td>Checked by <kbd>SWT015_01</kbd> with a canvas, a button and a text.
+        Seen on the screen: <em>to be confirmed</em> (a <code>Label</code> may
+        let the mouse go to its parent).</td>
+      </tr>
+
+      <tr>
+        <td><code>Tracker.setCursor()</code></td>
+
+        <td>Done [lpino]</td>
+
+        <td>Checked by <kbd>SWT015_01</kbd>.</td>
+      </tr>
+    </table>
+  </body>
+</html>

@@ -420,6 +420,26 @@ href="eclipseos2-xxe.css"
       <code>WinQueryPointerPos()</code>. <code>WinQueryMsgPos()</code> is the
       pointer when the last message was retrieved.</li>
 
+      <li>The presentation space of a <code>GC</code> has a default view matrix
+      that turns the y axis (<code>GC.java</code>, where it is created). The Gpi
+      calls that take world coordinates (<code>GpiQueryPel</code>,
+      <code>GpiMove</code>, <code>GpiBox</code>) count y from the top there, but
+      <code>WinDrawPointer</code> and the other calls in device coordinates
+      count it from the bottom. Reading with the second convention what was
+      drawn with the first one turns the picture upside down
+      (<a href="swt015.html">step 015</a>).</li>
+
+      <li>A pointer is a monochrome bitmap of double height: the XOR plane in
+      the lower half, the AND plane in the upper one, rows from the bottom, and
+      the hot spot counted from the bottom. There is no <code>WM_SETCURSOR</code>:
+      the default processing of <code>WM_MOUSEMOVE</code> sets the pointer, and
+      a window that wants another one sets it after that.</li>
+
+      <li>A message that is posted (<code>WinPostMsg</code>) is read before the
+      input of the mouse and the keyboard: a test can put keys and mouse
+      messages in the queue before a modal loop and the loop reads them as if
+      the user had sent them (<a href="swt014.html">step 014</a>).</li>
+
       <li>The eCS toolbar control (<kbd>etoolbar.h</kbd>) can only append
       buttons; the 2024 toolkit has the same messages as the installed one
       and only adds the <code>TBS_2D</code> style.
@@ -477,7 +497,13 @@ href="eclipseos2-xxe.css"
 
       <li><code>Tracker</code> (<a href="swt014.html">step 014</a>) is done.</li>
 
-      <li>Not ported: <code>Caret</code>, <code>Cursor</code>, tool tips (<code>Control</code> only keeps the
+      <li><code>Cursor</code> and <code>setCursor()</code> (<a href="swt015.html">step
+      015</a>) are done.</li>
+
+      <li>Not ported: <code>Caret</code>, the <code>MouseMove</code> events
+      (<code>WM_MOUSEMOVE</code> is not given to
+      <code>Control.WM_MOUSEMOVE()</code>, which sends them; it has been so
+      since the import), tool tips (<code>Control</code> only keeps the
       text), AWT, drag and drop, printing, OLE.</li>
     </ul>
   </body>

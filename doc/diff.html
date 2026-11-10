@@ -385,13 +385,32 @@ href="eclipseos2-xxe.css"
         <td><code>Tracker</code> captures the pointer instead
         (<code>WinSetCapture</code>), and draws on the presentation space of the
         parent or of the screen. A <code>WM_CHAR</code> with <code>KC_ALT</code>
-        cancels it. <code>setCursor()</code> is missing because the
-        <code>Cursor</code> class is not ported; the pointers of the resize are
-        the system ones. An empty rectangle is accepted (its proportions are
+        cancels it. The pointers of the resize are the system ones;
+        <code>setCursor()</code> sets the pointer when the tracker opens and when
+        it is called from a listener. An empty rectangle is accepted (its proportions are
         computed as if it were one pixel wide or high).</td>
 
         <td>A <code>WM_QUIT</code> read by the loop of the tracker cancels it and
         is posted again.</td>
+      </tr>
+
+      <tr>
+        <td>017</td>
+
+        <td>Every cursor style is a cursor of the system (the hand only since
+        Windows 98 and 2000; before, SWT makes it). <code>Control.setCursor()</code>
+        acts through <code>WM_SETCURSOR</code>.</td>
+
+        <td>The hand, the cross and the up arrow are made by SWT (PM has none).
+        <code>CURSOR_HELP</code> is the arrow and <code>CURSOR_APPSTARTING</code>
+        the clock: PM has no pointers for them. <code>CURSOR_SIZEALL</code> is the
+        pointer to move (<code>SPTR_MOVE</code>). The pointers of the system are
+        shared and <code>dispose()</code> does not destroy them. The cursor of a
+        control is set after the default processing of
+        <code>WM_MOUSEMOVE</code>.</td>
+
+        <td>The look of the pointers of the system is the one of the Workplace
+        Shell.</td>
       </tr>
     </table>
 
