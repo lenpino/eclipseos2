@@ -45,6 +45,8 @@ public class SWT013_01 extends SWTTestCase {
 	}
 
 	int checks;
+	/* Parent of the dialogs of the automatic checks: out of the screen, so they are not seen */
+	Shell owner;
 	String failure;
 
 	Shell createTopShell(Display display) {
@@ -61,7 +63,7 @@ public class SWT013_01 extends SWTTestCase {
 	Shell dialogShell(String title) {
 		Shell[] shells = display.getShells();
 		for (int i = 0; i < shells.length; i++) {
-			if (shells[i] != shell && title.equals(shells[i].getText())) return shells[i];
+			if (shells[i] != shell && shells[i] != owner && title.equals(shells[i].getText())) return shells[i];
 		}
 		return null;
 	}
@@ -119,9 +121,9 @@ public class SWT013_01 extends SWTTestCase {
 
 	void checkApi() {
 		saySubObjective("The API");
-		final DirectoryDialog dialog = new DirectoryDialog(shell);
+		final DirectoryDialog dialog = new DirectoryDialog(owner);
 		check(dialog.getFilterPath().equals("") && dialog.getMessage().equals("") && dialog.getText().equals(""), "the dialog is empty at first");
-		check(dialog.getParent() == shell, "getParent");
+		check(dialog.getParent() == owner, "getParent");
 		check((dialog.getStyle() & SWT.PRIMARY_MODAL) != 0, "the style is primary modal by default");
 		dialog.setFilterPath("C:\\");
 		dialog.setMessage("Choose a directory");
@@ -141,7 +143,7 @@ public class SWT013_01 extends SWTTestCase {
 	void checkOpenAndAccept() throws Exception {
 		saySubObjective("Open, shows the directory and OK");
 		final File here = new File(".").getCanonicalFile();
-		final DirectoryDialog dialog = new DirectoryDialog(shell);
+		final DirectoryDialog dialog = new DirectoryDialog(owner);
 		dialog.setText("Pick one");
 		dialog.setMessage("The current directory has to be selected");
 		dialog.setFilterPath(here.getPath());
@@ -168,7 +170,7 @@ public class SWT013_01 extends SWTTestCase {
 
 	void checkCancel() throws Exception {
 		saySubObjective("Cancel");
-		final DirectoryDialog dialog = new DirectoryDialog(shell);
+		final DirectoryDialog dialog = new DirectoryDialog(owner);
 		dialog.setText("Cancel it");
 		dialog.setFilterPath(new File(".").getCanonicalPath());
 		String before = dialog.getFilterPath();
@@ -180,7 +182,7 @@ public class SWT013_01 extends SWTTestCase {
 		check(result == null, "Cancel returns null");
 		check(dialog.getFilterPath().equals(before), "and does not change the filter path");
 
-		final DirectoryDialog closed = new DirectoryDialog(shell);
+		final DirectoryDialog closed = new DirectoryDialog(owner);
 		closed.setText("Closed");
 		result = openAnd(closed, new Task() {
 			public void run(Shell d) {
@@ -195,7 +197,7 @@ public class SWT013_01 extends SWTTestCase {
 		File top = new File(".").getCanonicalFile();
 		while (top.getParentFile() != null) top = top.getParentFile();
 		final File drive = top;
-		final DirectoryDialog dialog = new DirectoryDialog(shell);
+		final DirectoryDialog dialog = new DirectoryDialog(owner);
 		dialog.setText("No such path");
 		dialog.setFilterPath(new File(drive, "no\\such\\directory").getPath());
 		String result = openAnd(dialog, new Task() {
@@ -210,7 +212,7 @@ public class SWT013_01 extends SWTTestCase {
 		});
 		check(same(result, drive.getPath()), "OK returns it: " + result);
 
-		final DirectoryDialog gone = new DirectoryDialog(shell);
+		final DirectoryDialog gone = new DirectoryDialog(owner);
 		gone.setText("No such drive");
 		gone.setFilterPath("Y:\\no\\such\\directory");
 		result = openAnd(gone, new Task() {
@@ -229,7 +231,7 @@ public class SWT013_01 extends SWTTestCase {
 		File top = root;
 		while (top.getParentFile() != null) top = top.getParentFile();
 		final File drive = top;
-		final DirectoryDialog dialog = new DirectoryDialog(shell);
+		final DirectoryDialog dialog = new DirectoryDialog(owner);
 		dialog.setText("Expand");
 		String result = openAnd(dialog, new Task() {
 			public void run(Shell d) {
@@ -278,11 +280,18 @@ public class SWT013_01 extends SWTTestCase {
 		/* The window is not shown during the automatic checks (see SWT012_01) */
 		shell.setSize(420, 150);
 		sayObjective("Automatic checks");
-		checkApi();
-		checkOpenAndAccept();
-		checkCancel();
-		checkMissingPath();
-		checkExpand();
+		owner = new Shell(display, SWT.NO_TRIM);
+		owner.setBounds(-5000, -5000, 100, 100);
+		owner.open();
+		try {
+			checkApi();
+			checkOpenAndAccept();
+			checkCancel();
+			checkMissingPath();
+			checkExpand();
+		} finally {
+			owner.dispose();
+		}
 		say("\n" + checks + " checks passed.\n");
 	}
 
