@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/css"
+href="eclipseos2-xxe.css"
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"xhtml1-strict.dtd">
+<html>
+  <head>
+    <link href="eclipseos2.css" rel="stylesheet" type="text/css" />
+
+    <title>Eclipse for OS/2 Transitional Project Notes</title>
+  </head>
+
+  <body>
+    <h1>SWT Step 013. Directory dialog</h1>
+
+    <h2>Objective</h2>
+
+    <p>Implement the <code>o.e.swt.widgets.DirectoryDialog</code> class. The test
+    case <kbd>SWT013_01</kbd> opens the dialog and, from a task that runs in its
+    event loop, looks at its widgets and presses its buttons (31 automatic
+    checks); then it shows a button that opens the dialog for being used by
+    hand.</p>
+
+    <h2>Task notes</h2>
+
+    <p>There is nothing to wrap: <code>WinFileDlg</code> chooses files and the
+    Workplace Shell has no common dialog for directories, so the dialog is built
+    with SWT widgets, using the native <code>Tree</code> of
+    <a href="swt011.html">step 011</a>:</p>
+
+    <ul>
+      <li>The roots are the drives (<code>File.listRoots()</code>). Every directory
+      has a child with the text <code>...</code> until it is expanded, so that the
+      tree shows a plus sign without reading the disk (reading a floppy drive
+      would stop the program). The <code>Expand</code> event replaces it with the
+      subdirectories, sorted without regard to case.</li>
+
+      <li>The filter path is shown by expanding the directories that lead to it;
+      if it is not there, the deepest one that exists is selected.</li>
+
+      <li>The dialog is an application modal shell with the manual layout that the
+      other tests use. It is opened with an event loop of its own, like the
+      dialogs of the other platforms do.</li>
+    </ul>
+
+    <p>The differences with Windows are in <a href="diff.html">difference
+    015</a>.</p>
+
+    <h2>Step checklist</h2>
+
+    <table>
+      <col width="40%" />
+
+      <col />
+
+      <col width="50%" />
+
+      <thead>
+        <tr>
+          <th>Operation</th>
+
+          <th>Status</th>
+
+          <th>Remarks</th>
+        </tr>
+      </thead>
+
+      <tr>
+        <td><code>DirectoryDialog</code>: open, filter path, message, title, OK,
+        Cancel</td>
+
+        <td>Done [lpino]</td>
+
+        <td>Checked by <kbd>SWT013_01</kbd>. Seen on the screen: <em>to be
+        confirmed</em>.</td>
+      </tr>
+    </table>
+  </body>
+</html>

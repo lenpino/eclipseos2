@@ -352,6 +352,26 @@ href="eclipseos2-xxe.css"
         selection. A <code>SWT.SINGLE</code> table is kept to one selected item by
         <code>Table</code> itself.</td>
       </tr>
+
+      <tr>
+        <td>015</td>
+
+        <td>The directory dialog is the one of the system: on Windows the
+        shell dialog that browses folders, with the message above the tree.</td>
+
+        <td>PM has no dialog to choose a directory (<code>WinFileDlg</code> chooses
+        files), so <code>DirectoryDialog</code> is made of SWT widgets: a window
+        with the message, a <code>Tree</code> of the drives and directories, and
+        the OK and Cancel buttons. The subdirectories of a directory are read when
+        it is expanded. Enter or a double click on a directory is the same as OK.
+        The look is that of the other SWT widgets, not of the Workplace Shell.
+        <code>getFilterPath()</code> is set to the chosen directory when the dialog
+        is accepted.</td>
+
+        <td>The tree always has one selected item (difference 013), so when the
+        filter path does not exist the deepest directory that exists is selected,
+        or the first drive, and OK accepts it.</td>
+      </tr>
     </table>
 
     <h2>Other differences</h2>
