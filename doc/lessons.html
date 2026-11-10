@@ -316,6 +316,13 @@ href="eclipseos2-xxe.css"
       inserted without it has no place yet. 400 items now take 15 to 35
       milliseconds. <code>String.getBytes()</code> was not the cause.</li>
 
+      <li>In the detail view the container does <em>not</em> draw the image of a
+      record with its text: only a column of its own does, with
+      <code>CFA_BITMAPORICON</code> and the <code>offStruct</code> of
+      <code>hbmBitmap</code> (32). <code>Table</code> puts that column (22 pixels,
+      no title) before the others when the first image is set. Only bitmaps are
+      drawn, not icons (<code>hptrIcon</code> would need another column).</li>
+
       <li>The container reports <code>CN_EMPHASIS</code> of a record that
       is selected <em>before</em> it has marked it, and after clearing the
       previous one, so asking for the selection at that moment can give nothing:

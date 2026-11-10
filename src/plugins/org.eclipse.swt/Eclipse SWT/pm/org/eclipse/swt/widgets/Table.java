@@ -57,6 +57,8 @@ public class Table extends Composite {
 	Field implicit;
 	boolean [] slotUsed;
 	boolean refreshPending;
+	/* The column that draws the images of the items, created with the first one */
+	int iconField;
 	boolean linesVisible, headerVisible;
 	/* Programmatic changes do not send the events of the user's ones */
 	boolean ignoreSelect;
@@ -246,7 +248,7 @@ void createColumn (TableColumn column, int index) {
 		return;
 	}
 	int slot = allocateSlot ();
-	int hAfter = index == 0 ? OS.CMA_FIRST : ((TableColumn) columns.elementAt (index - 1)).field.handle;
+	int hAfter = index == 0 ? (iconField != 0 ? iconField : OS.CMA_FIRST) : ((TableColumn) columns.elementAt (index - 1)).field.handle;
 	column.field = newField (slot, DEFAULT_COLUMN_WIDTH, "", hAfter);
 	columns.insertElementAt (column, index);
 	updateColumnWidth ();
@@ -473,6 +475,30 @@ Field newField (int slot, int width, String title, int hAfter) {
 	OS.free (insert);
 	if (count == 0) SWT.error (SWT.ERROR_NO_HANDLES);
 	return field;
+}
+
+/*
+ * In the detail view the container draws the image of a record only in a column of
+ * its own (CFA_BITMAPORICON, that reads hbmBitmap of the record), not with the text.
+ * It is put before the others when the first image is set.
+ */
+void ensureIconField () {
+	if (iconField != 0 || handle == 0) return;
+	int fi = send (OS.CM_ALLOCDETAILFIELDINFO, 1, 0);
+	if (fi == 0 || fi == -1) SWT.error (SWT.ERROR_NO_HANDLES);
+	Tree.poke (fi + FI_FLDATA, OS.CFA_BITMAPORICON | OS.CFA_CENTER | OS.CFA_VCENTER | OS.CFA_FIREADONLY);
+	Tree.poke (fi + FI_FLTITLE, OS.CFA_CENTER | OS.CFA_FITITLEREADONLY);
+	Tree.poke (fi + FI_OFFSTRUCT, 32);
+	Tree.poke (fi + FI_CXWIDTH, 22);
+	int insert = Tree.allocate (16);
+	Tree.poke (insert, 16);
+	Tree.poke (insert + 4, OS.CMA_FIRST);
+	Tree.poke (insert + 8, OS.TRUE);
+	Tree.poke (insert + 12, 1);
+	int count = send (OS.CM_INSERTDETAILFIELDINFO, fi, insert);
+	OS.free (insert);
+	if (count == 0) SWT.error (SWT.ERROR_NO_HANDLES);
+	iconField = fi;
 }
 
 int fieldData (int alignment) {

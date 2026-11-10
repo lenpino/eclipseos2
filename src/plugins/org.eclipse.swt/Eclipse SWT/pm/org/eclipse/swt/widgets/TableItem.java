@@ -497,6 +497,7 @@ public void setImage (int index, Image image) {
 	cellImage [slot] = image;
 	if (index != 0) return;
 	super.setImage (image);
+	if (image != null) parent.ensureIconField ();
 	/* RECORDCORE: hptrIcon 24, hptrMiniIcon 28, hbmBitmap 32, hbmMiniBitmap 36 */
 	int bitmap = 0, icon = 0;
 	if (image != null) {
