@@ -61,6 +61,14 @@ href="eclipseos2-xxe.css"
       <li>The height of the header is the height of the window minus the top of
       the viewport of the records; the order of the items, for the access by
       index, is kept in a vector.</li>
+
+      <li>One click of the user is a burst of <code>CN_EMPHASIS</code>: the
+      record that was selected is cleared, the new one is selected and the cursor
+      moves, each with its notification. Reporting each change of the selection
+      gave two <code>Selection</code> events per click (2026-11-10). The
+      notifications only ask for a check (<code>asyncExec</code>), which runs when
+      the burst is over and sends one event if the selection changed, with the
+      item that has the cursor (the focused item of Windows).</li>
     </ul>
 
     <p>The behavior that differs from Windows is in <a href="diff.html">difference

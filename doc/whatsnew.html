@@ -752,6 +752,15 @@ href="eclipseos2-xxe.css"
       screen: it works. Fixed on the way: <code>COLOR_INFO_BACKGROUND</code> was the color of the desktop; a
       <code>WM_MOUSEMOVE</code> without a move restarted the time at rest. See
       <a href="diff.html">difference 020</a>.</li>
+
+      <li><a href="swt012.html">Table</a>: a click gave two
+      <code>Selection</code> events. The container sends a burst of
+      <code>CN_EMPHASIS</code> for one click (the old record cleared, the new one
+      selected, the cursor moved) and each change of the selection was reported.
+      Now the burst is looked at once when it is over, and the event has the item
+      with the cursor, as the focused item of Windows. <kbd>SWT012_01</kbd>
+      checks a whole click done by the container (126 checks). Seen on the
+      screen: <em>to be confirmed</em>.</li>
     </ul>
   </body>
 </html>

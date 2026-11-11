@@ -545,6 +545,12 @@ href="eclipseos2-xxe.css"
       for the events to run. <code>Display.wake()</code> does nothing from the
       thread of the display.</li>
 
+      <li>A control of PM reports one action of the user with several
+      notifications (the container: clear, select, cursor). An SWT event that
+      stands for the action is sent once, after the burst: the notifications only
+      schedule a check with <code>asyncExec</code>, which runs when the queue is
+      empty (<a href="swt012.html">step 012</a>).</li>
+
       <li>PM sends <code>WM_MOUSEMOVE</code> to the window under the pointer
       when a window changes there, also when the pointer has not moved. What
       counts the time at rest (hover, tool tips) has to look at the position,
