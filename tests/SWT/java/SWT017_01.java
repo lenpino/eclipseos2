@@ -94,8 +94,7 @@ public class SWT017_01 extends SWTTestCase {
 		c.setBounds(10, 20, 2, 15);
 		check(c.getBounds().equals(new Rectangle(10, 20, 2, 15)) && c.getLocation().equals(new Point(10, 20)) && c.getSize().equals(new Point(2, 15)), "bounds, location and size");
 		check(c.getVisible() && !c.isVisible(), "visible, but not shown without the focus");
-		/* Font.equals() compares the FATTRS objects, and getFont() makes a new one each time: the data is compared */
-		check(c.getFont().getFontData()[0].equals(canvas.getFont().getFontData()[0]), "the font is the one of the canvas by default");
+		check(c.getFont().equals(canvas.getFont()), "the font is the one of the canvas by default");
 		Image image = new Image(display, 8, 12);
 		c.setImage(image);
 		check(c.getImage() == image && c.getSize().equals(new Point(8, 12)) && c.getBounds().equals(new Rectangle(10, 20, 8, 12)), "with an image the size is the one of the image");

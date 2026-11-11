@@ -131,7 +131,15 @@ public boolean equals(Object object) {
 	if (object == this) return true;
 	if (!(object instanceof Font)) return false;
 	Font font = (Font) object;
-    return device == font.device && handle == font.handle;
+    if (device != font.device) return false;
+    if (handle == null || font.handle == null) return handle == font.handle;
+    /*
+    * On Windows two fonts are equal when they have the same HFONT, and
+    * Control.getFont() gives the HFONT of the control each time. Here the
+    * handle is a FATTRS that getFont() makes anew each time, so the fonts
+    * are compared by what the FATTRS describes (difference 021).
+    */
+    return FontData.pm_new (handle).equals (FontData.pm_new (font.handle));
 }
 
 /**
@@ -162,7 +170,8 @@ public FontData[] getFontData() {
  * @see #equals
  */
 public int hashCode () {
-    return handle.hashCode();
+    if (handle == null) return 0;
+    return FontData.pm_new (handle).hashCode ();
 }
 
 void init (Device device, FontData fd) {
