@@ -464,6 +464,22 @@ href="eclipseos2-xxe.css"
 
         <td></td>
       </tr>
+
+      <tr>
+        <td>021</td>
+
+        <td>Two fonts are equal when they have the same <code>HFONT</code>:
+        <code>getFont()</code> of a control gives the same one each time, and two
+        fonts created apart with the same data are not equal.</td>
+
+        <td>The handle of a font is a <code>FATTRS</code> that
+        <code>getFont()</code> makes anew each time, so fonts are equal when they
+        describe the same font (its <code>FontData</code>): also two fonts
+        created apart with the same data.</td>
+
+        <td><code>Control.updateFont()</code>, which gives the new system font to
+        the controls that had the old one, depends on it.</td>
+      </tr>
     </table>
 
     <h2>Other differences</h2>

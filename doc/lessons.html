@@ -630,9 +630,11 @@ href="eclipseos2-xxe.css"
       <li><code>Caret</code> (<a href="swt017.html">step 017</a>) is done;
       <code>Canvas.scroll()</code> is not.</li>
 
-      <li><code>Font.equals()</code> compares the <code>FATTRS</code> objects and
-      <code>Control.getFont()</code> makes a new one each time: two calls are not
-      equal.</li>
+      <li><code>Font.equals()</code> compared the <code>FATTRS</code> objects and
+      <code>Control.getFont()</code> makes a new one each time: two calls were
+      not equal, and <code>Control.updateFont()</code> never matched. Fonts are
+      now compared by what they describe (<kbd>SWT005_03</kbd>, <a
+      href="diff.html">difference 021</a>).</li>
 
       <li>Tool tips (<a href="swt018.html">step 018</a>) are done, except for
       the <code>TabItem</code>.</li>

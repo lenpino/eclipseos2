@@ -761,6 +761,13 @@ href="eclipseos2-xxe.css"
       with the cursor, as the focused item of Windows. <kbd>SWT012_01</kbd>
       checks a whole click done by the container (126 checks). Seen on the
       screen: one event per click, also with Ctrl and Shift.</li>
+
+      <li><a href="swt005.html">Fonts</a>: <code>Font.equals()</code> compared
+      the <code>FATTRS</code> objects, so two <code>getFont()</code> of the same
+      control were not equal and <code>Control.updateFont()</code> never
+      matched. Fonts are now equal when they describe the same font. New test
+      case <kbd>SWT005_03</kbd> (8 checks). See <a href="diff.html">difference
+      021</a>.</li>
     </ul>
   </body>
 </html>

@@ -61,10 +61,10 @@ href="eclipseos2-xxe.css"
       <li><code>Canvas.scroll()</code> is not ported yet; on Windows it hides the
       caret while it scrolls.</li>
 
-      <li>Found on the way: <code>Font.equals()</code> compares the
+      <li>Found on the way: <code>Font.equals()</code> compared the
       <code>FATTRS</code> objects, and <code>Control.getFont()</code> makes a new
-      one each time, so <code>c.getFont().equals(c.getFont())</code> is
-      false.</li>
+      one each time, so <code>c.getFont().equals(c.getFont())</code> was false.
+      Fixed afterwards (<a href="diff.html">difference 021</a>).</li>
     </ul>
 
     <p>The differences with Windows are in <a href="diff.html">difference
