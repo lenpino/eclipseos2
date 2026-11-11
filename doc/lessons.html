@@ -419,6 +419,12 @@ href="eclipseos2-xxe.css"
       were waiting for a message), and the next ones printed the handles that
       showed the native cut to one byte.</li>
 
+      <li>The automatic checks that put the pointer (<kbd>SWT016_01</kbd>,
+      <kbd>SWT018_01</kbd>) fail if the mouse of the host is moved over the
+      window of the VM meanwhile: the integration puts the pointer back where the
+      mouse is. The tests say so before, and a failure says where the pointer
+      is.</li>
+
       <li>In the VM with the integration of the mouse the pointer that is seen
       is the one of the host: <code>WinSetPointerPos</code> moves the pointer of
       PM (<code>WinQueryPointerPos</code> says so) but not the one on the screen,

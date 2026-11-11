@@ -57,6 +57,14 @@ href="eclipseos2-xxe.css"
       and a hover could come late. Now only a move to another position, or to
       another control, restarts it.</li>
 
+      <li>The automatic part puts the pointer itself
+      (<code>WinSetPointerPos</code>). In the VM with the integration of the
+      mouse, moving the mouse of the host over the window of the VM puts the
+      pointer back where the mouse is, and the checks fail: the mouse must not
+      be touched until the interactive part, which the test says. A failure
+      says when the pointer is not where the test put it. The same holds for
+      <kbd>SWT016_01</kbd>.</li>
+
       <li>The window class of the statics is <code>Label.LabelClass</code>
       (<code>PSZ.getAtom(OS.WC_STATIC)</code>): <code>new
       PSZ(OS.WC_STATIC)</code> compiles too, because there is a constructor
@@ -90,8 +98,8 @@ href="eclipseos2-xxe.css"
 
         <td>Done [lpino]</td>
 
-        <td>Checked by <kbd>SWT018_01</kbd>. Seen on the screen: <em>to be
-        confirmed</em>.</td>
+        <td>Checked by <kbd>SWT018_01</kbd>. Seen on the screen: it works
+        (2026-11-10).</td>
       </tr>
 
       <tr>
