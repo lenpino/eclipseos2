@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/css"
+href="eclipseos2-xxe.css"
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"xhtml1-strict.dtd">
+<html>
+  <head>
+    <link href="eclipseos2.css" rel="stylesheet" type="text/css" />
+
+    <title>Eclipse for OS/2 Transitional Project Notes</title>
+  </head>
+
+  <body>
+    <h1>SWT Step 018. Tool tips</h1>
+
+    <h2>Objective</h2>
+
+    <p>Show the tool tips of the controls (<code>Control.setToolTipText()</code>,
+    which was commented out) and of the tool items. The test case
+    <kbd>SWT018_01</kbd> shows the window, puts the pointer over the controls
+    and reads the window of the tool tip after each wait (23 automatic checks);
+    its interactive part has a button, a text, a label, a canvas and a tool bar
+    with tool tips.</p>
+
+    <h2>Task notes</h2>
+
+    <ul>
+      <li>PM has no tool tip control. The <code>Display</code> shows a window of
+      its own made of static controls: a black rectangle (the border), a light
+      yellow one inside, and a text for each line of the tool tip (a
+      <code>\n</code> gives two lines, as on Windows). It is a child of the
+      desktop, not a <code>Shell</code>: it is not in
+      <code>getShells()</code> and it takes neither the focus nor the
+      activation.</li>
+
+      <li>The timer of the mouse of <a href="swt016.html">step 016</a> decides
+      when: after 500 ms at rest on a control with a tool tip text it is shown
+      below the pointer (above it when there is no room); it goes away when the
+      pointer leaves the control, when a button or a key is pressed (then it
+      does not come back until the pointer leaves the control) and after 5
+      seconds. A new text replaces it while it is shown; no text, or the
+      control disposed, takes it away.</li>
+
+      <li>A <code>ToolItem</code> is a button of its own (<a
+      href="swt010.html">step 010</a>): its tool tip text goes to the
+      button.</li>
+
+      <li><code>Display.getSystemColor(SWT.COLOR_INFO_BACKGROUND)</code> gave
+      the color of the desktop (<code>SYSCLR_BACKGROUND</code>); now it is the
+      yellow of the tool tips of Windows, 255, 255, 225.</li>
+
+      <li>A defect of step 016 that the tool tips showed: PM sends
+      <code>WM_MOUSEMOVE</code> to the window under the pointer when a window
+      changes there, also when the pointer does not move (the tool tip that goes
+      away). That restarted the time at rest, so a changed text did not come back
+      and a hover could come late. Now only a move to another position, or to
+      another control, restarts it.</li>
+
+      <li>The window class of the statics is <code>Label.LabelClass</code>
+      (<code>PSZ.getAtom(OS.WC_STATIC)</code>): <code>new
+      PSZ(OS.WC_STATIC)</code> compiles too, because there is a constructor
+      <code>PSZ(int length)</code>, and gives an empty buffer.</li>
+    </ul>
+
+    <p>The differences with Windows are in <a href="diff.html">difference
+    020</a>.</p>
+
+    <h2>Step checklist</h2>
+
+    <table>
+      <col width="40%" />
+
+      <col />
+
+      <col width="50%" />
+
+      <thead>
+        <tr>
+          <th>Operation</th>
+
+          <th>Status</th>
+
+          <th>Remarks</th>
+        </tr>
+      </thead>
+
+      <tr>
+        <td>Tool tips of the controls and of the tool items</td>
+
+        <td>Done [lpino]</td>
+
+        <td>Checked by <kbd>SWT018_01</kbd>. Seen on the screen: <em>to be
+        confirmed</em>.</td>
+      </tr>
+
+      <tr>
+        <td>Tool tips of the <code>TabItem</code></td>
+
+        <td>Not done</td>
+
+        <td>The text is only kept: the tabs are not windows of their own.</td>
+      </tr>
+    </table>
+  </body>
+</html>

@@ -480,6 +480,12 @@ href="eclipseos2-xxe.css"
       on port 22 of the known addresses tells whether it moved; on 2026-11-10 it
       went to another network (<code>172.20.10.11</code>).</li>
 
+      <li>A <code>vm.sh</code> session can stay open after the program it ran
+      has ended (no <kbd>java</kbd> left in <code>pstat</code>), and the output
+      is lost. Writing the output to a file of the VM
+      (<code>java ... &gt; t.out 2&gt;&amp;1</code>) and reading it with
+      <code>type</code> in a second call does not depend on it.</li>
+
       <li><code>ant.cmd dll</code> builds the DLL but cannot copy it while a test
       that uses it is open (<code>SYS0032</code>, and still
       <code>BUILD SUCCESSFUL</code>): the window of the test has to be closed
@@ -532,6 +538,11 @@ href="eclipseos2-xxe.css"
       go through the queue: it has to post something (a <code>WM_NULL</code>)
       for the events to run. <code>Display.wake()</code> does nothing from the
       thread of the display.</li>
+
+      <li>PM sends <code>WM_MOUSEMOVE</code> to the window under the pointer
+      when a window changes there, also when the pointer has not moved. What
+      counts the time at rest (hover, tool tips) has to look at the position,
+      not at the message (<a href="swt018.html">step 018</a>).</li>
 
       <li>A native that has never been called may be wrong. A handle that only
       shares its last digits with the right one is a value returned with a
@@ -611,7 +622,10 @@ href="eclipseos2-xxe.css"
       <code>Control.getFont()</code> makes a new one each time: two calls are not
       equal.</li>
 
-      <li>Not ported: tool tips (<code>Control</code> only keeps the
+      <li>Tool tips (<a href="swt018.html">step 018</a>) are done, except for
+      the <code>TabItem</code>.</li>
+
+      <li>Not ported: (<code>Control</code> only keeps the
       text), AWT, drag and drop, printing, OLE.</li>
     </ul>
   </body>

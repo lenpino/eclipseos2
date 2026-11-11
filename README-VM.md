@@ -91,6 +91,9 @@ variables de entorno `VM_HOST`, `VM_USER`, `VM_PASS`, `VM_SWT_DIR`).
   (`SYS0032`, y aun así `BUILD SUCCESSFUL`): cerrar antes la ventana de la
   prueba. Un `cd` a una carpeta con espacios dentro de `vm.sh` falla
   (`SYS0003`) y lo que sigue se ejecuta en otra carpeta.
+- Una sesión de `vm.sh` puede quedarse abierta aunque el programa ya haya
+  terminado, y la salida se pierde. Más seguro: `java ... > t.out 2>&1` en una
+  llamada y `type t.out` en otra.
 - Si la VM no contesta (`vm.sh` termina con 255 sin imprimir nada), mirar con
   `nc -z -G 2 <ip> 22` en las IPs conocidas si cambió de dirección.
 - Tras commitear páginas de `doc/`, enviarlas a la VM:
