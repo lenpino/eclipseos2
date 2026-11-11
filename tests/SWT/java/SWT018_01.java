@@ -57,10 +57,26 @@ public class SWT018_01 extends SWTTestCase {
 		return new Shell(display, SWT.SHELL_TRIM | SWT.NO_REDRAW_RESIZE);
 	}
 
+	/* Where the test put the pointer last (PM coordinates) */
+	int[] placed;
+
 	void check(boolean ok, String what) {
 		checks++;
 		say((ok ? "  ok    " : "  FAIL  ") + what);
-		if (!ok) throw new RuntimeException("Check failed: " + what);
+		if (!ok) {
+			/*
+			 * The checks put the pointer themselves. In a VM with the integration of the
+			 * mouse, the mouse of the host moving over the window of the VM puts it back
+			 * where it is, and then another control has it.
+			 */
+			int[] now = new int[2];
+			OS.WinQueryPointerPos(OS.HWND_DESKTOP, now);
+			if (placed != null && (now[0] != placed[0] || now[1] != placed[1])) {
+				say("        The pointer is not where the test put it (" + now[0] + "," + now[1] + " instead of " + placed[0] + "," + placed[1]
+					+ "): was the mouse moved? Keep it out of the window of the VM during the automatic checks.");
+			}
+			throw new RuntimeException("Check failed: " + what);
+		}
 	}
 
 	void run(int milliseconds) {
@@ -79,6 +95,7 @@ public class SWT018_01 extends SWTTestCase {
 	/** Puts the pointer at a point of the screen (SWT coordinates) and sends WM_MOUSEMOVE to the window there. */
 	void pointAt(Point p) {
 		int[] pt = new int[] {p.x, screenHeight() - 1 - p.y};
+		placed = new int[] {pt[0], pt[1]};
 		OS.WinSetPointerPos(OS.HWND_DESKTOP, pt[0], pt[1]);
 		int hwnd = OS.WinWindowFromPoint(OS.HWND_DESKTOP, pt, true);
 		OS.WinMapWindowPoints(OS.HWND_DESKTOP, hwnd, pt, 1);
@@ -248,6 +265,7 @@ public class SWT018_01 extends SWTTestCase {
 		tool.setText("Item");
 		checkApi();
 		/* The window is shown and the pointer goes where the messages say (see SWT016_01) */
+		say("The pointer is moved by the test: do not touch the mouse until the interactive part.");
 		shell.setLocation(40, 40);
 		shell.open();
 		run(300);
