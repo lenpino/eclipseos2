@@ -1449,11 +1449,9 @@ void releaseWidget () {
 //    if (OS.IsDBLocale) {
 //        OS.ImmAssociateContext (handle, 0);
 //    }
-//    if (toolTipText != null) {
-//        Shell shell = getShell ();
-//        shell.setToolTipText (handle, null);
-//    }
     toolTipText = null;
+    Display display = getDisplay ();
+    if (display.toolTipControl == this) display.toolTipChanged (this);
 
     if (menu != null && !menu.isDisposed ()) {
             menu.dispose ();
@@ -2474,12 +2472,11 @@ boolean setTabItemFocus () {
  *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
  * </ul>
  */
-//@@TODO(dmik)
-//public void setToolTipText (String string) {
-//    checkWidget ();
-//    Shell shell = getShell ();
-//    shell.setToolTipText (handle, toolTipText = string);
-//}
+public void setToolTipText (String string) {
+    checkWidget ();
+    toolTipText = string;
+    getDisplay ().toolTipChanged (this);
+}
 
 /**
  * Marks the receiver as visible if the argument is <code>true</code>,
@@ -3629,16 +3626,17 @@ MRESULT WM_MENUSELECT (int mp1, int mp2) {
 MRESULT WM_MOUSEMOVE (int mp1, int mp2) {
     Display display = getDisplay ();
     int x = (short) (mp1 & 0xFFFF), y = (short) (mp1 >> 16);
-    display.mouseMoved (this, x, getHeight () - 1 - y);
-    if (isDisposed ()) return MRESULT.TRUE;
     /*
     * PM sends WM_MOUSEMOVE also when the pointer does not move (when a
-    * window changes under it). The position is taken from the message,
-    * in screen coordinates, as Windows does with GetMessagePos().
+    * window changes under it, like the tool tip that goes away). The
+    * position is taken from the message, in screen coordinates, as Windows
+    * does with GetMessagePos(); such a message does not count as a move.
     */
     int[] pnt = new int [] {x, y};
     OS.WinMapWindowPoints (handle, OS.HWND_DESKTOP, pnt, 1);
     int pos = (pnt [1] << 16) | (pnt [0] & 0xFFFF);
+    display.mouseMoved (this, x, getHeight () - 1 - y, pos != display.lastMouse);
+    if (isDisposed ()) return MRESULT.TRUE;
     if (pos != display.lastMouse) {
         display.lastMouse = pos;
         sendMouseEvent (SWT.MouseMove, 0, OS.WM_MOUSEMOVE, mp1, mp2);

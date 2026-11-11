@@ -151,6 +151,23 @@ public class Display extends Device {
             checkMouse ();
         }
     };
+
+    /*
+    * Tool tips. Windows has a tool tip control; PM has none, so the
+    * display shows a window of its own, made of static controls (a
+    * black rectangle as the border, a light yellow one inside, a text
+    * for each line), with the timer of the mouse: after TOOLTIP_DELAY at
+    * rest on a control with a tool tip text it is shown under the pointer,
+    * and it goes away when the pointer leaves the control, when a button
+    * or a key is pressed and after TOOLTIP_TIME, as on Windows.
+    */
+    int hwndToolTip;
+    Control toolTipControl;
+    boolean toolTipDone;
+    long toolTipTime;
+    static final int TOOLTIP_DELAY = 500, TOOLTIP_TIME = 5000;
+    /* The color of the tool tips of Windows: PM has no such color */
+    static final int INFO_BACKGROUND = 0xFFFFE1;
     byte [] keyboard = new byte [256];
     boolean accelKeyHit, mnemonicKeyHit;
 
@@ -543,6 +560,14 @@ boolean filterMessage (QMSG qmsg) {
     if (wndProc == Decorations.FrameProc) return false;
     
     int msg = qmsg.msg;
+    /* A button or a key takes the tool tip away until the pointer leaves the control */
+    if (toolTipControl != null) {
+        boolean keyDown = msg == OS.WM_CHAR && (qmsg.mp1 & OS.KC_KEYUP) == 0;
+        if (keyDown || msg == OS.WM_BUTTON1DOWN || msg == OS.WM_BUTTON2DOWN || msg == OS.WM_BUTTON3DOWN) {
+            hideToolTip ();
+            toolTipDone = true;
+        }
+    }
     if (msg == OS.WM_CHAR) {
         Control control = findControl (qmsg.hwnd);
         if (control != null) {
@@ -1064,7 +1089,8 @@ public Color getSystemColor (int id) {
         case SWT.COLOR_LIST_SELECTION:      pixel = OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_MENUHILITEBGND,0);   break;
         case SWT.COLOR_LIST_SELECTION_TEXT:     pixel =OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_MENUHILITE,0);   break;
         case SWT.COLOR_INFO_FOREGROUND:     pixel = OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_WINDOWTEXT,0);   break;
-         case SWT.COLOR_INFO_BACKGROUND:     pixel = OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_BACKGROUND,0);   break;
+        /* SYSCLR_BACKGROUND is the color of the desktop: PM has no color for tool tips */
+        case SWT.COLOR_INFO_BACKGROUND:     pixel = INFO_BACKGROUND;   break;
         case SWT.COLOR_TITLE_FOREGROUND:        pixel =OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_ACTIVETITLETEXT,0);   break;
         case SWT.COLOR_TITLE_BACKGROUND:        pixel = OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_ACTIVETITLE,0);   break;
         case SWT.COLOR_TITLE_BACKGROUND_GRADIENT:	pixel = OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_ACTIVETITLE,0);   break;
@@ -1411,6 +1437,9 @@ void releaseDisplay () {
 //        messageCallback.dispose ();
 //        messageCallback = null;
 //    }
+
+    if (hwndToolTip != 0) OS.WinDestroyWindow (hwndToolTip);
+    hwndToolTip = 0;
 
     /* Destroy the message only HWND */
     if (hwndShell != 0) OS.WinDestroyWindow (hwndShell);
@@ -1910,19 +1939,31 @@ public void timerExec (int milliseconds, Runnable runnable) {
  * MouseExit and this one MouseEnter, as on Windows when the pointer goes
  * from a window to another, also from a parent to its child.
  */
-void mouseMoved (Control control, int x, int y) {
+void mouseMoved (Control control, int x, int y, boolean moved) {
     if (control != mouseControl) {
+        moved = true;
         Control old = mouseControl;
         mouseControl = control;
+        hideToolTip ();
+        toolTipDone = false;
         if (old != null && !old.isDisposed ()) old.postMouseEvent (SWT.MouseExit);
         if (control.isDisposed ()) return;
         Event event = new Event ();
         event.x = x;  event.y = y;
         control.postEvent (SWT.MouseEnter, event);
     }
-    mouseTime = System.currentTimeMillis ();
-    mouseHovered = false;
-    if (!mouseChecking && (control.hooks (SWT.MouseExit) || control.hooks (SWT.MouseHover))) {
+    /* The time at rest (hover, tool tip) starts again only when the pointer moves */
+    if (moved) {
+        mouseTime = System.currentTimeMillis ();
+        mouseHovered = false;
+    }
+    startMouseCheck (control);
+}
+
+/* The timer runs while the control needs it: Exit, Hover or a tool tip */
+void startMouseCheck (Control control) {
+    if (mouseChecking) return;
+    if (control.hooks (SWT.MouseExit) || control.hooks (SWT.MouseHover) || control.toolTipText != null || toolTipControl == control) {
         mouseChecking = true;
         timerExec (MOUSE_CHECK_TIME, mouseCheck);
     }
@@ -1957,17 +1998,104 @@ void checkMouse () {
     boolean inside = OS.WinQueryCapture (OS.HWND_DESKTOP) == control.handle || controlAt (pt [0], pt [1]) == control;
     if (!inside) {
         mouseControl = null;
+        hideToolTip ();
+        toolTipDone = false;
         control.postMouseEvent (SWT.MouseExit);
         return;
     }
-    if (!mouseHovered && System.currentTimeMillis () - mouseTime >= HOVER_TIME) {
+    long now = System.currentTimeMillis ();
+    if (!mouseHovered && now - mouseTime >= HOVER_TIME) {
         mouseHovered = true;
         control.postMouseEvent (SWT.MouseHover);
     }
-    if (control.hooks (SWT.MouseExit) || control.hooks (SWT.MouseHover)) {
-        mouseChecking = true;
-        timerExec (MOUSE_CHECK_TIME, mouseCheck);
+    if (control.toolTipText != null && !toolTipDone) {
+        if (toolTipControl != control) {
+            if (now - mouseTime >= TOOLTIP_DELAY) showToolTip (control, pt [0], pt [1]);
+        } else {
+            if (now - toolTipTime >= TOOLTIP_TIME) {
+                hideToolTip ();
+                toolTipDone = true;
+            }
+        }
     }
+    startMouseCheck (control);
+}
+
+/*
+ * Shows the tool tip of the control under the pointer (PM coordinates of
+ * the screen): below it, or above it when there is no room below.
+ */
+void showToolTip (Control control, int x, int y) {
+    hideToolTip ();
+    String text = control.toolTipText;
+    java.util.Vector lines = new java.util.Vector ();
+    int start = 0, end;
+    while ((end = text.indexOf ('\n', start)) != -1) {
+        lines.addElement (text.substring (start, end));
+        start = end + 1;
+    }
+    lines.addElement (text.substring (start));
+    GC gc = new GC (control);
+    gc.setFont (getSystemFont ());
+    int lineHeight = gc.getFontMetrics ().getHeight ();
+    int textWidth = 0;
+    for (int i = 0; i < lines.size (); i++) {
+        textWidth = Math.max (textWidth, gc.stringExtent ((String) lines.elementAt (i)).x);
+    }
+    gc.dispose ();
+    int margin = 3;
+    int width = textWidth + 2 * (margin + 1), height = lines.size () * lineHeight + 2 * (margin - 1) + 2;
+    /* The old windows of the tool tip are replaced: the text and its number of lines change */
+    if (hwndToolTip != 0) OS.WinDestroyWindow (hwndToolTip);
+    hwndToolTip = OS.WinCreateWindow (OS.HWND_DESKTOP, Label.LabelClass, null,
+        OS.SS_FGNDRECT, 0, 0, width, height, 0, OS.HWND_TOP, 0, 0, 0);
+    if (hwndToolTip == 0) return;
+    setToolTipColor (hwndToolTip, OS.PP_FOREGROUNDCOLOR, OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_WINDOWTEXT, 0));
+    int inside = OS.WinCreateWindow (hwndToolTip, Label.LabelClass, null,
+        OS.WS_VISIBLE | OS.SS_FGNDRECT, 1, 1, width - 2, height - 2, 0, OS.HWND_TOP, 0, 0, 0);
+    setToolTipColor (inside, OS.PP_FOREGROUNDCOLOR, INFO_BACKGROUND);
+    byte[] font = new PSZ (composeFontNameSize (systemFont ())).getBytes ();
+    for (int i = 0; i < lines.size (); i++) {
+        /* An empty PSZ is an array of one byte, which the natives cannot release */
+        String string = (String) lines.elementAt (i);
+        if (string.length () == 0) string = " ";
+        int line = OS.WinCreateWindow (inside, Label.LabelClass, new PSZ (string),
+            OS.WS_VISIBLE | OS.SS_TEXT | OS.DT_LEFT | OS.DT_VCENTER,
+            margin, height - 2 - (margin - 1) - (i + 1) * lineHeight, textWidth + 2, lineHeight, 0, OS.HWND_TOP, 0, 0, 0);
+        OS.WinSetPresParam (line, OS.PP_FONTNAMESIZE, font.length, font);
+        setToolTipColor (line, OS.PP_BACKGROUNDCOLOR, INFO_BACKGROUND);
+        setToolTipColor (line, OS.PP_FOREGROUNDCOLOR, OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_WINDOWTEXT, 0));
+    }
+    int screenWidth = OS.WinQuerySysValue (OS.HWND_DESKTOP, OS.SV_CXSCREEN);
+    int screenHeight = OS.WinQuerySysValue (OS.HWND_DESKTOP, OS.SV_CYSCREEN);
+    /* Below the pointer leaves room for the pointer itself, as on Windows */
+    int tipX = Math.max (0, Math.min (x, screenWidth - width));
+    int tipY = y - OS.WinQuerySysValue (OS.HWND_DESKTOP, OS.SV_CYPOINTER) - height;
+    if (tipY < 0) tipY = Math.min (y + 4, screenHeight - height);
+    OS.WinSetWindowPos (hwndToolTip, OS.HWND_TOP, tipX, tipY, width, height,
+        OS.SWP_MOVE | OS.SWP_SIZE | OS.SWP_ZORDER | OS.SWP_SHOW);
+    toolTipControl = control;
+    toolTipTime = System.currentTimeMillis ();
+}
+
+static void setToolTipColor (int hwnd, int index, int rgb) {
+    OS.WinSetPresParam (hwnd, index, 4, new int [] {rgb});
+}
+
+void hideToolTip () {
+    if (toolTipControl == null) return;
+    toolTipControl = null;
+    if (hwndToolTip != 0) OS.WinShowWindow (hwndToolTip, false);
+}
+
+/* Called when the tool tip text of a control changes or the control goes away */
+void toolTipChanged (Control control) {
+    if (toolTipControl == control) {
+        hideToolTip ();
+        /* With a new text it comes back at once, if the pointer is still resting */
+        toolTipDone = false;
+    }
+    if (control == mouseControl && !control.isDisposed ()) startMouseCheck (control);
 }
 
 boolean translateAccelerator (QMSG qmsg, Control control) {

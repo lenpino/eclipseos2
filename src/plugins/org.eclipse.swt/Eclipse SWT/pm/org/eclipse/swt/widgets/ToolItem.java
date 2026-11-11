@@ -695,6 +695,9 @@ public void setText (String string) {
 public void setToolTipText (String string) {
 	checkWidget();
 	toolTipText = string;
+	/* The item is a button of its own: the tool tip is the one of the button */
+	if (button != null) button.setToolTipText (string);
+	if (arrow != null) arrow.setToolTipText (string);
 }
 
 /**

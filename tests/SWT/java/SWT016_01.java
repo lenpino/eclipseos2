@@ -197,11 +197,12 @@ public class SWT016_01 extends SWTTestCase {
 	void checkLeave() {
 		saySubObjective("Leaving the program and resting on a control");
 		move(a, 30, 30);
-		taken();
+		/* A tick of the timer that was already due may bring the Exit at once: it counts too */
+		String first = taken();
 		/* The window is hidden again: the pointer of the screen is not over the control */
 		run(300);
-		String s = taken();
-		check(s.startsWith("Exit a "), "a hidden control loses the pointer too: " + s);
+		String s = first + " | " + taken();
+		check(s.indexOf("Exit a ") >= 0, "a hidden control loses the pointer too: " + s);
 		run(500);
 		check(taken().equals(""), "once");
 
