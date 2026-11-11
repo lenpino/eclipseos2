@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/css"
+href="eclipseos2-xxe.css"
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"xhtml1-strict.dtd">
+<html>
+  <head>
+    <link href="eclipseos2.css" rel="stylesheet" type="text/css" />
+
+    <title>Eclipse for OS/2 Transitional Project Notes</title>
+  </head>
+
+  <body>
+    <h1>SWT Step 019. Scrolling a canvas</h1>
+
+    <h2>Objective</h2>
+
+    <p>Implement <code>Canvas.scroll()</code>, which text editors use to move
+    their contents. The test case <kbd>SWT019_01</kbd> shows the window and reads
+    the pixels of the screen before and after scrolling (10 automatic checks);
+    its interactive part scrolls lines of text with buttons.</p>
+
+    <h2>Task notes</h2>
+
+    <ul>
+      <li>As on Windows: the caret is hidden while the area is scrolled (it must
+      not be copied with it), the pending paints are flushed
+      (<code>WinUpdateWindow</code>, where Windows uses
+      <code>RedrawWindow</code>), the area is copied with
+      <code>WinScrollWindow</code> and the part of it that is not covered by the
+      copy is invalidated (<code>SW_INVALIDATERGN</code>).</li>
+
+      <li>The rectangle is turned for the y of PM, and so is the vertical move:
+      a positive <code>destY - y</code> (down in SWT) is a negative move in
+      PM.</li>
+
+      <li>With <code>all</code>, Windows moves the children that intersect the
+      area. The canvas moves them itself, so that the children out of the area
+      stay whatever <code>SW_SCROLLCHILDREN</code> of PM would do with
+      them.</li>
+
+      <li>The checks: the canvas paints a black square, then stops painting it
+      and scrolls. A black square at the destination can only come from the
+      copy, and white where it was means that the uncovered part was repainted.
+      A wrong sign of the vertical move would put it elsewhere.</li>
+
+      <li>A mistake of the first version of the test, not of the port:
+      <code>scroll(30, 0, 0, 50, ...)</code> also moves the area up 50, and the
+      child that went from y 70 to 20 was right. The arguments are the
+      destination and the source, not a displacement.</li>
+    </ul>
+
+    <h2>Step checklist</h2>
+
+    <table>
+      <col width="40%" />
+
+      <col />
+
+      <col width="50%" />
+
+      <thead>
+        <tr>
+          <th>Operation</th>
+
+          <th>Status</th>
+
+          <th>Remarks</th>
+        </tr>
+      </thead>
+
+      <tr>
+        <td><code>Canvas.scroll()</code>: copy, repaint, children, caret</td>
+
+        <td>Done [lpino]</td>
+
+        <td>Checked by <kbd>SWT019_01</kbd>. Seen on the screen: <em>to be
+        confirmed</em>.</td>
+      </tr>
+    </table>
+  </body>
+</html>

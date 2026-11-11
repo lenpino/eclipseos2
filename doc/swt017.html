@@ -58,8 +58,8 @@ href="eclipseos2-xxe.css"
       caret: the box now paints its own background (<code>NO_BACKGROUND</code>,
       which the port honours) and repaints only from the changed letter on.</li>
 
-      <li><code>Canvas.scroll()</code> is not ported yet; on Windows it hides the
-      caret while it scrolls.</li>
+      <li><code>Canvas.scroll()</code> hides the caret while it scrolls (<a
+      href="swt019.html">step 019</a>).</li>
 
       <li>Found on the way: <code>Font.equals()</code> compared the
       <code>FATTRS</code> objects, and <code>Control.getFont()</code> makes a new
