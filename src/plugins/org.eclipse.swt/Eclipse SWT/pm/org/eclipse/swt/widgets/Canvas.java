@@ -120,52 +120,64 @@ void releaseWidget () {
 	super.releaseWidget ();
 }
 //
-///**
-// * Scrolls a rectangular area of the receiver by first copying 
-// * the source area to the destination and then causing the area
-// * of the source which is not covered by the destination to
-// * be repainted. Children that intersect the rectangle are
-// * optionally moved during the operation. In addition, outstanding
-// * paint events are flushed before the source area is copied to
-// * ensure that the contents of the canvas are drawn correctly.
-// *
-// * @param destX the x coordinate of the destination
-// * @param destY the y coordinate of the destination
-// * @param x the x coordinate of the source
-// * @param y the y coordinate of the source
-// * @param width the width of the area
-// * @param height the height of the area
-// * @param all <code>true</code>if children should be scrolled, and <code>false</code> otherwise
-// *
-// * @exception SWTException <ul>
-// *    <li>ERROR_WIDGET_DISPOSED - if the receiver has been disposed</li>
-// *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
-// * </ul>
-// */
-//public void scroll (int destX, int destY, int x, int y, int width, int height, boolean all) {
-//	checkWidget ();
-//		
-//	/* Remove the caret so it won't get scrolled */
-//	boolean isFocus = caret != null && caret.isFocusCaret ();
-//	if (isFocus) caret.killFocus ();
-//
-//	/* Flush outstanding WM_PAINT's and scroll the window */
-//	if (OS.IsWinCE) {
-//		OS.UpdateWindow (handle);
-//	} else {
-//		int flags = OS.RDW_UPDATENOW | OS.RDW_ALLCHILDREN;
-//		OS.RedrawWindow (handle, null, 0, flags);
-//	}
-//	RECT rect = new RECT ();
-//	OS.SetRect (rect, x, y, x + width, y + height);
-//	int deltaX = destX - x, deltaY = destY - y;
-//	int flags = OS.SW_INVALIDATE | OS.SW_ERASE;
-//	if (all) flags |= OS.SW_SCROLLCHILDREN;
-//	OS.ScrollWindowEx (handle, deltaX, deltaY, rect, null, 0, null, flags);
-//
-//	/* Restore the caret */
-//	if (isFocus) caret.setFocus ();
-//}
+/**
+ * Scrolls a rectangular area of the receiver by first copying 
+ * the source area to the destination and then causing the area
+ * of the source which is not covered by the destination to
+ * be repainted. Children that intersect the rectangle are
+ * optionally moved during the operation. In addition, outstanding
+ * paint events are flushed before the source area is copied to
+ * ensure that the contents of the canvas are drawn correctly.
+ *
+ * @param destX the x coordinate of the destination
+ * @param destY the y coordinate of the destination
+ * @param x the x coordinate of the source
+ * @param y the y coordinate of the source
+ * @param width the width of the area
+ * @param height the height of the area
+ * @param all <code>true</code>if children should be scrolled, and <code>false</code> otherwise
+ *
+ * @exception SWTException <ul>
+ *    <li>ERROR_WIDGET_DISPOSED - if the receiver has been disposed</li>
+ *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
+ * </ul>
+ */
+public void scroll (int destX, int destY, int x, int y, int width, int height, boolean all) {
+	checkWidget ();
+		
+	/* Remove the caret so it won't get scrolled */
+	boolean isFocus = caret != null && caret.isFocusCaret ();
+	if (isFocus) caret.killFocus ();
+
+	/* Flush outstanding WM_PAINT's and scroll the window */
+	OS.WinUpdateWindow (handle);
+	/* The y of PM grows upwards: the rectangle is turned and so is the move */
+	int windowHeight = getHeight ();
+	RECTL rect = new RECTL ();
+	rect.xLeft = x;  rect.xRight = x + width;
+	rect.yTop = windowHeight - y;  rect.yBottom = windowHeight - (y + height);
+	int deltaX = destX - x, deltaY = destY - y;
+	OS.WinScrollWindow (handle, deltaX, -deltaY, rect, null, 0, null, OS.SW_INVALIDATERGN);
+
+	/*
+	* Windows moves the children that intersect the area. They are moved
+	* here, so that it is the same whatever SW_SCROLLCHILDREN of PM does
+	* with the ones out of the area.
+	*/
+	if (all) {
+		Rectangle area = new Rectangle (x, y, width, height);
+		Control [] children = _getChildren ();
+		for (int i=0; i<children.length; i++) {
+			Rectangle bounds = children [i].getBounds ();
+			if (bounds.intersects (area)) {
+				children [i].setLocation (bounds.x + deltaX, bounds.y + deltaY);
+			}
+		}
+	}
+
+	/* Restore the caret */
+	if (isFocus) caret.setFocus ();
+}
 //
 /**
  * Sets the receiver's caret.
