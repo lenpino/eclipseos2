@@ -354,6 +354,21 @@ public class SWT012_01 extends SWTTestCase {
 		check(counts[0] >= 3 && selected[0] != null, "a notification before the record is marked selected still gives an item (events: " + counts[0] + ", item " + (selected[0] == null ? "null" : selected[0].getText()) + ")");
 		OS.free(emphasis);
 
+		/*
+		 * A whole click of the user, as the container does it: it clears the record that was
+		 * selected, selects the new one and moves the cursor to it, with a notification for
+		 * each change (sent to the container directly, so that it notifies by itself).
+		 * Windows sends one Selection for it, with the item that has the focus.
+		 */
+		table.setSelection(0);
+		pump();
+		int before = counts[0];
+		OS.WinSendMsg(table.handle, OS.CM_SETRECORDEMPHASIS, third_handle(table, 0), OS.MPFROM2SHORT((short) 0, (short) OS.CRA_SELECTED));
+		OS.WinSendMsg(table.handle, OS.CM_SETRECORDEMPHASIS, third_handle(table, 1), OS.MPFROM2SHORT((short) 1, (short) OS.CRA_SELECTED));
+		OS.WinSendMsg(table.handle, OS.CM_SETRECORDEMPHASIS, third_handle(table, 1), OS.MPFROM2SHORT((short) 1, (short) OS.CRA_CURSORED));
+		pump();
+		check(counts[0] - before == 1 && selected[0] == second, "a click is one Selection, with the item clicked (events: " + (counts[0] - before) + ", item " + (selected[0] == null ? "null" : selected[0].getText()) + ")");
+
 		/* NOTIFYRECORDENTER: hwndCnr, fKey, pRecord */
 		int enter = allocate(12);
 		poke(enter, table.handle);

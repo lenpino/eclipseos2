@@ -64,6 +64,15 @@ public class Table extends Composite {
 	boolean ignoreSelect;
 	/* The selection that was last reported, to report only a change */
 	int selectionKey;
+	/*
+	* One click of the user is a burst of CN_EMPHASIS (the record that was
+	* selected is cleared, the new one selected, the cursor moved). They are
+	* looked at once, when the burst is over, so that the click gives one
+	* Selection, as on Windows.
+	*/
+	boolean selectionPending;
+	int lastEmphasis;
+	Runnable selectionCheck;
 	/* The container keeps the pointer to the structure of CM_SETCNRINFO: it has to live as long as the table */
 	int cnrInfoPtr;
 	/* A string with nothing: what the cells point to until they have a text (the container does not take a null pointer) */
@@ -1610,9 +1619,9 @@ MRESULT wmControlChild (int mp1, int mp2) {
 			/* NOTIFYRECORDEMPHASIS: hwndCnr, pRecord, fEmphasisMask */
 			int hRecord = Tree.peek (mp2 + 4);
 			int mask = Tree.peek (mp2 + 8);
-			if (!ignoreSelect && (mask & OS.CRA_SELECTED) != 0 && hRecord != 0) {
+			if (!ignoreSelect && (mask & (OS.CRA_SELECTED | OS.CRA_CURSORED)) != 0 && hRecord != 0) {
 				/* A SINGLE table keeps the record that was clicked */
-				if ((style & SWT.SINGLE) != 0 && isRecordSelected (hRecord)) {
+				if ((mask & OS.CRA_SELECTED) != 0 && (style & SWT.SINGLE) != 0 && isRecordSelected (hRecord)) {
 					boolean oldIgnore = ignoreSelect;
 					ignoreSelect = true;
 					for (int i=0; i<order.size (); i++) {
@@ -1623,24 +1632,17 @@ MRESULT wmControlChild (int mp1, int mp2) {
 					}
 					ignoreSelect = oldIgnore;
 				}
-				int key = selectionKey ();
-				if (key != selectionKey) {
-					selectionKey = key;
-					/*
-					* The container may report the record before it has marked it as selected
-					* (the previous one is cleared first), so the record of the notification
-					* is the item, and the selection is only a fallback.
-					*/
-					TableItem item = itemOf (hRecord);
-					if (item == null) {
-						TableItem [] selection = getSelection ();
-						item = selection.length > 0 ? selection [0] : null;
+				lastEmphasis = hRecord;
+				if (!selectionPending) {
+					selectionPending = true;
+					if (selectionCheck == null) {
+						selectionCheck = new Runnable () {
+							public void run () {
+								checkSelection ();
+							}
+						};
 					}
-					if (item != null) {
-						Event event = new Event ();
-						event.item = item;
-						postEvent (SWT.Selection, event);
-					}
+					getDisplay ().asyncExec (selectionCheck);
 				}
 			}
 			break;
@@ -1657,6 +1659,37 @@ MRESULT wmControlChild (int mp1, int mp2) {
 		}
 	}
 	return super.wmControlChild (mp1, mp2);
+}
+
+/*
+ * Runs when the notifications of a click are over: one Selection if the
+ * selection changed, with the item that has the cursor (the focus of
+ * Windows), or else the record of the last notification.
+ */
+void checkSelection () {
+	selectionPending = false;
+	if (isDisposed ()) return;
+	int key = selectionKey ();
+	if (key == selectionKey) return;
+	selectionKey = key;
+	TableItem item = null;
+	for (int i=0; i<order.size () && item == null; i++) {
+		TableItem other = (TableItem) order.elementAt (i);
+		if ((Tree.peek (other.handle + Tree.REC_FLAGS) & OS.CRA_CURSORED) != 0) item = other;
+	}
+	/* Without a cursor on a selected item, the record that was reported last */
+	if (item == null || (!isRecordSelected (item.handle) && isRecordSelected (lastEmphasis))) {
+		TableItem last = itemOf (lastEmphasis);
+		if (last != null) item = last;
+	}
+	if (item == null) {
+		TableItem [] selection = getSelection ();
+		item = selection.length > 0 ? selection [0] : null;
+	}
+	if (item == null) return;
+	Event event = new Event ();
+	event.item = item;
+	sendEvent (SWT.Selection, event);
 }
 
 TableItem itemOf (int hRecord) {
