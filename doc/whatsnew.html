@@ -816,7 +816,17 @@ href="eclipseos2-xxe.css"
       drop down <code>Combo</code> below its text field (its window of PM
       includes the list) showed the screen behind. The combo paints it with the
       background of its parent while the list is closed. <kbd>SWT020_01</kbd>
-      (47 checks) opens a combo over a black window and reads the pixels.</li>
+      (47 checks) opens a combo over a black window and reads the pixels. Seen
+      on the screen: <kbd>SWT020_01</kbd> and <kbd>SWT009_04</kbd> work.</li>
+
+      <li><a href="swt018.html">Tool tips</a> of the tabs of a
+      <code>TabFolder</code>. The notebook of PM does not tell where its tabs
+      are; they were measured on the screen with five fonts, and the port
+      computes them the same way. <kbd>SWT018_01</kbd> (38 checks) finds the
+      tabs by their pixels and checks the tool tips near their edges with two
+      fonts. Fixed on the way: <code>TabFolder.setBounds()</code> without items
+      threw a <code>NullPointerException</code>. See <a
+      href="diff.html">difference 020</a>.</li>
     </ul>
   </body>
 </html>

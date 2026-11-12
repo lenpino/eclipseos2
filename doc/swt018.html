@@ -19,9 +19,10 @@ href="eclipseos2-xxe.css"
     <p>Show the tool tips of the controls (<code>Control.setToolTipText()</code>,
     which was commented out) and of the tool items. The test case
     <kbd>SWT018_01</kbd> shows the window, puts the pointer over the controls
-    and reads the window of the tool tip after each wait (23 automatic checks);
-    its interactive part has a button, a text, a label, a canvas and a tool bar
-    with tool tips.</p>
+    and reads the window of the tool tip after each wait (38 automatic checks,
+    15 of them on the tabs of a <code>TabFolder</code>); its interactive part
+    has a button, a text, a label, a canvas, a tool bar and a tab folder with
+    tool tips.</p>
 
     <h2>Task notes</h2>
 
@@ -65,6 +66,25 @@ href="eclipseos2-xxe.css"
       says when the pointer is not where the test put it. The same holds for
       <kbd>SWT016_01</kbd>.</li>
 
+      <li>The tabs of a <code>TabFolder</code> (2026-11-12). Windows asks the
+      tab control for the text of the tab under the pointer; here the control
+      tells the display which widget has the tool tip at a point (the tab, or
+      the folder on its page) and the tool tip changes when the pointer goes to
+      another tab. The notebook of PM has no message for the place of a tab, so
+      it was measured on the screen with five fonts: the tabs begin at half the
+      em height and 5 pixels, each one is as wide as its text
+      (<code>GpiQueryTextBox</code>, top left to top right corner) and one and
+      a half em heights, the first one a pixel more. The measure agrees to a
+      pixel. The test finds the tabs on the screen, by the light top edge of
+      each one, and puts the pointer near their edges, also with Helv 14. When
+      the tabs do not fit the notebook narrows or scrolls them: then there is no
+      tool tip for them.</li>
+
+      <li>A defect found on the way: <code>TabFolder.setBounds()</code> before
+      the first item threw a <code>NullPointerException</code>. The free places
+      of the array of page identifiers are 0, and so is the page that the
+      notebook gives when it has none.</li>
+
       <li>The window class of the statics is <code>Label.LabelClass</code>
       (<code>PSZ.getAtom(OS.WC_STATIC)</code>): <code>new
       PSZ(OS.WC_STATIC)</code> compiles too, because there is a constructor
@@ -105,9 +125,10 @@ href="eclipseos2-xxe.css"
       <tr>
         <td>Tool tips of the <code>TabItem</code></td>
 
-        <td>Not done</td>
+        <td>Done [lpino]</td>
 
-        <td>The text is only kept: the tabs are not windows of their own.</td>
+        <td>Checked by <kbd>SWT018_01</kbd> (2026-11-12). Seen on the screen:
+        <em>to be confirmed</em>.</td>
       </tr>
     </table>
   </body>

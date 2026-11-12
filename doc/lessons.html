@@ -486,6 +486,13 @@ href="eclipseos2-xxe.css"
       on port 22 of the known addresses tells whether it moved; on 2026-11-10 it
       went to another network (<code>172.20.10.11</code>).</li>
 
+      <li>A diagnostic that prints rows of pixels must not
+      <code>trim()</code> them: the leading blanks are the position. For a
+      while the tabs of a notebook seemed to begin at 0 in the diagnostic and at
+      11 in the test, and the time went into looking for a difference between
+      the two programs that did not exist (<a href="swt018.html">step
+      018</a>).</li>
+
       <li>Automatic checks of positions and sizes did not see what the screen
       showed at once: erased text, a bar six times too high. A count of the
       dark pixels of a control after a redraw finds the first; comparing
