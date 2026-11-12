@@ -38,6 +38,7 @@
         <!--javac destdir="${temp.folder}/ws/pm/swt.jar.bin" verbose="true" debug="on" failonerror="no" bootclasspath="${bootclasspath}"-->
         <javac destdir="${temp.folder}/ws/pm/swt.jar.bin" debug="on" failonerror="no" bootclasspath="${bootclasspath}" includesfile="classes.inc">
             <src path="${plugindir}/Eclipse SWT/pm/" />
+            <src path="${plugindir}/Eclipse SWT/emulated/coolbar/" />
             <src path="${plugindir.orig}/Eclipse SWT/common/" />
             <src path="${plugindir.orig}/Eclipse SWT/common_j2se/" />
 
@@ -66,6 +67,7 @@
         <property name="excludes" value="**/*.java,**/*.bak,**/library/,**/.nbattrs"/>
         <copy todir="${temp.folder}/ws/pm/swt.jar.bin">
             <fileset dir="${plugindir}/Eclipse SWT/pm/" includes="${includes}" excludes="${excludes}"/>
+            <fileset dir="${plugindir}/Eclipse SWT/emulated/coolbar/" includes="${includes}" excludes="${excludes}"/>
             <fileset dir="${plugindir.orig}/Eclipse SWT/common/" includes="${includes}" excludes="${excludes}"/>
             <fileset dir="${plugindir.orig}/Eclipse SWT/common_j2se/" includes="${includes}" excludes="${excludes}"/>
             <fileset dir="${plugindir}/Eclipse SWT PI/pm/" includes="${includes}" excludes="${excludes}"/>

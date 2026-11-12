@@ -2496,7 +2496,12 @@ public void setToolTipText (String string) {
  */
 public void setVisible (boolean visible) {
     checkWidget ();
-    if (OS.WinIsWindowVisible (handle) == visible) return;
+    /*
+    * The style bit of the receiver, as on Windows: WinIsWindowVisible
+    * is false while a parent is hidden, so setVisible (false) did
+    * nothing before the shell was opened.
+    */
+    if (getVisible () == visible) return;
     if (visible) {
         /*
         * It is possible (but unlikely), that application

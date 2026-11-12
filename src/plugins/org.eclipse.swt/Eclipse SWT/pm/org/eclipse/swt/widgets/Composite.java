@@ -185,6 +185,17 @@ void drawBackground (int hps, RECTL rcl) {
     super.drawBackground (hps, rcl);
 }
 
+public int getBorderWidth () {
+	checkWidget ();
+	/*
+	* Windows gives the width of the edge of the window, none without
+	* SWT.BORDER. The composites of PM draw no border: without SWT.BORDER
+	* there is none (the CoolBar adds it to its height).
+	*/
+	if ((style & SWT.BORDER) == 0) return 0;
+	return super.getBorderWidth ();
+}
+
 /**
  * Returns an array containing the receiver's children.
  * <p>

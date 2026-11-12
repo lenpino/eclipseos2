@@ -95,6 +95,7 @@
         <mkdir dir="${dev.classes}" />
         <javac destdir="${dev.classes}" debug="on" failonerror="yes" bootclasspath="${bootclasspath}" includesfile="${classes.inc}">
             <src path="${plugindir}/Eclipse SWT/pm/" />
+            <src path="${plugindir}/Eclipse SWT/emulated/coolbar/" />
             <src path="${plugindir.orig}/Eclipse SWT/common/" />
             <src path="${plugindir.orig}/Eclipse SWT/common_j2se/" />
 

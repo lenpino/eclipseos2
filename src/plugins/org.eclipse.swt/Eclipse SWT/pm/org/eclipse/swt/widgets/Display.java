@@ -1078,8 +1078,9 @@ public Color getSystemColor (int id) {
     int pixel = 0x02000000;
     switch (id) {
         case SWT.COLOR_WIDGET_DARK_SHADOW:      pixel = OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_SHADOW,0);   break;
-        case SWT.COLOR_WIDGET_NORMAL_SHADOW:    pixel = OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_SCROLLBAR,0);   break;
-        case SWT.COLOR_WIDGET_LIGHT_SHADOW:     pixel = OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_MENUHILITEBGND,0);      break;
+        /* The 3D colors of Windows are those of the buttons: dark, middle (the face) and light */
+        case SWT.COLOR_WIDGET_NORMAL_SHADOW:    pixel = OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_BUTTONDARK,0);   break;
+        case SWT.COLOR_WIDGET_LIGHT_SHADOW:     pixel = OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_BUTTONMIDDLE,0);      break;
         case SWT.COLOR_WIDGET_HIGHLIGHT_SHADOW:	pixel = OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_BUTTONLIGHT,0);      break;
         case SWT.COLOR_WIDGET_BACKGROUND:       pixel = OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_DIALOGBACKGROUND,0);   break;
         case SWT.COLOR_WIDGET_BORDER:       pixel = OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_WINDOWFRAME,0);   break;

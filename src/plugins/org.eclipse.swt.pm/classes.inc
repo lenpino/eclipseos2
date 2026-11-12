@@ -60,6 +60,11 @@ org\eclipse\swt\widgets\TreeItem.java
 org\eclipse\swt\widgets\ProgressBar.java
 org\eclipse\swt\widgets\Sash.java
 
+# SWT Emulated CoolBar (#)
+
+org\eclipse\swt\widgets\CoolBar.java
+org\eclipse\swt\widgets\CoolItem.java
+
 # SWT Base
 
 org\eclipse\swt\graphics\Drawable.java
