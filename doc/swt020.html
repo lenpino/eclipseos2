@@ -20,7 +20,7 @@ href="eclipseos2-xxe.css"
     control: the port takes the emulated cool bar of Eclipse 2.0.1 (the one of
     Motif, in pure Java, folder <code>Eclipse SWT/emulated/coolbar</code>),
     which draws the grabbers and moves the items itself. The test case
-    <kbd>SWT020_01</kbd> has 45 automatic checks (the layout of the items, the
+    <kbd>SWT020_01</kbd> has 47 automatic checks (the layout of the items, the
     pixels of the grabbers on the screen, dragging, double click, locked,
     <code>setItemLayout</code>, the chevron and disposing) and an interactive
     part: a cool bar with three tool bars and a combo, the chevrons showing a
@@ -82,6 +82,15 @@ href="eclipseos2-xxe.css"
           window of PM, which includes the list (122 pixels for a field of 20),
           and the row of the bar was that high. On Windows it is the height of
           the text field; now it is too.</li>
+
+          <li>A consequence of the clipping, seen on the screen the next day
+          (green under the combo of <kbd>SWT009_04</kbd> and of the cool bar):
+          nothing painted the part of the window of a drop down combo below its
+          text field, which the parent painted before, and the screen behind
+          showed through. The combo paints it now with the background of its
+          parent while the list is closed. The test opens a window with a combo
+          over a black one and reads the pixels below the field. As before,
+          that part hides the controls under it.</li>
 
           <li>A <code>ToolItem</code> was at least 24 x 22 also with an image.
           The bar measures the trim of its chevrons with a tool bar with an
