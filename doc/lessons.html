@@ -486,6 +486,13 @@ href="eclipseos2-xxe.css"
       on port 22 of the known addresses tells whether it moved; on 2026-11-10 it
       went to another network (<code>172.20.10.11</code>).</li>
 
+      <li>An old address of the VM can belong to another machine later: on
+      2026-11-11 port 22 of <code>192.168.1.87</code> answered, the session
+      reached the authentication and then hung, and a restart of the
+      <code>sshd</code> of the VM changed nothing. The VM was at
+      <code>.88</code>. <code>arp -a</code> on the Mac shows it by the prefix
+      of the MAC addresses of VirtualBox, <code>08:00:27</code>.</li>
+
       <li>A <code>vm.sh</code> session can stay open after the program it ran
       has ended (no <kbd>java</kbd> left in <code>pstat</code>), and the output
       is lost. Writing the output to a file of the VM
@@ -508,6 +515,12 @@ href="eclipseos2-xxe.css"
     <h2>Things learned about PM</h2>
 
     <ul>
+      <li><code>WinIsWindowVisible</code> is false while any parent is hidden,
+      so it cannot tell whether a control is shown: a check of it made
+      <code>setVisible(false)</code> do nothing before the shell was opened (<a
+      href="swt020.html">step 020</a>). The style bit <code>WS_VISIBLE</code> of
+      the window says it.</li>
+
       <li>The origin of PM coordinates (desktop, windows,
       <code>WinPopupMenu</code>, <code>WinSetWindowPos</code>, the pointer) is
       the <em>lower</em> left corner, and y grows upwards. SWT and Windows use

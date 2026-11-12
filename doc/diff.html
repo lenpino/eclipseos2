@@ -480,6 +480,22 @@ href="eclipseos2-xxe.css"
         <td><code>Control.updateFont()</code>, which gives the new system font to
         the controls that had the old one, depends on it.</td>
       </tr>
+
+      <tr>
+        <td>022</td>
+
+        <td>The <code>CoolBar</code> is the rebar control of Windows: its
+        bands, grabbers and chevrons are drawn by Windows, with its look and
+        its rules for dragging and wrapping.</td>
+
+        <td>PM has no rebar control: the <code>CoolBar</code> is the emulated
+        one of Eclipse 2.0.1 (that of Motif), in pure Java. It draws flat
+        grabbers, a chevron is a tool bar of its own, and dragging, double
+        click and wrapping follow the code of the emulated bar.</td>
+
+        <td>The API is the same. The children of the bar include the tool bars
+        of the chevrons (as on Motif).</td>
+      </tr>
     </table>
 
     <h2>Other differences</h2>

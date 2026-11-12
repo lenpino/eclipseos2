@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/css"
+href="eclipseos2-xxe.css"
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"xhtml1-strict.dtd">
+<html>
+  <head>
+    <link href="eclipseos2.css" rel="stylesheet" type="text/css" />
+
+    <title>Eclipse for OS/2 Transitional Project Notes</title>
+  </head>
+
+  <body>
+    <h1>SWT Step 020. CoolBar</h1>
+
+    <h2>Objective</h2>
+
+    <p>Have <code>CoolBar</code> and <code>CoolItem</code>. PM has no rebar
+    control: the port takes the emulated cool bar of Eclipse 2.0.1 (the one of
+    Motif, in pure Java, folder <code>Eclipse SWT/emulated/coolbar</code>),
+    which draws the grabbers and moves the items itself. The test case
+    <kbd>SWT020_01</kbd> has 40 automatic checks (the layout of the items, the
+    pixels of the grabbers on the screen, dragging, double click, locked,
+    <code>setItemLayout</code>, the chevron and disposing) and an interactive
+    part: a cool bar with three tool bars and a combo, the chevrons showing a
+    menu with the hidden buttons, and a check box to lock it.</p>
+
+    <h2>Task notes</h2>
+
+    <ul>
+      <li>The emulated classes compile as they are: they go into the build from
+      their own source folder (<code>classes.inc</code>, both
+      <code>build.xml</code>). What they need from the port is plain SWT: mouse
+      events (<a href="swt016.html">step 016</a>), cursors (<a
+      href="swt015.html">step 015</a>), <code>redraw</code> of a part, the
+      clipping of the paint, tool bars and images.</li>
+
+      <li>The dragging of the automatic part sends the mouse events to the bar
+      (<code>notifyListeners</code>); the pointer is not moved. The pixels are
+      read from the screen, so the mouse must not be over the window meanwhile.
+      An item dragged under its row makes a new row and the bar grows: the
+      controls of the first row stay at the top (in PM the children keep their
+      distance to the bottom of the parent, but the bar lays the items out
+      again after its new size).</li>
+
+      <li>Three defects of the port found by the test, fixed:
+        <ul>
+          <li><code>Control.setVisible(false)</code> did nothing while the shell
+          was not open yet: it returned early when
+          <code>WinIsWindowVisible</code> was already false, and that is false
+          while any parent is hidden. The chevrons hidden while the bar was
+          built showed up when the shell was opened. Now it looks at the
+          <code>WS_VISIBLE</code> bit of the control, as Windows does.</li>
+
+          <li><code>getBorderWidth()</code> gave the border of the system (1)
+          to every control; on Windows it is 0 without <code>SWT.BORDER</code>.
+          The composites of PM draw no border, and now give 0 without
+          <code>SWT.BORDER</code>: the bar was 2 pixels higher than its
+          row.</li>
+
+          <li><code>COLOR_WIDGET_NORMAL_SHADOW</code> was the color of the
+          scroll bars (192, nearly the background, 204) and
+          <code>COLOR_WIDGET_LIGHT_SHADOW</code> that of the selected menu item.
+          They are now the dark and middle colors of the buttons of PM
+          (<code>SYSCLR_BUTTONDARK</code>, <code>SYSCLR_BUTTONMIDDLE</code>), the
+          3D colors of Windows.</li>
+        </ul>
+      </li>
+
+      <li>A mistake of the first version of the test: <code>setControl</code>
+      puts the control into the item, still empty, so its size has to be taken
+      before (as the examples of Eclipse do).</li>
+    </ul>
+
+    <p>The differences with Windows are in <a href="diff.html">difference
+    022</a>.</p>
+
+    <h2>Step checklist</h2>
+
+    <table>
+      <col width="40%" />
+
+      <col />
+
+      <col width="50%" />
+
+      <thead>
+        <tr>
+          <th>Operation</th>
+
+          <th>Status</th>
+
+          <th>Remarks</th>
+        </tr>
+      </thead>
+
+      <tr>
+        <td><code>CoolBar</code>, <code>CoolItem</code> (emulated)</td>
+
+        <td>Done [lpino]</td>
+
+        <td>Checked by <kbd>SWT020_01</kbd>. Seen on the screen: <em>to be
+        confirmed</em>.</td>
+      </tr>
+
+      <tr>
+        <td><code>setVisible</code> with the shell hidden,
+        <code>getBorderWidth</code> of the composites, shadow colors</td>
+
+        <td>Done [lpino]</td>
+
+        <td>Checked by <kbd>SWT020_01</kbd>; the automatic tests of steps 005
+        and 012 to 019 still pass.</td>
+      </tr>
+    </table>
+  </body>
+</html>

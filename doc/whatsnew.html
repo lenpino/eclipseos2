@@ -775,5 +775,27 @@ href="eclipseos2-xxe.css"
       <kbd>SWT019_01</kbd> (10 checks, reading the pixels of the screen). Not seen
       on the screen yet.</li>
     </ul>
+
+    <h3>2026-11-11</h3>
+
+    <h4>[lpino]</h4>
+
+    <ul>
+      <li>New <a href="swt020.html">SWT Step 020</a> (cool bar): the emulated
+      <code>CoolBar</code> and <code>CoolItem</code> of Eclipse 2.0.1, in pure
+      Java, go into the build as they are. Test case <kbd>SWT020_01</kbd> (40
+      automatic checks: layout, pixels of the grabbers, dragging, double click,
+      locked, chevron, disposing) and an interactive part. Not seen on the
+      screen yet. See <a href="diff.html">difference 022</a>.</li>
+
+      <li>Fixed on the way: <code>Control.setVisible(false)</code> did nothing
+      before the shell was opened (<code>WinIsWindowVisible</code> is false
+      while a parent is hidden; now the <code>WS_VISIBLE</code> bit of the
+      control is looked at, as on Windows); <code>getBorderWidth()</code> of a
+      composite without <code>SWT.BORDER</code> is 0, as on Windows; the normal
+      and light shadow colors are those of the buttons of PM (the normal one was
+      the color of the scroll bars, nearly the background). The automatic tests
+      of steps 005 and 012 to 019 still pass.</li>
+    </ul>
   </body>
 </html>

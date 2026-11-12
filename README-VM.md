@@ -96,6 +96,9 @@ variables de entorno `VM_HOST`, `VM_USER`, `VM_PASS`, `VM_SWT_DIR`).
   llamada y `type t.out` en otra.
 - Si la VM no contesta (`vm.sh` termina con 255 sin imprimir nada), mirar con
   `nc -z -G 2 <ip> 22` en las IPs conocidas si cambió de dirección.
+- Una IP antigua de la VM puede ser ahora de otro equipo: el puerto 22 contesta
+  y la sesión se cuelga en la autenticación. La VM se reconoce en `arp -a` por
+  el prefijo MAC de VirtualBox, `08:00:27` (el 2026-11-11 estaba en `.88`).
 - Tras commitear páginas de `doc/`, enviarlas a la VM:
   `git ls-files doc | xargs tools/vm-push.sh -f` (en zsh `$F` no se parte en
   palabras).
