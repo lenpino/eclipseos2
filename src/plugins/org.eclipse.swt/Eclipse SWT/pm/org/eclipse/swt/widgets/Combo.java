@@ -957,6 +957,26 @@ public void select (int index) {
 //	if (hwndList != 0) OS.InvalidateRect (hwndList, null, true);
 //}
 
+public Rectangle getBounds () {
+	checkWidget ();
+	Rectangle bounds = super.getBounds ();
+	/*
+	* Windows gives the height of the text field of a drop down combo
+	* box. The window of PM includes the list (see setBounds), so the
+	* height is that of the text field, as computeSize gives it.
+	*/
+	if ((style & SWT.DROP_DOWN) != 0) bounds.height = getTextHeight ();
+	return bounds;
+}
+
+public Point getSize () {
+	checkWidget ();
+	Point size = super.getSize ();
+	/* See getBounds */
+	if ((style & SWT.DROP_DOWN) != 0) size.y = getTextHeight ();
+	return size;
+}
+
 void setBounds (int x, int y, int width, int height, int flags) {
 	/*
 	* Feature in Windows. If the combo box has the CBS_DROPDOWN

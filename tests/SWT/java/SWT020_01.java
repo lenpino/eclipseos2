@@ -122,6 +122,24 @@ public class SWT020_01 extends SWTTestCase {
 		return '?';
 	}
 
+	/** The number of dark pixels (text) on the screen in a control of the bar. */
+	int text(Control control) {
+		Rectangle b = control.getBounds();
+		Point origin = bar.toDisplay(new Point(b.x, b.y));
+		int screen = OS.WinQuerySysValue(OS.HWND_DESKTOP, OS.SV_CYSCREEN);
+		int hps = OS.WinGetScreenPS(OS.HWND_DESKTOP);
+		OS.GpiCreateLogColorTable(hps, 0, OS.LCOLF_RGB, 0, 0, null);
+		int count = 0;
+		for (int y = 0; y < b.height; y++) {
+			for (int x = 0; x < b.width; x++) {
+				int pel = OS.GpiQueryPel(hps, new int[] {origin.x + x, screen - 1 - (origin.y + y)});
+				if (((pel >> 16) & 0xFF) < 60 && ((pel >> 8) & 0xFF) < 60 && (pel & 0xFF) < 60) count++;
+			}
+		}
+		OS.WinReleasePS(hps);
+		return count;
+	}
+
 	/** The pixels of the separator and the grabber of an item, from left to right and the top and bottom of the grabber. */
 	String grabber(CoolItem item) {
 		Rectangle b = item.getBounds();
@@ -210,6 +228,12 @@ public class SWT020_01 extends SWTTestCase {
 		run(300);
 		String s = grabber(items[1]);
 		check(s.equals("SHHBS HS"), "separator, grabber and its top and bottom, left to right (SH H B S, top H, bottom S): " + s + (s.equals("SHHBS HS") ? "" : strips(items[1])));
+		int before = text(tools[1]);
+		check(before > 20, "the text of the buttons of a tool bar is on the screen: " + before + " dark pixels");
+		bar.redraw();
+		run(300);
+		int after = text(tools[1]);
+		check(after == before, "the bar repainted does not paint over its children (WS_CLIPCHILDREN): " + after + " dark pixels");
 	}
 
 	void checkDrag() {
@@ -272,6 +296,7 @@ public class SWT020_01 extends SWTTestCase {
 		run(300);
 		String s = grabber(items[2]);
 		check(s.startsWith("SHBBB"), "only the separator is drawn: " + s);
+		check(text(tools[2]) > 20, "and the text of the tool bar is still there: " + text(tools[2]) + " dark pixels");
 		bar.setLocked(false);
 	}
 
@@ -334,6 +359,12 @@ public class SWT020_01 extends SWTTestCase {
 		run(400);
 		check(!hidden.getVisible() && !OS.WinIsWindowVisible(hidden.handle), "a control hidden before the shell is opened stays hidden");
 		hidden.dispose();
+		Combo combo = new Combo(shell, SWT.DROP_DOWN);
+		combo.setBounds(10, 200, 120, 24);
+		int comboHeight = combo.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
+		check(combo.getSize().y == comboHeight && combo.getBounds().height == comboHeight && combo.getBounds().y == 200,
+			"a drop down combo is as high as its text field, as on Windows (the window of PM includes the list): " + combo.getBounds() + " " + comboHeight);
+		combo.dispose();
 		checkLayout();
 		checkPixels();
 		checkDrag();
@@ -341,6 +372,19 @@ public class SWT020_01 extends SWTTestCase {
 		checkLocked();
 		checkItemLayout(sizes);
 		checkChevron();
+		Combo barCombo = new Combo(bar, SWT.DROP_DOWN);
+		barCombo.setItems(new String[] {"one", "two"});
+		/* The first one of the row: the last one fills it */
+		CoolItem comboItem = new CoolItem(bar, SWT.NONE, 0);
+		Point comboSize = barCombo.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+		comboItem.setControl(barCombo);
+		Point preferred = comboItem.computeSize(comboSize.x, comboSize.y);
+		comboItem.setPreferredSize(preferred);
+		comboItem.setSize(preferred.x - 20, preferred.y);
+		check(chevronShown(comboItem) && barCombo.getSize().y == comboSize.y,
+			"a narrow item of a combo, as high as its text field, shows its chevron: " + comboItem.getBounds() + " " + barCombo.getSize());
+		comboItem.dispose();
+		barCombo.dispose();
 		saySubObjective("Disposing");
 		ToolBar chevron = chevron(items[0]);
 		items[1].dispose();

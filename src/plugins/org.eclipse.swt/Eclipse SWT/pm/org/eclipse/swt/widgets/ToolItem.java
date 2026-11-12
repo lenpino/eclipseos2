@@ -401,9 +401,18 @@ Point computeItemSize () {
 		return new Point (width > 0 ? width : SEPARATOR_WIDTH, height);
 	}
 	Point size = button.computeSize (SWT.DEFAULT, SWT.DEFAULT, true);
-	int width = Math.max (size.x, DEFAULT_WIDTH);
+	/*
+	* The minimum is the size of a button of Windows without an image.
+	* With an image Windows fits the button to it: the CoolBar measures
+	* the trim of its chevrons with an image of one pixel.
+	*/
+	int width = size.x, height = size.y;
+	if (image == null) {
+		width = Math.max (width, DEFAULT_WIDTH);
+		height = Math.max (height, DEFAULT_HEIGHT);
+	}
 	if (arrow != null) width += ARROW_WIDTH;
-	return new Point (width, Math.max (size.y, DEFAULT_HEIGHT));
+	return new Point (width, height);
 }
 
 void releaseChild () {

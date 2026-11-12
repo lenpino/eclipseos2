@@ -502,8 +502,12 @@ boolean translateMnemonic (char key) {
 //}
 
 int widgetStyle () {
-	/* Temporary code to force SWT.CLIP_SIBLINGS */
-	return super.widgetStyle ();// | OS.WS_CLIPCHILDREN | OS.WS_CLIPSIBLINGS;
+	/*
+	* As on Windows, the composite does not paint over its children:
+	* without it a redraw of the composite erased them (the tool bars
+	* of a CoolBar lost their text) and they were not painted again.
+	*/
+	return super.widgetStyle () | OS.WS_CLIPCHILDREN;
 }
 
 MRESULT WM_CALCVALIDRECTS (int mp1, int mp2) {
