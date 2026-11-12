@@ -265,6 +265,7 @@ public void setText (String string) {
 public void setToolTipText (String string) {
 	checkWidget();
 	toolTipText = string;
+	getDisplay ().toolTipChanged (parent);
 }
 
 }

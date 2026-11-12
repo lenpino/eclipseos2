@@ -163,6 +163,7 @@ public class Display extends Device {
     */
     int hwndToolTip;
     Control toolTipControl;
+    Widget toolTipWidget;
     boolean toolTipDone;
     long toolTipTime;
     static final int TOOLTIP_DELAY = 500, TOOLTIP_TIME = 5000;
@@ -1947,6 +1948,7 @@ void mouseMoved (Control control, int x, int y, boolean moved) {
         mouseControl = control;
         hideToolTip ();
         toolTipDone = false;
+        toolTipWidget = null;
         if (old != null && !old.isDisposed ()) old.postMouseEvent (SWT.MouseExit);
         if (control.isDisposed ()) return;
         Event event = new Event ();
@@ -1964,7 +1966,7 @@ void mouseMoved (Control control, int x, int y, boolean moved) {
 /* The timer runs while the control needs it: Exit, Hover or a tool tip */
 void startMouseCheck (Control control) {
     if (mouseChecking) return;
-    if (control.hooks (SWT.MouseExit) || control.hooks (SWT.MouseHover) || control.toolTipText != null || toolTipControl == control) {
+    if (control.hooks (SWT.MouseExit) || control.hooks (SWT.MouseHover) || control.hasToolTip () || toolTipControl == control) {
         mouseChecking = true;
         timerExec (MOUSE_CHECK_TIME, mouseCheck);
     }
@@ -2009,9 +2011,17 @@ void checkMouse () {
         mouseHovered = true;
         control.postMouseEvent (SWT.MouseHover);
     }
-    if (control.toolTipText != null && !toolTipDone) {
+    /* Over another tab of a TabFolder the tool tip is another one, as over another control */
+    Point point = control.toControl (new Point (pt [0], OS.WinQuerySysValue (OS.HWND_DESKTOP, OS.SV_CYSCREEN) - 1 - pt [1]));
+    Widget widget = control.toolTipWidget (point.x, point.y);
+    if (widget != toolTipWidget) {
+        hideToolTip ();
+        toolTipDone = false;
+        toolTipWidget = widget;
+    }
+    if (widget != null && !toolTipDone) {
         if (toolTipControl != control) {
-            if (now - mouseTime >= TOOLTIP_DELAY) showToolTip (control, pt [0], pt [1]);
+            if (now - mouseTime >= TOOLTIP_DELAY) showToolTip (control, control.toolTipText (widget), pt [0], pt [1]);
         } else {
             if (now - toolTipTime >= TOOLTIP_TIME) {
                 hideToolTip ();
@@ -2023,12 +2033,11 @@ void checkMouse () {
 }
 
 /*
- * Shows the tool tip of the control under the pointer (PM coordinates of
+ * Shows a tool tip of the control under the pointer (PM coordinates of
  * the screen): below it, or above it when there is no room below.
  */
-void showToolTip (Control control, int x, int y) {
+void showToolTip (Control control, String text, int x, int y) {
     hideToolTip ();
-    String text = control.toolTipText;
     java.util.Vector lines = new java.util.Vector ();
     int start = 0, end;
     while ((end = text.indexOf ('\n', start)) != -1) {

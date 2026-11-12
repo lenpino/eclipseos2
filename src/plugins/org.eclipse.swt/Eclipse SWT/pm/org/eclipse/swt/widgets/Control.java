@@ -951,6 +951,24 @@ public String getToolTipText () {
     return toolTipText;
 }
 
+/*
+ * The tool tips seen by the display: whether the receiver has one at
+ * all (the pointer is watched while it is over it), the widget whose
+ * tool tip is shown at a point of the receiver (its coordinates; null
+ * for none) and the text of that widget. A TabFolder gives its tabs.
+ */
+boolean hasToolTip () {
+    return toolTipText != null;
+}
+
+Widget toolTipWidget (int x, int y) {
+    return toolTipText != null ? this : null;
+}
+
+String toolTipText (Widget widget) {
+    return toolTipText;
+}
+
 /**
  * Returns <code>true</code> if the receiver is visible, and
  * <code>false</code> otherwise.

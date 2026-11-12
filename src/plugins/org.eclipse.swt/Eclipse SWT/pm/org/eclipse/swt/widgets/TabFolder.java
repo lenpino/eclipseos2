@@ -615,7 +615,68 @@ void setSelection (int index, boolean notify) {
 		}
 	}
 }
+boolean hasToolTip () {
+	if (super.hasToolTip ()) return true;
+	int count = OS.WinSendMsg (handle, OS.BKM_QUERYPAGECOUNT, 0, OS.BKA_END);
+	for (int i = 0; i < count; i++) {
+		if (items [i].toolTipText != null) return true;
+	}
+	return false;
+}
+
+/*
+ * The tab at a point of the receiver, or null. The notebook tells
+ * nothing about where its tabs are; they are measured as it draws them
+ * (step 018, five fonts, to a pixel): the first one begins at half the
+ * em height and 5 pixels, then each one is as wide as its text
+ * (GpiQueryTextBox, from the top left to the top right corner) and one
+ * and a half em heights, the first one a pixel more; the tabs are about
+ * one and a half em heights and 2 pixels high. When they do not fit the
+ * notebook narrows or scrolls them, and no tab is given.
+ */
+TabItem tabAt (int x, int y) {
+	if (x < 0 || y < 0) return null;
+	/* The font of the window, as the notebook draws the tabs (a GC can have another one) */
+	int hps = OS.WinGetPS (handle);
+	FONTMETRICS fm = new FONTMETRICS ();
+	OS.GpiQueryFontMetrics (hps, FONTMETRICS.sizeof, fm);
+	int em = fm.lEmHeight;
+	TabItem result = null;
+	int right = em / 2 + 5, width = getClientArea ().width;
+	int[] pnts = new int [OS.TXTBOX_COUNT * 2];
+	int id = OS.WinSendMsg (handle, OS.BKM_QUERYPAGEID, 0, OS.MPFROM2SHORT ((short)OS.BKA_FIRST, (short)OS.BKA_MAJOR));
+	for (boolean first = true; id != 0; first = false) {
+		int index = getTabIndex (id);
+		if (index == -1) break;
+		byte[] text = items [index].getText ().getBytes ();
+		int extent = 0;
+		if (text.length > 0 && OS.GpiQueryTextBox (hps, text.length, text, OS.TXTBOX_COUNT, pnts)) {
+			extent = pnts [4] - pnts [0];
+		}
+		int left = right;
+		right += extent + em * 3 / 2 + (first ? 1 : 0);
+		if (result == null && y < em * 3 / 2 + 2 && left <= x && x < right) result = items [index];
+		id = OS.WinSendMsg (handle, OS.BKM_QUERYPAGEID, id, OS.MPFROM2SHORT ((short)OS.BKA_NEXT, (short)OS.BKA_MAJOR));
+	}
+	OS.WinReleasePS (hps);
+	return right <= width ? result : null;
+}
+
+Widget toolTipWidget (int x, int y) {
+	/* Over a tab, its tool tip or none (Windows asks the tab control for the text of the tab) */
+	TabItem item = tabAt (x, y);
+	if (item != null) return item.toolTipText != null ? item : null;
+	return super.toolTipWidget (x, y);
+}
+
+String toolTipText (Widget widget) {
+	if (widget instanceof TabItem) return ((TabItem) widget).toolTipText;
+	return super.toolTipText (widget);
+}
+
 int getTabIndex(int pageID){
+    /* No page is 0, nor are the free places of itemsID */
+    if (pageID == 0) return -1;
     for(int i=0;i<itemsID.length;i++){
         if(itemsID[i] == pageID)
             return i;
