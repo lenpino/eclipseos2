@@ -957,6 +957,35 @@ public void select (int index) {
 //	if (hwndList != 0) OS.InvalidateRect (hwndList, null, true);
 //}
 
+MRESULT WM_PAINT (int mp1, int mp2) {
+	/*
+	* The window of a drop down combo box of PM includes the list (see
+	* setBounds) and nothing paints the part below the text field while
+	* the list is closed: the parent clips its children. It is painted
+	* with the background of the parent, as the parent did before.
+	*/
+	if ((style & SWT.DROP_DOWN) != 0) {
+		int hwndList = OS.WinWindowFromID (handle, OS.CBID_LIST);
+		if (hwndList == 0 || !OS.WinIsWindowVisible (hwndList)) {
+			RECTL rcl = new RECTL ();
+			OS.WinQueryWindowRect (handle, rcl);
+			rcl.yTop -= getTextHeight ();
+			if (rcl.yTop > 0) {
+				int hps = OS.WinGetPS (handle);
+				int hPalette = getDisplay ().hPalette;
+				if (hPalette == 0) {
+					OS.GpiCreateLogColorTable (hps, 0, OS.LCOLF_RGB, 0, 0, null);
+				} else {
+					OS.GpiSelectPalette (hps, hPalette);
+				}
+				OS.WinFillRect (hps, rcl, parent.getBackgroundPixel ());
+				OS.WinReleasePS (hps);
+			}
+		}
+	}
+	return super.WM_PAINT (mp1, mp2);
+}
+
 public Rectangle getBounds () {
 	checkWidget ();
 	Rectangle bounds = super.getBounds ();

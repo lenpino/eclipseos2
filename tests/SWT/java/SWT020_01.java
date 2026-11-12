@@ -109,13 +109,19 @@ public class SWT020_01 extends SWTTestCase {
 		return Math.abs(r - rgb.red) < 16 && Math.abs(g - rgb.green) < 16 && Math.abs(b - rgb.blue) < 16;
 	}
 
-	/** 'S' shadow, 'H' highlight, 'B' background of the bar or '?' for the pixel of the screen at a point of the bar. */
-	char pixel(int x, int y) {
-		Point p = bar.toDisplay(new Point(x, y));
+	/** The color of the screen at a point of a control. */
+	int pel(Control control, int x, int y) {
+		Point p = control.toDisplay(new Point(x, y));
 		int hps = OS.WinGetScreenPS(OS.HWND_DESKTOP);
 		OS.GpiCreateLogColorTable(hps, 0, OS.LCOLF_RGB, 0, 0, null);
 		int pel = OS.GpiQueryPel(hps, new int[] {p.x, OS.WinQuerySysValue(OS.HWND_DESKTOP, OS.SV_CYSCREEN) - 1 - p.y});
 		OS.WinReleasePS(hps);
+		return pel;
+	}
+
+	/** 'S' shadow, 'H' highlight, 'B' background of the bar or '?' for the pixel of the screen at a point of the bar. */
+	char pixel(int x, int y) {
+		int pel = pel(bar, x, y);
 		if (near(pel, display.getSystemColor(SWT.COLOR_WIDGET_NORMAL_SHADOW).getRGB())) return 'S';
 		if (near(pel, display.getSystemColor(SWT.COLOR_WIDGET_HIGHLIGHT_SHADOW).getRGB())) return 'H';
 		if (near(pel, bar.getBackground().getRGB())) return 'B';
@@ -364,6 +370,27 @@ public class SWT020_01 extends SWTTestCase {
 		int comboHeight = combo.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
 		check(combo.getSize().y == comboHeight && combo.getBounds().height == comboHeight && combo.getBounds().y == 200,
 			"a drop down combo is as high as its text field, as on Windows (the window of PM includes the list): " + combo.getBounds() + " " + comboHeight);
+		/* A window with a combo opened over a black one: what is not painted stays black */
+		Point corner = shell.toDisplay(new Point(250, 100));
+		Shell black = new Shell(shell, SWT.NO_TRIM);
+		black.setBackground(display.getSystemColor(SWT.COLOR_BLACK));
+		black.setBounds(corner.x, corner.y, 200, 150);
+		black.open();
+		run(300);
+		Shell front = new Shell(shell, SWT.NO_TRIM);
+		front.setBounds(corner.x, corner.y, 200, 150);
+		Combo frontCombo = new Combo(front, SWT.DROP_DOWN);
+		frontCombo.setBounds(10, 10, 120, 24);
+		front.open();
+		run(300);
+		RGB frontBackground = front.getBackground().getRGB();
+		String below = "";
+		for (int y = comboHeight + 1; y < comboHeight + 60; y += 6) below += near(pel(frontCombo, 60, y), frontBackground) ? 'B' : '?';
+		check(below.indexOf('?') < 0, "below its text field the background of the parent is seen, not the screen behind (the parent clips its children): "
+			+ below + " " + Integer.toHexString(pel(frontCombo, 60, comboHeight + 10)));
+		check(!near(pel(frontCombo, 60, comboHeight / 2), frontBackground), "and the text field is not painted over: " + Integer.toHexString(pel(frontCombo, 60, comboHeight / 2)));
+		front.dispose();
+		black.dispose();
 		combo.dispose();
 		checkLayout();
 		checkPixels();
