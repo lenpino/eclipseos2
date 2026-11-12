@@ -796,6 +796,15 @@ href="eclipseos2-xxe.css"
       and light shadow colors are those of the buttons of PM (the normal one was
       the color of the scroll bars, nearly the background). The automatic tests
       of steps 005 and 012 to 019 still pass.</li>
+
+      <li>Seen on the screen with <kbd>SWT020_01</kbd>, and fixed: the
+      composites now clip their children (<code>WS_CLIPCHILDREN</code>, as on
+      Windows; a redraw of the cool bar erased the text of its tool bars);
+      <code>getSize()</code> of a drop down <code>Combo</code> is the height of
+      its text field, not of the window of PM with its list; a
+      <code>ToolItem</code> with an image fits it, without the minimum of 24 x
+      22. <kbd>SWT020_01</kbd> has 45 checks; the automatic tests of steps 005
+      and 012 to 019 still pass.</li>
     </ul>
   </body>
 </html>

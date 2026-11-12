@@ -486,6 +486,12 @@ href="eclipseos2-xxe.css"
       on port 22 of the known addresses tells whether it moved; on 2026-11-10 it
       went to another network (<code>172.20.10.11</code>).</li>
 
+      <li>Automatic checks of positions and sizes did not see what the screen
+      showed at once: erased text, a bar six times too high. A count of the
+      dark pixels of a control after a redraw finds the first; comparing
+      <code>getSize()</code> with <code>computeSize()</code> the second (<a
+      href="swt020.html">step 020</a>).</li>
+
       <li>An old address of the VM can belong to another machine later: on
       2026-11-11 port 22 of <code>192.168.1.87</code> answered, the session
       reached the authentication and then hung, and a restart of the
@@ -515,6 +521,12 @@ href="eclipseos2-xxe.css"
     <h2>Things learned about PM</h2>
 
     <ul>
+      <li>Without <code>WS_CLIPCHILDREN</code> a window paints over its
+      children, and they are not told to paint again: an invalidated parent
+      erases them. The window of a drop down combo box includes its list, also
+      while the list is closed: its size is not that of what is seen (<a
+      href="swt020.html">step 020</a>).</li>
+
       <li><code>WinIsWindowVisible</code> is false while any parent is hidden,
       so it cannot tell whether a control is shown: a check of it made
       <code>setVisible(false)</code> do nothing before the shell was opened (<a

@@ -20,7 +20,7 @@ href="eclipseos2-xxe.css"
     control: the port takes the emulated cool bar of Eclipse 2.0.1 (the one of
     Motif, in pure Java, folder <code>Eclipse SWT/emulated/coolbar</code>),
     which draws the grabbers and moves the items itself. The test case
-    <kbd>SWT020_01</kbd> has 40 automatic checks (the layout of the items, the
+    <kbd>SWT020_01</kbd> has 45 automatic checks (the layout of the items, the
     pixels of the grabbers on the screen, dragging, double click, locked,
     <code>setItemLayout</code>, the chevron and disposing) and an interactive
     part: a cool bar with three tool bars and a combo, the chevrons showing a
@@ -68,6 +68,30 @@ href="eclipseos2-xxe.css"
         </ul>
       </li>
 
+      <li>Three more, seen on the screen in the interactive part (the
+      automatic checks did not look at them yet; now they do):
+        <ul>
+          <li>The composites had no <code>WS_CLIPCHILDREN</code> (it was
+          commented out in <code>Composite.widgetStyle()</code>; Windows has
+          it): a redraw of the bar, after a drag or <code>setLocked</code>,
+          painted over its tool bars and their text was gone. The test counts the
+          dark pixels of a tool bar before and after <code>redraw()</code> (182
+          and 0 before the fix).</li>
+
+          <li><code>getSize()</code> of a drop down <code>Combo</code> gave the
+          window of PM, which includes the list (122 pixels for a field of 20),
+          and the row of the bar was that high. On Windows it is the height of
+          the text field; now it is too.</li>
+
+          <li>A <code>ToolItem</code> was at least 24 x 22 also with an image.
+          The bar measures the trim of its chevrons with a tool bar with an
+          image of one pixel (on Windows about 7), so it got 21 and the chevron
+          of the combo item failed with an image of a negative height. The
+          minimum is now only for the items without an image, as on
+          Windows.</li>
+        </ul>
+      </li>
+
       <li>A mistake of the first version of the test: <code>setControl</code>
       puts the control into the item, still empty, so its size has to be taken
       before (as the examples of Eclipse do).</li>
@@ -100,13 +124,16 @@ href="eclipseos2-xxe.css"
 
         <td>Done [lpino]</td>
 
-        <td>Checked by <kbd>SWT020_01</kbd>. Seen on the screen: <em>to be
-        confirmed</em>.</td>
+        <td>Checked by <kbd>SWT020_01</kbd>. Seen on the screen (2026-11-11):
+        text of the tool bars erased and the bar too high, fixed; the fixed
+        version is <em>to be confirmed</em>.</td>
       </tr>
 
       <tr>
         <td><code>setVisible</code> with the shell hidden,
-        <code>getBorderWidth</code> of the composites, shadow colors</td>
+        <code>getBorderWidth</code> of the composites, shadow colors, clipping
+        of the children, size of the drop down combo, minimum of the tool
+        items</td>
 
         <td>Done [lpino]</td>
 
