@@ -800,6 +800,127 @@ public class SWT012_01 extends SWTTestCase {
 		return right < 0 ? null : new Rectangle(left, top, right - left + 1, bottom - top + 1);
 	}
 
+	/*
+	 * The cells are drawn by the table (owner draw): the text must be where the container put
+	 * it (the dark pixels of the texts below were measured on the container itself, before,
+	 * with these widths and two fonts), with the colors of the item, and the highlight on the
+	 * cells of a selected row.
+	 */
+	void checkCellsOnScreen() {
+		saySubObjective("Cells and colors, seen on the screen");
+		Shell window = new Shell(display, SWT.NO_TRIM);
+		window.setBounds(10, 10, 400, 200);
+		window.open();
+		String[] fonts = {null, "Helvetica"};
+		String[] expected = {"9..37 63..99 42..65", "12..60 30..97 34..75"};
+		for (int f = 0; f < fonts.length; f++) {
+			Table table = new Table(window, SWT.MULTI | SWT.BORDER);
+			table.setBounds(0, 0, 400, 200);
+			org.eclipse.swt.graphics.Font font = fonts[f] == null ? null : new org.eclipse.swt.graphics.Font(display, fonts[f], 14, SWT.NORMAL);
+			if (font != null) table.setFont(font);
+			table.setHeaderVisible(true);
+			int[] aligns = {SWT.LEFT, SWT.RIGHT, SWT.CENTER};
+			for (int c = 0; c < 3; c++) {
+				TableColumn column = new TableColumn(table, aligns[c]);
+				column.setText("Col " + c);
+				column.setWidth(110);
+			}
+			TableItem[] items = new TableItem[4];
+			for (int i = 0; i < items.length; i++) {
+				items[i] = new TableItem(table, SWT.NONE);
+				items[i].setText(new String[] {"Item " + i, "WWW " + i, "xyz " + i});
+			}
+			items[2].setImage(image);
+			settleTable(table);
+			String what = fonts[f] == null ? "default font" : fonts[f] + " 14";
+			String place = darkSpan(table, items[0], 0) + " " + darkSpan(table, items[0], 1) + " " + darkSpan(table, items[0], 2);
+			check(place.equals(expected[f]), "the texts are where the container put them (" + what + "): " + place + ", the container: " + expected[f]);
+			Color red = new Color(display, 255, 0, 0), yellow = new Color(display, 255, 255, 0);
+			items[1].setForeground(red);
+			items[2].setBackground(yellow);
+			items[3].setForeground(red);
+			table.setSelection(new int[] {3});
+			settleTable(table);
+			int hilite = OS.WinQuerySysColor(OS.HWND_DESKTOP, OS.SYSCLR_HILITEBACKGROUND, 0) & 0xFFFFFF;
+			String all = "";
+			for (int i = 0; i < items.length; i++) all += i + ":" + cellColors(table, items[i], hilite) + " ";
+			check(cellColors(table, items[0], hilite).equals("dark white"), "a row without colors (" + what + "): " + all);
+			check(cellColors(table, items[1], hilite).equals("red white"), "the foreground in every cell: " + all);
+			check(cellColors(table, items[2], hilite).equals("dark yellow"), "the background fills the cells: " + all);
+			check(cellColors(table, items[3], hilite).equals("white hilite"), "a selected row has the highlight, not its colors: " + all);
+			Rectangle icon = items[2].getImageBounds(0);
+			check(pel(table, icon.x + icon.width / 2, icon.y + icon.height / 2) == 0x00FF00, "the image is still drawn by the container");
+			items[1].setForeground(null);
+			table.deselectAll();
+			settleTable(table);
+			check(cellColors(table, items[1], hilite).equals("dark white") && cellColors(table, items[3], hilite).equals("red white"),
+					"null gives the color of the table again, and a deselected row its own: " + cellColors(table, items[1], hilite) + ", " + cellColors(table, items[3], hilite));
+			table.dispose();
+			red.dispose();
+			yellow.dispose();
+			if (font != null) font.dispose();
+		}
+		window.dispose();
+	}
+
+	void settleTable(Table table) {
+		pump();
+		for (int i = 0; i < 20; i++) display.readAndDispatch();
+		table.update();
+		for (int i = 0; i < 20; i++) display.readAndDispatch();
+	}
+
+	int pel(Table table, int x, int y) {
+		Point p = table.toDisplay(new Point(x, y));
+		int hps = OS.WinGetScreenPS(OS.HWND_DESKTOP);
+		OS.GpiCreateLogColorTable(hps, 0, OS.LCOLF_RGB, 0, 0, null);
+		int pel = OS.GpiQueryPel(hps, new int[] {p.x, OS.WinQuerySysValue(OS.HWND_DESKTOP, OS.SV_CYSCREEN) - 1 - p.y}) & 0xFFFFFF;
+		OS.WinReleasePS(hps);
+		return pel;
+	}
+
+	/* The first and last x, from the left of the cell, of the dark pixels in it */
+	String darkSpan(Table table, TableItem item, int column) {
+		Rectangle r = item.getBounds(column);
+		int first = -1, last = -1;
+		for (int y = r.y; y < r.y + r.height; y++) {
+			for (int x = r.x; x < r.x + r.width; x++) {
+				int pel = pel(table, x, y);
+				if ((((pel >> 16) & 0xFF) + ((pel >> 8) & 0xFF) + (pel & 0xFF)) / 3 < 60) {
+					if (first == -1 || x - r.x < first) first = x - r.x;
+					if (x - r.x > last) last = x - r.x;
+				}
+			}
+		}
+		return first + ".." + last;
+	}
+
+	/* The colors in the cells of a row (not the column of the images), in a fixed order */
+	String cellColors(Table table, TableItem item, int hilite) {
+		boolean isDark = false, isRed = false, isWhite = false, isYellow = false, isHilite = false;
+		for (int c = 0; c < 3; c++) {
+			Rectangle r = item.getBounds(c);
+			for (int y = r.y + 1; y < r.y + r.height - 1; y++) {
+				for (int x = r.x + 1; x < r.x + r.width - 1; x++) {
+					int pel = pel(table, x, y);
+					int red = (pel >> 16) & 0xFF, green = (pel >> 8) & 0xFF, blue = pel & 0xFF;
+					if (pel == hilite) isHilite = true;
+					else if (red < 60 && green < 60 && blue < 60) isDark = true;
+					else if (red > 200 && green < 60 && blue < 60) isRed = true;
+					else if (red > 200 && green > 200 && blue < 60) isYellow = true;
+					else if (red > 240 && green > 240 && blue > 240) isWhite = true;
+				}
+			}
+		}
+		String result = "";
+		if (isDark) result += "dark ";
+		if (isRed) result += "red ";
+		if (isWhite) result += "white ";
+		if (isYellow) result += "yellow ";
+		if (isHilite) result += "hilite ";
+		return result.trim();
+	}
+
 	void checkImagesAndColors() {
 		saySubObjective("Images and colors");
 		Table table = newTable(SWT.BORDER);
@@ -858,6 +979,7 @@ public class SWT012_01 extends SWTTestCase {
 		checkSizeAndRedraw();
 		checkImagesAndColors();
 		checkImageOnScreen();
+		checkCellsOnScreen();
 		say("\n" + checks + " checks passed.\n");
 
 		sayObjective("Interactive: click, Ctrl and Shift click, press Enter, click the titles of the columns, try to drag their borders");
@@ -895,6 +1017,9 @@ public class SWT012_01 extends SWTTestCase {
 			TableItem item = new TableItem(table, SWT.NONE);
 			item.setText(new String[] {"File " + (i + 1), String.valueOf((i + 1) * 137) + " KB", kinds[i % kinds.length]});
 			item.setImage(image);
+			/* Colors to look at: a red text every five rows, a yellow background */
+			if (i % 5 == 4) item.setForeground(display.getSystemColor(SWT.COLOR_RED));
+			if (i == 2) item.setBackground(display.getSystemColor(SWT.COLOR_YELLOW));
 		}
 		table.setRedraw(true);
 		table.addSelectionListener(new SelectionAdapter() {

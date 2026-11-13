@@ -3195,6 +3195,10 @@ MRESULT WM_DRAWITEM (int mp1, int mp2) {
       if (control == null) return null;
       return control.wmDrawChild (mp1, mp2);
     }
+    /* The detail view of a container draws in a child window (CID_LEFTDVWND): the table is its parent */
+    int parent = OS.WinQueryWindow (struct.hwnd, OS.QW_PARENT);
+    Control control = WidgetTable.get (parent);
+    if (control instanceof Table) return control.wmDrawChild (mp1, mp2);
      return null;
 }
 

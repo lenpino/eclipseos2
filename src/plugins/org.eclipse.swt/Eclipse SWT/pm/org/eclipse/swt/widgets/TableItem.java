@@ -33,8 +33,9 @@ import org.eclipse.swt.graphics.*;
  * OS/2 note: an item is a record of the container, and the text of each cell
  * a string in native memory pointed to from a slot of the record (one for
  * each column). Only the image of the first column is shown (it is the icon
- * of the record), the others are kept. The colors and the check box state are
- * only kept as well. See the notes of <code>Table</code>.
+ * of the record), the others are kept. The table draws the cells with the
+ * colors of the item; the check box state is only kept. See the notes of
+ * <code>Table</code>.
  * </p>
  */
 public class TableItem extends Item {
@@ -378,9 +379,6 @@ void releaseWidget () {
  * Sets the receiver's background color to the color specified
  * by the argument, or to the default system color for the item
  * if the argument is null.
- * <p>
- * OS/2 note: the color is only kept, the container does not use it.
- * </p>
  *
  * @param color the new color (or null)
  *
@@ -395,7 +393,11 @@ void releaseWidget () {
 public void setBackground (Color color) {
 	checkWidget ();
 	if (color != null && color.isDisposed ()) error (SWT.ERROR_INVALID_ARGUMENT);
-	background = color == null ? -1 : color.handle;
+	int pixel = color == null ? -1 : color.handle;
+	if (pixel == background) return;
+	background = pixel;
+	/* The table draws the cells with the colors of the item */
+	if (handle != 0) parent.invalidateRecord (handle, OS.CMA_NOREPOSITION);
 }
 
 /**
@@ -419,9 +421,6 @@ public void setChecked (boolean checked) {
  * Sets the receiver's foreground color to the color specified
  * by the argument, or to the default system color for the item
  * if the argument is null.
- * <p>
- * OS/2 note: the color is only kept, the container does not use it.
- * </p>
  *
  * @param color the new color (or null)
  *
@@ -436,7 +435,10 @@ public void setChecked (boolean checked) {
 public void setForeground (Color color) {
 	checkWidget ();
 	if (color != null && color.isDisposed ()) error (SWT.ERROR_INVALID_ARGUMENT);
-	foreground = color == null ? -1 : color.handle;
+	int pixel = color == null ? -1 : color.handle;
+	if (pixel == foreground) return;
+	foreground = pixel;
+	if (handle != 0) parent.invalidateRecord (handle, OS.CMA_NOREPOSITION);
 }
 
 /**

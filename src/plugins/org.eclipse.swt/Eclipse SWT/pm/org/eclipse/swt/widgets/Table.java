@@ -291,7 +291,7 @@ void createHandle () {
 }
 
 int containerAttributes () {
-	int attr = OS.CV_DETAIL | OS.CV_MINI | OS.CA_DRAWBITMAP;
+	int attr = OS.CV_DETAIL | OS.CV_MINI | OS.CA_DRAWBITMAP | OS.CA_OWNERDRAW;
 	if (headerVisible) attr |= OS.CA_DETAILSVIEWTITLES;
 	return attr;
 }
@@ -1875,6 +1875,60 @@ void checkSelection () {
 	Event event = new Event ();
 	event.item = item;
 	sendEvent (SWT.Selection, event);
+}
+
+/*
+ * A cell of a record (WM_DRAWITEM of the container, CA_OWNERDRAW, sent for each field of each
+ * record and of the titles). The table draws the cells of the columns: the background of the
+ * item, or the highlight when the record is selected, and the text in the same place as the
+ * container puts it (measured with two fonts 2026-11-13): the content of a field starts half
+ * the margin of the other fields after its left (the whole margin of the first field less
+ * that half) and ends that half before its right. The titles and the column of the images are
+ * drawn by the container. OWNERITEM.hItem points to a CNRDRAWITEMINFO: pRecord, pFieldInfo.
+ * The colors are RGB values: the presentation space is put in RGB mode for the cell and given
+ * back its default color table.
+ */
+MRESULT wmDrawChild (int mp1, int mp2) {
+	OWNERITEM struct = new OWNERITEM ();
+	OS.objcpy (struct, mp2);
+	if (struct.hItem == 0) return null;
+	TableItem item = itemOf (Tree.peek (struct.hItem));
+	int fi = Tree.peek (struct.hItem + 4);
+	if (item == null || fi == 0 || fi == iconField) return null;
+	int index = -1, alignment = OS.DT_LEFT;
+	if (implicit != null && fi == implicit.handle) index = 0;
+	for (int i=0; i<columns.size () && index == -1; i++) {
+		TableColumn column = (TableColumn) columns.elementAt (i);
+		if (column.field.handle == fi) {
+			index = i;
+			if ((column.style & SWT.RIGHT) != 0) alignment = OS.DT_RIGHT;
+			if ((column.style & SWT.CENTER) != 0) alignment = OS.DT_CENTER;
+		}
+	}
+	if (index == -1) return null;
+	int foreground, background;
+	if ((struct.fsAttribute & OS.CRA_SELECTED) != 0) {
+		foreground = OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_HILITEFOREGROUND, 0);
+		background = OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_HILITEBACKGROUND, 0);
+	} else {
+		foreground = item.foreground != -1 ? item.foreground : getForegroundPixel ();
+		background = item.background != -1 ? item.background : getBackgroundPixel ();
+	}
+	int half = fieldPad (1) / 2;
+	RECTL content = new RECTL ();
+	content.xLeft = struct.rclItem.xLeft + (firstPosition () + index == 0 ? fieldPad (0) - half : half);
+	/* The cell of the last column goes on to the right of the window: the content ends with the column */
+	content.xRight = struct.rclItem.xLeft + widthOf (index) - half;
+	/* The container starts a text on the left half the separator further left (1 pixel with the default font, 2 with 14.Helvetica) */
+	if (alignment == OS.DT_LEFT) content.xLeft -= (fieldPad (1) - fieldPad (0)) / 2;
+	content.yBottom = struct.rclItem.yBottom;
+	content.yTop = struct.rclItem.yTop;
+	byte [] text = Tree.bytesOf (item.getText (index));
+	OS.GpiCreateLogColorTable (struct.hps, 0, OS.LCOLF_RGB, 0, 0, null);
+	OS.WinFillRect (struct.hps, struct.rclItem, background);
+	OS.WinDrawText (struct.hps, text.length, text, content, foreground, background, alignment | OS.DT_VCENTER);
+	OS.GpiCreateLogColorTable (struct.hps, OS.LCOL_RESET, OS.LCOLF_DEFAULT, 0, 0, null);
+	return new MRESULT (OS.TRUE);
 }
 
 TableItem itemOf (int hRecord) {

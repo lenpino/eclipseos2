@@ -146,20 +146,22 @@ static int allocate (int size) {
 	return block;
 }
 
-static int allocateString (String string) {
-	/*
-	* String.getBytes() takes about 9 ms for each call in the Java 1.3.1 of OS/2 (it
-	* looks the converter up again): ASCII, which is nearly all of it, is converted here.
-	*/
+/*
+ * String.getBytes() takes about 9 ms for each call in the Java 1.3.1 of OS/2 (it
+ * looks the converter up again): ASCII, which is nearly all of it, is converted here.
+ */
+static byte [] bytesOf (String string) {
 	byte [] bytes = new byte [string.length ()];
 	for (int i=0; i<bytes.length; i++) {
 		char c = string.charAt (i);
-		if (c >= 0x80) {
-			bytes = string.getBytes ();
-			break;
-		}
+		if (c >= 0x80) return string.getBytes ();
 		bytes [i] = (byte) c;
 	}
+	return bytes;
+}
+
+static int allocateString (String string) {
+	byte [] bytes = bytesOf (string);
 	int block = allocate (bytes.length + 1);
 	if (bytes.length > 0) OS.objcpy (block, bytes);
 	return block;
@@ -985,7 +987,7 @@ MRESULT wmDrawChild (int mp1, int mp2) {
 	if (struct.idItem != OS.CMA_TEXT || struct.hItem == 0) return null;
 	TreeItem item = itemOf (peek (struct.hItem));
 	if (item == null) return null;
-	byte [] text = item.getText ().getBytes ();
+	byte [] text = bytesOf (item.getText ());
 	int foreground, background;
 	if (item.selected) {
 		foreground = OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_HILITEFOREGROUND, 0);
