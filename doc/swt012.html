@@ -133,6 +133,15 @@ href="eclipseos2-xxe.css"
       the container. <code>String.getBytes()</code> takes about 9 ms in this
       Java, so the texts of the cells are converted by <code>Tree.bytesOf()</code>
       (also used by the tree).</li>
+
+      <li>The images of the other columns (2026-11-13) are drawn by the table
+      in their cells (<code>GpiWCBitBlt</code>), at the start of the content,
+      and the text after them and a gap of half the margin. Without the column
+      of the images the rectangle of a cell is one pixel higher than the record
+      and goes into the next row: the image is placed in the height of the
+      record (<code>CM_QUERYRECORDRECT</code>, without placing the records
+      again, as it is asked while they are painted), from its top.
+      <code>getImageBounds()</code> follows the same rule.</li>
     </ul>
 
     <p>The behavior that differs from Windows is in <a href="diff.html">difference

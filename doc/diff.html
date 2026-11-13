@@ -336,11 +336,12 @@ href="eclipseos2-xxe.css"
         resize the columns, with <code>Move</code> and <code>Resize</code> events.</td>
 
         <td><code>Table</code> is the container control of PM in its detail view.
-        A column is a <code>FIELDINFO</code>, and there are at most 32 of them. Only
-        the image of the first column is shown (the icon of the record), in a column
-        of its own before the first one and centered in it; the others are kept, and
-        their <code>getImageBounds()</code> has no width. The image indent is only
-        kept. <code>SWT.CHECK</code> has no effect (the state is only kept), and the
+        A column is a <code>FIELDINFO</code>, and there are at most 32 of them. The
+        image of the first column is the icon of the record, in a column of its own
+        before the first one and centered in it; the images of the other columns
+        are drawn by the table at the start of their cells. Only bitmaps are drawn,
+        and an image is cut to the height of the row (which is that of the text
+        until the first column has an image). The image indent is only kept. <code>SWT.CHECK</code> has no effect (the state is only kept), and the
         images of a column header are only kept. The colors of an item are drawn in
         its cells, not in the column of the images. A click
         on a title is a <code>Selection</code> of the column, and a width set by
