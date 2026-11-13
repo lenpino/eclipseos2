@@ -115,6 +115,24 @@ href="eclipseos2-xxe.css"
       the default font, 8 with 14.Helvetica), as the separator of the fields
       after the first is on their right. Checked on the screen with two fonts
       (2026-11-13).</li>
+
+      <li>The colors of the items (2026-11-13). With <code>CA_OWNERDRAW</code>
+      the detail view sends a <code>WM_DRAWITEM</code> for each field of each
+      record (and of the titles, with no record), with <code>idItem</code> 0
+      and the rectangle of the whole cell; the cell of the last column goes on
+      to the right of the window. <code>OWNERITEM.hwnd</code> is the child
+      window of the records (<code>CID_LEFTDVWND</code>), not the container:
+      <code>Control.WM_DRAWITEM</code> looks at its parent. When the owner draws
+      a cell the container draws no highlight in it, so the table draws the
+      cells of the columns: the background of the item, or the highlight when
+      the record is selected (<code>fsAttribute</code>), and the text where the
+      container puts it, found by its pixels with two fonts and the three
+      alignments: the content of a field is inside half the margin of the other
+      fields on each side, and a text on the left starts half a separator
+      further left. The titles and the column of the images are still drawn by
+      the container. <code>String.getBytes()</code> takes about 9 ms in this
+      Java, so the texts of the cells are converted by <code>Tree.bytesOf()</code>
+      (also used by the tree).</li>
     </ul>
 
     <p>The behavior that differs from Windows is in <a href="diff.html">difference
