@@ -106,6 +106,15 @@ href="eclipseos2-xxe.css"
       <code>setTopIndex()</code> and <code>showItem()</code> its green pixels
       are in the first or the last row. A positive amount of
       <code>CM_SCROLLWINDOW</code> shows the lower records.</li>
+
+      <li><code>getImageBounds(0)</code> gave the start of the first cell, but
+      the image is drawn in the column of the images, before it: centered in
+      its 22 pixels, after the left margin of the field, and centered in the
+      height of the row. The left margin is <code>(2 * first - others) /
+      2</code> of the margins that <code>Table</code> measures (6 pixels with
+      the default font, 8 with 14.Helvetica), as the separator of the fields
+      after the first is on their right. Checked on the screen with two fonts
+      (2026-11-13).</li>
     </ul>
 
     <p>The behavior that differs from Windows is in <a href="diff.html">difference

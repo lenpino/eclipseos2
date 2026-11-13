@@ -275,6 +275,11 @@ public Image getImage () {
  * Returns a rectangle describing the size and location
  * relative to its parent of an image at a column in the
  * table.
+ * <p>
+ * OS/2 note: the image of the first column is drawn in a column of its own,
+ * before the first one, and the images of the other columns are not drawn:
+ * their rectangle has no width.
+ * </p>
  *
  * @param index the index that specifies the column
  * @return the receiver's bounding image rectangle
@@ -288,10 +293,12 @@ public Rectangle getImageBounds (int index) {
 	checkWidget ();
 	Rectangle cell = getBounds (index);
 	Image image = getImage (index);
-	if (image == null || cell.height == 0) return new Rectangle (cell.x, cell.y, 0, cell.height);
+	/* Only the image of the first column is drawn, in the column of the images before it */
+	if (index != 0 || image == null || cell.height == 0 || parent.iconField == 0) return new Rectangle (cell.x, cell.y, 0, cell.height);
 	Rectangle size = image.getBounds ();
-	int x = cell.x + (index == 0 ? imageIndent : 0);
-	return new Rectangle (x, cell.y, size.width, Math.min (size.height, cell.height));
+	int width = Math.min (size.width, Table.ICON_FIELD_WIDTH), height = Math.min (size.height, cell.height);
+	Rectangle row = getRowBounds ();
+	return new Rectangle (row.x + parent.imageOffset (width), row.y + (row.height - height) / 2, width, height);
 }
 
 /**
@@ -515,6 +522,10 @@ public void setImage (Image image) {
 
 /**
  * Sets the indent of the first column's image.
+ * <p>
+ * OS/2 note: the indent is only kept, the container centers the image in its
+ * column.
+ * </p>
  *
  * @param indent the new indent
  *

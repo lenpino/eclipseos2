@@ -737,6 +737,69 @@ public class SWT012_01 extends SWTTestCase {
 		b.dispose();
 	}
 
+	/*
+	 * Where the image of an item is drawn: in the column of the images, before the first
+	 * column (see Table.ensureIconField). The green of the test image (it fills the image
+	 * but its border of 1 pixel) is looked for on the screen, with two fonts.
+	 */
+	void checkImageOnScreen() {
+		saySubObjective("Images, seen on the screen");
+		Shell window = new Shell(display, SWT.NO_TRIM);
+		window.setBounds(10, 10, 400, 200);
+		window.open();
+		String[] fonts = {null, "Helvetica"};
+		for (int f = 0; f < fonts.length; f++) {
+			Table table = new Table(window, SWT.SINGLE | SWT.BORDER);
+			table.setBounds(0, 0, 400, 200);
+			org.eclipse.swt.graphics.Font font = fonts[f] == null ? null : new org.eclipse.swt.graphics.Font(display, fonts[f], 14, SWT.NORMAL);
+			if (font != null) table.setFont(font);
+			table.setHeaderVisible(true);
+			new TableColumn(table, SWT.NONE).setWidth(150);
+			new TableColumn(table, SWT.NONE).setWidth(100);
+			new TableItem(table, SWT.NONE).setText(new String[] {"first", "x"});
+			TableItem item = new TableItem(table, SWT.NONE);
+			item.setText(new String[] {"with image", "x"});
+			item.setImage(image);
+			item.setImage(1, image);
+			pump();
+			for (int i = 0; i < 20; i++) display.readAndDispatch();
+			table.update();
+			Rectangle green = greenBox(table);
+			Rectangle bounds = item.getImageBounds(0);
+			Rectangle expected = green == null ? null : new Rectangle(green.x - 1, green.y - 1, green.width + 2, green.height + 2);
+			String what = fonts[f] == null ? "default font" : fonts[f] + " 14";
+			check(bounds.equals(expected), "getImageBounds(0) is where the image is drawn (" + what + "): " + bounds + ", on the screen " + expected);
+			Rectangle row = item.getBounds(0);
+			check(bounds.x + bounds.width <= row.x, "it is before the first column, where the image is drawn: " + bounds + " " + row);
+			Rectangle other = item.getImageBounds(1);
+			check(other.width == 0 && other.x == item.getBounds(1).x, "the image of another column is not drawn: no width (" + other + ")");
+			table.dispose();
+			if (font != null) font.dispose();
+		}
+		window.dispose();
+	}
+
+	/* The box of the green pixels of a table, or null */
+	Rectangle greenBox(Table table) {
+		Rectangle area = table.getClientArea();
+		Point origin = table.toDisplay(new Point(0, 0));
+		int screen = OS.WinQuerySysValue(OS.HWND_DESKTOP, OS.SV_CYSCREEN);
+		int hps = OS.WinGetScreenPS(OS.HWND_DESKTOP);
+		OS.GpiCreateLogColorTable(hps, 0, OS.LCOLF_RGB, 0, 0, null);
+		int left = Integer.MAX_VALUE, top = Integer.MAX_VALUE, right = -1, bottom = -1;
+		for (int y = 0; y < area.height; y++) {
+			for (int x = 0; x < 300; x++) {
+				int pel = OS.GpiQueryPel(hps, new int[] {origin.x + x, screen - 1 - (origin.y + y)});
+				if (((pel >> 8) & 0xFF) > 200 && ((pel >> 16) & 0xFF) < 60 && (pel & 0xFF) < 60) {
+					left = Math.min(left, x); right = Math.max(right, x);
+					top = Math.min(top, y); bottom = Math.max(bottom, y);
+				}
+			}
+		}
+		OS.WinReleasePS(hps);
+		return right < 0 ? null : new Rectangle(left, top, right - left + 1, bottom - top + 1);
+	}
+
 	void checkImagesAndColors() {
 		saySubObjective("Images and colors");
 		Table table = newTable(SWT.BORDER);
@@ -749,7 +812,7 @@ public class SWT012_01 extends SWTTestCase {
 		check(item.getImage(1) == null, "no image in the other column");
 		item.setImage(1, image);
 		check(item.getImage(1) == image, "the image of another column is kept");
-		check(item.getImageBounds(0).width > 0 && item.getImageBounds(1).width > 0, "the bounds of the images: " + item.getImageBounds(0));
+		check(item.getImageBounds(0).width > 0, "the bounds of the image: " + item.getImageBounds(0));
 		item.setImageIndent(6);
 		check(item.getImageIndent() == 6, "setImageIndent");
 		item.setImage((Image) null);
@@ -794,6 +857,7 @@ public class SWT012_01 extends SWTTestCase {
 		checkScrollingOnScreen();
 		checkSizeAndRedraw();
 		checkImagesAndColors();
+		checkImageOnScreen();
 		say("\n" + checks + " checks passed.\n");
 
 		sayObjective("Interactive: click, Ctrl and Shift click, press Enter, click the titles of the columns, try to drag their borders");

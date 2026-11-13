@@ -859,6 +859,17 @@ href="eclipseos2-xxe.css"
       <code>DirectoryDialog</code> did not show a directory further down
       either). Fixed; <kbd>SWT011_01</kbd> (79 checks) finds the items by the
       pixels of their images. <kbd>SWT013_01</kbd> still passes.</li>
+
+      <li>Seen on the screen: <code>Tree.showItem()</code> scrolls to the last
+      and the first of 40 items, with the buttons that the interactive part of
+      <kbd>SWT011_01</kbd> now has. <kbd>build.xml</kbd> had no target
+      <kbd>swt009_11</kbd>.</li>
+
+      <li><code>TableItem.getImageBounds()</code> is where the image is drawn:
+      in the column of the images, before the first column (it gave the start
+      of the first cell), and without width for the other columns, whose images
+      are not drawn. <kbd>SWT012_01</kbd> (164 checks) finds the image on the
+      screen with two fonts. See <a href="diff.html">difference 014</a>.</li>
     </ul>
   </body>
 </html>

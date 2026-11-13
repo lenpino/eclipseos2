@@ -109,6 +109,8 @@ public class Table extends Composite {
 	static final int DEFAULT_WIDTH = 64;
 	static final int DEFAULT_HEIGHT = 64;
 	static final int DEFAULT_COLUMN_WIDTH = 100;
+	/* The width of the field of the column of the images, without the margins */
+	static final int ICON_FIELD_WIDTH = 22;
 
 	/* A column of the container */
 	static final class Field {
@@ -502,7 +504,7 @@ void ensureIconField () {
 	Tree.poke (fi + FI_FLDATA, OS.CFA_BITMAPORICON | OS.CFA_CENTER | OS.CFA_VCENTER | OS.CFA_FIREADONLY);
 	Tree.poke (fi + FI_FLTITLE, OS.CFA_CENTER | OS.CFA_FITITLEREADONLY);
 	Tree.poke (fi + FI_OFFSTRUCT, 32);
-	Tree.poke (fi + FI_CXWIDTH, 22);
+	Tree.poke (fi + FI_CXWIDTH, ICON_FIELD_WIDTH);
 	int insert = Tree.allocate (16);
 	Tree.poke (insert, 16);
 	Tree.poke (insert + 4, OS.CMA_FIRST);
@@ -605,6 +607,18 @@ int [] measurePadding () {
 int fieldPad (int position) {
 	if (padding == null) padding = measurePadding ();
 	return position == 0 ? padding [0] : padding [1];
+}
+
+/*
+ * Where an image of the given width starts in a row: centered in the field of the column
+ * of the images, after its left margin. The margins of a field are the same on both sides
+ * and the separator that the fields after the first have is on the right, so the left one
+ * is (2 * first - others) / 2 (measured on the screen 2026-11-13: 6 pixels with the
+ * default font, 8 with 14.Helvetica).
+ */
+int imageOffset (int width) {
+	int margin = (2 * fieldPad (0) - fieldPad (1)) / 2;
+	return margin + (ICON_FIELD_WIDTH - width) / 2;
 }
 
 /* The position of the field of the first column */
