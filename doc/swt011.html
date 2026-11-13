@@ -86,6 +86,17 @@ href="eclipseos2-xxe.css"
       <code>UP</code> and <code>CLICK</code> sent to it): it looks at the real
       mouse. The checks send the clicks on the items; the plus sign is tried by
       hand.</li>
+
+      <li>The colors of the items (2026-11-13) are drawn with the text: the
+      foreground and the background of the item, or else those of the tree,
+      in RGB values. The presentation space of the container is put in RGB mode
+      (<code>GpiCreateLogColorTable</code> with <code>LCOLF_RGB</code>) for
+      the text and given back its default table (<code>LCOL_RESET</code>);
+      the images, the lines and the plus signs that the container draws after
+      it are still right (checked on the screen). The rectangle of the text is
+      13 pixels high in a row of 16, so the background of an item is that
+      band, as the label of Windows. A selected item has the colors of the
+      highlight.</li>
     </ul>
 
     <p>Three problems that were found on the way and are not tree specific are
@@ -155,8 +166,8 @@ href="eclipseos2-xxe.css"
         <td>Partly done [lpino]</td>
 
         <td>The image is the mini icon of the record (checked that it has
-        bounds, not how it looks). No check boxes, and the colors are only
-        kept.</td>
+        bounds, not how it looks). No check boxes. The colors are drawn
+        (2026-11-13), checked on the screen.</td>
       </tr>
     </table>
   </body>

@@ -306,8 +306,9 @@ href="eclipseos2-xxe.css"
         with the arrows do not extend the selection. The record that the
         container keeps selected is the cursor, shown by its dotted frame.
         <code>SWT.CHECK</code> has no effect (the container has no check
-        boxes, the state is only kept), and the colors of an item are only
-        kept. <code>setInsertMark()</code> does nothing. An image that is an
+        boxes, the state is only kept). The colors of an item are those of its
+        text (the background of the image is the one of the tree).
+        <code>setInsertMark()</code> does nothing. An image that is an
         icon (<code>SWT.ICON</code>) is not drawn, only bitmaps are.</td>
 
         <td>All of it was measured on the container: with
