@@ -432,6 +432,46 @@ href="eclipseos2-xxe.css"
       rectangle; without the integration (Host+I in VirtualBox) it does.</li>
     </ul>
 
+    <h2>The cool bar and the tabs (<kbd>SWT020_01</kbd>, <kbd>SWT018_01</kbd>)</h2>
+
+    <ul>
+      <li>Code of Eclipse that is compiled as it is tests the port well. The
+      emulated <code>CoolBar</code> uses only the public API, and through it
+      six defects of the port came out that no test had seen:
+      <code>setVisible(false)</code> before the shell is open, the border of the
+      composites, two shadow colors, the clipping of the children, the size of a
+      drop down <code>Combo</code> and the minimum of a <code>ToolItem</code>
+      with an image (<a href="swt020.html">step 020</a>).</li>
+
+      <li>Each defect seen on the screen got a check first, and the check was
+      seen to fail before the fix: 182 dark pixels of text before a redraw and
+      0 after, a combo 122 pixels high for a field of 20, black under a combo.
+      Then the same check tells that the fix works, and it stays.</li>
+
+      <li>A check of pixels needs a background that is not the right answer.
+      The first check of the part below a combo passed with the defect: the
+      combo was created on a shell already painted, and the gray left there was
+      the color expected. Opening the window of the combo over a black one made
+      it fail as the screen did.</li>
+
+      <li>A fix for all the controls of a kind (<code>WS_CLIPCHILDREN</code>
+      for every composite) changes what other tests show, and their interactive
+      parts are not checked by anything. The user found the screen behind the
+      combo of <kbd>SWT009_04</kbd>: after such a fix, the report names the
+      older tests that have to be looked at.</li>
+
+      <li>When PM does not tell something (where the notebook draws its tabs),
+      it can be measured: a diagnostic that prints the pixels, run with several
+      texts and five fonts, gave the rule to a pixel. The test does not use the
+      rule: it finds the tabs on the screen by their pixels and puts the pointer
+      near their edges, so it would catch a wrong rule.</li>
+
+      <li>The rule of the tabs held with one font and failed with another one:
+      a measure with a single font proves little. The metrics of each font
+      (<code>lEmHeight</code>) were printed next to the measures, and the
+      relation came out of the table.</li>
+    </ul>
+
     <h2>The tools and the virtual machine</h2>
 
     <ul>
@@ -499,6 +539,13 @@ href="eclipseos2-xxe.css"
       <code>getSize()</code> with <code>computeSize()</code> the second (<a
       href="swt020.html">step 020</a>).</li>
 
+      <li>On 2026-11-12 the VM dropped from the network several times (no
+      answer to ping) and came back with the same address. A
+      <code>vm-push.sh</code> cut in the middle ends without its line
+      <code>&gt;&gt; Enviados</code>, and the VM keeps the old files: after a
+      drop, <code>dir</code> on the VM and the sizes on the Mac tell whether
+      they arrived. A push that used to take seconds took 160.</li>
+
       <li>An old address of the VM can belong to another machine later: on
       2026-11-11 port 22 of <code>192.168.1.87</code> answered, the session
       reached the authentication and then hung, and a restart of the
@@ -528,6 +575,15 @@ href="eclipseos2-xxe.css"
     <h2>Things learned about PM</h2>
 
     <ul>
+      <li>The notebook (<code>WC_NOTEBOOK</code>) has no message for the place
+      of a tab. With <code>BKS_TABBEDDIALOG</code> the tabs fit their text, and
+      the width set with <code>BKM_SETDIMENSIONS</code> does not count: the
+      first one begins at half the em height and 5 pixels, each one is as wide
+      as its text (<code>GpiQueryTextBox</code>, top left to top right corner)
+      and one and a half em heights, the first one a pixel more. When they do
+      not fit, the last ones are narrowed. <code>BKM_QUERYPAGEID</code> gives 0
+      when there is no page (<a href="swt018.html">step 018</a>).</li>
+
       <li>Without <code>WS_CLIPCHILDREN</code> a window paints over its
       children, and they are not told to paint again: an invalidated parent
       erases them. The window of a drop down combo box includes its list, also
@@ -646,11 +702,10 @@ href="eclipseos2-xxe.css"
     <h2>Still to do</h2>
 
     <ul>
-      <li>The sources of Eclipse 2.0.1 already include emulated, pure Java
-      versions of <code>CoolBar</code> and <code>CoolItem</code>
-      (<kbd>Eclipse SWT/emulated</kbd>), not compiled yet. <code>Table</code>
-      (<a href="swt012.html">step 012</a>) and <code>DirectoryDialog</code>
-      (<a href="swt013.html">step 013</a>) are done.</li>
+      <li><code>CoolBar</code> (<a href="swt020.html">step 020</a>, the
+      emulated one of Eclipse 2.0.1), <code>Table</code> (<a
+      href="swt012.html">step 012</a>) and <code>DirectoryDialog</code> (<a
+      href="swt013.html">step 013</a>) are done.</li>
 
       <li><code>Tracker</code> (<a href="swt014.html">step 014</a>) is done.</li>
 
@@ -669,8 +724,13 @@ href="eclipseos2-xxe.css"
       now compared by what they describe (<kbd>SWT005_03</kbd>, <a
       href="diff.html">difference 021</a>).</li>
 
-      <li>Tool tips (<a href="swt018.html">step 018</a>) are done, except for
-      the <code>TabItem</code>.</li>
+      <li>Tool tips (<a href="swt018.html">step 018</a>) are done, also for the
+      <code>TabItem</code>.</li>
+
+      <li>Still open: the events of the columns of a <code>Table</code> (move,
+      resize) and the sign of its scrolling, limits of the container; the
+      single selection of a <code>Tree</code> (<a href="diff.html">difference
+      013</a>).</li>
 
       <li>Not ported: (<code>Control</code> only keeps the
       text), AWT, drag and drop, printing, OLE.</li>
