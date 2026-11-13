@@ -257,6 +257,14 @@ href="eclipseos2-xxe.css"
       <li>A record that is not shown (inside a collapsed item) is not selected:
       <code>setSelection()</code> expands the ancestors first.</li>
 
+      <li>The tree view cannot be made to have no selection or several, but
+      with <code>CA_OWNERDRAW</code> the owner draws the text of each record
+      and the container then draws no highlight: the tree keeps the
+      selection and draws it (2026-11-13). Found with a program that counted
+      the pixels of the highlight color in each row with and without drawing
+      the text. The container does not react to mouse messages sent to it
+      on the plus sign.</li>
+
       <li><code>CM_QUERYRECORDEMPHASIS</code> with a record gives the <em>next</em>
       record with that emphasis, not whether that one has it: the flags of the
       record (<code>flRecordAttr</code>, at offset 4) are read for that, and the
@@ -755,9 +763,8 @@ href="eclipseos2-xxe.css"
       a title, a width set by program). The container does not let the user
       change the width of a column (only the split bar, not used, can be
       dragged). The direction of the scrolling of tables and trees is checked
-      on the screen. Still open: the
-      single selection of a <code>Tree</code> (<a href="diff.html">difference
-      013</a>).</li>
+      on the screen. The selection of a <code>Tree</code> is as on Windows,
+      drawn by the tree (<a href="diff.html">difference 013</a>).</li>
 
       <li>Not ported: AWT, drag and drop, printing, OLE.</li>
     </ul>

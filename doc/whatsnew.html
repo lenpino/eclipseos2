@@ -870,6 +870,20 @@ href="eclipseos2-xxe.css"
       of the first cell), and without width for the other columns, whose images
       are not drawn. <kbd>SWT012_01</kbd> (164 checks) finds the image on the
       screen with two fonts. See <a href="diff.html">difference 014</a>.</li>
+
+      <li>The selection of a <a href="swt011.html">tree</a> is as on
+      Windows: none at first, <code>deselectAll()</code> clears it, several
+      items in a <code>SWT.MULTI</code> tree by program and with Ctrl and Shift
+      and a click, and a click on a plus sign does not select. The tree view
+      of the container always keeps one selected record: the tree keeps the
+      selection itself and draws the texts of the records
+      (<code>CA_OWNERDRAW</code>), and that record is the cursor.
+      <code>DirectoryDialog</code> selects the first drive itself when the
+      filter path does not exist. <kbd>SWT011_01</kbd> (96 checks) sends the
+      clicks and finds the highlight on the screen; its interactive tree is
+      <code>SWT.MULTI</code>. <kbd>SWT009_11</kbd>, <kbd>SWT012_01</kbd>,
+      <kbd>SWT013_01</kbd> and <kbd>SWT016_01</kbd> still pass. See <a
+      href="diff.html">difference 013</a>.</li>
     </ul>
   </body>
 </html>

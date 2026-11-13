@@ -299,25 +299,26 @@ href="eclipseos2-xxe.css"
         item are drawn.</td>
 
         <td><code>Tree</code> is the container control of PM in its tree view.
-        It always has one selected item once it has items, which is the first
-        one that is added (no <code>Selection</code> event is sent for it),
-        <code>deselectAll()</code> does not remove it, and selecting another
-        item replaces it, also in a <code>SWT.MULTI</code> tree and also from the
-        program: <code>getSelection()</code> never gives more than one item.
+        The selection is as on Windows (since 2026-11-13): none at first,
+        <code>deselectAll()</code> clears it, a <code>SWT.MULTI</code> tree
+        can have several items, by program and with Ctrl and Shift and a click.
+        With the keyboard the arrows move and select one item; Shift and Ctrl
+        with the arrows do not extend the selection. The record that the
+        container keeps selected is the cursor, shown by its dotted frame.
         <code>SWT.CHECK</code> has no effect (the container has no check
         boxes, the state is only kept), and the colors of an item are only
-        kept. <code>setInsertMark()</code> does nothing. Clicking the plus or
-        minus sign of an item also selects it (a <code>Selection</code> event is
-        sent after the <code>Expand</code> or <code>Collapse</code> one), and an
-        image that is an icon (<code>SWT.ICON</code>) is not drawn, only bitmaps
-        are.</td>
+        kept. <code>setInsertMark()</code> does nothing. An image that is an
+        icon (<code>SWT.ICON</code>) is not drawn, only bitmaps are.</td>
 
         <td>All of it was measured on the container: with
         <code>CM_SETRECORDEMPHASIS</code> deselecting the selected record
         returns <code>FALSE</code>, and <code>CCS_SINGLESEL</code>,
         <code>CCS_EXTENDSEL</code>, <code>CCS_MULTIPLESEL</code> and none of
-        them give the same result. To have no selection, or several, the
-        highlight would have to be drawn by the application (owner draw).
+        them give the same result. So <code>Tree</code> keeps the selection
+        itself and draws the texts of the records (<code>CA_OWNERDRAW</code>:
+        when the owner draws the text the container draws no highlight), and it
+        handles the clicks (<code>WM_BUTTON1DOWN</code>): the container does not
+        report a click on the record it has selected already.
         <code>Scrollable</code> adds <code>SBS_VERT</code> (1) to the style
         of any control with a vertical scroll bar, which in the container is
         <code>CCS_EXTENDSEL</code>: <code>Tree</code> removes it.</td>
@@ -375,9 +376,8 @@ href="eclipseos2-xxe.css"
         <code>getFilterPath()</code> is set to the chosen directory when the dialog
         is accepted.</td>
 
-        <td>The tree always has one selected item (difference 013), so when the
-        filter path does not exist the deepest directory that exists is selected,
-        or the first drive, and OK accepts it.</td>
+        <td>When the filter path does not exist the deepest directory that
+        exists is selected, or the first drive, and OK accepts it.</td>
       </tr>
 
       <tr>

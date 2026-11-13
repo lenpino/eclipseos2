@@ -55,6 +55,37 @@ href="eclipseos2-xxe.css"
       <code>CN_COLLAPSETREE</code> are <code>Expand</code> and
       <code>Collapse</code>. The container does not send them for what the
       program does, and a flag avoids it when the container does.</li>
+
+      <li>The selection (2026-11-13). The tree view of the container always
+      has one selected record that cannot be deselected, and never more than
+      one. With <code>CA_OWNERDRAW</code> the container sends
+      <code>WM_DRAWITEM</code> for the icon (<code>CMA_ICON</code>) and the
+      text (<code>CMA_TEXT</code>) of each record, with its emphasis in
+      <code>fsAttribute</code>; when the owner draws the text and returns
+      <code>TRUE</code>, the container draws no highlight (840 pixels of the
+      highlight color in the row, then none but the 16 of the dotted frame of
+      the cursor). So <code>TreeItem</code> has a <code>selected</code> flag,
+      <code>Tree</code> draws the text with the highlight colors when it is
+      set, and the record of the container is only the cursor.
+      <code>Control.WM_DRAWITEM</code> gives the containers their
+      <code>WM_DRAWITEM</code>.</li>
+
+      <li>A click (<code>WM_BUTTON1DOWN</code> of the tree, before the
+      container) on the icon or the text of an item selects it, with Ctrl it is
+      added or removed and with Shift the items from the anchor are selected
+      (<code>SWT.MULTI</code>). The container does not notify a click on the
+      record it already has selected, which after <code>deselectAll()</code>
+      would be lost. The record of the row that was clicked, also on the plus
+      sign, becomes the cursor: the <code>CN_EMPHASIS</code> that follows is
+      not taken as a move of the keyboard, which is how a click on the plus
+      sign no longer selects. A <code>CN_EMPHASIS</code> of another record is
+      the keyboard: it selects that one.</li>
+
+      <li>The container does not expand a record when its plus sign gets the
+      mouse messages from a program (<code>WM_BUTTON1DOWN</code>,
+      <code>UP</code> and <code>CLICK</code> sent to it): it looks at the real
+      mouse. The checks send the clicks on the items; the plus sign is tried by
+      hand.</li>
     </ul>
 
     <p>Three problems that were found on the way and are not tree specific are
@@ -109,12 +140,14 @@ href="eclipseos2-xxe.css"
         <td>Selection and <code>Selection</code>, <code>DefaultSelection</code>,
         <code>Expand</code>, <code>Collapse</code> events</td>
 
-        <td>Done [lpino], with limits</td>
+        <td>Done [lpino]</td>
 
-        <td>One selected item at a time, see <a href="diff.html">difference
-        013</a>. The notifications of the container were <em>simulated</em> to
-        check the routing: the clicks, the Enter key and the plus signs have to
-        be tried by hand in the interactive part.</td>
+        <td>The selection is kept and drawn by the tree (2026-11-13): none,
+        one or several items, checked with clicks sent to the tree and the
+        highlight found on the screen. The real clicks, the keyboard and the
+        plus signs: <em>to be seen</em> in the interactive part (a
+        <code>SWT.MULTI</code> tree). See <a href="diff.html">difference
+        013</a>.</td>
       </tr>
 
       <tr>
