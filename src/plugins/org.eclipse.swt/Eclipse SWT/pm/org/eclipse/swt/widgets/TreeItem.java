@@ -44,6 +44,8 @@ public class TreeItem extends Item {
 	/* The text of the record, allocated apart: the container keeps the pointer */
 	int textPtr;
 	boolean checked, grayed;
+	/* Selected in the tree (the tree keeps the selection, see Tree) */
+	boolean selected;
 
 /**
  * Constructs a new instance of this class given its parent

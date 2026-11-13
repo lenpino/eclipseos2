@@ -46,17 +46,27 @@ import org.eclipse.swt.events.*;
  * through their addresses (see <code>peek()</code> and <code>poke()</code>),
  * and the texts are allocated apart because the container keeps pointers to
  * them. The container has no check boxes, so <code>SWT.CHECK</code> has no
- * effect, and in its tree view it always has one selected item and no more
- * (the first one added at first, and a selection cannot be cleared). See
- * difference 013 in the project notes.
+ * effect. In its tree view the container always has one selected record and
+ * no more, so the selection is kept by the tree, which draws the texts of the
+ * records (owner draw): the record of the container is the cursor. With the
+ * keyboard the cursor moves and selects one item (Shift and Ctrl do not extend
+ * the selection). See difference 013 in the project notes.
  * </p>
  */
 public class Tree extends Composite {
 	TreeItem [] items;
 	/* Programmatic changes must not send the events of the user's ones */
 	boolean ignoreSelect, ignoreExpand;
-	/* The record of the selection that was last reported, to report a change once */
-	int selectedHandle;
+	/*
+	* The selection is kept by the tree, in the items, and drawn by it: the tree view of the
+	* container always has one selected record, which cannot be deselected, and selects one at
+	* a time (difference 013). The record that the container selects is only the cursor (the
+	* focused item of Windows); its notifications for it are told apart from those of the
+	* keyboard by remembering the record that the mouse went down on.
+	*/
+	int cursorHandle;
+	/* Where a range that is selected with Shift starts */
+	TreeItem anchor;
 	int cnrInfoPtr;
 
 	static final int TreeProc;
@@ -317,7 +327,7 @@ void createHandle () {
 	*/
 	cnrInfoPtr = allocate (92);
 	poke (cnrInfoPtr, 92);
-	poke (cnrInfoPtr + 20, OS.CV_TREE | OS.CV_ICON | OS.CV_MINI | OS.CA_TREELINE | OS.CA_DRAWBITMAP);
+	poke (cnrInfoPtr + 20, OS.CV_TREE | OS.CV_ICON | OS.CV_MINI | OS.CA_TREELINE | OS.CA_DRAWBITMAP | OS.CA_OWNERDRAW);
 	poke (cnrInfoPtr + 40, 16);
 	poke (cnrInfoPtr + 44, 16);
 	send (OS.CM_SETCNRINFO, cnrInfoPtr, OS.CMA_FLWINDOWATTR | OS.CMA_SLBITMAPORICON);
@@ -350,16 +360,14 @@ void createItem (TreeItem item, int hParent, int hInsertAfter) {
 	poke (insert + 20, 1);
 	/*
 	* The container selects the first record that is inserted in it, and
-	* tells so. It always keeps one selected record, which cannot be
-	* deselected, but creating an item is not a selection of the user: no
-	* event is sent for it. See difference 013.
+	* tells so: it is the cursor, the tree has no selection (see the fields).
 	*/
 	boolean oldIgnore = ignoreSelect;
 	ignoreSelect = true;
 	int count = send (OS.CM_INSERTRECORD, hItem, insert);
 	OS.free (insert);
 	ignoreSelect = oldIgnore;
-	if (count != 0 && (peek (hItem + REC_FLAGS) & OS.CRA_SELECTED) != 0) selectedHandle = hItem;
+	if (count != 0 && (peek (hItem + REC_FLAGS) & OS.CRA_SELECTED) != 0) cursorHandle = hItem;
 	if (count == 0) {
 		item.freeText ();
 		item.handle = 0;
@@ -392,7 +400,8 @@ void destroyItem (TreeItem item) {
 	OS.free (array);
 	int id = peek (item.handle + REC_SIZE);
 	if (0 <= id && id < items.length && items [id] == item) items [id] = null;
-	if (selectedHandle == item.handle) selectedHandle = 0;
+	if (cursorHandle == item.handle) cursorHandle = 0;
+	if (anchor == item) anchor = null;
 }
 
 /**
@@ -405,14 +414,7 @@ void destroyItem (TreeItem item) {
  */
 public void deselectAll () {
 	checkWidget ();
-	boolean oldIgnore = ignoreSelect;
-	ignoreSelect = true;
-	TreeItem [] selection = getSelection ();
-	for (int i=0; i<selection.length; i++) {
-		send (OS.CM_SETRECORDEMPHASIS, selection [i].handle,
-			OS.MPFROM2SHORT ((short) 0, (short) (OS.CRA_SELECTED | OS.CRA_CURSORED)));
-	}
-	ignoreSelect = oldIgnore;
+	setSelected (getSelection (), false);
 }
 
 /**
@@ -538,16 +540,43 @@ public TreeItem getParentItem () {
  */
 public TreeItem [] getSelection () {
 	checkWidget ();
-	int count = 0;
-	for (int h = send (OS.CM_QUERYRECORDEMPHASIS, OS.CMA_FIRST, OS.CRA_SELECTED); h != 0 && h != -1;
-			h = send (OS.CM_QUERYRECORDEMPHASIS, h, OS.CRA_SELECTED)) count++;
-	TreeItem [] result = new TreeItem [count];
-	int index = 0;
-	for (int h = send (OS.CM_QUERYRECORDEMPHASIS, OS.CMA_FIRST, OS.CRA_SELECTED); h != 0 && h != -1 && index < count;
-			h = send (OS.CM_QUERYRECORDEMPHASIS, h, OS.CRA_SELECTED)) {
-		result [index++] = itemOf (h);
+	java.util.Vector result = new java.util.Vector ();
+	collectSelected (0, result);
+	TreeItem [] array = new TreeItem [result.size ()];
+	result.copyInto (array);
+	return array;
+}
+
+/* The selected items under a record, in the order of the tree */
+void collectSelected (int hParent, java.util.Vector result) {
+	for (int h = firstChild (hParent); h != 0; h = query (h, OS.CMA_NEXT)) {
+		TreeItem item = itemOf (h);
+		if (item == null) continue;
+		if (item.selected) result.addElement (item);
+		collectSelected (h, result);
 	}
-	return result;
+}
+
+/*
+ * Selects or deselects items and paints them again: the text of a record is drawn
+ * by the tree (see wmDrawChild()).
+ */
+void setSelected (TreeItem [] items, boolean selected) {
+	TreeItem [] changed = new TreeItem [items.length];
+	int count = 0;
+	for (int i=0; i<items.length; i++) {
+		if (items [i].selected != selected) {
+			items [i].selected = selected;
+			changed [count++] = items [i];
+		}
+	}
+	if (count == 0 || handle == 0) return;
+	/* Many records are painted again at once */
+	if (count > 8) {
+		OS.WinInvalidateRect (handle, null, true);
+		return;
+	}
+	for (int i=0; i<count; i++) invalidateRecord (changed [i].handle, OS.CMA_NOREPOSITION);
 }
 
 /**
@@ -599,7 +628,8 @@ public void removeAll () {
 		}
 	}
 	items = new TreeItem [4];
-	selectedHandle = 0;
+	cursorHandle = 0;
+	anchor = null;
 }
 
 /**
@@ -666,14 +696,11 @@ public void removeTreeListener(TreeListener listener) {
 public void selectAll () {
 	checkWidget ();
 	if ((style & SWT.SINGLE) != 0) return;
-	boolean oldIgnore = ignoreSelect;
-	ignoreSelect = true;
-	for (int i=0; i<items.length; i++) {
-		if (items [i] != null) {
-			send (OS.CM_SETRECORDEMPHASIS, items [i].handle, OS.MPFROM2SHORT ((short) 1, (short) OS.CRA_SELECTED));
-		}
-	}
-	ignoreSelect = oldIgnore;
+	int count = 0;
+	for (int i=0; i<items.length; i++) if (items [i] != null) count++;
+	TreeItem [] all = new TreeItem [count];
+	for (int i=0, j=0; i<items.length; i++) if (items [i] != null) all [j++] = items [i];
+	setSelected (all, true);
 }
 
 /**
@@ -721,19 +748,25 @@ public void setSelection (TreeItem [] items) {
 	for (int i=0; i<items.length; i++) {
 		if (items [i] == null || items [i].isDisposed ()) error (SWT.ERROR_INVALID_ARGUMENT);
 	}
+	int count = (style & SWT.SINGLE) != 0 ? Math.min (items.length, 1) : items.length;
+	TreeItem [] selection = new TreeItem [count];
+	System.arraycopy (items, 0, selection, 0, count);
 	deselectAll ();
+	setSelected (selection, true);
+	if (count == 0) return;
+	/* The first one is shown and gets the cursor (the container does not select a record that is not shown) */
+	showItem (selection [0]);
+	setCursor (selection [0]);
+	anchor = selection [0];
+}
+
+/* Moves the cursor of the container (its selected record) without reporting it */
+void setCursor (TreeItem item) {
 	boolean oldIgnore = ignoreSelect;
 	ignoreSelect = true;
-	int count = (style & SWT.SINGLE) != 0 ? Math.min (items.length, 1) : items.length;
-	for (int i=0; i<count; i++) {
-		/* The container does not select a record that is not shown: expand its ancestors first */
-		showItem (items [i]);
-		int emphasis = OS.CRA_SELECTED | (i == 0 ? OS.CRA_CURSORED : 0);
-		send (OS.CM_SETRECORDEMPHASIS, items [i].handle, OS.MPFROM2SHORT ((short) 1, (short) emphasis));
-	}
+	send (OS.CM_SETRECORDEMPHASIS, item.handle, OS.MPFROM2SHORT ((short) 1, (short) (OS.CRA_SELECTED | OS.CRA_CURSORED)));
 	ignoreSelect = oldIgnore;
-	int selected = send (OS.CM_QUERYRECORDEMPHASIS, OS.CMA_FIRST, OS.CRA_SELECTED);
-	selectedHandle = selected == -1 ? 0 : selected;
+	cursorHandle = item.handle;
 }
 
 /**
@@ -863,6 +896,27 @@ int windowProc () {
 }
 
 int windowProc (int msg, int mp1, int mp2) {
+	if (msg == OS.WM_BUTTON1DOWN && items != null && handle != 0) {
+		/*
+		* A click selects the item under the pointer (its icon or its text, not the plus
+		* sign). The container selects the record of the row, also from the plus sign: that
+		* record becomes the cursor, whose notification is not taken as a move of the keyboard.
+		*/
+		Point point = new Point ((short) (mp1 & 0xFFFF), getHeight () - 1 - (short) (mp1 >> 16));
+		TreeItem item = null, row = null;
+		TreeItem [] visible = visibleItems ();
+		for (int i=0; i<visible.length && row == null; i++) {
+			Rectangle bounds = visible [i].getBounds ();
+			if (bounds.y <= point.y && point.y < bounds.y + bounds.height) {
+				row = visible [i];
+				if (bounds.contains (point)) item = row;
+			}
+		}
+		if (row != null) cursorHandle = row.handle;
+		int result = super.windowProc (msg, mp1, mp2);
+		if (item != null && !isDisposed () && !item.isDisposed ()) clickItem (item, OS.SHORT2FROMMP (mp2));
+		return result;
+	}
 	int result = super.windowProc (msg, mp1, mp2);
 	/*
 	* The container does not place its records again when it changes of
@@ -883,6 +937,59 @@ int windowProc (int msg, int mp1, int mp2) {
  * Notifications of the container (WM_CONTROL): mp1 = (id, code) and mp2
  * is a pointer to a structure that depends on the code.
  */
+/*
+ * A click of the user on an item, with the keys that were down: Ctrl adds or removes it,
+ * and Shift selects the items between the anchor and it, in a MULTI tree, as on Windows.
+ */
+void clickItem (TreeItem item, int keys) {
+	TreeItem [] old = getSelection ();
+	boolean multi = (style & SWT.MULTI) != 0;
+	if (multi && (keys & OS.KC_CTRL) != 0) {
+		setSelected (new TreeItem [] {item}, !item.selected);
+		anchor = item;
+	} else if (multi && (keys & OS.KC_SHIFT) != 0 && anchor != null && !anchor.isDisposed ()) {
+		TreeItem [] visible = visibleItems ();
+		int from = -1, to = -1;
+		for (int i=0; i<visible.length; i++) {
+			if (visible [i] == anchor) from = i;
+			if (visible [i] == item) to = i;
+		}
+		if (from == -1) from = to;
+		TreeItem [] range = new TreeItem [Math.abs (to - from) + 1];
+		System.arraycopy (visible, Math.min (from, to), range, 0, range.length);
+		setSelected (old, false);
+		setSelected (range, true);
+	} else {
+		setSelected (old, false);
+		setSelected (new TreeItem [] {item}, true);
+		anchor = item;
+	}
+	/* A SINGLE tree reports a change only, a MULTI one every click (Windows) */
+	if (!multi && old.length == 1 && old [0] == item) return;
+	Event event = new Event ();
+	event.item = item;
+	postEvent (SWT.Selection, event);
+}
+
+/*
+ * The text of a record (WM_DRAWITEM of the container, CA_OWNERDRAW): with the colors of the
+ * highlight when the item is selected. The rest (the icon, the lines, the plus sign and the
+ * dotted frame of the cursor) is drawn by the container. OWNERITEM.hItem points to a
+ * CNRDRAWITEMINFO: pRecord, pFieldInfo.
+ */
+MRESULT wmDrawChild (int mp1, int mp2) {
+	OWNERITEM struct = new OWNERITEM ();
+	OS.objcpy (struct, mp2);
+	if (struct.idItem != OS.CMA_TEXT || struct.hItem == 0) return null;
+	TreeItem item = itemOf (peek (struct.hItem));
+	if (item == null) return null;
+	byte [] text = item.getText ().getBytes ();
+	int foreground = item.selected ? OS.SYSCLR_HILITEFOREGROUND : OS.SYSCLR_WINDOWTEXT;
+	int background = item.selected ? OS.SYSCLR_HILITEBACKGROUND : OS.SYSCLR_WINDOW;
+	OS.WinDrawText (struct.hps, text.length, text, struct.rclItem, foreground, background, OS.DT_LEFT | OS.DT_VCENTER | OS.DT_ERASERECT);
+	return new MRESULT (OS.TRUE);
+}
+
 MRESULT wmControlChild (int mp1, int mp2) {
 	switch (OS.SHORT2FROMMP (mp1)) {
 		case OS.CN_EMPHASIS: {
@@ -890,15 +997,18 @@ MRESULT wmControlChild (int mp1, int mp2) {
 			int hRecord = peek (mp2 + 4);
 			int mask = peek (mp2 + 8);
 			/*
-			* The container sends several notifications for one click (for
-			* the record that is selected and for the one that was), and it
-			* selects the record whose plus sign is clicked: report only a
-			* change of the selected record.
+			* The container sends several notifications for one move of its cursor
+			* (for the record that gets it and for the one that loses it). A record
+			* that is not the cursor yet was moved to with the keyboard: it is the
+			* selection, as on Windows. The clicks are handled in windowProc().
 			*/
-			if (!ignoreSelect && (mask & OS.CRA_SELECTED) != 0 && hRecord != 0 && hRecord != selectedHandle) {
+			if (!ignoreSelect && (mask & OS.CRA_SELECTED) != 0 && hRecord != 0 && hRecord != cursorHandle) {
 				TreeItem item = itemOf (hRecord);
 				if (item != null && (peek (hRecord + REC_FLAGS) & OS.CRA_SELECTED) != 0) {
-					selectedHandle = hRecord;
+					cursorHandle = hRecord;
+					anchor = item;
+					setSelected (getSelection (), false);
+					setSelected (new TreeItem [] {item}, true);
 					Event event = new Event ();
 					event.item = item;
 					postEvent (SWT.Selection, event);

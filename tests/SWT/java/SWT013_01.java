@@ -203,7 +203,7 @@ public class SWT013_01 extends SWTTestCase {
 		String result = openAnd(dialog, new Task() {
 			public void run(Shell d) {
 				Tree tree = (Tree) find(d, Tree.class, null);
-				/* The container always keeps one item selected (difference 013) */
+				/* The dialog selects the deepest directory that exists (difference 015) */
 				TreeItem[] selection = tree.getSelection();
 				check(selection.length == 1 && same(((File) selection[0].getData()).getPath(), drive.getPath()),
 						"the deepest directory that exists is selected: " + (selection.length > 0 ? ((File) selection[0].getData()).getPath() : "nothing"));

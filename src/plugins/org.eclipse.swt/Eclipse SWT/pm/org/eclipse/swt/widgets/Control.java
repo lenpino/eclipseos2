@@ -3184,6 +3184,11 @@ MRESULT WM_DRAWITEM (int mp1, int mp2) {
         if (item == null) return null;
         return item.wmDrawChild (mp1, mp2);
     }
+    if(buffer.toString().equalsIgnoreCase(PSZ.getAtom (OS.WC_CONTAINER).toString())){
+      Control control = WidgetTable.get (struct.hwnd);
+      if (control == null) return null;
+      return control.wmDrawChild (mp1, mp2);
+    }
     if(buffer.toString().equalsIgnoreCase(PSZ.getAtom (OS.WC_SLIDER).toString())){
       Control control = WidgetTable.get (mp1);
 //      System.out.println("Control:WM_DRAWITEM - MP1 = " + Integer.toHexString(mp1));

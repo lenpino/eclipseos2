@@ -242,16 +242,17 @@ public class SWT011_01 extends SWTTestCase {
 		a.setText("A");
 		TreeItem b = new TreeItem(single, SWT.NONE);
 		b.setText("B");
-		/* The container always keeps one selected record: the first one that is inserted */
-		check(single.getSelectionCount() == 1 && single.getSelection()[0] == a, "the first item is selected at first (container behavior)");
+		check(single.getSelectionCount() == 0 && single.getSelection().length == 0, "a new tree has no selection: " + single.getSelectionCount());
 		single.setSelection(new TreeItem[] {b});
 		check(single.getSelectionCount() == 1 && single.getSelection()[0] == b, "setSelection / getSelection");
 		single.setSelection(new TreeItem[] {a, b});
 		check(single.getSelectionCount() == 1 && single.getSelection()[0] == a, "a single selection tree keeps the first item only");
 		single.deselectAll();
-		check(single.getSelectionCount() <= 1, "deselectAll leaves at most the one selection the container keeps");
+		check(single.getSelectionCount() == 0, "deselectAll leaves nothing selected: " + single.getSelectionCount());
 		single.selectAll();
-		check(single.getSelectionCount() == 1, "selectAll does nothing in a single selection tree");
+		check(single.getSelectionCount() == 0, "selectAll does nothing in a single selection tree");
+		single.setSelection(new TreeItem[0]);
+		check(single.getSelectionCount() == 0, "an empty array clears the selection");
 		boolean threw = false;
 		try { single.setSelection(null); } catch (IllegalArgumentException e) { threw = true; }
 		check(threw, "setSelection(null) throws");
@@ -265,14 +266,127 @@ public class SWT011_01 extends SWTTestCase {
 		m2.setText("M2");
 		TreeItem m11 = new TreeItem(m1, SWT.NONE);
 		m11.setText("M1.1");
-		/* The tree view of the container selects one record at a time, also by program */
 		multi.selectAll();
-		check(multi.getSelectionCount() >= 1, "selectAll leaves a selection: " + multi.getSelectionCount());
+		check(multi.getSelectionCount() == 3, "selectAll selects every item, also the collapsed ones: " + multi.getSelectionCount());
+		TreeItem[] all = multi.getSelection();
+		check(all[0] == m1 && all[1] == m11 && all[2] == m2, "getSelection is in the order of the tree");
 		multi.setSelection(new TreeItem[] {m2, m11});
-		check(multi.getSelectionCount() >= 1 && multi.getSelection()[0] != null, "setSelection with two items: " + multi.getSelectionCount() + " selected");
-		multi.setSelection(new TreeItem[] {m11});
-		check(multi.getSelectionCount() == 1 && multi.getSelection()[0] == m11, "setSelection with one item");
+		TreeItem[] two = multi.getSelection();
+		check(two.length == 2 && two[0] == m11 && two[1] == m2, "setSelection with two items selects both: " + two.length);
+		multi.deselectAll();
+		check(multi.getSelectionCount() == 0, "deselectAll (MULTI)");
+		m11.dispose();
+		multi.selectAll();
+		check(multi.getSelectionCount() == 2, "a disposed item is not in the selection");
 		multi.dispose();
+	}
+
+	/*
+	 * The clicks of the user, sent to the tree as the mouse messages (the container does not
+	 * report a click on a record that it already has selected, nor the keys), and the highlight
+	 * of the selected items on the screen, found by its color.
+	 */
+	void checkClicks() {
+		saySubObjective("Clicks and the highlight, seen on the screen");
+		Shell window = new Shell(display, SWT.NO_TRIM);
+		window.setBounds(10, 10, 300, 200);
+		window.open();
+		Tree tree = new Tree(window, SWT.MULTI | SWT.BORDER);
+		tree.setBounds(0, 0, 300, 200);
+		final TreeItem[] items = new TreeItem[5];
+		for (int i = 0; i < items.length; i++) {
+			items[i] = new TreeItem(tree, SWT.NONE);
+			items[i].setText("Item " + i);
+		}
+		TreeItem child = new TreeItem(items[4], SWT.NONE);
+		child.setText("Child");
+		final int[] events = new int[1];
+		final TreeItem[] last = new TreeItem[1];
+		tree.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) { events[0]++; last[0] = (TreeItem) e.item; }
+		});
+		settle(tree);
+		check(lit(tree, items).equals(""), "nothing is highlighted at first: " + lit(tree, items));
+
+		click(tree, items[1], 0);
+		check(selection(tree).equals("1 ") && events[0] == 1 && last[0] == items[1], "a click selects the item: " + selection(tree) + ", events " + events[0]);
+		check(lit(tree, items).equals("1 "), "and it is highlighted: " + lit(tree, items));
+		click(tree, items[3], OS.KC_CTRL);
+		check(selection(tree).equals("1 3 ") && events[0] == 2, "Ctrl and a click adds an item: " + selection(tree));
+		check(lit(tree, items).equals("1 3 "), "both are highlighted: " + lit(tree, items));
+		click(tree, items[1], OS.KC_CTRL);
+		check(selection(tree).equals("3 "), "Ctrl and a click on a selected item removes it: " + selection(tree));
+		/* The anchor is the last item clicked without Shift (the item 1, as on Windows) */
+		click(tree, items[3], OS.KC_SHIFT);
+		check(selection(tree).equals("1 2 3 "), "Shift and a click selects from the anchor: " + selection(tree));
+		check(lit(tree, items).equals("1 2 3 "), "all of them highlighted: " + lit(tree, items));
+		click(tree, items[0], OS.KC_SHIFT);
+		check(selection(tree).equals("0 1 "), "and again from the same anchor, upwards: " + selection(tree));
+		click(tree, items[2], 0);
+		check(selection(tree).equals("2 "), "a click alone leaves one item: " + selection(tree));
+
+		tree.deselectAll();
+		settle(tree);
+		check(selection(tree).equals("") && lit(tree, items).equals(""), "deselectAll clears the selection and the highlight: " + lit(tree, items));
+		int before = events[0];
+		click(tree, items[2], 0);
+		check(selection(tree).equals("2 ") && events[0] == before + 1, "a click on the item that the container still has selected selects it again: " + selection(tree));
+
+		/* The plus sign of the item 4 is left of its icon (measured: from 20 to 7 pixels left of it) */
+		Rectangle b4 = items[4].getBounds();
+		before = events[0];
+		mouse(tree, b4.x - 13, b4.y + b4.height / 2, 0);
+		settle(tree);
+		/* The container does not expand with these messages (it looks at the real mouse): that is seen by hand */
+		check(selection(tree).equals("2 ") && events[0] == before, "and does not select it: " + selection(tree) + ", events " + (events[0] - before));
+		check(lit(tree, items).equals("2 "), "the highlight did not move: " + lit(tree, items));
+		window.dispose();
+	}
+
+	/* A click with the keys (KC_CTRL, KC_SHIFT) in the middle of the text of an item */
+	void click(Tree tree, TreeItem item, int keys) {
+		Rectangle b = item.getBounds();
+		mouse(tree, b.x + b.width / 2, b.y + b.height / 2, keys);
+		settle(tree);
+	}
+
+	void mouse(Tree tree, int x, int y, int keys) {
+		int height = tree.getSize().y;
+		int mp1 = (x & 0xFFFF) | ((height - 1 - y) << 16);
+		OS.WinSendMsg(tree.handle, OS.WM_BUTTON1DOWN, mp1, keys << 16);
+		OS.WinSendMsg(tree.handle, OS.WM_BUTTON1UP, mp1, keys << 16);
+	}
+
+	/* The selected items, by the number in their text */
+	String selection(Tree tree) {
+		TreeItem[] selection = tree.getSelection();
+		String result = "";
+		for (int i = 0; i < selection.length; i++) result += selection[i].getText().substring(5) + " ";
+		return result;
+	}
+
+	/* The items whose row has the color of the highlight on the screen */
+	String lit(Tree tree, TreeItem[] items) {
+		int hilite = OS.WinQuerySysColor(OS.HWND_DESKTOP, OS.SYSCLR_HILITEBACKGROUND, 0) & 0xFFFFFF;
+		Point origin = tree.toDisplay(new Point(0, 0));
+		int width = tree.getClientArea().width;
+		int screen = OS.WinQuerySysValue(OS.HWND_DESKTOP, OS.SV_CYSCREEN);
+		int hps = OS.WinGetScreenPS(OS.HWND_DESKTOP);
+		OS.GpiCreateLogColorTable(hps, 0, OS.LCOLF_RGB, 0, 0, null);
+		String result = "";
+		for (int i = 0; i < items.length; i++) {
+			Rectangle r = items[i].getBounds();
+			int count = 0;
+			for (int y = r.y; y < r.y + r.height; y++) {
+				for (int x = 0; x < width; x++) {
+					if ((OS.GpiQueryPel(hps, new int[] {origin.x + x, screen - 1 - (origin.y + y)}) & 0xFFFFFF) == hilite) count++;
+				}
+			}
+			/* The dotted frame of the cursor has the color too, a few pixels */
+			if (count > 100) result += i + " ";
+		}
+		OS.WinReleasePS(hps);
+		return result;
 	}
 
 	/** Sends the parent the WM_CONTROL that the container sends for a user action. */
@@ -520,15 +634,16 @@ public class SWT011_01 extends SWTTestCase {
 		checkSizeAfterItems();
 		checkRedrawOff();
 		checkSelection();
+		checkClicks();
 		checkEvents();
 		checkDispose();
 		checkImagesAndColors();
 		checkScrollingOnScreen();
 		say("\n" + checks + " checks passed.\n");
 
-		sayObjective("Interactive: click, double click, press Enter, use the plus signs, the buttons Show the last / Show the first");
+		sayObjective("Interactive: click, Ctrl and Shift click, the arrow keys, double click, Enter, the plus signs (they do not select), the buttons Show the last / Show the first");
 		shell.setLayout(null);
-		final Tree tree = new Tree(shell, SWT.SINGLE | SWT.BORDER);
+		final Tree tree = new Tree(shell, SWT.MULTI | SWT.BORDER);
 		final Text log = new Text(shell, SWT.BORDER | SWT.MULTI | SWT.READ_ONLY);
 		final Button showLast = new Button(shell, SWT.PUSH), showFirst = new Button(shell, SWT.PUSH);
 		showLast.setText("Show the last");
@@ -577,7 +692,7 @@ public class SWT011_01 extends SWTTestCase {
 		showFirst.addListener(SWT.Selection, show);
 		tree.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				String msg = "Selection: " + ((TreeItem) e.item).getText();
+				String msg = "Selection: " + ((TreeItem) e.item).getText() + " (" + tree.getSelectionCount() + " selected)";
 				say(msg);
 				log.setText(msg);
 			}

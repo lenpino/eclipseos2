@@ -299,9 +299,16 @@ void populate (TreeItem item) {
 	}
 }
 
-/* Expands the drive and directories that lead to the path, and selects it */
+/*
+ * Expands the drive and directories that lead to the path, and selects the deepest one that
+ * exists, or else the first drive: OK always has a directory to accept (difference 015).
+ */
 void showPath (Tree tree, String path) {
-	if (path == null || path.length () == 0) return;
+	TreeItem [] drives = tree.getItems ();
+	if (path == null || path.length () == 0) {
+		if (drives.length > 0) tree.setSelection (new TreeItem [] {drives [0]});
+		return;
+	}
 	File file = new File (path).getAbsoluteFile ();
 	java.util.Vector chain = new java.util.Vector ();
 	for (File f = file; f != null; f = f.getParentFile ()) chain.insertElementAt (f, 0);
@@ -325,6 +332,7 @@ void showPath (Tree tree, String path) {
 			level = next.getItems ();
 		}
 	}
+	if (found == null && drives.length > 0) found = drives [0];
 	if (found != null) {
 		tree.setSelection (new TreeItem [] {found});
 		tree.showItem (found);

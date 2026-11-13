@@ -911,8 +911,8 @@ public class OS {
     public static final int SYSCLR_SHADOW =                 -36;
 //    public static final int SYSCLR_ICONTEXT =               -35;
     public static final int SYSCLR_DIALOGBACKGROUND =       -34;
-//    public static final int SYSCLR_HILITEFOREGROUND =       -33;
-//    public static final int SYSCLR_HILITEBACKGROUND =       -32;
+    public static final int SYSCLR_HILITEFOREGROUND =       -33;
+    public static final int SYSCLR_HILITEBACKGROUND =       -32;
 //    public static final int SYSCLR_INACTIVETITLETEXTBGND =  -31;
 //    public static final int SYSCLR_ACTIVETITLETEXTBGND =    -30;
     public static final int SYSCLR_INACTIVETITLETEXT =      -29;
