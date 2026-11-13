@@ -340,7 +340,10 @@ href="eclipseos2-xxe.css"
         colors of an item and the images of a column header are only kept. A click
         on a title is a <code>Selection</code> of the column, and a width set by
         program a <code>Resize</code> and a <code>Move</code> of the columns that
-        follow; the user cannot drag the border of a title (to be confirmed). A
+        follow. The user cannot change the width of a column: the container has no
+        border to drag between the titles (the pointer does not change over it,
+        seen on the screen 2026-11-13), so a <code>Resize</code> only comes from
+        the program, and <code>setResizable()</code> is only kept. A
         column is never narrower than the margins of the container (12 to 24
         pixels, depending on the font), and a width of 0 does not hide it. Inserting a column
         before others does not move the texts of the items: they stay with their
