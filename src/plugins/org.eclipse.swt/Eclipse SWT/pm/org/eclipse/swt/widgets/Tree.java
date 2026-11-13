@@ -772,8 +772,8 @@ public void showItem (TreeItem item) {
 	if (bounds.y < 0) delta = bounds.y;
 	else if (bounds.y + bounds.height > area.height) delta = bounds.y + bounds.height - area.height;
 	if (delta != 0) {
-		/* CM_SCROLLWINDOW: a positive delta scrolls the workspace down in PM, so up the view */
-		send (OS.CM_SCROLLWINDOW, OS.CMA_VERTICAL, -delta);
+		/* CM_SCROLLWINDOW: a positive amount shows the records that are lower, as in Table (seen on the screen 2026-11-13) */
+		send (OS.CM_SCROLLWINDOW, OS.CMA_VERTICAL, delta);
 	}
 }
 

@@ -852,6 +852,13 @@ href="eclipseos2-xxe.css"
       gives one <code>Selection</code> of its column, the widths and the
       selection of the rows are right. The user cannot drag the border of a
       title: the container does not offer it (difference 014).</li>
+
+      <li>The direction of the scrolling, checked on the screen: right in
+      <code>Table</code> (<kbd>SWT012_01</kbd>, 158 checks), wrong in
+      <code>Tree.showItem()</code>, which never scrolled down (so
+      <code>DirectoryDialog</code> did not show a directory further down
+      either). Fixed; <kbd>SWT011_01</kbd> (79 checks) finds the items by the
+      pixels of their images. <kbd>SWT013_01</kbd> still passes.</li>
     </ul>
   </body>
 </html>

@@ -428,6 +428,78 @@ public class SWT011_01 extends SWTTestCase {
 		tree.dispose();
 	}
 
+	/*
+	 * The direction of the scrolling of showItem(), on the screen: only the items 30 and
+	 * 70 have an image (green), and the green must be at the top or at the bottom of the
+	 * tree. The positions that the container reports are not used.
+	 */
+	void checkScrollingOnScreen() {
+		saySubObjective("Scrolling, seen on the screen");
+		Shell window = new Shell(display, SWT.NO_TRIM);
+		window.setBounds(10, 10, 300, 200);
+		window.open();
+		Tree tree = new Tree(window, SWT.SINGLE | SWT.BORDER);
+		tree.setBounds(0, 0, 300, 200);
+		TreeItem[] items = new TreeItem[100];
+		for (int i = 0; i < items.length; i++) {
+			items[i] = new TreeItem(tree, SWT.NONE);
+			items[i].setText("Item " + i);
+			if (i == 30 || i == 70) items[i].setImage(image);
+		}
+		settle(tree);
+		int height = tree.getClientArea().height, row = items[0].getBounds().height;
+		check(green(tree) == null, "at first no green is shown");
+		tree.showItem(items[30]);
+		settle(tree);
+		int[] g = green(tree);
+		check(g != null && g[1] > height - row - 4, "showItem from above shows the item at the bottom (green " + span(g) + ", height " + height + ", row " + row + ", item 30 at " + items[30].getBounds() + ")");
+		tree.showItem(items[70]);
+		settle(tree);
+		g = green(tree);
+		check(g != null && g[1] > height - row - 4, "and the next one too (green " + span(g) + ")");
+		tree.showItem(items[30]);
+		settle(tree);
+		g = green(tree);
+		check(g != null && g[0] < row + 2, "showItem from below shows it at the top (green " + span(g) + ")");
+		tree.showItem(items[0]);
+		settle(tree);
+		check(green(tree) == null, "showItem of the first one goes back up (green " + span(green(tree)) + ")");
+		window.dispose();
+	}
+
+	void settle(Tree tree) {
+		pump();
+		for (int i = 0; i < 20; i++) display.readAndDispatch();
+		tree.update();
+	}
+
+	String span(int[] g) {
+		return g == null ? "none" : g[0] + ".." + g[1];
+	}
+
+	/* The first and last y of the client area with green pixels near the left, or null */
+	int[] green(Tree tree) {
+		int height = tree.getClientArea().height;
+		Point origin = tree.toDisplay(new Point(0, 0));
+		int screen = OS.WinQuerySysValue(OS.HWND_DESKTOP, OS.SV_CYSCREEN);
+		int hps = OS.WinGetScreenPS(OS.HWND_DESKTOP);
+		OS.GpiCreateLogColorTable(hps, 0, OS.LCOLF_RGB, 0, 0, null);
+		int[] result = null;
+		for (int y = 0; y < height; y++) {
+			boolean green = false;
+			for (int x = 0; x < 60 && !green; x++) {
+				int pel = OS.GpiQueryPel(hps, new int[] {origin.x + x, screen - 1 - (origin.y + y)});
+				green = ((pel >> 8) & 0xFF) > 200 && ((pel >> 16) & 0xFF) < 60 && (pel & 0xFF) < 60;
+			}
+			if (green) {
+				if (result == null) result = new int[] {y, y};
+				result[1] = y;
+			}
+		}
+		OS.WinReleasePS(hps);
+		return result;
+	}
+
 	void initComponents() {
 		image = new Image(display, 16, 16);
 		GC gc = new GC(image);
@@ -450,6 +522,7 @@ public class SWT011_01 extends SWTTestCase {
 		checkEvents();
 		checkDispose();
 		checkImagesAndColors();
+		checkScrollingOnScreen();
 		say("\n" + checks + " checks passed.\n");
 
 		sayObjective("Interactive: click, double click, press Enter, use the plus signs");

@@ -100,6 +100,12 @@ href="eclipseos2-xxe.css"
       horizontally, back to the left or to another place: every change of
       the table took the user back. <code>Table</code> scrolls it back to where
       it was.</li>
+
+      <li>The direction of the scrolling is checked on the screen
+      (2026-11-13): only two items have an image, and after
+      <code>setTopIndex()</code> and <code>showItem()</code> its green pixels
+      are in the first or the last row. A positive amount of
+      <code>CM_SCROLLWINDOW</code> shows the lower records.</li>
     </ul>
 
     <p>The behavior that differs from Windows is in <a href="diff.html">difference

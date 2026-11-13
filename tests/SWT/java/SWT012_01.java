@@ -623,6 +623,79 @@ public class SWT012_01 extends SWTTestCase {
 		table.dispose();
 	}
 
+	/*
+	 * The direction of the scrolling, on the screen: only the items 30 and 70 have an
+	 * image (green), and after setTopIndex() or showItem() the green must be in the row
+	 * that the item should be in. The positions that the container reports are not used.
+	 */
+	void checkScrollingOnScreen() {
+		saySubObjective("Scrolling, seen on the screen");
+		Shell window = new Shell(display, SWT.NO_TRIM);
+		window.setBounds(10, 10, 300, 200);
+		window.open();
+		Table table = new Table(window, SWT.SINGLE | SWT.BORDER);
+		table.setBounds(0, 0, 300, 200);
+		table.setHeaderVisible(true);
+		new TableColumn(table, SWT.NONE).setWidth(200);
+		for (int i = 0; i < 100; i++) {
+			TableItem item = new TableItem(table, SWT.NONE);
+			item.setText("Row " + i);
+			if (i == 30 || i == 70) item.setImage(image);
+		}
+		pumpWhile(table);
+		int header = table.getHeaderHeight(), row = table.getItemHeight();
+		check(greenRows(table, header).equals(""), "at first no green row is shown (" + greenRows(table, header) + ")");
+		table.setTopIndex(30);
+		pumpWhile(table);
+		check(greenRows(table, header).equals("0 "), "setTopIndex(30) shows the item 30 in the first row (green rows: " + greenRows(table, header) + ", row " + row + ")");
+		table.setTopIndex(70);
+		pumpWhile(table);
+		check(greenRows(table, header).equals("0 "), "setTopIndex(70) shows the item 70 in the first row (green rows: " + greenRows(table, header) + ")");
+		table.setTopIndex(0);
+		pumpWhile(table);
+		check(greenRows(table, header).equals(""), "setTopIndex(0) goes back up (green rows: " + greenRows(table, header) + ")");
+		table.showItem(table.getItem(30));
+		pumpWhile(table);
+		int visible = (table.getClientArea().height - header) / row;
+		check(greenRows(table, header).equals((visible - 1) + " "), "showItem from above puts the item in the last full row " + (visible - 1) + " (green rows: " + greenRows(table, header) + ")");
+		table.setTopIndex(50);
+		table.showItem(table.getItem(30));
+		pumpWhile(table);
+		check(greenRows(table, header).equals("0 "), "showItem from below puts it in the first row (green rows: " + greenRows(table, header) + ")");
+		window.dispose();
+	}
+
+	void pumpWhile(Table table) {
+		pump();
+		for (int i = 0; i < 20; i++) display.readAndDispatch();
+		table.update();
+	}
+
+	/* The rows under the header, counted from 0, with green pixels in the column of the images */
+	String greenRows(Table table, int header) {
+		int row = table.getItemHeight(), height = table.getClientArea().height;
+		Point origin = table.toDisplay(new Point(0, 0));
+		int screen = OS.WinQuerySysValue(OS.HWND_DESKTOP, OS.SV_CYSCREEN);
+		int hps = OS.WinGetScreenPS(OS.HWND_DESKTOP);
+		OS.GpiCreateLogColorTable(hps, 0, OS.LCOLF_RGB, 0, 0, null);
+		String rows = "";
+		int last = -1;
+		for (int y = header; y < height; y++) {
+			boolean green = false;
+			for (int x = 0; x < 40 && !green; x++) {
+				int pel = OS.GpiQueryPel(hps, new int[] {origin.x + x, screen - 1 - (origin.y + y)});
+				green = ((pel >> 8) & 0xFF) > 200 && ((pel >> 16) & 0xFF) < 60 && (pel & 0xFF) < 60;
+			}
+			int index = (y - header) / row;
+			if (green && index != last) {
+				rows += index + " ";
+				last = index;
+			}
+		}
+		OS.WinReleasePS(hps);
+		return rows;
+	}
+
 	void checkSizeAndRedraw() {
 		saySubObjective("Items added before the table has a size, and with the redrawing off");
 		Table a = new Table(shell, SWT.BORDER);
@@ -718,6 +791,7 @@ public class SWT012_01 extends SWTTestCase {
 		checkColumnEvents();
 		checkRemove();
 		checkScrolling();
+		checkScrollingOnScreen();
 		checkSizeAndRedraw();
 		checkImagesAndColors();
 		say("\n" + checks + " checks passed.\n");

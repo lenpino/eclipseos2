@@ -348,6 +348,12 @@ href="eclipseos2-xxe.css"
       moves the horizontal scroll (to 0, or elsewhere when several are pending);
       the scroll is read before and given back after.</li>
 
+      <li><code>CM_SCROLLWINDOW</code> with <code>CMA_VERTICAL</code> and a
+      positive amount shows the records that are lower, in the detail view and
+      in the tree view alike. <code>Tree.showItem()</code> sent the opposite
+      sign and never scrolled down; its checks only looked at the expansion.
+      Both are now checked on the screen (2026-11-13).</li>
+
       <li>The titles of the detail view are a child window
       (<code>CID_LEFTCOLTITLEWND</code>, as wide as the container) that does not
       scroll: it paints the titles from the left of the viewport. A click on it
@@ -748,7 +754,8 @@ href="eclipseos2-xxe.css"
       <li>The events of the columns of a <code>Table</code> are done (a click on
       a title, a width set by program). The container does not let the user
       change the width of a column (only the split bar, not used, can be
-      dragged). Still open: the sign of the scrolling of a table; the
+      dragged). The direction of the scrolling of tables and trees is checked
+      on the screen. Still open: the
       single selection of a <code>Tree</code> (<a href="diff.html">difference
       013</a>).</li>
 
