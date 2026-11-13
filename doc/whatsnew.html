@@ -828,5 +828,25 @@ href="eclipseos2-xxe.css"
       threw a <code>NullPointerException</code>. See <a
       href="diff.html">difference 020</a>.</li>
     </ul>
+
+    <h3>2026-11-13</h3>
+
+    <h4>[lpino]</h4>
+
+    <ul>
+      <li>The events of the columns of a <a href="swt012.html">table</a>: a
+      click on a title is a <code>Selection</code> of the column (the click of
+      the title window of the container is taken from the queue), and a width
+      set by program is a <code>Resize</code> of the column and a
+      <code>Move</code> of those that follow. Measured on the screen and fixed
+      on the way: the container adds a margin to every column that depends on
+      the font, so the cells were narrower than on the screen and the columns
+      wider than asked; the width of a column is now all of it, as on Windows,
+      with the margins measured in a hidden container. Placing the records again
+      scrolled the table back to the left after any change; it now stays.
+      <kbd>SWT012_01</kbd> has 152 checks, among them the separators found in
+      the pixels with two fonts; <kbd>SWT011_01</kbd> and <kbd>SWT016_01</kbd>
+      still pass. See <a href="diff.html">difference 014</a>.</li>
+    </ul>
   </body>
 </html>

@@ -70,6 +70,36 @@ href="eclipseos2-xxe.css"
       the burst is over and sends one event if the selection changed, with the
       item that has the cursor (the focused item of Windows). Seen on the
       screen: one event per click, also with Ctrl and Shift.</li>
+
+      <li>The events of the columns (2026-11-13). The titles are a child
+      window of the container (<code>CID_LEFTCOLTITLEWND</code>) that does not
+      notify a click: <code>Display.filterMessage()</code> takes the
+      <code>WM_BUTTON1CLICK</code> of that window from the queue, and
+      <code>Table</code> posts a <code>Selection</code> to the column under the
+      pointer, as Windows does with <code>HDN_ITEMCLICK</code>. The title window
+      does not move when the table scrolls (it paints scrolled): the column is
+      found in the workspace, with the left of the viewport. A change of width by
+      program is a <code>Resize</code> of the column and a <code>Move</code> of
+      those that follow (<code>HDN_ITEMCHANGED</code> of Windows).</li>
+
+      <li>The container gives every field more width than its
+      <code>cxWidth</code>: a margin, and a separator before every field but
+      the first. It depends on the font: 15 and 18 pixels with the default font,
+      12 and 15 with 8.Helv, 20 and 24 with 14.Helvetica; the lines do not change
+      it. The cells were 17 pixels too narrow and too far left for each column
+      before them, which put a click on a title in the wrong column. The width
+      of a <code>TableColumn</code> is now all of the column on the screen, as
+      on Windows: <code>Table</code> measures the margins in a hidden container
+      with the font of the table (one record, one and then two fields of one
+      pixel), and gives each field the width less its margin. A
+      <code>cxWidth</code> of 0 is not an empty column but one that fits its
+      texts, so the narrowest column is the margin plus one pixel.</li>
+
+      <li>Placing the records again (<code>CM_INVALIDATERECORD</code> with
+      <code>CMA_REPOSITION</code>, see above) also scrolls the table
+      horizontally, back to the left or to another place: every change of
+      the table took the user back. <code>Table</code> scrolls it back to where
+      it was.</li>
     </ul>
 
     <p>The behavior that differs from Windows is in <a href="diff.html">difference
@@ -100,7 +130,20 @@ href="eclipseos2-xxe.css"
 
         <td>Done [lpino]</td>
 
-        <td>Checked by <kbd>SWT012_01</kbd>. No events (difference 014).</td>
+        <td>Checked by <kbd>SWT012_01</kbd>. The widths are checked on the
+        screen (the separators, with two fonts).</td>
+      </tr>
+
+      <tr>
+        <td><code>TableColumn</code> events: <code>Selection</code> (click on
+        the title), <code>Resize</code> and <code>Move</code> (width changed by
+        program)</td>
+
+        <td>Done [lpino]</td>
+
+        <td>Checked by <kbd>SWT012_01</kbd>, with the click posted to the title
+        window. Seen on the screen: <em>to be confirmed</em>; whether the user
+        can change a width is <em>to be seen</em>.</td>
       </tr>
 
       <tr>

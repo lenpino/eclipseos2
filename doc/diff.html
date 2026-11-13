@@ -337,10 +337,12 @@ href="eclipseos2-xxe.css"
         A column is a <code>FIELDINFO</code>, and there are at most 32 of them. Only
         the image of the first column is shown (the icon of the record), the others
         are kept. <code>SWT.CHECK</code> has no effect (the state is only kept), the
-        colors of an item and the images of a column header are only kept, and the
-        <code>Selection</code>, <code>Move</code> and <code>Resize</code> listeners
-        of a <code>TableColumn</code> are never called: the container does not
-        report a click on a header or a change of the width. Inserting a column
+        colors of an item and the images of a column header are only kept. A click
+        on a title is a <code>Selection</code> of the column, and a width set by
+        program a <code>Resize</code> and a <code>Move</code> of the columns that
+        follow; the user cannot drag the border of a title (to be confirmed). A
+        column is never narrower than the margins of the container (12 to 24
+        pixels, depending on the font), and a width of 0 does not hide it. Inserting a column
         before others does not move the texts of the items: they stay with their
         column. A table without columns has one implicit column that takes all the
         width, and the first <code>TableColumn</code> takes its place.
