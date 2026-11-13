@@ -20,6 +20,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.internal.pm.OS;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Shell;
@@ -525,14 +526,15 @@ public class SWT011_01 extends SWTTestCase {
 		checkScrollingOnScreen();
 		say("\n" + checks + " checks passed.\n");
 
-		sayObjective("Interactive: click, double click, press Enter, use the plus signs");
+		sayObjective("Interactive: click, double click, press Enter, use the plus signs, the buttons Show the last / Show the first");
 		shell.setLayout(null);
 		final Tree tree = new Tree(shell, SWT.SINGLE | SWT.BORDER);
 		final Text log = new Text(shell, SWT.BORDER | SWT.MULTI | SWT.READ_ONLY);
+		final Button showLast = new Button(shell, SWT.PUSH), showFirst = new Button(shell, SWT.PUSH);
+		showLast.setText("Show the last");
+		showFirst.setText("Show the first");
 		/* Size first, and no redrawing while the items are added: nothing is painted twice */
-		Rectangle area = shell.getClientArea();
-		tree.setBounds(0, 0, area.width, Math.max(20, area.height - 40));
-		log.setBounds(0, Math.max(20, area.height - 40), area.width, 40);
+		layoutInteractive(tree, log, showLast, showFirst);
 		tree.setRedraw(false);
 		String[] names = {"Documents", "Pictures", "Music", "Empty"};
 		for (int i = 0; i < names.length; i++) {
@@ -550,7 +552,29 @@ public class SWT011_01 extends SWTTestCase {
 				}
 			}
 		}
+		/* Enough items to scroll: showItem() of the last one and of the first one, with the buttons */
+		TreeItem many = new TreeItem(tree, SWT.NONE);
+		many.setText("Many");
+		many.setImage(image);
+		final TreeItem[] ends = new TreeItem[2];
+		for (int i = 1; i <= 40; i++) {
+			TreeItem child = new TreeItem(many, SWT.NONE);
+			child.setText("Many / item " + i);
+			if (i == 1) ends[0] = child;
+			if (i == 40) ends[1] = child;
+		}
 		tree.setRedraw(true);
+		org.eclipse.swt.widgets.Listener show = new org.eclipse.swt.widgets.Listener() {
+			public void handleEvent(Event e) {
+				TreeItem item = e.widget == showLast ? ends[1] : ends[0];
+				tree.showItem(item);
+				String msg = "showItem(" + item.getText() + "): at " + item.getBounds() + " in a tree " + tree.getClientArea().height + " high";
+				say(msg);
+				log.setText(msg);
+			}
+		};
+		showLast.addListener(SWT.Selection, show);
+		showFirst.addListener(SWT.Selection, show);
 		tree.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				String msg = "Selection: " + ((TreeItem) e.item).getText();
@@ -569,14 +593,22 @@ public class SWT011_01 extends SWTTestCase {
 		});
 		shell.addListener(SWT.Resize, new org.eclipse.swt.widgets.Listener() {
 			public void handleEvent(Event e) {
-				Rectangle area = shell.getClientArea();
-				int logHeight = 40;
-				tree.setBounds(0, 0, area.width, Math.max(20, area.height - logHeight));
-				log.setBounds(0, Math.max(20, area.height - logHeight), area.width, logHeight);
+				layoutInteractive(tree, log, showLast, showFirst);
 			}
 		});
 		shell.setSize(420, 340);
 		setTitle(null);
+	}
+
+	/* The tree on top, then a row with the buttons, and the log at the bottom */
+	void layoutInteractive(Tree tree, Text log, Button showLast, Button showFirst) {
+		Rectangle area = shell.getClientArea();
+		int logHeight = 40, buttonHeight = 26;
+		int treeHeight = Math.max(20, area.height - logHeight - buttonHeight);
+		tree.setBounds(0, 0, area.width, treeHeight);
+		showLast.setBounds(0, treeHeight, 130, buttonHeight);
+		showFirst.setBounds(134, treeHeight, 130, buttonHeight);
+		log.setBounds(0, treeHeight + buttonHeight, area.width, logHeight);
 	}
 
 	protected void done() {
