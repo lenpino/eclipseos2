@@ -973,9 +973,11 @@ void clickItem (TreeItem item, int keys) {
 
 /*
  * The text of a record (WM_DRAWITEM of the container, CA_OWNERDRAW): with the colors of the
- * highlight when the item is selected. The rest (the icon, the lines, the plus sign and the
- * dotted frame of the cursor) is drawn by the container. OWNERITEM.hItem points to a
- * CNRDRAWITEMINFO: pRecord, pFieldInfo.
+ * highlight when the item is selected, else with its own colors or those of the tree. The rest
+ * (the icon, the lines, the plus sign and the dotted frame of the cursor) is drawn by the
+ * container. OWNERITEM.hItem points to a CNRDRAWITEMINFO: pRecord, pFieldInfo. The colors are
+ * RGB values: the presentation space of the container is put in RGB mode for the text and
+ * given back with its default color table.
  */
 MRESULT wmDrawChild (int mp1, int mp2) {
 	OWNERITEM struct = new OWNERITEM ();
@@ -984,9 +986,17 @@ MRESULT wmDrawChild (int mp1, int mp2) {
 	TreeItem item = itemOf (peek (struct.hItem));
 	if (item == null) return null;
 	byte [] text = item.getText ().getBytes ();
-	int foreground = item.selected ? OS.SYSCLR_HILITEFOREGROUND : OS.SYSCLR_WINDOWTEXT;
-	int background = item.selected ? OS.SYSCLR_HILITEBACKGROUND : OS.SYSCLR_WINDOW;
+	int foreground, background;
+	if (item.selected) {
+		foreground = OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_HILITEFOREGROUND, 0);
+		background = OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_HILITEBACKGROUND, 0);
+	} else {
+		foreground = item.foreground != -1 ? item.foreground : getForegroundPixel ();
+		background = item.background != -1 ? item.background : getBackgroundPixel ();
+	}
+	OS.GpiCreateLogColorTable (struct.hps, 0, OS.LCOLF_RGB, 0, 0, null);
 	OS.WinDrawText (struct.hps, text.length, text, struct.rclItem, foreground, background, OS.DT_LEFT | OS.DT_VCENTER | OS.DT_ERASERECT);
+	OS.GpiCreateLogColorTable (struct.hps, OS.LCOL_RESET, OS.LCOLF_DEFAULT, 0, 0, null);
 	return new MRESULT (OS.TRUE);
 }
 

@@ -32,8 +32,9 @@ import org.eclipse.swt.graphics.*;
  * </p>
  * <p>
  * OS/2 note: an item is a record of the container (<code>handle</code> is its
- * address). The colors are only kept, the container does not use them, and
- * there are no check boxes. See the notes of <code>Tree</code>.
+ * address). The tree draws the text with the colors of the item (the image
+ * has no background color). There are no check boxes. See the notes of
+ * <code>Tree</code>.
  * </p>
  */
 public class TreeItem extends Item {
@@ -398,9 +399,6 @@ void releaseWidget () {
  * Sets the receiver's background color to the color specified
  * by the argument, or to the default system color for the item
  * if the argument is null.
- * <p>
- * OS/2 note: the color is only kept, the container does not use it.
- * </p>
  *
  * @param color the new color (or null)
  *
@@ -415,7 +413,11 @@ void releaseWidget () {
 public void setBackground (Color color) {
 	checkWidget ();
 	if (color != null && color.isDisposed ()) error (SWT.ERROR_INVALID_ARGUMENT);
-	background = color == null ? -1 : color.handle;
+	int pixel = color == null ? -1 : color.handle;
+	if (pixel == background) return;
+	background = pixel;
+	/* The tree draws the text with the colors of the item */
+	if (handle != 0) parent.invalidateRecord (handle, OS.CMA_NOREPOSITION);
 }
 
 /**
@@ -459,9 +461,6 @@ public void setExpanded (boolean expanded) {
  * Sets the receiver's foreground color to the color specified
  * by the argument, or to the default system color for the item
  * if the argument is null.
- * <p>
- * OS/2 note: the color is only kept, the container does not use it.
- * </p>
  *
  * @param color the new color (or null)
  *
@@ -476,7 +475,10 @@ public void setExpanded (boolean expanded) {
 public void setForeground (Color color) {
 	checkWidget ();
 	if (color != null && color.isDisposed ()) error (SWT.ERROR_INVALID_ARGUMENT);
-	foreground = color == null ? -1 : color.handle;
+	int pixel = color == null ? -1 : color.handle;
+	if (pixel == foreground) return;
+	foreground = pixel;
+	if (handle != 0) parent.invalidateRecord (handle, OS.CMA_NOREPOSITION);
 }
 
 /**

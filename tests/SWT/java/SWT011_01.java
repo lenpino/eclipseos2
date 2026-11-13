@@ -582,6 +582,110 @@ public class SWT011_01 extends SWTTestCase {
 		window.dispose();
 	}
 
+	/*
+	 * The colors of the items on the screen: the text with its foreground, on its background,
+	 * and a selected item with the colors of the highlight, as on Windows. The rest of what
+	 * the container draws (the images, the plus sign, the items without colors) must stay
+	 * as it was: the tree draws the texts in RGB and gives the presentation space back.
+	 */
+	void checkColorsOnScreen() {
+		saySubObjective("Colors of the items, seen on the screen");
+		Shell window = new Shell(display, SWT.NO_TRIM);
+		window.setBounds(10, 10, 300, 200);
+		window.open();
+		Tree tree = new Tree(window, SWT.MULTI | SWT.BORDER);
+		tree.setBounds(0, 0, 300, 200);
+		Color red = new Color(display, 255, 0, 0), yellow = new Color(display, 255, 255, 0), cyan = new Color(display, 0, 255, 255);
+		String[] names = {"Plain", "Red text", "On yellow", "Red on yellow", "Image, red", "Selected red"};
+		TreeItem[] items = new TreeItem[names.length];
+		for (int i = 0; i < names.length; i++) {
+			items[i] = new TreeItem(tree, SWT.NONE);
+			items[i].setText(names[i] + " WWWW");
+		}
+		new TreeItem(items[0], SWT.NONE).setText("child");
+		items[1].setForeground(red);
+		items[2].setBackground(yellow);
+		items[3].setForeground(red);
+		items[3].setBackground(yellow);
+		items[4].setImage(image);
+		items[4].setForeground(red);
+		items[5].setForeground(red);
+		tree.setSelection(new TreeItem[] {items[5]});
+		settle(tree);
+		int hilite = OS.WinQuerySysColor(OS.HWND_DESKTOP, OS.SYSCLR_HILITEBACKGROUND, 0) & 0xFFFFFF;
+		String counts = "";
+		for (int i = 0; i < items.length; i++) counts += i + ":" + colors(tree, items[i], hilite) + " ";
+		check(colors(tree, items[0], hilite).equals("dark white"), "an item without colors: dark text on white (" + counts + ")");
+		check(colors(tree, items[1], hilite).equals("red white"), "the foreground is the color of the text (" + counts + ")");
+		check(colors(tree, items[2], hilite).equals("dark yellow"), "the background is behind the text (" + counts + ")");
+		check(colors(tree, items[3], hilite).equals("red yellow"), "both colors (" + counts + ")");
+		check(colors(tree, items[4], hilite).equals("red white") && colors(tree, items[4], hilite, 0).indexOf("green") != -1, "the image is still drawn next to a colored text (" + counts + ", all the item: " + colors(tree, items[4], hilite, 0) + ")");
+		check(colors(tree, items[5], hilite).equals("white hilite"), "a selected item has the colors of the highlight, not its own (" + counts + ")");
+		Rectangle b0 = items[0].getBounds();
+		int box = 0;
+		for (int x = b0.x - 20; x < b0.x - 7; x++) if (dark(pel(tree, x, b0.y + b0.height / 2))) box++;
+		check(box >= 2, "the plus sign is still drawn: " + box + " dark pixels across it");
+		items[1].setForeground(null);
+		settle(tree);
+		check(colors(tree, items[1], hilite).equals("dark white"), "null gives the text the color of the tree again: " + colors(tree, items[1], hilite));
+		tree.setBackground(cyan);
+		settle(tree);
+		check(colors(tree, items[0], hilite).equals("dark cyan"), "the text of an item without colors is on the background of the tree: " + colors(tree, items[0], hilite));
+		window.dispose();
+		red.dispose();
+		yellow.dispose();
+		cyan.dispose();
+	}
+
+	/*
+	 * The colors found in the text of an item, in a fixed order: the text, the background, the image.
+	 * The bounds of an item start with its icon: the text is 22 pixels further (measured, WM_DRAWITEM).
+	 */
+	String colors(Tree tree, TreeItem item, int hilite) {
+		return colors(tree, item, hilite, 22);
+	}
+
+	String colors(Tree tree, TreeItem item, int hilite, int from) {
+		Rectangle b = item.getBounds();
+		boolean isDark = false, isRed = false, isWhite = false, isYellow = false, isCyan = false, isGreen = false, isHilite = false;
+		/* The rectangle of the text is lower than the row (13 of 16 pixels): its middle */
+		for (int y = b.y + b.height / 2 - 3; y <= b.y + b.height / 2 + 3; y++) {
+			for (int x = b.x + from; x < b.x + b.width; x++) {
+				int pel = pel(tree, x, y);
+				int r = (pel >> 16) & 0xFF, g = (pel >> 8) & 0xFF, bl = pel & 0xFF;
+				if (pel == hilite) isHilite = true;
+				else if (dark(pel)) isDark = true;
+				else if (r > 200 && g < 60 && bl < 60) isRed = true;
+				else if (r > 200 && g > 200 && bl < 60) isYellow = true;
+				else if (r < 60 && g > 200 && bl > 200) isCyan = true;
+				else if (r < 60 && g > 200 && bl < 60) isGreen = true;
+				else if (r > 240 && g > 240 && bl > 240) isWhite = true;
+			}
+		}
+		String result = "";
+		if (isDark) result += "dark ";
+		if (isRed) result += "red ";
+		if (isWhite) result += "white ";
+		if (isYellow) result += "yellow ";
+		if (isCyan) result += "cyan ";
+		if (isHilite) result += "hilite ";
+		if (isGreen) result += "green ";
+		return result.trim();
+	}
+
+	boolean dark(int pel) {
+		return ((pel >> 16) & 0xFF) < 60 && ((pel >> 8) & 0xFF) < 60 && (pel & 0xFF) < 60;
+	}
+
+	int pel(Tree tree, int x, int y) {
+		Point p = tree.toDisplay(new Point(x, y));
+		int hps = OS.WinGetScreenPS(OS.HWND_DESKTOP);
+		OS.GpiCreateLogColorTable(hps, 0, OS.LCOLF_RGB, 0, 0, null);
+		int pel = OS.GpiQueryPel(hps, new int[] {p.x, OS.WinQuerySysValue(OS.HWND_DESKTOP, OS.SV_CYSCREEN) - 1 - p.y}) & 0xFFFFFF;
+		OS.WinReleasePS(hps);
+		return pel;
+	}
+
 	void settle(Tree tree) {
 		pump();
 		for (int i = 0; i < 20; i++) display.readAndDispatch();
@@ -638,6 +742,7 @@ public class SWT011_01 extends SWTTestCase {
 		checkEvents();
 		checkDispose();
 		checkImagesAndColors();
+		checkColorsOnScreen();
 		checkScrollingOnScreen();
 		say("\n" + checks + " checks passed.\n");
 
@@ -660,6 +765,9 @@ public class SWT011_01 extends SWTTestCase {
 				TreeItem child = new TreeItem(root, SWT.NONE);
 				child.setText(names[i] + " / item " + (j + 1));
 				child.setImage(image);
+				/* Colors to look at: a red text, a yellow background */
+				if (i == 1 && j == 0) child.setForeground(display.getSystemColor(SWT.COLOR_RED));
+				if (i == 2 && j == 0) child.setBackground(display.getSystemColor(SWT.COLOR_YELLOW));
 				if (j == 1) {
 					TreeItem grandchild = new TreeItem(child, SWT.NONE);
 					grandchild.setText("a grandchild");

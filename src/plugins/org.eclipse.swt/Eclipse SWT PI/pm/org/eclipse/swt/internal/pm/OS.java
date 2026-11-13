@@ -816,13 +816,13 @@ public class OS {
 //    public static final int CAPS_RASTER_FLOOD_FILL =        64;
 
     /* options for GpiCreateLogColorTable and others */
-//    public static final int LCOL_RESET =                    0x0001;
+    public static final int LCOL_RESET =                    0x0001;
 //    public static final int LCOL_REALIZABLE =               0x0002;
 //    public static final int LCOL_PURECOLOR =                0x0004;
 //    public static final int LCOL_OVERRIDE_DEFAULT_COLORS =  0x0008;
 //    public static final int LCOL_REALIZED =                 0x0010;
     /* format of logical lColor table for GpiCreateLogColorTable and others */
-//    public static final int LCOLF_DEFAULT =                 0;
+    public static final int LCOLF_DEFAULT =                 0;
 //    public static final int LCOLF_INDRGB =                  1;
     public static final int LCOLF_CONSECRGB =               2;
     public static final int LCOLF_RGB =                     3;
