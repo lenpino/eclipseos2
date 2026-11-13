@@ -621,6 +621,33 @@ int imageOffset (int width) {
 	return margin + (ICON_FIELD_WIDTH - width) / 2;
 }
 
+/*
+ * Where the content of a cell of the column with the given index starts and ends, from the left
+ * of the cell: half the margin of the fields after the first inside on each side (the first
+ * field has the rest of its own margin on the left).
+ */
+int contentLeft (int index) {
+	int half = fieldPad (1) / 2;
+	return firstPosition () + index == 0 ? fieldPad (0) - half : half;
+}
+
+int contentRight (int index) {
+	return widthOf (index) - fieldPad (1) / 2;
+}
+
+/* The height of a record, without placing the records again (it is asked while they are painted) */
+int recordHeight (int hRecord) {
+	/* RECTL: xLeft, yBottom, xRight, yTop. QUERYRECORDRECT: cb, pRecord, fRightSplitWindow, fsExtent */
+	int rect = Tree.allocate (16), query = Tree.allocate (16);
+	Tree.poke (query, 16);
+	Tree.poke (query + 4, hRecord);
+	Tree.poke (query + 12, OS.CMA_ICON | OS.CMA_TEXT);
+	int height = send (OS.CM_QUERYRECORDRECT, rect, query) != 0 ? Tree.peek (rect + 12) - Tree.peek (rect + 4) : 0;
+	OS.free (query);
+	OS.free (rect);
+	return height;
+}
+
 /* The position of the field of the first column */
 int firstPosition () {
 	return iconField != 0 ? 1 : 0;
@@ -1884,7 +1911,9 @@ void checkSelection () {
  * container puts it (measured with two fonts 2026-11-13): the content of a field starts half
  * the margin of the other fields after its left (the whole margin of the first field less
  * that half) and ends that half before its right. The titles and the column of the images are
- * drawn by the container. OWNERITEM.hItem points to a CNRDRAWITEMINFO: pRecord, pFieldInfo.
+ * drawn by the container. The image of a column after the first one (a bitmap) is drawn at the
+ * start of the content, and the text after it. OWNERITEM.hItem points to a CNRDRAWITEMINFO:
+ * pRecord, pFieldInfo.
  * The colors are RGB values: the presentation space is put in RGB mode for the cell and given
  * back its default color table.
  */
@@ -1914,18 +1943,32 @@ MRESULT wmDrawChild (int mp1, int mp2) {
 		foreground = item.foreground != -1 ? item.foreground : getForegroundPixel ();
 		background = item.background != -1 ? item.background : getBackgroundPixel ();
 	}
-	int half = fieldPad (1) / 2;
 	RECTL content = new RECTL ();
-	content.xLeft = struct.rclItem.xLeft + (firstPosition () + index == 0 ? fieldPad (0) - half : half);
+	content.xLeft = struct.rclItem.xLeft + contentLeft (index);
 	/* The cell of the last column goes on to the right of the window: the content ends with the column */
-	content.xRight = struct.rclItem.xLeft + widthOf (index) - half;
-	/* The container starts a text on the left half the separator further left (1 pixel with the default font, 2 with 14.Helvetica) */
-	if (alignment == OS.DT_LEFT) content.xLeft -= (fieldPad (1) - fieldPad (0)) / 2;
+	content.xRight = struct.rclItem.xLeft + contentRight (index);
 	content.yBottom = struct.rclItem.yBottom;
 	content.yTop = struct.rclItem.yTop;
 	byte [] text = Tree.bytesOf (item.getText (index));
 	OS.GpiCreateLogColorTable (struct.hps, 0, OS.LCOLF_RGB, 0, 0, null);
 	OS.WinFillRect (struct.hps, struct.rclItem, background);
+	Image image = index > 0 ? item.getImage (index) : null;
+	if (image != null && image.type == SWT.BITMAP) {
+		Rectangle size = image.getBounds ();
+		/*
+		* The rectangle of the cell can be a pixel higher than the record (without the column of
+		* the images) and go into the next row: the image is placed in the record, from its top.
+		*/
+		int cellHeight = Math.min (recordHeight (item.handle), content.yTop - content.yBottom);
+		int width = Math.min (size.width, content.xRight - content.xLeft), height = Math.min (size.height, cellHeight);
+		/* PM coordinates: the bottom of the image, and the top of the bitmap when it is cut */
+		int x = content.xLeft, y = content.yTop - cellHeight + (cellHeight - height) / 2;
+		OS.GpiWCBitBlt (struct.hps, image.handle, 4, new int [] {x, y, x + width - 1, y + height - 1, 0, size.height - height, width, size.height}, OS.ROP_SRCCOPY, OS.BBO_IGNORE);
+		content.xLeft = x + width + fieldPad (1) / 2;
+	} else if (alignment == OS.DT_LEFT) {
+		/* The container starts a text on the left half the separator further left (1 pixel with the default font, 2 with 14.Helvetica) */
+		content.xLeft -= (fieldPad (1) - fieldPad (0)) / 2;
+	}
 	OS.WinDrawText (struct.hps, text.length, text, content, foreground, background, alignment | OS.DT_VCENTER);
 	OS.GpiCreateLogColorTable (struct.hps, OS.LCOL_RESET, OS.LCOLF_DEFAULT, 0, 0, null);
 	return new MRESULT (OS.TRUE);

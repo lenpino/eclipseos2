@@ -764,7 +764,8 @@ public class SWT012_01 extends SWTTestCase {
 			pump();
 			for (int i = 0; i < 20; i++) display.readAndDispatch();
 			table.update();
-			Rectangle green = greenBox(table);
+			/* In the column of the images only: the image of the column 1 is green too */
+			Rectangle green = greenBox(table, new Rectangle(0, 0, item.getBounds(0).x, table.getClientArea().height));
 			Rectangle bounds = item.getImageBounds(0);
 			Rectangle expected = green == null ? null : new Rectangle(green.x - 1, green.y - 1, green.width + 2, green.height + 2);
 			String what = fonts[f] == null ? "default font" : fonts[f] + " 14";
@@ -772,32 +773,11 @@ public class SWT012_01 extends SWTTestCase {
 			Rectangle row = item.getBounds(0);
 			check(bounds.x + bounds.width <= row.x, "it is before the first column, where the image is drawn: " + bounds + " " + row);
 			Rectangle other = item.getImageBounds(1);
-			check(other.width == 0 && other.x == item.getBounds(1).x, "the image of another column is not drawn: no width (" + other + ")");
+			check(other.width == 16 && item.getBounds(1).contains(other.x, other.y), "the image of another column is in its cell (" + other + ")");
 			table.dispose();
 			if (font != null) font.dispose();
 		}
 		window.dispose();
-	}
-
-	/* The box of the green pixels of a table, or null */
-	Rectangle greenBox(Table table) {
-		Rectangle area = table.getClientArea();
-		Point origin = table.toDisplay(new Point(0, 0));
-		int screen = OS.WinQuerySysValue(OS.HWND_DESKTOP, OS.SV_CYSCREEN);
-		int hps = OS.WinGetScreenPS(OS.HWND_DESKTOP);
-		OS.GpiCreateLogColorTable(hps, 0, OS.LCOLF_RGB, 0, 0, null);
-		int left = Integer.MAX_VALUE, top = Integer.MAX_VALUE, right = -1, bottom = -1;
-		for (int y = 0; y < area.height; y++) {
-			for (int x = 0; x < 300; x++) {
-				int pel = OS.GpiQueryPel(hps, new int[] {origin.x + x, screen - 1 - (origin.y + y)});
-				if (((pel >> 8) & 0xFF) > 200 && ((pel >> 16) & 0xFF) < 60 && (pel & 0xFF) < 60) {
-					left = Math.min(left, x); right = Math.max(right, x);
-					top = Math.min(top, y); bottom = Math.max(bottom, y);
-				}
-			}
-		}
-		OS.WinReleasePS(hps);
-		return right < 0 ? null : new Rectangle(left, top, right - left + 1, bottom - top + 1);
 	}
 
 	/*
@@ -861,6 +841,75 @@ public class SWT012_01 extends SWTTestCase {
 			if (font != null) font.dispose();
 		}
 		window.dispose();
+	}
+
+	/*
+	 * The images of the other columns, drawn by the table at the start of the cell with the
+	 * text after them: the green of the test image (all but its border of 1 pixel) is looked
+	 * for in each cell and must be where getImageBounds() says, and the text right of it.
+	 */
+	void checkColumnImagesOnScreen() {
+		saySubObjective("Images of the other columns, seen on the screen");
+		Shell window = new Shell(display, SWT.NO_TRIM);
+		window.setBounds(10, 10, 400, 200);
+		window.open();
+		String[] fonts = {null, "Helvetica"};
+		for (int f = 0; f < fonts.length; f++) {
+			Table table = new Table(window, SWT.MULTI | SWT.BORDER);
+			table.setBounds(0, 0, 400, 200);
+			org.eclipse.swt.graphics.Font font = fonts[f] == null ? null : new org.eclipse.swt.graphics.Font(display, fonts[f], 14, SWT.NORMAL);
+			if (font != null) table.setFont(font);
+			int[] aligns = {SWT.LEFT, SWT.LEFT, SWT.RIGHT};
+			for (int c = 0; c < 3; c++) new TableColumn(table, aligns[c]).setWidth(110);
+			TableItem plain = new TableItem(table, SWT.NONE);
+			plain.setText(new String[] {"no image", "text", "text"});
+			TableItem item = new TableItem(table, SWT.NONE);
+			item.setText(new String[] {"first", "second", "third"});
+			item.setImage(new Image[] {null, image, image});
+			/* A row as high as the text (15 pixels with the default font) cuts the image: first that */
+			settleTable(table);
+			Rectangle low = item.getImageBounds(1), lowGreen = greenBox(table, item.getBounds(1)), lowRow = item.getBounds(1);
+			check(lowGreen != null && low.contains(lowGreen.x, lowGreen.y) && low.contains(lowGreen.x + lowGreen.width - 1, lowGreen.y + lowGreen.height - 1)
+					&& lowRow.contains(low.x, low.y) && low.y + low.height <= lowRow.y + lowRow.height,
+					"an image in a low row stays in getImageBounds() and in the row: " + low + ", green " + lowGreen + ", row " + lowRow);
+			/* With an image in the first column the rows are as high as the images (the column of the images) */
+			TableItem other = new TableItem(table, SWT.NONE);
+			other.setImage(image);
+			table.select(1);
+			table.deselectAll();
+			settleTable(table);
+			String what = fonts[f] == null ? "default font" : fonts[f] + " 14";
+			for (int c = 1; c < 3; c++) {
+				Rectangle cell = item.getBounds(c);
+				Rectangle green = greenBox(table, cell);
+				Rectangle expected = green == null ? null : new Rectangle(green.x - 1, green.y - 1, green.width + 2, green.height + 2);
+				Rectangle bounds = item.getImageBounds(c);
+				check(bounds.equals(expected), "the image of the column " + c + " is drawn where getImageBounds() says (" + what + "): " + bounds + ", on the screen " + expected);
+				String span = darkSpan(table, item, c);
+				int first = Integer.parseInt(span.substring(0, span.indexOf('.')));
+				check(cell.x + first > bounds.x + bounds.width, "and its text is right of it: text from " + (cell.x + first) + ", image to " + (bounds.x + bounds.width));
+			}
+			check(greenBox(table, item.getBounds(0)) == null, "a column without an image has none (its image is in the column of the images)");
+			check(greenBox(table, plain.getBounds(1)) == null && plain.getImageBounds(1).width == 0, "nor the cells of an item without images");
+			table.dispose();
+			if (font != null) font.dispose();
+		}
+		window.dispose();
+	}
+
+	/* The box of the green pixels in a rectangle of a table, or null */
+	Rectangle greenBox(Table table, Rectangle area) {
+		int left = Integer.MAX_VALUE, top = Integer.MAX_VALUE, right = -1, bottom = -1;
+		for (int y = area.y; y < area.y + area.height; y++) {
+			for (int x = area.x; x < area.x + area.width; x++) {
+				int pel = pel(table, x, y);
+				if (((pel >> 8) & 0xFF) > 200 && ((pel >> 16) & 0xFF) < 60 && (pel & 0xFF) < 60) {
+					left = Math.min(left, x); right = Math.max(right, x);
+					top = Math.min(top, y); bottom = Math.max(bottom, y);
+				}
+			}
+		}
+		return right < 0 ? null : new Rectangle(left, top, right - left + 1, bottom - top + 1);
 	}
 
 	void settleTable(Table table) {
@@ -980,6 +1029,7 @@ public class SWT012_01 extends SWTTestCase {
 		checkImagesAndColors();
 		checkImageOnScreen();
 		checkCellsOnScreen();
+		checkColumnImagesOnScreen();
 		say("\n" + checks + " checks passed.\n");
 
 		sayObjective("Interactive: click, Ctrl and Shift click, press Enter, click the titles of the columns, try to drag their borders");
@@ -1020,6 +1070,8 @@ public class SWT012_01 extends SWTTestCase {
 			/* Colors to look at: a red text every five rows, a yellow background */
 			if (i % 5 == 4) item.setForeground(display.getSystemColor(SWT.COLOR_RED));
 			if (i == 2) item.setBackground(display.getSystemColor(SWT.COLOR_YELLOW));
+			/* An image in the column Size every three rows */
+			if (i % 3 == 0) item.setImage(1, image);
 		}
 		table.setRedraw(true);
 		table.addSelectionListener(new SelectionAdapter() {

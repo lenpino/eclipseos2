@@ -33,8 +33,9 @@ import org.eclipse.swt.graphics.*;
  * OS/2 note: an item is a record of the container, and the text of each cell
  * a string in native memory pointed to from a slot of the record (one for
  * each column). Only the image of the first column is shown (it is the icon
- * of the record), the others are kept. The table draws the cells with the
- * colors of the item; the check box state is only kept. See the notes of
+ * of the record, in a column of its own), the others at the start of their
+ * cells; only bitmaps are drawn. The table draws the cells with the colors of
+ * the item; the check box state is only kept. See the notes of
  * <code>Table</code>.
  * </p>
  */
@@ -278,8 +279,8 @@ public Image getImage () {
  * table.
  * <p>
  * OS/2 note: the image of the first column is drawn in a column of its own,
- * before the first one, and the images of the other columns are not drawn:
- * their rectangle has no width.
+ * before the first one; the images of the other columns at the start of their
+ * cells. Only bitmaps are drawn (an icon has no width).
  * </p>
  *
  * @param index the index that specifies the column
@@ -294,9 +295,17 @@ public Rectangle getImageBounds (int index) {
 	checkWidget ();
 	Rectangle cell = getBounds (index);
 	Image image = getImage (index);
-	/* Only the image of the first column is drawn, in the column of the images before it */
-	if (index != 0 || image == null || cell.height == 0 || parent.iconField == 0) return new Rectangle (cell.x, cell.y, 0, cell.height);
+	if (image == null || image.type != SWT.BITMAP || cell.height == 0) return new Rectangle (cell.x, cell.y, 0, cell.height);
 	Rectangle size = image.getBounds ();
+	if (index > 0) {
+		/* At the start of the content of the cell, centered in its height as in PM coordinates (see Table.wmDrawChild()) */
+		int left = cell.x + parent.contentLeft (index);
+		int width = Math.min (size.width, cell.x + parent.contentRight (index) - left), height = Math.min (size.height, cell.height);
+		int fromBottom = (cell.height - height) / 2;
+		return new Rectangle (left, cell.y + cell.height - height - fromBottom, width, height);
+	}
+	/* The image of the first column is drawn in the column of the images, before it */
+	if (parent.iconField == 0) return new Rectangle (cell.x, cell.y, 0, cell.height);
 	int width = Math.min (size.width, Table.ICON_FIELD_WIDTH), height = Math.min (size.height, cell.height);
 	Rectangle row = getRowBounds ();
 	return new Rectangle (row.x + parent.imageOffset (width), row.y + (row.height - height) / 2, width, height);
@@ -481,8 +490,9 @@ public void setImage (Image [] images) {
 /**
  * Sets the receiver's image at a column.
  * <p>
- * OS/2 note: only the image of the first column is shown, as the icon of the
- * record; the other ones are kept.
+ * OS/2 note: the image of the first column is the icon of the record, in a
+ * column of its own; the other ones are drawn at the start of their cells.
+ * Only bitmaps are drawn.
  * </p>
  *
  * @param index the column index
@@ -502,7 +512,11 @@ public void setImage (int index, Image image) {
 	int slot = parent.slotOf (index);
 	if (slot == -1) return;
 	cellImage [slot] = image;
-	if (index != 0) return;
+	if (index != 0) {
+		/* The table draws it in the cell */
+		parent.invalidateRecord (handle, OS.CMA_NOREPOSITION);
+		return;
+	}
 	super.setImage (image);
 	if (image != null) parent.ensureIconField ();
 	/* RECORDCORE: hptrIcon 24, hptrMiniIcon 28, hbmBitmap 32, hbmMiniBitmap 36 */
