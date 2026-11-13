@@ -391,6 +391,173 @@ public class SWT012_01 extends SWTTestCase {
 		}
 	}
 
+	/*
+	 * Where the columns are on the screen. The container gives every field more width than
+	 * it is told (margins that depend on the font): the separators of the lines are looked
+	 * for in the pixels of an empty row, and they must be where the cells end. With the
+	 * default font and a big one, and with the column of the images.
+	 */
+	void checkColumnGeometry() {
+		saySubObjective("Columns on the screen");
+		Shell window = new Shell(display, SWT.NO_TRIM);
+		window.setBounds(10, 10, 600, 200);
+		window.open();
+		String[] fonts = {null, "Helvetica"};
+		for (int f = 0; f < fonts.length; f++) {
+			for (int withImage = 0; withImage < 2; withImage++) {
+				Table table = new Table(window, SWT.SINGLE | SWT.BORDER);
+				table.setBounds(0, 0, 600, 200);
+				org.eclipse.swt.graphics.Font font = fonts[f] == null ? null : new org.eclipse.swt.graphics.Font(display, fonts[f], 14, SWT.NORMAL);
+				if (font != null) table.setFont(font);
+				table.setLinesVisible(true);
+				int[] widths = {37, 161, 120};
+				TableColumn[] cols = new TableColumn[widths.length];
+				for (int i = 0; i < widths.length; i++) {
+					cols[i] = new TableColumn(table, SWT.NONE);
+					cols[i].setWidth(widths[i]);
+				}
+				TableItem item = new TableItem(table, SWT.NONE);
+				if (withImage == 1) item.setImage(image);
+				for (int i = 0; i < 50; i++) display.readAndDispatch();
+				String what = (fonts[f] == null ? "default font" : fonts[f] + " 14") + (withImage == 1 ? ", with an image" : "");
+				Rectangle row = item.getBounds(0);
+				String expected = "";
+				int end = 0;
+				for (int i = 1; i <= widths.length; i++) {
+					end = i < widths.length ? item.getBounds(i).x : item.getBounds(i - 1).x + item.getBounds(i - 1).width;
+					expected += end + " ";
+				}
+				/* Up to a little after the last column: the scroll bar is further */
+				String strip = separators(table, row.y + row.height / 2, end + 6);
+				String found = "";
+				for (int x = 0; x < strip.length(); x++) if (strip.charAt(x) == '|') found += x + " ";
+				check(found.equals(expected), "the separators on the screen are where the cells end (" + what + "): found " + found + "expected " + expected);
+				boolean same = true;
+				for (int i = 0; i < widths.length; i++) same &= cols[i].getWidth() == widths[i] && item.getBounds(i).width == widths[i];
+				check(same, "a column is as wide on the screen as its width (" + what + ")");
+				table.dispose();
+				if (font != null) font.dispose();
+			}
+		}
+		window.dispose();
+	}
+
+	/* A row of pixels of a table, with '|' where a separator is (a gray between the white and the black of the texts) */
+	String separators(Table table, int y, int width) {
+		Point p = table.toDisplay(new Point(0, y));
+		int screen = OS.WinQuerySysValue(OS.HWND_DESKTOP, OS.SV_CYSCREEN);
+		int hps = OS.WinGetScreenPS(OS.HWND_DESKTOP);
+		OS.GpiCreateLogColorTable(hps, 0, OS.LCOLF_RGB, 0, 0, null);
+		StringBuffer b = new StringBuffer();
+		for (int x = 0; x < width; x++) {
+			int pel = OS.GpiQueryPel(hps, new int[] {p.x + x, screen - 1 - p.y});
+			int lum = (((pel >> 16) & 0xFF) + ((pel >> 8) & 0xFF) + (pel & 0xFF)) / 3;
+			b.append(lum >= 100 && lum < 180 ? '|' : lum < 100 ? '#' : '.');
+		}
+		OS.WinReleasePS(hps);
+		return b.toString();
+	}
+
+	/*
+	 * The events of the columns. A change of width is a Resize of the column and a Move of
+	 * the ones that follow (the Windows header reports both); a click on a title is a
+	 * Selection of its column, simulated by posting WM_BUTTON1CLICK to the title window of
+	 * the container, as the system does (it goes through the message queue).
+	 */
+	void checkColumnEvents() {
+		saySubObjective("Events of the columns");
+		final Table table = newTable(SWT.SINGLE);
+		table.setHeaderVisible(true);
+		final TableColumn[] cols = new TableColumn[3];
+		final int[][] counts = new int[3][3];
+		final int RESIZE = 0, MOVE = 1, SELECT = 2;
+		for (int i = 0; i < cols.length; i++) {
+			final int index = i;
+			cols[i] = new TableColumn(table, SWT.NONE);
+			cols[i].setText("Column " + i);
+			cols[i].setWidth(100);
+			cols[i].addListener(SWT.Resize, new org.eclipse.swt.widgets.Listener() {
+				public void handleEvent(Event e) { counts[index][RESIZE]++; }
+			});
+			cols[i].addListener(SWT.Move, new org.eclipse.swt.widgets.Listener() {
+				public void handleEvent(Event e) { counts[index][MOVE]++; }
+			});
+			cols[i].addSelectionListener(new SelectionAdapter() {
+				public void widgetSelected(SelectionEvent e) { counts[index][SELECT]++; }
+			});
+		}
+		TableItem item = new TableItem(table, SWT.NONE);
+		item.setText(new String[] {"a", "b", "c"});
+
+		cols[1].setWidth(130);
+		check(counts[1][RESIZE] == 1 && counts[0][RESIZE] == 0 && counts[2][RESIZE] == 0, "setWidth sends Resize to the column: " + counts[0][RESIZE] + counts[1][RESIZE] + counts[2][RESIZE]);
+		check(counts[2][MOVE] == 1 && counts[0][MOVE] == 0 && counts[1][MOVE] == 0, "and Move to the columns that follow: " + counts[0][MOVE] + counts[1][MOVE] + counts[2][MOVE]);
+		cols[1].setWidth(130);
+		check(counts[1][RESIZE] == 1 && counts[2][MOVE] == 1, "the same width again sends nothing");
+		cols[0].setWidth(80);
+		check(counts[0][RESIZE] == 1 && counts[1][MOVE] == 1 && counts[2][MOVE] == 2, "a change of the first column moves the other two");
+		cols[2].pack();
+		check(counts[2][RESIZE] == 1, "pack sends Resize when the width changes: " + cols[2].getWidth());
+		cols[0].addListener(SWT.Resize, new org.eclipse.swt.widgets.Listener() {
+			public void handleEvent(Event e) { cols[1].dispose(); }
+		});
+		cols[0].setWidth(90);
+		check(cols[1].isDisposed() && counts[1][MOVE] == 1 && counts[2][MOVE] == 3, "a column disposed in the Resize listener gets no Move, the others do");
+		cols[2].setWidth(100);
+		cols[0].setWidth(100);
+		pump();
+
+		/* The title window of the container: a click in the middle of each column selects it */
+		int title = OS.WinWindowFromID(table.handle, OS.CID_LEFTCOLTITLEWND);
+		check(title != 0, "the container has a window for the titles of the columns");
+		int[] counted = {counts[0][SELECT], counts[2][SELECT]};
+		check(counted[0] == 0 && counted[1] == 0, "no Selection of a column before a click");
+		clickTitle(table, title, item.getBounds(1).x + 50);
+		check(counts[2][SELECT] == 0, "the click is posted: nothing until the queue is read");
+		pump();
+		check(counts[2][SELECT] == 1 && counts[0][SELECT] == 0, "a click on the title of the second column selects it: " + counts[0][SELECT] + "," + counts[2][SELECT]);
+		clickTitle(table, title, item.getBounds(0).x + 3);
+		pump();
+		check(counts[0][SELECT] == 1 && counts[2][SELECT] == 1, "a click near the left of the first title selects the first column");
+		clickTitle(table, title, item.getBounds(0).x + 98);
+		pump();
+		check(counts[0][SELECT] == 2 && counts[2][SELECT] == 1, "a click near its right edge too");
+		clickTitle(table, title, item.getBounds(1).x + 2);
+		pump();
+		check(counts[2][SELECT] == 2, "and one just after the edge selects the next column");
+		clickTitle(table, title, item.getBounds(1).x + 150);
+		pump();
+		check(counts[0][SELECT] == 2 && counts[2][SELECT] == 2, "a click at the right of the last column selects nothing");
+
+		/* With the image column before the others, and scrolled to the right */
+		item.setImage(image);
+		cols[0].setWidth(250);
+		cols[2].setWidth(250);
+		Rectangle before = item.getBounds(1);
+		OS.WinSendMsg(table.handle, OS.CM_SCROLLWINDOW, OS.CMA_HORIZONTAL, 120);
+		Rectangle after = item.getBounds(1);
+		check(after.x < before.x, "the table scrolls to the right: " + before.x + " -> " + after.x);
+		pump();
+		check(item.getBounds(1).x == after.x, "and stays scrolled when the messages that were waiting are read: " + item.getBounds(1).x);
+		clickTitle(table, title, after.x + 20);
+		pump();
+		check(counts[2][SELECT] == 3 && counts[0][SELECT] == 2, "a click on a scrolled title selects its column: " + counts[0][SELECT] + "," + counts[2][SELECT]);
+		clickTitle(table, title, after.x - 20);
+		pump();
+		check(counts[0][SELECT] == 3, "and the one before it the column before");
+		table.dispose();
+	}
+
+	/* A click posted to the title window at x of the table, in the middle of its height */
+	void clickTitle(Table table, int title, int x) {
+		int[] point = {x, 0};
+		OS.WinMapWindowPoints(table.handle, title, point, 1);
+		org.eclipse.swt.internal.pm.RECTL rect = new org.eclipse.swt.internal.pm.RECTL();
+		OS.WinQueryWindowRect(title, rect);
+		int y = (rect.yBottom + rect.yTop) / 2;
+		OS.WinPostMsg(title, OS.WM_BUTTON1CLICK, (point[0] & 0xFFFF) | (y << 16), 0);
+	}
+
 	void checkRemove() {
 		saySubObjective("Remove, dispose and removeAll");
 		final Table table = newTable(SWT.MULTI);
@@ -547,13 +714,15 @@ public class SWT012_01 extends SWTTestCase {
 		checkBounds();
 		checkSelection();
 		checkEvents();
+		checkColumnGeometry();
+		checkColumnEvents();
 		checkRemove();
 		checkScrolling();
 		checkSizeAndRedraw();
 		checkImagesAndColors();
 		say("\n" + checks + " checks passed.\n");
 
-		sayObjective("Interactive: click, Ctrl and Shift click, drag the borders of the headers, press Enter");
+		sayObjective("Interactive: click, Ctrl and Shift click, press Enter, click the titles of the columns, try to drag their borders");
 		shell.setLayout(null);
 		final Table table = new Table(shell, SWT.MULTI | SWT.BORDER);
 		final Text log = new Text(shell, SWT.BORDER | SWT.MULTI | SWT.READ_ONLY);
@@ -566,10 +735,22 @@ public class SWT012_01 extends SWTTestCase {
 		String[] titles = {"Name", "Size", "Kind"};
 		int[] aligns = {SWT.LEFT, SWT.RIGHT, SWT.CENTER};
 		int[] widths = {170, 90, 110};
+		org.eclipse.swt.widgets.Listener columnListener = new org.eclipse.swt.widgets.Listener() {
+			public void handleEvent(Event e) {
+				TableColumn column = (TableColumn) e.widget;
+				String type = e.type == SWT.Selection ? "Selection" : e.type == SWT.Resize ? "Resize" : "Move";
+				String msg = type + " of the column " + column.getText() + " (width " + column.getWidth() + ")";
+				say(msg);
+				log.setText(msg);
+			}
+		};
 		for (int i = 0; i < titles.length; i++) {
 			TableColumn column = new TableColumn(table, aligns[i]);
 			column.setText(titles[i]);
 			column.setWidth(widths[i]);
+			column.addListener(SWT.Selection, columnListener);
+			column.addListener(SWT.Resize, columnListener);
+			column.addListener(SWT.Move, columnListener);
 		}
 		String[] kinds = {"image", "text", "audio", "folder"};
 		for (int i = 0; i < 40; i++) {

@@ -313,6 +313,8 @@ public class OS {
    public static final int WM_BUTTON3DOWN          = 0x0077;
    public static final int WM_BUTTON3UP            = 0x0078;
    public static final int WM_BUTTON3DBLCLK        = 0x0079;
+   /* A press and release of button 1 without moving (posted after WM_BUTTON1UP) */
+   public static final int WM_BUTTON1CLICK         = 0x0413;
    
 	/*
 	 Mouse messages.

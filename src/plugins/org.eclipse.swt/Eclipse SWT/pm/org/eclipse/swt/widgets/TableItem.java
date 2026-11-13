@@ -159,9 +159,7 @@ public Rectangle getBounds (int index) {
 	checkWidget ();
 	Rectangle row = getRowBounds ();
 	if (row.height == 0 || index < 0 || index >= parent.fieldCount ()) return new Rectangle (0, 0, 0, 0);
-	int x = row.x;
-	for (int i=0; i<index; i++) x += parent.widthOf (i);
-	return new Rectangle (x, row.y, parent.widthOf (index), row.height);
+	return new Rectangle (row.x + parent.offsetOf (index), row.y, parent.widthOf (index), row.height);
 }
 
 /*

@@ -59,6 +59,8 @@ public class Table extends Composite {
 	boolean refreshPending;
 	/* The column that draws the images of the items, created with the first one */
 	int iconField;
+	/* The width that the container adds to the first field and to the others (null until measured for the font) */
+	int [] padding;
 	boolean linesVisible, headerVisible;
 	/* Programmatic changes do not send the events of the user's ones */
 	boolean ignoreSelect;
@@ -234,8 +236,7 @@ protected void checkSubclass () {
 
 public Point computeSize (int wHint, int hHint, boolean changed) {
 	checkWidget ();
-	int width = 0;
-	for (int i=0; i<columns.size (); i++) width += ((TableColumn) columns.elementAt (i)).getWidth ();
+	int width = columns.size () == 0 ? 0 : offsetOf (columns.size ());
 	int height = getHeaderHeight () + order.size () * getItemHeight ();
 	if (width == 0) width = DEFAULT_WIDTH;
 	if (height == 0) height = DEFAULT_HEIGHT;
@@ -252,15 +253,18 @@ void createColumn (TableColumn column, int index) {
 		/* The first column takes the place of the implicit one, with the texts of the items */
 		column.field = implicit;
 		implicit = null;
-		setFieldWidth (column.field, DEFAULT_COLUMN_WIDTH);
+		column.width = DEFAULT_COLUMN_WIDTH;
 		columns.addElement (column);
+		layoutFields ();
 		return;
 	}
 	int slot = allocateSlot ();
 	int hAfter = index == 0 ? (iconField != 0 ? iconField : OS.CMA_FIRST) : ((TableColumn) columns.elementAt (index - 1)).field.handle;
-	column.field = newField (slot, DEFAULT_COLUMN_WIDTH, "", hAfter);
+	column.field = newField (slot, 1, "", hAfter);
+	column.width = DEFAULT_COLUMN_WIDTH;
 	columns.insertElementAt (column, index);
-	updateColumnWidth ();
+	/* The column that was the first one may not be anymore */
+	layoutFields ();
 }
 
 void createHandle () {
@@ -508,6 +512,8 @@ void ensureIconField () {
 	OS.free (insert);
 	if (count == 0) SWT.error (SWT.ERROR_NO_HANDLES);
 	iconField = fi;
+	/* The first column is not the first field anymore */
+	layoutFields ();
 }
 
 int fieldData (int alignment) {
@@ -526,8 +532,99 @@ void setFieldTitle (Field field, String title) {
 	field.titlePtr = ptr;
 }
 
+/* The width of a field, without what the container adds. It takes 0 as "as wide as the texts". */
 void setFieldWidth (Field field, int width) {
-	Tree.poke (field.handle + FI_CXWIDTH, Math.max (width, 0));
+	Tree.poke (field.handle + FI_CXWIDTH, Math.max (width, 1));
+}
+
+/*
+ * The container gives every field more width than its cxWidth, a margin around the
+ * texts and a separator before every field but the first, and how much depends on the
+ * font (2026-11-13, measured on the screen: 15 and 18 pixels with the default font, 12
+ * and 15 with 8.Helv, 20 and 24 with 14.Helvetica). It is measured in a hidden container
+ * with the font of the table: the row of a record with one field one pixel wide, and
+ * then with two. The result is what is added to the first field and to the others.
+ */
+int [] measurePadding () {
+	int [] result = {15, 18};
+	if (handle == 0) return result;
+	int hwnd = OS.WinCreateWindow (handle, TableClass, null, OS.CCS_READONLY, 0, 0, 100, 100, 0, OS.HWND_BOTTOM, 0, 0, 0);
+	if (hwnd == 0) return result;
+	byte [] font = new byte [OS.FACESIZE];
+	int length = OS.WinQueryPresParam (handle, OS.PP_FONTNAMESIZE, 0, null, font.length, font, 0);
+	if (length > 0) OS.WinSetPresParam (hwnd, OS.PP_FONTNAMESIZE, length, font);
+	int info = Tree.allocate (92);
+	Tree.poke (info, 92);
+	Tree.poke (info + 20, OS.CV_DETAIL);
+	OS.WinSendMsg (hwnd, OS.CM_SETCNRINFO, info, OS.CMA_FLWINDOWATTR);
+	/* A record whose only cell is the empty string */
+	int record = OS.WinSendMsg (hwnd, OS.CM_ALLOCRECORD, 4, 1);
+	int [] widths = new int [2];
+	if (record != 0 && record != -1) {
+		Tree.poke (record + Tree.REC_SIZE, emptyPtr);
+		int insert = Tree.allocate (24);
+		Tree.poke (insert, 24);
+		Tree.poke (insert + 4, OS.CMA_END);
+		Tree.poke (insert + 12, OS.TRUE);
+		Tree.poke (insert + 16, OS.CMA_TOP);
+		Tree.poke (insert + 20, 1);
+		OS.WinSendMsg (hwnd, OS.CM_INSERTRECORD, record, insert);
+		OS.free (insert);
+		int fieldInsert = Tree.allocate (16), rect = Tree.allocate (16), query = Tree.allocate (16);
+		Tree.poke (fieldInsert, 16);
+		Tree.poke (fieldInsert + 4, OS.CMA_END);
+		Tree.poke (fieldInsert + 8, OS.TRUE);
+		Tree.poke (fieldInsert + 12, 1);
+		Tree.poke (query, 16);
+		Tree.poke (query + 4, record);
+		Tree.poke (query + 12, OS.CMA_TEXT);
+		for (int i=0; i<widths.length; i++) {
+			int fi = OS.WinSendMsg (hwnd, OS.CM_ALLOCDETAILFIELDINFO, 1, 0);
+			if (fi == 0 || fi == -1) break;
+			Tree.poke (fi + FI_FLDATA, OS.CFA_STRING | OS.CFA_LEFT | OS.CFA_FIREADONLY);
+			Tree.poke (fi + FI_OFFSTRUCT, Tree.REC_SIZE);
+			Tree.poke (fi + FI_CXWIDTH, 1);
+			OS.WinSendMsg (hwnd, OS.CM_INSERTDETAILFIELDINFO, fi, fieldInsert);
+			if (OS.WinSendMsg (hwnd, OS.CM_QUERYRECORDRECT, rect, query) == 0) break;
+			widths [i] = Tree.peek (rect + 8) - Tree.peek (rect);
+		}
+		OS.free (query);
+		OS.free (rect);
+		OS.free (fieldInsert);
+	}
+	OS.WinDestroyWindow (hwnd);
+	OS.free (info);
+	if (widths [0] > 1 && widths [1] > widths [0] + 1) {
+		result [0] = widths [0] - 1;
+		result [1] = widths [1] - widths [0] - 1;
+	}
+	return result;
+}
+
+/* What the container adds to the field at a position (the column of the images, when there is one, is the first) */
+int fieldPad (int position) {
+	if (padding == null) padding = measurePadding ();
+	return position == 0 ? padding [0] : padding [1];
+}
+
+/* The position of the field of the first column */
+int firstPosition () {
+	return iconField != 0 ? 1 : 0;
+}
+
+/*
+ * The fields take the widths of the columns on the screen, as the columns of Windows: the
+ * width of a column is all of it, with the margins and the separator.
+ */
+void layoutFields () {
+	if (handle == 0) return;
+	int first = firstPosition ();
+	if (implicit != null) setFieldWidth (implicit, getClientArea ().width - fieldPad (first));
+	for (int i=0; i<columns.size (); i++) {
+		TableColumn column = (TableColumn) columns.elementAt (i);
+		setFieldWidth (column.field, column.width - fieldPad (first + i));
+	}
+	invalidateFields ();
 }
 
 void invalidateRecord (int hRecord, int flags) {
@@ -550,10 +647,18 @@ void refresh () {
 	OS.WinPostMsg (handle, WM_REPOSITION, 0, 0);
 }
 
-/* The width of the column with the given index (the implicit one, when there are none) */
+/* The width on the screen of the column with the given index (the implicit one, when there are none) */
 int widthOf (int index) {
-	if (columns.size () == 0) return implicit == null ? 0 : Tree.peek (implicit.handle + FI_CXWIDTH);
-	return ((TableColumn) columns.elementAt (index)).getWidth ();
+	Field field = columns.size () == 0 ? implicit : ((TableColumn) columns.elementAt (index)).field;
+	if (field == null) return 0;
+	return Tree.peek (field.handle + FI_CXWIDTH) + fieldPad (firstPosition () + index);
+}
+
+/* Where the column with the given index starts, from the left of a row: after the column of the images and the columns before */
+int offsetOf (int index) {
+	int x = iconField != 0 ? Tree.peek (iconField + FI_CXWIDTH) + fieldPad (0) : 0;
+	for (int i=0; i<index; i++) x += widthOf (i);
+	return x;
 }
 
 void invalidateFields () {
@@ -561,11 +666,67 @@ void invalidateFields () {
 }
 
 /*
+ * The width of a column changed: Resize for it and Move for the ones that follow,
+ * as the header of Windows reports it (HDN_ITEMCHANGED).
+ */
+void columnResized (TableColumn column) {
+	int index = columns.indexOf (column);
+	if (index == -1) return;
+	TableColumn [] after = new TableColumn [columns.size () - index - 1];
+	for (int i=0; i<after.length; i++) after [i] = (TableColumn) columns.elementAt (index + 1 + i);
+	column.sendEvent (SWT.Resize);
+	if (isDisposed ()) return;
+	for (int i=0; i<after.length; i++) {
+		if (!after [i].isDisposed ()) after [i].sendEvent (SWT.Move);
+	}
+}
+
+/*
+ * The column at x, in the coordinates of the table, or null. The columns are laid out
+ * in the workspace of the container, which starts at the left of the viewport when
+ * the table is not scrolled; the column of the images comes first.
+ */
+TableColumn columnAt (int x) {
+	if (columns.size () == 0) return null;
+	flush ();
+	x += scrollX ();
+	for (int i=0; i<columns.size (); i++) {
+		int left = offsetOf (i);
+		if (left <= x && x < left + widthOf (i)) return (TableColumn) columns.elementAt (i);
+	}
+	return null;
+}
+
+/*
+ * How far the table is scrolled to the right: the left of the viewport in the
+ * workspace, less its left in the window.
+ */
+int scrollX () {
+	/* RECTL: xLeft, yBottom, xRight, yTop */
+	int rect = Tree.allocate (16);
+	int window = send (OS.CM_QUERYVIEWPORTRECT, rect, OS.MPFROM2SHORT ((short) OS.CMA_WINDOW, (short) 0)) != 0 ? Tree.peek (rect) : 0;
+	int workspace = send (OS.CM_QUERYVIEWPORTRECT, rect, OS.MPFROM2SHORT ((short) OS.CMA_WORKSPACE, (short) 0)) != 0 ? Tree.peek (rect) : 0;
+	OS.free (rect);
+	return workspace - window;
+}
+
+/*
+ * A click on the titles (a child window of the container, mp1 is the point in it):
+ * the column under it is selected. Windows posts the event (HDN_ITEMCLICK).
+ */
+void titleClicked (int hwndTitle, int mp1) {
+	int [] point = {(short) (mp1 & 0xFFFF), (short) (mp1 >> 16)};
+	OS.WinMapWindowPoints (hwndTitle, handle, point, 1);
+	TableColumn column = columnAt (point [0]);
+	if (column != null) column.postEvent (SWT.Selection);
+}
+
+/*
  * The column of an item that has no columns takes all the width.
  */
 void updateColumnWidth () {
 	if (implicit == null || handle == 0) return;
-	setFieldWidth (implicit, getClientArea ().width);
+	setFieldWidth (implicit, getClientArea ().width - fieldPad (firstPosition ()));
 	invalidateFields ();
 }
 
@@ -587,8 +748,9 @@ void destroyColumn (TableColumn column) {
 	column.field = null;
 	if (columns.size () == 0) {
 		/* Back to the column of the items without columns */
-		implicit = newField (allocateSlot (), getClientArea ().width, "", OS.CMA_END);
+		implicit = newField (allocateSlot (), 1, "", OS.CMA_END);
 	}
+	layoutFields ();
 }
 
 /*
@@ -1586,6 +1748,11 @@ int windowProc (int msg, int mp1, int mp2) {
 		return 0;
 	}
 	int result = super.windowProc (msg, mp1, mp2);
+	if (msg == OS.WM_PRESPARAMCHANGED && mp1 == OS.PP_FONTNAMESIZE && columns != null && handle != 0 && !isDisposed ()) {
+		/* The margins of the fields change with the font */
+		padding = null;
+		layoutFields ();
+	}
 	if (msg == OS.WM_SIZE && items != null && handle != 0 && !isDisposed ()) {
 		updateColumnWidth ();
 		OS.WinPostMsg (handle, WM_REPOSITION, 0, 0);
@@ -1601,7 +1768,11 @@ int windowProc (int msg, int mp1, int mp2) {
  */
 void reposition () {
 	if (handle == 0 || order == null || order.size () == 0) return;
+	/* Placing the records again also scrolls horizontally (2026-11-13, back to the left or not): the table stays where it was */
+	int scrolled = scrollX ();
 	send (OS.CM_INVALIDATERECORD, 0, OS.MPFROM2SHORT ((short) 0, (short) (OS.CMA_REPOSITION | OS.CMA_TEXTCHANGED | OS.CMA_ERASE)));
+	int delta = scrolled - scrollX ();
+	if (delta != 0) send (OS.CM_SCROLLWINDOW, OS.CMA_HORIZONTAL, delta);
 }
 
 void setBounds (int x, int y, int width, int height, int flags) {

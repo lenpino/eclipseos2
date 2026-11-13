@@ -569,6 +569,14 @@ boolean filterMessage (QMSG qmsg) {
             toolTipDone = true;
         }
     }
+    /* A click on the titles of a table (a child window of the container) selects a column */
+    if (msg == OS.WM_BUTTON1CLICK) {
+        int id = OS.WinQueryWindowUShort (hwnd, OS.QWS_ID) & 0xFFFF;
+        if (id == OS.CID_LEFTCOLTITLEWND || id == OS.CID_RIGHTCOLTITLEWND) {
+            Control control = findControl (hwnd);
+            if (control instanceof Table) ((Table) control).titleClicked (hwnd, qmsg.mp1);
+        }
+    }
     if (msg == OS.WM_CHAR) {
         Control control = findControl (qmsg.hwnd);
         if (control != null) {

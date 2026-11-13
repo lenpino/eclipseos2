@@ -30,16 +30,20 @@ import org.eclipse.swt.events.*;
  * IMPORTANT: This class is <em>not</em> intended to be subclassed.
  * </p>
  * <p>
- * OS/2 note: a column is a <code>FIELDINFO</code> of the container. It does not
- * report that the user moved or resized it, or clicked its header, so the
- * Move, Resize and Selection listeners are kept and never called. The image is
- * kept, the header does not show it.
+ * OS/2 note: a column is a <code>FIELDINFO</code> of the container. A click on
+ * its title is a Selection, and a change of its width (by program: the user
+ * cannot change it) is a Resize, with a Move for the columns that follow. The
+ * image is kept, the header does not show it. The width is the one of all the
+ * column on the screen, but the container does not make it narrower than the
+ * margins around the text (from 12 to 24 pixels, depending on the font).
  * </p>
  */
 public class TableColumn extends Item {
 	Table parent;
 	/* The column of the container */
 	Table.Field field;
+	/* The width on the screen: the field is narrower by what the container adds (see Table.layoutFields) */
+	int width;
 	boolean resizable = true;
 
 /**
@@ -235,7 +239,7 @@ public boolean getResizable () {
  */
 public int getWidth () {
 	checkWidget ();
-	return Tree.peek (field.handle + Table.FI_CXWIDTH);
+	return width;
 }
 
 /**
@@ -250,19 +254,19 @@ public int getWidth () {
  */
 public void pack () {
 	checkWidget ();
-	/* The widest of the header and the texts of the cells, with some space around */
+	/*
+	* The widest of the title and the texts of the cells, with the margins of the container.
+	* The images are in a column of their own (see Table.ensureIconField).
+	*/
 	GC gc = new GC (parent);
-	int width = gc.stringExtent (getText ()).x + 12;
-	boolean first = parent.columns.indexOf (this) == 0;
+	int width = gc.stringExtent (getText ()).x;
 	for (int i=0; i<parent.order.size (); i++) {
 		TableItem item = (TableItem) parent.order.elementAt (i);
 		String text = item.cellText [field.slot];
-		int itemWidth = text == null ? 0 : gc.stringExtent (text).x + 12;
-		if (first && item.cellImage [field.slot] != null) itemWidth += 20;
-		width = Math.max (width, itemWidth);
+		if (text != null) width = Math.max (width, gc.stringExtent (text).x);
 	}
 	gc.dispose ();
-	setWidth (width);
+	setWidth (width + parent.fieldPad (parent.firstPosition () + parent.columns.indexOf (this)));
 }
 
 void releaseChild () {
@@ -357,8 +361,7 @@ public void setAlignment (int alignment) {
  * not resizable cannot be dragged by the user but
  * may be resized by the programmer.
  * <p>
- * OS/2 note: the attribute is only kept, the container always lets the user
- * resize a column.
+ * OS/2 note: the attribute is only kept.
  * </p>
  *
  * @param resizable the resize attribute
@@ -429,9 +432,10 @@ public void setText (String string) {
  */
 public void setWidth (int width) {
 	checkWidget ();
-	if (width < 0) return;
-	parent.setFieldWidth (field, width);
-	parent.invalidateFields ();
+	if (width < 0 || width == this.width) return;
+	this.width = width;
+	parent.layoutFields ();
+	parent.columnResized (this);
 }
 
 /*
