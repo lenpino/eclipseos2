@@ -355,6 +355,8 @@ public class SWT011_01 extends SWTTestCase {
 		int mp1 = (x & 0xFFFF) | ((height - 1 - y) << 16);
 		OS.WinSendMsg(tree.handle, OS.WM_BUTTON1DOWN, mp1, keys << 16);
 		OS.WinSendMsg(tree.handle, OS.WM_BUTTON1UP, mp1, keys << 16);
+		/* The system sends it after the button goes up: the container moves its cursor with it */
+		OS.WinSendMsg(tree.handle, OS.WM_BUTTON1CLICK, mp1, keys << 16);
 	}
 
 	/* The selected items, by the number in their text */

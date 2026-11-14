@@ -957,7 +957,10 @@ public class SWT012_01 extends SWTTestCase {
 
 		table.setSelection(3);
 		settleTable(table);
+		setCellsDrawn(table, 0);
 		postClick(table, boxes[0].x + boxes[0].width / 2, boxes[0].y + boxes[0].height / 2);
+		int drawn = cellsDrawn(table);
+		check(drawn > 0 && drawn <= 4, "only the row of the box is painted again (no flicker of the table): " + drawn + " cells");
 		check(items[0].getChecked() && events[0] == 1 && last[0] == items[0], "a click on the box checks the item, with a Selection of SWT.CHECK: " + events[0]);
 		check(table.getSelectionCount() == 1 && table.isSelected(3), "and the selection does not change: " + table.getSelectionCount());
 		check(inside(table, boxes[0]).equals("dark light"), "the mark is drawn");
@@ -986,6 +989,26 @@ public class SWT012_01 extends SWTTestCase {
 		}
 	}
 
+	int cellsDrawn(Table table) {
+		try {
+			java.lang.reflect.Field f = Table.class.getDeclaredField("cellsDrawn");
+			f.setAccessible(true);
+			return ((Integer) f.get(table)).intValue();
+		} catch (Exception e) {
+			throw new RuntimeException(e.toString());
+		}
+	}
+
+	void setCellsDrawn(Table table, int value) {
+		try {
+			java.lang.reflect.Field f = Table.class.getDeclaredField("cellsDrawn");
+			f.setAccessible(true);
+			f.setInt(table, value);
+		} catch (Exception e) {
+			throw new RuntimeException(e.toString());
+		}
+	}
+
 	/* A click posted to the window of the records at a point of the table */
 	void postClick(Table table, int x, int y) {
 		int records = OS.WinWindowFromID(table.handle, OS.CID_LEFTDVWND);
@@ -994,6 +1017,8 @@ public class SWT012_01 extends SWTTestCase {
 		int mp1 = (point[0] & 0xFFFF) | (point[1] << 16);
 		OS.WinPostMsg(records, OS.WM_BUTTON1DOWN, mp1, 0);
 		OS.WinPostMsg(records, OS.WM_BUTTON1UP, mp1, 0);
+		/* The system sends it after the button goes up: the container selects with it */
+		OS.WinPostMsg(records, OS.WM_BUTTON1CLICK, mp1, 0);
 		settleTable(table);
 	}
 

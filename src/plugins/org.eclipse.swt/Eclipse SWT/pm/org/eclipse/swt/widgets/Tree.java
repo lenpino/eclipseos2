@@ -75,6 +75,8 @@ public class Tree extends Composite {
 	* of a pixel and a half; the room left is at the end of the text.
 	*/
 	static final String CHECK_PREFIX = "            ";
+	/* A click on a check box is going on: the container gets none of its messages (see windowProc()) */
+	boolean checkClick;
 	static final int CHECK_GAP = 4;
 	int cnrInfoPtr;
 
@@ -907,7 +909,13 @@ int windowProc () {
 }
 
 int windowProc (int msg, int mp1, int mp2) {
+	if ((msg == OS.WM_BUTTON1UP || msg == OS.WM_BUTTON1CLICK) && checkClick) {
+		/* The rest of a click on a check box: the container moves its cursor with WM_BUTTON1CLICK */
+		if (msg == OS.WM_BUTTON1CLICK) checkClick = false;
+		return 0;
+	}
 	if (msg == OS.WM_BUTTON1DOWN && items != null && handle != 0) {
+		checkClick = false;
 		/*
 		* A click selects the item under the pointer (its icon or its text, not the plus
 		* sign). The container selects the record of the row, also from the plus sign: that
@@ -921,6 +929,7 @@ int windowProc (int msg, int mp1, int mp2) {
 			for (int i=0; i<visible.length; i++) {
 				if (checkBounds (visible [i]).contains (point)) {
 					toggleCheck (visible [i]);
+					checkClick = true;
 					return 0;
 				}
 			}

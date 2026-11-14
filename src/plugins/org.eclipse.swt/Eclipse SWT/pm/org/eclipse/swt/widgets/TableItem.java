@@ -404,7 +404,7 @@ public void setBackground (Color color) {
 	if (pixel == background) return;
 	background = pixel;
 	/* The table draws the cells with the colors of the item */
-	if (handle != 0) parent.invalidateRecord (handle, OS.CMA_NOREPOSITION);
+	if (handle != 0) parent.redrawRecord (handle);
 }
 
 /**
@@ -423,7 +423,7 @@ public void setChecked (boolean checked) {
 	if ((parent.style & SWT.CHECK) == 0 || this.checked == checked) return;
 	this.checked = checked;
 	/* The table draws the check box (see Table.wmDrawChild()) */
-	if (handle != 0) parent.invalidateRecord (handle, OS.CMA_NOREPOSITION);
+	if (handle != 0) parent.redrawRecord (handle);
 }
 
 /**
@@ -447,7 +447,7 @@ public void setForeground (Color color) {
 	int pixel = color == null ? -1 : color.handle;
 	if (pixel == foreground) return;
 	foreground = pixel;
-	if (handle != 0) parent.invalidateRecord (handle, OS.CMA_NOREPOSITION);
+	if (handle != 0) parent.redrawRecord (handle);
 }
 
 /**
@@ -465,7 +465,7 @@ public void setGrayed (boolean grayed) {
 	checkWidget ();
 	if ((parent.style & SWT.CHECK) == 0 || this.grayed == grayed) return;
 	this.grayed = grayed;
-	if (handle != 0) parent.invalidateRecord (handle, OS.CMA_NOREPOSITION);
+	if (handle != 0) parent.redrawRecord (handle);
 }
 
 /**
@@ -515,7 +515,7 @@ public void setImage (int index, Image image) {
 	cellImage [slot] = image;
 	if (index != 0) {
 		/* The table draws it in the cell */
-		parent.invalidateRecord (handle, OS.CMA_NOREPOSITION);
+		parent.redrawRecord (handle);
 		return;
 	}
 	super.setImage (image);

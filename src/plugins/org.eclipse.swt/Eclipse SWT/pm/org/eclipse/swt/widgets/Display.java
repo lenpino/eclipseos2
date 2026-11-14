@@ -578,11 +578,19 @@ boolean filterMessage (QMSG qmsg) {
         }
     }
     /* The check boxes of a table: a click on one in the window of the records, and the space bar */
-    if (msg == OS.WM_BUTTON1DOWN || msg == OS.WM_BUTTON1DBLCLK) {
+    if (msg == OS.WM_BUTTON1DOWN || msg == OS.WM_BUTTON1DBLCLK || msg == OS.WM_BUTTON1UP || msg == OS.WM_BUTTON1CLICK) {
         int id = OS.WinQueryWindowUShort (hwnd, OS.QWS_ID) & 0xFFFF;
         if (id == OS.CID_LEFTDVWND) {
             Control control = findControl (hwnd);
-            if (control instanceof Table && ((Table) control).checkClicked (hwnd, qmsg.mp1)) return true;
+            if (control instanceof Table) {
+                Table table = (Table) control;
+                if (msg == OS.WM_BUTTON1DOWN || msg == OS.WM_BUTTON1DBLCLK) {
+                    if (table.checkClicked (hwnd, qmsg.mp1)) return true;
+                } else {
+                    /* The rest of a click on a check box: the container selects with WM_BUTTON1CLICK */
+                    if (table.checkClickRest (msg)) return true;
+                }
+            }
         }
     }
     if (msg == OS.WM_CHAR) {

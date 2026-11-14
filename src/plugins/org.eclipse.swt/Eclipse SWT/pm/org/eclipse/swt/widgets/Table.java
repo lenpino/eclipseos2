@@ -79,6 +79,10 @@ public class Table extends Composite {
 	int cnrInfoPtr;
 	/* A string with nothing: what the cells point to until they have a text (the container does not take a null pointer) */
 	int emptyPtr;
+	/* The cells drawn by the table, for the tests (how much a change paints again) */
+	int cellsDrawn;
+	/* A click on a check box is going on: the container gets none of its messages */
+	boolean checkClick;
 
 	static final int TableProc;
 	static final PSZ TableClass = PSZ.getAtom (OS.WC_CONTAINER);
@@ -685,6 +689,7 @@ Rectangle checkBounds (TableItem item) {
  * the click (the selection does not change). True when it was on a check box.
  */
 boolean checkClicked (int hwnd, int mp1) {
+	checkClick = false;
 	if ((style & SWT.CHECK) == 0 || order == null) return false;
 	int [] point = {(short) (mp1 & 0xFFFF), (short) (mp1 >> 16)};
 	OS.WinMapWindowPoints (hwnd, handle, point, 1);
@@ -692,7 +697,43 @@ boolean checkClicked (int hwnd, int mp1) {
 	TableItem item = getItem (where);
 	if (item == null || !checkBounds (item).contains (where)) return false;
 	toggleCheck (item);
+	checkClick = true;
 	return true;
+}
+
+/*
+ * After a click on a check box, its WM_BUTTON1UP and WM_BUTTON1CLICK are not given to the
+ * container either: it selects the record with WM_BUTTON1CLICK (seen on the screen
+ * 2026-11-13). True when the message is one of them.
+ */
+boolean checkClickRest (int msg) {
+	if (!checkClick) return false;
+	if (msg == OS.WM_BUTTON1CLICK) checkClick = false;
+	return true;
+}
+
+/*
+ * Paints a record again where it is, without placing the records again (that paints the
+ * whole table, a flicker): for a check box, the colors, an image of a cell.
+ */
+void redrawRecord (int hRecord) {
+	if (handle == 0 || drawCount != 0) return;
+	/* A refresh of all of them is coming anyway */
+	if (refreshPending) return;
+	/* RECTL: xLeft, yBottom, xRight, yTop. QUERYRECORDRECT: cb, pRecord, fRightSplitWindow, fsExtent */
+	int rect = Tree.allocate (16), query = Tree.allocate (16);
+	Tree.poke (query, 16);
+	Tree.poke (query + 4, hRecord);
+	Tree.poke (query + 12, OS.CMA_ICON | OS.CMA_TEXT);
+	if (send (OS.CM_QUERYRECORDRECT, rect, query) != 0) {
+		RECTL rectl = new RECTL ();
+		OS.objcpy (rectl, rect);
+		/* Also over the right of the last column, which the cells paint */
+		rectl.xRight = Math.max (rectl.xRight, getSize ().x);
+		OS.WinInvalidateRect (handle, rectl, true);
+	}
+	OS.free (query);
+	OS.free (rect);
 }
 
 /* The space bar: the item that has the cursor is checked or not. True when it was used. */
@@ -2016,6 +2057,7 @@ MRESULT wmDrawChild (int mp1, int mp2) {
 		}
 	}
 	if (index == -1) return null;
+	cellsDrawn++;
 	int foreground, background;
 	if ((struct.fsAttribute & OS.CRA_SELECTED) != 0) {
 		foreground = OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_HILITEFOREGROUND, 0);
