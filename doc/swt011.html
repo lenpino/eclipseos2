@@ -97,6 +97,20 @@ href="eclipseos2-xxe.css"
       13 pixels high in a row of 16, so the background of an item is that
       band, as the label of Windows. A selected item has the colors of the
       highlight.</li>
+
+      <li>The check boxes (2026-11-13). The container has none, so the tree
+      draws them with the text: a frame, gray inside when grayed, and a mark
+      when checked. The container sizes the rectangle of the text by the text,
+      so with <code>SWT.CHECK</code> the text of a record starts with twelve
+      spaces (the native text only; <code>getText()</code> has none): the
+      rectangle has room for the box and a gap, and the tree draws the text
+      after the box. The width of a space of the font of the container is not
+      known to the tree: a <code>GC</code> on the tree measured 3 pixels, the
+      container uses about 2. A click on a box (in
+      <code>WM_BUTTON1DOWN</code>, before the container gets it) and the space
+      bar on the item with the cursor change it and send a
+      <code>Selection</code> with <code>SWT.CHECK</code>; the selection does
+      not change.</li>
     </ul>
 
     <p>Three problems that were found on the way and are not tree specific are
@@ -166,8 +180,10 @@ href="eclipseos2-xxe.css"
         <td>Partly done [lpino]</td>
 
         <td>The image is the mini icon of the record (checked that it has
-        bounds, not how it looks). No check boxes. The colors are drawn
-        (2026-11-13), checked on the screen and seen by hand.</td>
+        bounds, not how it looks). The colors are drawn (2026-11-13), checked
+        on the screen and seen by hand. The check boxes of
+        <code>SWT.CHECK</code> are drawn by the tree (2026-11-13), checked on
+        the screen with the clicks and the space bar.</td>
       </tr>
     </table>
   </body>

@@ -305,8 +305,9 @@ href="eclipseos2-xxe.css"
         With the keyboard the arrows move and select one item; Shift and Ctrl
         with the arrows do not extend the selection. The record that the
         container keeps selected is the cursor, shown by its dotted frame.
-        <code>SWT.CHECK</code> has no effect (the container has no check
-        boxes, the state is only kept). The colors of an item are those of its
+        The container has no check boxes: with <code>SWT.CHECK</code> the tree
+        draws them, before the text and so after the image (Windows puts the box
+        before the image). The colors of an item are those of its
         text (the background of the image is the one of the tree).
         <code>setInsertMark()</code> does nothing. An image that is an
         icon (<code>SWT.ICON</code>) is not drawn, only bitmaps are.</td>
@@ -341,8 +342,10 @@ href="eclipseos2-xxe.css"
         before the first one and centered in it; the images of the other columns
         are drawn by the table at the start of their cells. Only bitmaps are drawn,
         and an image is cut to the height of the row (which is that of the text
-        until the first column has an image). The image indent is only kept. <code>SWT.CHECK</code> has no effect (the state is only kept), and the
-        images of a column header are only kept. The colors of an item are drawn in
+        until the first column has an image). The image indent is only kept. The
+        check boxes of <code>SWT.CHECK</code> are drawn by the table at the start
+        of the first cell, after the image of the first column (Windows puts the
+        box before it). The images of a column header are only kept. The colors of an item are drawn in
         its cells, not in the column of the images. A click
         on a title is a <code>Selection</code> of the column, and a width set by
         program a <code>Resize</code> and a <code>Move</code> of the columns that
