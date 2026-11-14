@@ -34,6 +34,12 @@ import org.eclipse.swt.graphics.*;
 public abstract class Scrollable extends Control {
 //@@TODO(dmik)
 	ScrollBar horizontalBar, verticalBar;
+	/*
+	* The corner between the two scroll bars of a canvas: a static window filled with the color
+	* of the buttons, as the size box of Windows (nothing painted it, the screen behind showed).
+	*/
+	int hwndCorner;
+	static final PSZ StaticClass = PSZ.getAtom (OS.WC_STATIC);
 
 /**
  * Prevents uninitialized instances from being created outside the package.
@@ -132,6 +138,11 @@ void createWidget () {
 	super.createWidget ();
 	if ((style & SWT.H_SCROLL) != 0) horizontalBar = createScrollBar (SWT.H_SCROLL);
 	if ((style & SWT.V_SCROLL) != 0) verticalBar = createScrollBar (SWT.V_SCROLL);
+	if (horizontalBar != null && horizontalBar.hwndBar != 0 && verticalBar != null && verticalBar.hwndBar != 0) {
+		hwndCorner = OS.WinCreateWindow (handle, StaticClass, null, OS.SS_FGNDRECT, 0, 0, 0, 0, handle, OS.HWND_TOP, 0, 0, 0);
+		int color = OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_BUTTONMIDDLE, 0);
+		if (hwndCorner != 0) OS.WinSetPresParam (hwndCorner, OS.PP_FOREGROUNDCOLOR, 4, new int [] {color});
+	}
 	layoutBars ();
 }
 
@@ -176,6 +187,7 @@ public Rectangle getClientArea () {
 void layoutBars () {
 	boolean vertical = verticalBar != null && verticalBar.hwndBar != 0 && verticalBar.getVisible ();
 	boolean horizontal = horizontalBar != null && horizontalBar.hwndBar != 0 && horizontalBar.getVisible ();
+	if (hwndCorner != 0 && !(vertical && horizontal)) OS.WinShowWindow (hwndCorner, false);
 	if (!vertical && !horizontal) return;
 	RECTL rect = new RECTL ();
 	OS.WinQueryWindowRect (handle, rect);
@@ -189,6 +201,9 @@ void layoutBars () {
 	}
 	if (horizontal) {
 		OS.WinSetWindowPos (horizontalBar.hwndBar, 0, 0, 0, Math.max (0, width - (vertical ? cx : 0)), cy, OS.SWP_MOVE | OS.SWP_SIZE);
+	}
+	if (hwndCorner != 0 && vertical && horizontal) {
+		OS.WinSetWindowPos (hwndCorner, 0, Math.max (0, width - cx), 0, cx, cy, OS.SWP_MOVE | OS.SWP_SIZE | OS.SWP_SHOW);
 	}
 }
 

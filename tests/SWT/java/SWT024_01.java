@@ -115,6 +115,15 @@ public class SWT024_01 extends SWTTestCase {
 		check(inVertical < (cx - 2) * (client.height - 4) / 4 && inHorizontal < (client.width - 4) * (cy - 2) / 4,
 				"the bars are drawn where they are, not the background: " + inVertical + " and " + inHorizontal + " white pixels");
 
+		/* The corner between the two bars: painted with the color of the buttons, as the size box of Windows */
+		int gray = OS.WinQuerySysColor(OS.HWND_DESKTOP, OS.SYSCLR_BUTTONMIDDLE, 0) & 0xFFFFFF;
+		int corner = 0, other = 0;
+		for (int y = client.height + 2; y < client.height + cy - 2; y++) {
+			for (int x = client.width + 2; x < client.width + cx - 2; x++) {
+				if (pel(canvas, x, y) == gray) corner++; else other++;
+			}
+		}
+		check(other == 0 && corner > 0, "the corner between the bars is painted with the color of the buttons: " + corner + " of " + (corner + other) + " pixels");
 		canvas.setSize(260, 180);
 		pump(canvas);
 		client = canvas.getClientArea();
