@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/css"
+href="eclipseos2-xxe.css"
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"xhtml1-strict.dtd">
+<html>
+  <head>
+    <link href="eclipseos2.css" rel="stylesheet" type="text/css" />
+
+    <title>Eclipse for OS/2 Transitional Project Notes</title>
+  </head>
+
+  <body>
+    <h1>SWT Step 022. The clipboard</h1>
+
+    <h2>Objective</h2>
+
+    <p>Implement the clipboard of the package <code>org.eclipse.swt.dnd</code>:
+    <code>Clipboard</code>, <code>Transfer</code>, <code>TransferData</code>,
+    <code>ByteArrayTransfer</code> and <code>TextTransfer</code>, with the API of
+    Eclipse 2.0.1, on the clipboard of PM. It is needed by <code>StyledText</code>
+    (copy and paste) and so by the editors of Eclipse. Drag and drop is not part
+    of the step. The test case <kbd>SWT022_01</kbd> (21 automatic checks) sends
+    texts and bytes to the clipboard and back, also through the text fields of
+    PM; its interactive part copies and pastes with another program.</p>
+
+    <h2>Task notes</h2>
+
+    <ul>
+      <li>The classes of Windows are made on OLE; the ones of PM are new, in
+      <code>Eclipse SWT Drag and Drop/pm</code>. <code>DND.java</code> (the
+      constants and the errors) is taken from the common part of the original
+      distribution. Both builds (the development one of <kbd>tests/SWT</kbd> and
+      the one of the jar) compile the two folders, and <kbd>classes.inc</kbd>
+      lists the six classes.</li>
+
+      <li>New natives (<kbd>swt.c</kbd>, the DLL is built again):
+      <code>WinSetClipbrdData</code>, <code>WinEmptyClipbrd</code>,
+      <code>WinEnumClipbrdFmts</code>, <code>WinQueryClipbrdFmtInfo</code>,
+      <code>DosAllocSharedMem</code> (without a name; the address comes back in
+      an array), <code>DosFreeMem</code>, <code>WinAddAtom</code> and
+      <code>WinQueryAtomName</code>. The anchor block is
+      <code>Display.internal_get_HAB()</code>.</li>
+
+      <li>The data given to the clipboard by address
+      (<code>CFI_POINTER</code>) must be shared memory that can be given to
+      another process: <code>DosAllocSharedMem</code> with
+      <code>OBJ_GIVEABLE | PAG_COMMIT | PAG_READ | PAG_WRITE</code>. The
+      clipboard owns it once it has taken it and frees it when it is emptied; if
+      it does not take it, the clipboard frees it with
+      <code>DosFreeMem</code>. The first version had <code>OBJ_GIVEABLE</code>
+      as <code>0x20</code> (that is <code>PAG_DECOMMIT</code>): the allocation
+      failed with 87 and nothing was set. It is <code>0x200</code>
+      (<kbd>bsememf.h</kbd>).</li>
+
+      <li><code>TextTransfer</code> is <code>CF_TEXT</code>: the text in the
+      code page of the system, ended by a zero, as the other programs of PM read
+      and write it. A registered type (<code>Transfer.registerType()</code>) is
+      an atom of the system atom table, as the formats of PM that are not
+      predefined. The clipboard does not keep the size of data given by
+      address: <code>ByteArrayTransfer</code> puts the count of the bytes (4
+      bytes) before them.</li>
+
+      <li><code>setContents()</code> empties the clipboard and puts the data
+      of every type at once (Windows can give it later, when asked);
+      <code>getContents()</code> takes the first type of the transfer that the
+      clipboard has. Both try to open the clipboard 10 times, every 10 ms, as
+      Windows does, when another program has it.</li>
+
+      <li>Found by the checks of the text fields: <code>Text.selectAll()</code>
+      selected up to the limit of the text, which is 0 until it is set, so it
+      selected nothing; and a multi line text (an MLE) was sent the message of
+      an entry field. It selects up to the length of the text now, with the
+      message of each.</li>
+    </ul>
+
+    <p>The behavior that differs from Windows is in <a href="diff.html">difference
+    023</a>.</p>
+
+    <h2>Step checklist</h2>
+
+    <table>
+      <col width="40%" />
+
+      <col />
+
+      <col width="50%" />
+
+      <thead>
+        <tr>
+          <th>Operation</th>
+
+          <th>Status</th>
+
+          <th>Remarks</th>
+        </tr>
+      </thead>
+
+      <tr>
+        <td><code>Clipboard</code>: <code>setContents</code>,
+        <code>getContents</code>, <code>getAvailableTypeNames</code></td>
+
+        <td>Done [lpino]</td>
+
+        <td>Checked by <kbd>SWT022_01</kbd>, also with the text fields of PM in
+        both directions. With another program: <em>to be seen</em> on the
+        screen.</td>
+      </tr>
+
+      <tr>
+        <td><code>TextTransfer</code>, <code>ByteArrayTransfer</code>,
+        <code>Transfer.registerType</code></td>
+
+        <td>Done [lpino]</td>
+
+        <td><code>RTFTransfer</code> and <code>FileTransfer</code> are not
+        done.</td>
+      </tr>
+
+      <tr>
+        <td>Drag and drop (<code>DragSource</code>,
+        <code>DropTarget</code>)</td>
+
+        <td>Not done</td>
+
+        <td></td>
+      </tr>
+    </table>
+  </body>
+</html>

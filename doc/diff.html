@@ -511,6 +511,26 @@ href="eclipseos2-xxe.css"
         <td>The API is the same. The children of the bar include the tool bars
         of the chevrons (as on Motif).</td>
       </tr>
+
+      <tr>
+        <td>023</td>
+
+        <td>The clipboard is the one of OLE: the data object is given to the
+        clipboard and asked for the data of a type when a program wants it, and
+        the text is <code>CF_UNICODETEXT</code> (or <code>CF_TEXT</code>).
+        <code>RTFTransfer</code> and <code>FileTransfer</code> are there.</td>
+
+        <td>The clipboard is the one of PM: <code>setContents()</code> converts
+        and puts the data of every type at once. The text is
+        <code>CF_TEXT</code>, in the code page of the system (the characters
+        that it does not have are lost). A registered type is an atom of the
+        system atom table, and its bytes are preceded by their count. Only
+        <code>TextTransfer</code> and <code>ByteArrayTransfer</code> are
+        implemented; there is no drag and drop.</td>
+
+        <td>The data of the clipboard stays after the program ends, as on
+        Windows after <code>OleFlushClipboard</code>.</td>
+      </tr>
     </table>
 
     <h2>Other differences</h2>
