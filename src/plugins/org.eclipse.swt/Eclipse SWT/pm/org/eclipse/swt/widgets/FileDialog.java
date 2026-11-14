@@ -251,7 +251,6 @@ public class FileDialog extends Dialog {
                 for (int i = 0 ; i < fileDlg.ulFQFCount; i++) {
                     if (fileDlg.papszFQFilename[i] != null){
                         bufferArray[i] = ((PSZ)fileDlg.papszFQFilename[i]).toString();
-                        System.out.println("FILE = " + bufferArray[i]);
                     }
                 }
             }

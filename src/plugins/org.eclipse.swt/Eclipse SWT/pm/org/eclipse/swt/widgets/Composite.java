@@ -823,7 +823,6 @@ MRESULT WM_SIZE (int mp1, int mp2) {
 }
 
 MRESULT WM_ADJUSTWINDOWPOS (int mp1, int mp2) {
-	System.out.println("Composite::WM_ADJUSTWINDOWPOS -> HANDLE  =  " + Integer.toHexString(handle));
 	return null;
 }
 

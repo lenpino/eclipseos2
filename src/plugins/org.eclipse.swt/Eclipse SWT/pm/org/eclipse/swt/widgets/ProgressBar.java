@@ -301,7 +301,6 @@ int windowProc () {
 /*MRESULT wmDrawChild (int mp1, int mp2) {
     OWNERITEM struct = new OWNERITEM();
     OS.objcpy(struct, mp2);
-    System.out.println("ProgressBar:WM_DRAWITEM");
     return null;
 
 switch(SHORT1FROMMP(mp1)){

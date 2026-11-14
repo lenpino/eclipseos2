@@ -1500,7 +1500,6 @@ MRESULT wmScroll (int msg, int mp1, int mp2) {
 
 //@@TODO(lpino): Implement this
 MRESULT wmMeasureChild (int mp1, int mp2) {
-	System.out.println("List::wmMeasureChild");
 //	int code = callWindowProc (msg, mp1, mp2);
 ////	if (code == 0) return MRESULT.ZERO;
 	return MRESULT.ZERO;    

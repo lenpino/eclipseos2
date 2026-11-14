@@ -253,7 +253,6 @@ void fillAccel (ACCEL accel) {
 	if ((accelerator & SWT.CTRL) != 0) accel.fs |= OS.AF_CONTROL;
 	if ((accelerator & SWT.SHIFT) != 0) accel.fs |= OS.AF_SHIFT;
         
-        System.out.println("MenuItem.fillAccel - KEY = " + accel.key);
 }
 
 /**
@@ -735,7 +734,6 @@ MRESULT wmCommandChild (int mp1, int mp2) {
 }
 //@@TODO(lpino) Finish the implementation of owner draw menu items
 MRESULT wmDrawChild (int mp1, int mp2) {
-        System.out.println("MenuItem:wmDrawChild");
         OWNERITEM struct = new OWNERITEM();
         OS.objcpy(struct, mp2);
 //	DRAWITEMSTRUCT struct = new DRAWITEMSTRUCT ();
@@ -766,7 +764,6 @@ MRESULT wmDrawChild (int mp1, int mp2) {
 }
 //@@TODO(lpino) Finish the implementation of owner draw menu items
 MRESULT wmMeasureChild (int mp1, int mp2) {
-    System.out.println("MenuItem:wmMeasureChild");
 //	MEASUREITEMSTRUCT struct = new MEASUREITEMSTRUCT ();
 //	OS.MoveMemory (struct, lParam, MEASUREITEMSTRUCT.sizeof);
 //	if (image != null) {

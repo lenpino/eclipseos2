@@ -321,14 +321,9 @@ void createAcceleratorTable () {
                 for(int i= 0;i < nAccel;i++)
                     pacctAccelTable.aaccel[i] = accelList[i];
 	}
- 	System.out.println("Decorations:createAcceleratorTable ");
        if (nAccel != 0) hAccel = OS.WinCreateAccelTable(getDisplay().hab, pacctAccelTable);
-       System.out.println("Decorations:createAcceleratorTable - Handle of accelerator table = " + hAccel);
-        if(!OS.WinSetAccelTable(getDisplay().hab, hAccel, frameHandle)){
-            System.out.println("Decorations:createAcceleratorTable - Thread did not attach accelerator table to the frame");
-            if(!OS.WinDestroyAccelTable(hAccel))
-                System.out.println("Decorations:createAcceleratorTable - The accelerator table was not destroyed");
-        }    
+        /* A table that the frame does not take is destroyed */
+        if(!OS.WinSetAccelTable(getDisplay().hab, hAccel, frameHandle)) OS.WinDestroyAccelTable(hAccel);
 //	if (nAccel != 0) hAccel = OS.CreateAcceleratorTable (buffer2, nAccel);
 }
 

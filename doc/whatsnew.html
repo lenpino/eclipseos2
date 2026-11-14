@@ -991,7 +991,15 @@ href="eclipseos2-xxe.css"
       <code>TableTree</code> did not expand with a click.
       <kbd>SWT011_01</kbd>, <kbd>SWT012_01</kbd>, <kbd>SWT016_01</kbd>,
       <kbd>SWT023_01</kbd> and <kbd>SWT024_01</kbd> still pass. Seen on the
-      screen: the scrolled view and the table tree.</li>
+      screen: the scrolled view and the table tree.</li
+
+      <li>The old traces of debugging that the port printed to the console
+      (<code>Control:WM_COMMAND</code> for every button, the accelerator table
+      of a shell, the color and the files of the dialogs, the owner draw of
+      the menu items...) are removed: 21 lines in 8 classes. The code they
+      were in does the same (in <code>Decorations</code>, an accelerator table
+      that the frame does not take is still destroyed). <kbd>SWT010_01</kbd>,
+      <kbd>SWT021_01</kbd> and <kbd>SWT022_01</kbd> still pass.</li>
     </ul>
   </body>
 </html>

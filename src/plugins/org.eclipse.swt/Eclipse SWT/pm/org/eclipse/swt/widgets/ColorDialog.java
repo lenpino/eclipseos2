@@ -128,7 +128,6 @@ public RGB open () {
 	}
 	rgb = null;
         color = OS.WinEditColorDlg(OS.HWND_DESKTOP, hwndOwner,color, pszTitle);
-        System.out.println("color = " + Integer.toHexString(color));
 	if (color != OS.CLR_ERROR) {
 		int red = (color >> 16) & 0xFF;
 		int green = (color >> 8) & 0xFF;

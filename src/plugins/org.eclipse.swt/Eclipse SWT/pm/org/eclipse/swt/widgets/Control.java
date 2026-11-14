@@ -3093,20 +3093,15 @@ MRESULT WM_COMMAND (int mp1, int mp2) {
             break;
         //    return null;
         case OS.CMDSRC_ACCELERATOR:
-            System.out.println("Control:WM_COMMAND - CMDSRC_ACCELERATOR");
             break;
         case OS.CMDSRC_PUSHBUTTON:
-            System.out.println("Control:WM_COMMAND - CMDSRC_PUSHBUTTON");
             break;
         //@@TODO(lpino)
         case OS.CMDSRC_FONTDLG:
-            System.out.println("Control:WM_COMMAND - CMDSRC_FONTDLG");
             break;
         case OS.CMDSRC_FILEDLG:
-            System.out.println("Control:WM_COMMAND - CMDSRC_FILEDLG");
             break;
         case OS.CMDSRC_OTHER:
-            System.out.println("Control:WM_COMMAND - CMDSRC_OTHER");
             break;
         //case OS.CMDSRC_PRINTDLG:
     }
@@ -3972,7 +3967,6 @@ MRESULT WM_SYSCOMMAND (int mp1, int mp2) {
       int cmd = mp1 & 0xFFFF;
       switch (cmd) {
               case OS.SC_CLOSE:
-	      	System.out.println("Control::WM_SYSCOMMAND -> SC_CLOSE"); 
                       int hwndShell = menuShell ().handle;
 //                      int bits =  OS.WinQueryWindowULong (frameHandle, OS.QWL_STYLE);
 //                      if ((bits & OS.WS_SYSMENU) == 0) return MRESULT.ZERO;
@@ -4148,7 +4142,6 @@ MRESULT wmDrawChild (int mp1, int mp2) {
 
 //@@TODO (dmik):
 MRESULT wmMeasureChild (int mp1, int mp2) {
-	System.out.println("Control:wmMeasureChild");
       return null;
 }
 
