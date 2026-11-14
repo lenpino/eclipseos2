@@ -577,6 +577,17 @@ boolean filterMessage (QMSG qmsg) {
             if (control instanceof Table) ((Table) control).titleClicked (hwnd, qmsg.mp1);
         }
     }
+    /*
+    * The window of the records of a table (a child of the container): its buttons are the mouse
+    * events of the table, and a click on a check box is the table's.
+    */
+    if (OS.WM_BUTTON1DOWN <= msg && msg <= OS.WM_BUTTON3DBLCLK) {
+        int id = OS.WinQueryWindowUShort (hwnd, OS.QWS_ID) & 0xFFFF;
+        if (id == OS.CID_LEFTDVWND) {
+            Control control = findControl (hwnd);
+            if (control instanceof Table) ((Table) control).recordsMouse (hwnd, msg, qmsg.mp1, qmsg.mp2);
+        }
+    }
     /* The check boxes of a table: a click on one in the window of the records, and the space bar */
     if (msg == OS.WM_BUTTON1DOWN || msg == OS.WM_BUTTON1DBLCLK || msg == OS.WM_BUTTON1UP || msg == OS.WM_BUTTON1CLICK) {
         int id = OS.WinQueryWindowUShort (hwnd, OS.QWS_ID) & 0xFFFF;

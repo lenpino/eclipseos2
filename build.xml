@@ -321,6 +321,10 @@
         <property name="test.step" value="023_01" />
         <antcall target="swt.test" />
     </target>
+     <target name="swt023_02" depends="init,build.prp">
+        <property name="test.step" value="023_02" />
+        <antcall target="swt.test" />
+    </target>
      <target name="swt024_01" depends="init,build.prp">
         <property name="test.step" value="024_01" />
         <antcall target="swt.test" />

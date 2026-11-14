@@ -757,6 +757,33 @@ void toggleCheck (TableItem item) {
 	postEvent (SWT.Selection, event);
 }
 
+/*
+ * A button of the mouse in the window of the records (CID_LEFTDVWND), which is not a window of
+ * SWT: the mouse event of the table, with the point in the table, as Control does for its own
+ * window (a double click is also a MouseDown). The container gets the message as before. The
+ * button 2 of PM is the right one, the button 3 of SWT.
+ */
+void recordsMouse (int hwnd, int msg, int mp1, int mp2) {
+	int [] point = {(short) (mp1 & 0xFFFF), (short) (mp1 >> 16)};
+	OS.WinMapWindowPoints (hwnd, handle, point, 1);
+	int where = (point [0] & 0xFFFF) | (point [1] << 16);
+	int button = 1, type = SWT.MouseDown;
+	switch (msg) {
+		case OS.WM_BUTTON1DOWN: break;
+		case OS.WM_BUTTON1UP: type = SWT.MouseUp; break;
+		case OS.WM_BUTTON1DBLCLK: type = SWT.MouseDoubleClick; break;
+		case OS.WM_BUTTON2DOWN: button = 3; break;
+		case OS.WM_BUTTON2UP: button = 3; type = SWT.MouseUp; break;
+		case OS.WM_BUTTON2DBLCLK: button = 3; type = SWT.MouseDoubleClick; break;
+		case OS.WM_BUTTON3DOWN: button = 2; break;
+		case OS.WM_BUTTON3UP: button = 2; type = SWT.MouseUp; break;
+		case OS.WM_BUTTON3DBLCLK: button = 2; type = SWT.MouseDoubleClick; break;
+		default: return;
+	}
+	if (type == SWT.MouseDoubleClick) sendMouseEvent (SWT.MouseDown, button, msg, where, mp2);
+	sendMouseEvent (type, button, msg, where, mp2);
+}
+
 /* The height of a record, without placing the records again (it is asked while they are painted) */
 int recordHeight (int hRecord) {
 	/* RECTL: xLeft, yBottom, xRight, yTop. QUERYRECORDRECT: cb, pRecord, fRightSplitWindow, fsExtent */
