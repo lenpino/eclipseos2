@@ -671,8 +671,8 @@ public class OS {
 //    public static final int FID_TITLEBAR =          0x8003;
 //    public static final int FID_MINMAX =            0x8004;
     public static final int FID_MENU =              0x8005;
-//    public static final int FID_VERTSCROLL =        0x8006;
-//    public static final int FID_HORZSCROLL =        0x8007;
+    public static final int FID_VERTSCROLL =        0x8006;
+    public static final int FID_HORZSCROLL =        0x8007;
     public static final int FID_CLIENT =            0x8008;
 
     /* General GPI return values */

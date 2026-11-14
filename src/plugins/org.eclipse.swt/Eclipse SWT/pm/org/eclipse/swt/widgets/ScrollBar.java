@@ -84,6 +84,15 @@ import org.eclipse.swt.events.*;
 public class ScrollBar extends Widget {	
 	Scrollable parent;
 	int increment, pageIncrement;
+	/*
+	* The bar of a canvas or a composite is a scroll bar window of PM of its own, a child of the
+	* parent: the style bits SBS_HORZ and SBS_VERT make no bar on other windows (2026-11-14).
+	* Its values are kept here, as on Windows: the selection goes from the minimum to the
+	* maximum less the thumb, which is the range of PM, and the thumb is the visible part of
+	* the whole (SBM_SETTHUMBSIZE). Zero for the bars of the native controls.
+	*/
+	int hwndBar;
+	int minimum, maximum = 100, thumb = 10;
 
 /**
  * Constructs a new instance of this class given its parent
@@ -177,6 +186,46 @@ void createWidget () {
 	* override the initial values provided by the
 	* list widget.
 	*/
+	if ((parent.state & CANVAS) != 0 && !(parent instanceof Decorations)) createBar ();
+}
+
+void createBar () {
+	int bits = OS.WS_VISIBLE | ((style & SWT.HORIZONTAL) != 0 ? OS.SBS_HORZ : OS.SBS_VERT);
+	int id = (style & SWT.HORIZONTAL) != 0 ? OS.FID_HORZSCROLL : OS.FID_VERTSCROLL;
+	hwndBar = OS.WinCreateWindow (parent.handle, Slider.ScrollBarClass, null, bits, 0, 0, 0, 0, parent.handle, OS.HWND_TOP, id, 0, 0);
+	if (hwndBar == 0) error (SWT.ERROR_NO_HANDLES);
+	updateBar ();
+}
+
+/* The values of the bar of a canvas given to PM (see the fields) */
+void updateBar () {
+	int last = Math.max (minimum, maximum - thumb);
+	int selection = Math.min (Math.max (OS.WinSendMsg (hwndBar, OS.SBM_QUERYPOS, 0, 0), minimum), last);
+	OS.WinSendMsg (hwndBar, OS.SBM_SETSCROLLBAR, selection, OS.MPFROM2SHORT ((short) minimum, (short) last));
+	OS.WinSendMsg (hwndBar, OS.SBM_SETTHUMBSIZE, OS.MPFROM2SHORT ((short) thumb, (short) (maximum - minimum)), 0);
+}
+
+/*
+ * WM_HSCROLL or WM_VSCROLL of the bar of a canvas: mp2 = (sPosition, usCommand). The
+ * position is moved and a Selection is sent, with the detail of Windows; the end of a drag
+ * (SB_SLIDERPOSITION) has none.
+ */
+void scrolled (int mp2) {
+	int code = OS.SHORT2FROMMP (mp2);
+	int selection = getSelection ();
+	Event event = new Event ();
+	switch (code) {
+		case OS.SB_LINEUP: selection -= increment; event.detail = SWT.ARROW_UP; break;
+		case OS.SB_LINEDOWN: selection += increment; event.detail = SWT.ARROW_DOWN; break;
+		case OS.SB_PAGEUP: selection -= pageIncrement; event.detail = SWT.PAGE_UP; break;
+		case OS.SB_PAGEDOWN: selection += pageIncrement; event.detail = SWT.PAGE_DOWN; break;
+		case OS.SB_SLIDERTRACK: selection = (short) OS.SHORT1FROMMP (mp2); event.detail = SWT.DRAG; break;
+		case OS.SB_SLIDERPOSITION: selection = (short) OS.SHORT1FROMMP (mp2); break;
+		default: return;
+	}
+	selection = Math.min (Math.max (selection, minimum), Math.max (minimum, maximum - thumb));
+	OS.WinSendMsg (hwndBar, OS.SBM_SETPOS, selection, 0);
+	sendEvent (SWT.Selection, event);
 }
 
 //@@TODO (lpino)
@@ -268,6 +317,7 @@ public int getIncrement () {
  */
 public int getMaximum () {
 	checkWidget();
+	if (hwndBar != 0) return maximum;
         int handle = hwndScrollBar();
         int mr = OS.WinSendMsg(handle, OS.SBM_QUERYRANGE, 0, 0);
         return OS.SHORT2FROMMP(mr);
@@ -285,6 +335,7 @@ public int getMaximum () {
  */
 public int getMinimum () {
 	checkWidget();
+	if (hwndBar != 0) return minimum;
         int handle = hwndScrollBar();
         int mr = OS.WinSendMsg(handle, OS.SBM_QUERYRANGE, 0, 0);
         return OS.SHORT1FROMMP(mr);
@@ -354,6 +405,11 @@ public int getSelection () {
  */
 public Point getSize () {
 	checkWidget();
+	if (hwndBar != 0) {
+		SWP swp = new SWP ();
+		OS.WinQueryWindowPos (hwndBar, swp);
+		return new Point (swp.cx, swp.cy);
+	}
 	RECTL rect = new RECTL ();
 	OS.WinQueryWindowRect (parent.handle, rect);
 	int width, height;
@@ -382,6 +438,7 @@ public Point getSize () {
  */
 public int getThumb () {
 	checkWidget();
+	if (hwndBar != 0) return thumb;
 //@@TODO (lpino): for now it returns the visible proportion
         Point size = getSize();
         int prop = 0;
@@ -420,6 +477,7 @@ public boolean getVisible () {
 }
 
 int hwndScrollBar () {
+	if (hwndBar != 0) return hwndBar;
 	return parent.handle;
 }
 
@@ -470,6 +528,7 @@ void releaseChild () {
 
 void releaseWidget () {
 	super.releaseWidget ();
+	hwndBar = 0;
 	parent = null;
 }
 
@@ -568,6 +627,13 @@ public void setMaximum (int value) {
     int usSliderPos = 0;
     checkWidget();
     if (value < 0) return;
+    if (hwndBar != 0) {
+        /* As Windows: the range must be wider than the thumb */
+        if (value - minimum - thumb < 1) return;
+        maximum = value;
+        updateBar ();
+        return;
+    }
     hwnd = hwndScrollBar();
     usMinimum = getMinimum();
     if(value - usMinimum < 1)
@@ -620,6 +686,12 @@ public void setMaximum (int value) {
 public void setMinimum (int value) {
 	checkWidget();
 	if (value < 0) return;
+	if (hwndBar != 0) {
+		if (maximum - value - thumb < 1) return;
+		minimum = value;
+		updateBar ();
+		return;
+	}
         int max = getMaximum();
         int pos = getSelection();
 //@@TODO (lpino): Complete this validation		        
@@ -662,6 +734,11 @@ public void setPageIncrement (int value) {
 public void setSelection (int selection) {
 	checkWidget();
 	if (selection < 0) return;
+	if (hwndBar != 0) {
+		selection = Math.min (Math.max (selection, minimum), Math.max (minimum, maximum - thumb));
+		OS.WinSendMsg (hwndBar, OS.SBM_SETPOS, selection, 0);
+		return;
+	}
         int handle = hwndScrollBar();
         OS.WinSendMsg(handle, OS.SBM_SETPOS, selection, 0);
 }
@@ -684,6 +761,11 @@ public void setThumb (int value) {
 	checkWidget();
 	/* Position the thumb */
 	if (value < 1) return;
+	if (hwndBar != 0) {
+		thumb = Math.min (value, maximum - minimum);
+		updateBar ();
+		return;
+	}
 	int hwnd = hwndScrollBar (), type = scrollBarType ();
         int mr = OS.WinSendMsg(hwnd, OS.SBM_QUERYRANGE, 0, 0);
         short max = OS.SHORT2FROMMP(mr);
@@ -724,6 +806,14 @@ public void setValues (int selection, int minimum, int maximum, int thumb, int i
 	if (pageIncrement < 1) return;
 	this.increment = increment;	
 	this.pageIncrement = pageIncrement;
+	if (hwndBar != 0) {
+		this.minimum = minimum;
+		this.maximum = maximum;
+		this.thumb = thumb;
+		OS.WinSendMsg (hwndBar, OS.SBM_SETPOS, selection, 0);
+		updateBar ();
+		return;
+	}
 	int hwnd = hwndScrollBar ();
         OS.WinSendMsg(hwnd, OS.SBM_SETSCROLLBAR, selection, OS.MPFROM2SHORT((short)minimum, (short)maximum));
         setThumb(thumb);		
@@ -747,6 +837,14 @@ public void setValues (int selection, int minimum, int maximum, int thumb, int i
  */
 public void setVisible (boolean visible) {
 	checkWidget();
+	if (hwndBar != 0 && visible != getVisible ()) {
+		state &= ~HIDDEN;
+		if (!visible) state |= HIDDEN;
+		OS.WinShowWindow (hwndBar, visible);
+		/* The other bar and the client area take the room */
+		parent.layoutBars ();
+		sendEvent (visible ? SWT.Show : SWT.Hide);
+	}
 //@@TODO (lpino)
 //	/*
 //	* Set the state bits before calling ShowScrollBar ()

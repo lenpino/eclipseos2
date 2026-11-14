@@ -132,6 +132,7 @@ void createWidget () {
 	super.createWidget ();
 	if ((style & SWT.H_SCROLL) != 0) horizontalBar = createScrollBar (SWT.H_SCROLL);
 	if ((style & SWT.V_SCROLL) != 0) verticalBar = createScrollBar (SWT.V_SCROLL);
+	layoutBars ();
 }
 
 /**
@@ -158,7 +159,37 @@ public Rectangle getClientArea () {
 
     Rectangle rect = getBounds();
     rect.x = 0; rect.y = 0;
+    /* The scroll bars of a canvas are windows in it (see ScrollBar): the client area is beside them */
+    if (verticalBar != null && verticalBar.hwndBar != 0 && verticalBar.getVisible ()) {
+        rect.width = Math.max (0, rect.width - OS.WinQuerySysValue (OS.HWND_DESKTOP, OS.SV_CXVSCROLL));
+    }
+    if (horizontalBar != null && horizontalBar.hwndBar != 0 && horizontalBar.getVisible ()) {
+        rect.height = Math.max (0, rect.height - OS.WinQuerySysValue (OS.HWND_DESKTOP, OS.SV_CYHSCROLL));
+    }
     return rect;
+}
+
+/*
+ * Places the scroll bars of a canvas (windows of their own, see ScrollBar) on the right and
+ * at the bottom of the window, the vertical one above the horizontal one.
+ */
+void layoutBars () {
+	boolean vertical = verticalBar != null && verticalBar.hwndBar != 0 && verticalBar.getVisible ();
+	boolean horizontal = horizontalBar != null && horizontalBar.hwndBar != 0 && horizontalBar.getVisible ();
+	if (!vertical && !horizontal) return;
+	RECTL rect = new RECTL ();
+	OS.WinQueryWindowRect (handle, rect);
+	int cx = OS.WinQuerySysValue (OS.HWND_DESKTOP, OS.SV_CXVSCROLL);
+	int cy = OS.WinQuerySysValue (OS.HWND_DESKTOP, OS.SV_CYHSCROLL);
+	int width = rect.xRight - rect.xLeft, height = rect.yTop - rect.yBottom;
+	/* PM coordinates: y = 0 is the bottom */
+	if (vertical) {
+		int bottom = horizontal ? cy : 0;
+		OS.WinSetWindowPos (verticalBar.hwndBar, 0, Math.max (0, width - cx), bottom, cx, Math.max (0, height - bottom), OS.SWP_MOVE | OS.SWP_SIZE);
+	}
+	if (horizontal) {
+		OS.WinSetWindowPos (horizontalBar.hwndBar, 0, 0, 0, Math.max (0, width - (vertical ? cx : 0)), cy, OS.SWP_MOVE | OS.SWP_SIZE);
+	}
 }
 
 /**
@@ -232,6 +263,11 @@ int windowProc () {
 
 
 MRESULT WM_HSCROLL (int mp1, int mp2) {
+	/* mp1 = (id of the bar, 0): the bar of a canvas, or a child control */
+	if (horizontalBar != null && horizontalBar.hwndBar != 0 && (OS.SHORT1FROMMP (mp1) & 0xFFFF) == OS.FID_HORZSCROLL) {
+		horizontalBar.scrolled (mp2);
+		return MRESULT.ZERO;
+	}
 	MRESULT result = super.WM_HSCROLL (mp1, mp2);
 	if (result != null) return result;
 	return result;
@@ -303,6 +339,7 @@ MRESULT WM_HSCROLL (int mp1, int mp2) {
 //}
 //
 MRESULT WM_SIZE (int mp1, int mp2) {
+	layoutBars ();
 	int code = callWindowProc (OS.WM_SIZE, mp1, mp2);
 	super.WM_SIZE (mp1, mp2);
 	// widget may be disposed at this point
@@ -311,6 +348,10 @@ MRESULT WM_SIZE (int mp1, int mp2) {
 }
 
 MRESULT WM_VSCROLL (int mp1, int mp2) {
+	if (verticalBar != null && verticalBar.hwndBar != 0 && (OS.SHORT1FROMMP (mp1) & 0xFFFF) == OS.FID_VERTSCROLL) {
+		verticalBar.scrolled (mp2);
+		return MRESULT.ZERO;
+	}
 	MRESULT result = super.WM_VSCROLL (mp1, mp2);
 	if (result != null) return result;
 	return result;
