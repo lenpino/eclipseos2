@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/css"
+href="eclipseos2-xxe.css"
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"xhtml1-strict.dtd">
+<html>
+  <head>
+    <link href="eclipseos2.css" rel="stylesheet" type="text/css" />
+
+    <title>Eclipse for OS/2 Transitional Project Notes</title>
+  </head>
+
+  <body>
+    <h1>SWT Step 023. The custom widgets</h1>
+
+    <h2>Objective</h2>
+
+    <p>Build the custom widgets of Eclipse 2.0.1 (<code>StyledText</code>,
+    <code>CTabFolder</code>, <code>SashForm</code>, <code>CCombo</code>,
+    <code>CLabel</code>, <code>TableTree</code>, <code>ViewForm</code> and the
+    others of <code>org.eclipse.swt.custom</code>), which are made of the other
+    widgets in pure Java, and see them work on PM. The editors and the views of
+    Eclipse are made of them. The test case <kbd>SWT023_01</kbd> (26 automatic
+    checks) types and clicks in a <code>StyledText</code>, copies and pastes, and
+    reads the screen; its interactive part has editors in the tabs of a
+    <code>CTabFolder</code>.</p>
+
+    <h2>Task notes</h2>
+
+    <ul>
+      <li>The folder <kbd>Eclipse SWT Custom Widgets/common</kbd> of the
+      original distribution is compiled in both builds, and
+      <kbd>classes.inc</kbd> lists its 47 classes.</li>
+
+      <li>What they need that the port did not have:
+      <code>RTFTransfer</code> (the registered format "Rich Text Format", the
+      name of Windows, see <a href="swt022.html">step 022</a>), the emulated
+      <code>BidiUtil</code> of <kbd>Eclipse SWT/emulated/bidi</kbd> (no
+      bidirectional text, as on Motif and GTK), <code>PrinterData</code> of the
+      original distribution, and a <code>Printer</code> and a
+      <code>PrintDialog</code> without printers, those of GTK in 2.0.1: printing
+      is not ported, <code>StyledText.print()</code> fails as it does on
+      GTK.</li>
+
+      <li>The first <code>new StyledText()</code> failed with a division by
+      zero in <code>ScrollBar.getThumb()</code>: a canvas had no scroll bars.
+      They are <a href="swt024.html">step 024</a>.</li>
+
+      <li>A check of the test was wrong, not the port: a backspace that
+      a program posts must be as PM sends it, a virtual key and a character
+      (8); with the virtual key only, <code>StyledText</code> got no
+      character.</li>
+    </ul>
+
+    <h2>Step checklist</h2>
+
+    <table>
+      <col width="40%" />
+
+      <col />
+
+      <col width="50%" />
+
+      <thead>
+        <tr>
+          <th>Operation</th>
+
+          <th>Status</th>
+
+          <th>Remarks</th>
+        </tr>
+      </thead>
+
+      <tr>
+        <td><code>StyledText</code>: text, lines, selection, styles, painting</td>
+
+        <td>Done [lpino]</td>
+
+        <td>Checked by <kbd>SWT023_01</kbd>, the texts and a red style found on the screen. Seen on the screen: <em>to be confirmed</em>.</td>
+      </tr>
+
+      <tr>
+        <td><code>StyledText</code>: copy, cut and paste</td>
+
+        <td>Done [lpino]</td>
+
+        <td>With the clipboard of step 022, also with a text field of PM.</td>
+      </tr>
+
+      <tr>
+        <td><code>StyledText</code>: keys, mouse, scrolling</td>
+
+        <td>Done [lpino]</td>
+
+        <td>Characters, arrows, backspace and a click posted; <code>setTopIndex()</code>, <code>showSelection()</code>.</td>
+      </tr>
+
+      <tr>
+        <td><code>CTabFolder</code>, <code>SashForm</code>, <code>CCombo</code></td>
+
+        <td>Done [lpino]</td>
+
+        <td>A click on a tab selects it. The others (<code>CLabel</code>, <code>TableTree</code>, <code>ViewForm</code>, <code>ScrolledComposite</code>...) are built, not checked.</td>
+      </tr>
+
+      <tr>
+        <td>Printing (<code>StyledText.print()</code>)</td>
+
+        <td>Not done</td>
+
+        <td>No printers, as GTK in 2.0.1.</td>
+      </tr>
+    </table>
+  </body>
+</html>

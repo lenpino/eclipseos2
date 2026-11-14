@@ -959,7 +959,23 @@ href="eclipseos2-xxe.css"
       <kbd>SWT022_01</kbd> (21 checks); <kbd>SWT010_01</kbd> and
       <kbd>SWT017_01</kbd> still pass. See <a href="diff.html">difference
       023</a>. Seen on the screen: copy and paste with another program, both
-      ways.</li>
+      ways.</li
+
+      <li><a href="swt023.html">Step 023</a>: the custom widgets of Eclipse
+      2.0.1 are built (<code>StyledText</code>, <code>CTabFolder</code>,
+      <code>SashForm</code>, <code>CCombo</code> and the others), with
+      <code>RTFTransfer</code>, the emulated <code>BidiUtil</code> and printing
+      without printers (as GTK). New test <kbd>SWT023_01</kbd> (26 checks):
+      typing, the mouse, the clipboard, scrolling and the tabs.</li>
+
+      <li><a href="swt024.html">Step 024</a>: the scroll bars of a canvas.
+      <code>H_SCROLL</code> and <code>V_SCROLL</code> made no bar on PM; the bars
+      are scroll bar windows of PM in the canvas now, with the values and the
+      events of Windows and the client area beside them. Found by
+      <code>StyledText</code>. New test <kbd>SWT024_01</kbd> (29 checks);
+      <kbd>SWT011_01</kbd>, <kbd>SWT012_01</kbd>, <kbd>SWT013_01</kbd>,
+      <kbd>SWT019_01</kbd>, <kbd>SWT020_01</kbd> and <kbd>SWT022_01</kbd>
+      still pass. See <a href="diff.html">difference 024</a>.</li>
     </ul>
   </body>
 </html>

@@ -531,6 +531,22 @@ href="eclipseos2-xxe.css"
         <td>The data of the clipboard stays after the program ends, as on
         Windows after <code>OleFlushClipboard</code>.</td>
       </tr>
+
+      <tr>
+        <td>024</td>
+
+        <td>The scroll bars of a canvas are part of its window
+        (<code>WS_HSCROLL</code>, <code>WS_VSCROLL</code>), drawn in its non
+        client area, and their values are 32 bit.</td>
+
+        <td>The scroll bars of a canvas are scroll bar windows of PM in the
+        canvas, on its right and at its bottom, beside the client area. The range
+        of PM is 16 bit: the values must stay under 32768. The bars of a shell
+        are not made.</td>
+
+        <td>The values, the events and the client area are those of
+        Windows.</td>
+      </tr>
     </table>
 
     <h2>Other differences</h2>

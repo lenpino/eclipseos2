@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/css"
+href="eclipseos2-xxe.css"
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"xhtml1-strict.dtd">
+<html>
+  <head>
+    <link href="eclipseos2.css" rel="stylesheet" type="text/css" />
+
+    <title>Eclipse for OS/2 Transitional Project Notes</title>
+  </head>
+
+  <body>
+    <h1>SWT Step 024. The scroll bars of a canvas</h1>
+
+    <h2>Objective</h2>
+
+    <p>Give a <code>Canvas</code> or a <code>Composite</code> made with
+    <code>SWT.H_SCROLL</code> or <code>SWT.V_SCROLL</code> its scroll bars, with
+    the values and the events of Windows. <code>StyledText</code> and the views
+    of Eclipse scroll with them. The test case <kbd>SWT024_01</kbd> (29
+    automatic checks) reads the screen, sets the values and sends the commands
+    of the bars; its interactive part scrolls a grid.</p>
+
+    <h2>Task notes</h2>
+
+    <ul>
+      <li>On Windows the bars are part of the window (<code>WS_HSCROLL</code>,
+      <code>WS_VSCROLL</code>). <code>Scrollable</code> added
+      <code>SBS_HORZ</code> and <code>SBS_VERT</code> to the style of the
+      window, which make no bar on a window that is not a scroll bar, and
+      <code>ScrollBar</code> sent its messages to its parent: there were no
+      bars, the client area was the whole window, and
+      <code>getThumb()</code> divided the range by the size in pixels.</li>
+
+      <li>Now the bar of a canvas (a <code>Scrollable</code> with the state
+      <code>CANVAS</code>, not a shell) is a scroll bar window of PM, a child and
+      an owned window of its parent, with the id <code>FID_VERTSCROLL</code> or
+      <code>FID_HORZSCROLL</code>, placed on the right and at the bottom at
+      creation and at every <code>WM_SIZE</code>. The client area is beside the
+      bars that are visible; the bars are not children (they are no widgets),
+      and are above the children in the order of the windows. Hiding a bar
+      gives its room to the client area.</li>
+
+      <li>The values are kept by <code>ScrollBar</code>, with the meaning of
+      Windows: the selection goes from the minimum to the maximum less the
+      thumb, which is the range given to PM
+      (<code>SBM_SETSCROLLBAR</code>), and the thumb is the visible part of the
+      whole (<code>SBM_SETTHUMBSIZE</code>). The defaults are those of
+      Windows (0, 100, thumb 10, increments 1 and 10).</li>
+
+      <li>The bar sends <code>WM_VSCROLL</code> or <code>WM_HSCROLL</code> to
+      its owner, with its id in <code>mp1</code>: <code>Scrollable</code>
+      gives it to the bar, which moves the position by the increment, the page
+      increment or to the thumb, and sends a <code>Selection</code> with the
+      detail of Windows (<code>ARROW_UP</code>, <code>ARROW_DOWN</code>,
+      <code>PAGE_UP</code>, <code>PAGE_DOWN</code>, <code>DRAG</code>, none at
+      the end of a drag). <code>SHORT1FROMMP()</code> is signed: the id
+      <code>0x8006</code> has to be compared without the sign.</li>
+
+      <li>The bars of the native controls (list, text, table, tree) are not
+      changed; <code>Slider</code> still computes its thumb the old way.</li>
+    </ul>
+
+    <p>The behavior that differs from Windows is in <a href="diff.html">difference
+    024</a>.</p>
+
+    <h2>Step checklist</h2>
+
+    <table>
+      <col width="40%" />
+
+      <col />
+
+      <col width="50%" />
+
+      <thead>
+        <tr>
+          <th>Operation</th>
+
+          <th>Status</th>
+
+          <th>Remarks</th>
+        </tr>
+      </thead>
+
+      <tr>
+        <td>Bars of a canvas: windows, layout, client area, visibility</td>
+
+        <td>Done [lpino]</td>
+
+        <td>Checked by <kbd>SWT024_01</kbd> on the screen. Seen by hand: <em>to be confirmed</em>.</td>
+      </tr>
+
+      <tr>
+        <td>Values: minimum, maximum, thumb, selection, increments</td>
+
+        <td>Done [lpino]</td>
+
+        <td>Checked by <kbd>SWT024_01</kbd>.</td>
+      </tr>
+
+      <tr>
+        <td><code>Selection</code> events of the bars</td>
+
+        <td>Done [lpino]</td>
+
+        <td>The commands of PM sent to the canvas. The mouse on a real bar: <em>to be seen</em>.</td>
+      </tr>
+
+      <tr>
+        <td><code>Slider</code>: <code>getThumb()</code></td>
+
+        <td>Not done</td>
+
+        <td>The same old computation as the bars had.</td>
+      </tr>
+    </table>
+  </body>
+</html>

@@ -383,6 +383,14 @@ href="eclipseos2-xxe.css"
       not look at the return code wrote at address 0 (a trap). The clipboard of
       PM takes data by address only in giveable shared memory (step 022).</li>
 
+      <li>Style bits are messages to the class of the window: <code>SBS_HORZ</code>
+      and <code>SBS_VERT</code> on a window of SWT made no scroll bar (on Windows
+      <code>WS_HSCROLL</code> does), and nothing had looked at a canvas with
+      them until <code>StyledText</code> divided by zero. The scroll bars of a
+      canvas are windows of their own now (step 024). <code>OS.SHORT1FROMMP</code>
+      is signed: an id above <code>0x7FFF</code> is compared with
+      <code>&amp; 0xFFFF</code>.</li>
+
       <li>The titles of the detail view are a child window
       (<code>CID_LEFTCOLTITLEWND</code>, as wide as the container) that does not
       scroll: it paints the titles from the left of the viewport. A click on it
