@@ -59,6 +59,14 @@ href="eclipseos2-xxe.css"
       the end of a drag). <code>SHORT1FROMMP()</code> is signed: the id
       <code>0x8006</code> has to be compared without the sign.</li>
 
+      <li>Seen on the screen (2026-11-14): the bars scroll with the arrows,
+      the page and the thumb, with the right events, and the editor keeps the
+      focus. The corner between the two bars was not painted (the screen
+      behind showed through, dark in the grid and green in the editor): it is
+      a static window now (<code>SS_FGNDRECT</code>) with the color of the
+      buttons, the size box of Windows, and <kbd>SWT024_01</kbd> (30 checks)
+      reads its pixels.</li>
+
       <li>The bars of the native controls (list, text, table, tree) are not
       changed; <code>Slider</code> still computes its thumb the old way.</li>
     </ul>
@@ -90,7 +98,7 @@ href="eclipseos2-xxe.css"
 
         <td>Done [lpino]</td>
 
-        <td>Checked by <kbd>SWT024_01</kbd> on the screen. Seen by hand: <em>to be confirmed</em>.</td>
+        <td>Checked by <kbd>SWT024_01</kbd> on the screen, also the corner. Seen on the screen (2026-11-14).</td>
       </tr>
 
       <tr>
@@ -106,7 +114,7 @@ href="eclipseos2-xxe.css"
 
         <td>Done [lpino]</td>
 
-        <td>The commands of PM sent to the canvas. The mouse on a real bar: <em>to be seen</em>.</td>
+        <td>The commands of PM sent to the canvas. Seen with the mouse on the real bars (2026-11-14).</td>
       </tr>
 
       <tr>
