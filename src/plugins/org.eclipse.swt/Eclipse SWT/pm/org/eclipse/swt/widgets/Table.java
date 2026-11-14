@@ -111,6 +111,8 @@ public class Table extends Composite {
 	static final int DEFAULT_COLUMN_WIDTH = 100;
 	/* The width of the field of the column of the images, without the margins */
 	static final int ICON_FIELD_WIDTH = 22;
+	/* The size of a check box (SWT.CHECK), as on Windows */
+	static final int CHECK_SIZE = 13;
 
 	/* A column of the container */
 	static final class Field {
@@ -633,6 +635,85 @@ int contentLeft (int index) {
 
 int contentRight (int index) {
 	return widthOf (index) - fieldPad (1) / 2;
+}
+
+/*
+ * A check box, in PM coordinates of a presentation space in RGB mode: a dark frame, the
+ * background of a window inside (gray when grayed), and a mark of two lines when checked.
+ */
+static void drawCheck (int hps, int x, int y, int size, boolean checked, boolean grayed) {
+	int dark = OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_WINDOWTEXT, 0);
+	int inside = OS.WinQuerySysColor (OS.HWND_DESKTOP, grayed ? OS.SYSCLR_BUTTONMIDDLE : OS.SYSCLR_WINDOW, 0);
+	RECTL rect = new RECTL ();
+	rect.xLeft = x;
+	rect.yBottom = y;
+	rect.xRight = x + size;
+	rect.yTop = y + size;
+	OS.WinFillRect (hps, rect, dark);
+	rect.xLeft++;
+	rect.yBottom++;
+	rect.xRight--;
+	rect.yTop--;
+	OS.WinFillRect (hps, rect, inside);
+	if (!checked) return;
+	/* The mark: down from the left, then up to the right, two pixels thick */
+	OS.GpiSetColor (hps, dark);
+	int left = x + 3, middle = x + size / 2 - 1, right = x + size - 4;
+	int low = y + 3, high = y + size - 4, start = y + size / 2;
+	for (int i=0; i<2; i++) {
+		OS.GpiMove (hps, new int [] {left, start - i});
+		OS.GpiLine (hps, new int [] {middle, low - i + 1});
+		OS.GpiLine (hps, new int [] {right, high - i});
+	}
+}
+
+/*
+ * The check box of an item, in the coordinates of the table (see wmDrawChild()), or an
+ * empty rectangle without SWT.CHECK.
+ */
+Rectangle checkBounds (TableItem item) {
+	Rectangle cell = item.getBounds (0);
+	if ((style & SWT.CHECK) == 0 || cell.height == 0) return new Rectangle (0, 0, 0, 0);
+	int size = Math.min (CHECK_SIZE, cell.height - 2);
+	int fromBottom = (cell.height - size) / 2;
+	return new Rectangle (cell.x + contentLeft (0), cell.y + cell.height - size - fromBottom, size, size);
+}
+
+/*
+ * A click in the window of the records (mp1 is the point in it): on a check box it changes
+ * the state, sends a Selection with SWT.CHECK as on Windows, and the container does not get
+ * the click (the selection does not change). True when it was on a check box.
+ */
+boolean checkClicked (int hwnd, int mp1) {
+	if ((style & SWT.CHECK) == 0 || order == null) return false;
+	int [] point = {(short) (mp1 & 0xFFFF), (short) (mp1 >> 16)};
+	OS.WinMapWindowPoints (hwnd, handle, point, 1);
+	Point where = new Point (point [0], getHeight () - 1 - point [1]);
+	TableItem item = getItem (where);
+	if (item == null || !checkBounds (item).contains (where)) return false;
+	toggleCheck (item);
+	return true;
+}
+
+/* The space bar: the item that has the cursor is checked or not. True when it was used. */
+boolean checkPressed () {
+	if ((style & SWT.CHECK) == 0 || order == null) return false;
+	for (int i=0; i<order.size (); i++) {
+		TableItem item = (TableItem) order.elementAt (i);
+		if ((Tree.peek (item.handle + Tree.REC_FLAGS) & OS.CRA_CURSORED) != 0) {
+			toggleCheck (item);
+			return true;
+		}
+	}
+	return false;
+}
+
+void toggleCheck (TableItem item) {
+	item.setChecked (!item.checked);
+	Event event = new Event ();
+	event.item = item;
+	event.detail = SWT.CHECK;
+	postEvent (SWT.Selection, event);
 }
 
 /* The height of a record, without placing the records again (it is asked while they are painted) */
@@ -1953,7 +2034,14 @@ MRESULT wmDrawChild (int mp1, int mp2) {
 	OS.GpiCreateLogColorTable (struct.hps, 0, OS.LCOLF_RGB, 0, 0, null);
 	OS.WinFillRect (struct.hps, struct.rclItem, background);
 	Image image = index > 0 ? item.getImage (index) : null;
-	if (image != null && image.type == SWT.BITMAP) {
+	if (index == 0 && (style & SWT.CHECK) != 0) {
+		/* The check box at the start of the first cell, in the height of the record as the images */
+		int cellHeight = Math.min (recordHeight (item.handle), content.yTop - content.yBottom);
+		int size = Math.min (CHECK_SIZE, cellHeight - 2);
+		int x = content.xLeft, y = content.yTop - cellHeight + (cellHeight - size) / 2;
+		drawCheck (struct.hps, x, y, size, item.checked, item.grayed);
+		content.xLeft = x + size + fieldPad (1) / 2;
+	} else if (image != null && image.type == SWT.BITMAP) {
 		Rectangle size = image.getBounds ();
 		/*
 		* The rectangle of the cell can be a pixel higher than the record (without the column of

@@ -577,6 +577,21 @@ boolean filterMessage (QMSG qmsg) {
             if (control instanceof Table) ((Table) control).titleClicked (hwnd, qmsg.mp1);
         }
     }
+    /* The check boxes of a table: a click on one in the window of the records, and the space bar */
+    if (msg == OS.WM_BUTTON1DOWN || msg == OS.WM_BUTTON1DBLCLK) {
+        int id = OS.WinQueryWindowUShort (hwnd, OS.QWS_ID) & 0xFFFF;
+        if (id == OS.CID_LEFTDVWND) {
+            Control control = findControl (hwnd);
+            if (control instanceof Table && ((Table) control).checkClicked (hwnd, qmsg.mp1)) return true;
+        }
+    }
+    if (msg == OS.WM_CHAR) {
+        int flags = qmsg.mp1 & 0xFFFF;
+        if ((flags & OS.KC_KEYUP) == 0 && (flags & OS.KC_VIRTUALKEY) != 0 && ((qmsg.mp2 >> 16) & 0xFFFF) == OS.VK_SPACE) {
+            Control control = findControl (hwnd);
+            if (control instanceof Table && ((Table) control).checkPressed ()) return true;
+        }
+    }
     if (msg == OS.WM_CHAR) {
         Control control = findControl (qmsg.hwnd);
         if (control != null) {

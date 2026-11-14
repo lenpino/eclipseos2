@@ -912,6 +912,133 @@ public class SWT012_01 extends SWTTestCase {
 		return right < 0 ? null : new Rectangle(left, top, right - left + 1, bottom - top + 1);
 	}
 
+	/*
+	 * The check boxes of SWT.CHECK, drawn by the table at the start of the first cell. The box
+	 * is found by its dark frame in the pixels; a click on it (posted to the window of the
+	 * records, as the system does) and the space bar change it and send a Selection with
+	 * SWT.CHECK, without changing the selection.
+	 */
+	void checkChecksOnScreen() {
+		saySubObjective("Check boxes, seen on the screen");
+		Shell window = new Shell(display, SWT.NO_TRIM);
+		window.setBounds(10, 10, 400, 200);
+		window.open();
+		final Table table = new Table(window, SWT.MULTI | SWT.CHECK | SWT.BORDER);
+		table.setBounds(0, 0, 400, 200);
+		for (int c = 0; c < 2; c++) new TableColumn(table, SWT.NONE).setWidth(120);
+		TableItem[] items = new TableItem[4];
+		for (int i = 0; i < items.length; i++) {
+			items[i] = new TableItem(table, SWT.NONE);
+			items[i].setText(new String[] {"Item " + i, "x"});
+		}
+		final int[] events = new int[2];
+		final TableItem[] last = new TableItem[1];
+		table.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				if (e.detail == SWT.CHECK) events[0]++; else events[1]++;
+				last[0] = (TableItem) e.item;
+			}
+		});
+		items[1].setChecked(true);
+		items[2].setChecked(true);
+		items[2].setGrayed(true);
+		settleTable(table);
+		check(events[0] == 0 && events[1] == 0, "setChecked and setGrayed send no event");
+		Rectangle[] boxes = new Rectangle[items.length];
+		for (int i = 0; i < items.length; i++) boxes[i] = box(table, items[i].getBounds(0));
+		check(boxes[0] != null && boxes[0].width >= 9 && boxes[0].width == boxes[0].height, "a check box is drawn in the first cell: " + boxes[0]);
+		String span = darkSpan(table, items[0], 0);
+		check(boxes[0] != null && items[0].getBounds(0).x + Integer.parseInt(span.substring(span.indexOf("..") + 2)) > boxes[0].x + boxes[0].width + 4,
+				"the text is after it: " + span + " from the cell, box " + boxes[0]);
+		check(inside(table, boxes[0]).equals("light"), "an unchecked box is empty: " + inside(table, boxes[0]));
+		check(inside(table, boxes[1]).equals("dark light"), "a checked one has the mark: " + inside(table, boxes[1]));
+		check(inside(table, boxes[2]).equals("dark gray"), "a grayed one is gray, with the mark: " + inside(table, boxes[2]));
+		check(box(table, items[0].getBounds(1)) == null, "no box in the other columns");
+
+		table.setSelection(3);
+		settleTable(table);
+		postClick(table, boxes[0].x + boxes[0].width / 2, boxes[0].y + boxes[0].height / 2);
+		check(items[0].getChecked() && events[0] == 1 && last[0] == items[0], "a click on the box checks the item, with a Selection of SWT.CHECK: " + events[0]);
+		check(table.getSelectionCount() == 1 && table.isSelected(3), "and the selection does not change: " + table.getSelectionCount());
+		check(inside(table, boxes[0]).equals("dark light"), "the mark is drawn");
+		postClick(table, boxes[1].x + boxes[1].width / 2, boxes[1].y + boxes[1].height / 2);
+		check(!items[1].getChecked() && events[0] == 2, "a click on a checked box unchecks it");
+		Rectangle text = items[2].getBounds(1);
+		postClick(table, text.x + 5, text.y + text.height / 2);
+		check(items[2].getChecked() && events[0] == 2, "a click elsewhere in the row does not change it");
+
+		/* The space bar, for the item that has the cursor */
+		int record = recordOf(items[0]);
+		OS.WinSendMsg(table.handle, OS.CM_SETRECORDEMPHASIS, record, OS.MPFROM2SHORT((short) 1, (short) OS.CRA_CURSORED));
+		OS.WinPostMsg(table.handle, OS.WM_CHAR, OS.KC_VIRTUALKEY | OS.KC_CHAR, ' ' | (OS.VK_SPACE << 16));
+		settleTable(table);
+		check(!items[0].getChecked() && events[0] == 3 && last[0] == items[0], "the space bar changes the box of the item with the cursor: " + items[0].getChecked() + ", events " + events[0]);
+		window.dispose();
+	}
+
+	int recordOf(TableItem item) {
+		try {
+			java.lang.reflect.Field f = TableItem.class.getDeclaredField("handle");
+			f.setAccessible(true);
+			return ((Integer) f.get(item)).intValue();
+		} catch (Exception e) {
+			throw new RuntimeException(e.toString());
+		}
+	}
+
+	/* A click posted to the window of the records at a point of the table */
+	void postClick(Table table, int x, int y) {
+		int records = OS.WinWindowFromID(table.handle, OS.CID_LEFTDVWND);
+		int[] point = {x, table.getSize().y - 1 - y};
+		OS.WinMapWindowPoints(table.handle, records, point, 1);
+		int mp1 = (point[0] & 0xFFFF) | (point[1] << 16);
+		OS.WinPostMsg(records, OS.WM_BUTTON1DOWN, mp1, 0);
+		OS.WinPostMsg(records, OS.WM_BUTTON1UP, mp1, 0);
+		settleTable(table);
+	}
+
+	/* The square of a dark frame in a rectangle: a column of dark pixels at least 9 high, and a row as long from its top */
+	Rectangle box(Table table, Rectangle area) {
+		for (int x = area.x; x < area.x + area.width; x++) {
+			int top = -1, run = 0;
+			for (int y = area.y; y < area.y + area.height; y++) {
+				if (darkPel(pel(table, x, y))) {
+					if (run == 0) top = y;
+					run++;
+					if (run >= 9 && (y + 1 == area.y + area.height || !darkPel(pel(table, x, y + 1)))) {
+						/* A square: the top side is as long, dark too (a letter is not) */
+						boolean square = true;
+						for (int i = 0; i < run && square; i++) square = darkPel(pel(table, x + i, top));
+						if (square) return new Rectangle(x, top, run, run);
+					}
+				} else {
+					run = 0;
+				}
+			}
+		}
+		return null;
+	}
+
+	boolean darkPel(int pel) {
+		return ((pel >> 16) & 0xFF) < 60 && ((pel >> 8) & 0xFF) < 60 && (pel & 0xFF) < 60;
+	}
+
+	/* What is inside the frame of a box: dark (the mark), light (white) and gray pixels */
+	String inside(Table table, Rectangle box) {
+		if (box == null) return "no box";
+		boolean dark = false, light = false, gray = false;
+		for (int y = box.y + 1; y < box.y + box.height - 1; y++) {
+			for (int x = box.x + 1; x < box.x + box.width - 1; x++) {
+				int pel = pel(table, x, y);
+				int lum = (((pel >> 16) & 0xFF) + ((pel >> 8) & 0xFF) + (pel & 0xFF)) / 3;
+				if (darkPel(pel)) dark = true;
+				else if (lum > 240) light = true;
+				else gray = true;
+			}
+		}
+		return ((dark ? "dark " : "") + (light ? "light " : "") + (gray ? "gray" : "")).trim();
+	}
+
 	void settleTable(Table table) {
 		pump();
 		for (int i = 0; i < 20; i++) display.readAndDispatch();
@@ -1030,11 +1157,12 @@ public class SWT012_01 extends SWTTestCase {
 		checkImageOnScreen();
 		checkCellsOnScreen();
 		checkColumnImagesOnScreen();
+		checkChecksOnScreen();
 		say("\n" + checks + " checks passed.\n");
 
-		sayObjective("Interactive: click, Ctrl and Shift click, press Enter, click the titles of the columns, try to drag their borders");
+		sayObjective("Interactive: click, Ctrl and Shift click, press Enter, click the titles of the columns, the check boxes and the space bar");
 		shell.setLayout(null);
-		final Table table = new Table(shell, SWT.MULTI | SWT.BORDER);
+		final Table table = new Table(shell, SWT.MULTI | SWT.CHECK | SWT.BORDER);
 		final Text log = new Text(shell, SWT.BORDER | SWT.MULTI | SWT.READ_ONLY);
 		Rectangle area = shell.getClientArea();
 		table.setBounds(0, 0, area.width, Math.max(20, area.height - 40));
@@ -1070,13 +1198,18 @@ public class SWT012_01 extends SWTTestCase {
 			/* Colors to look at: a red text every five rows, a yellow background */
 			if (i % 5 == 4) item.setForeground(display.getSystemColor(SWT.COLOR_RED));
 			if (i == 2) item.setBackground(display.getSystemColor(SWT.COLOR_YELLOW));
+			/* Some boxes checked at first, one grayed */
+			if (i % 4 == 1) item.setChecked(true);
+			if (i == 5) item.setGrayed(true);
 			/* An image in the column Size every three rows */
 			if (i % 3 == 0) item.setImage(1, image);
 		}
 		table.setRedraw(true);
 		table.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				String msg = "Selection: " + (e.item == null ? "(none)" : ((TableItem) e.item).getText()) + " (" + table.getSelectionCount() + " selected)";
+				String msg = e.detail == SWT.CHECK
+					? "Check: " + ((TableItem) e.item).getText() + " is " + (((TableItem) e.item).getChecked() ? "checked" : "not checked")
+					: "Selection: " + (e.item == null ? "(none)" : ((TableItem) e.item).getText()) + " (" + table.getSelectionCount() + " selected)";
 				say(msg);
 				log.setText(msg);
 			}

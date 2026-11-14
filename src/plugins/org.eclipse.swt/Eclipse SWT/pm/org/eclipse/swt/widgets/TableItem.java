@@ -35,7 +35,8 @@ import org.eclipse.swt.graphics.*;
  * each column). Only the image of the first column is shown (it is the icon
  * of the record, in a column of its own), the others at the start of their
  * cells; only bitmaps are drawn. The table draws the cells with the colors of
- * the item; the check box state is only kept. See the notes of
+ * the item, and the check box at the start of the first cell (after the image
+ * of the first column, which is before it). See the notes of
  * <code>Table</code>.
  * </p>
  */
@@ -191,9 +192,6 @@ Rectangle getRowBounds () {
  * Returns <code>true</code> if the receiver is checked,
  * and false otherwise.  When the parent does not have
  * the <code>CHECK style, return false.
- * <p>
- * OS/2 note: the container has no check boxes: the state is only kept.
- * </p>
  *
  * @return the checked state of the checkbox
  *
@@ -422,8 +420,10 @@ public void setBackground (Color color) {
  */
 public void setChecked (boolean checked) {
 	checkWidget ();
-	if ((parent.style & SWT.CHECK) == 0) return;
+	if ((parent.style & SWT.CHECK) == 0 || this.checked == checked) return;
 	this.checked = checked;
+	/* The table draws the check box (see Table.wmDrawChild()) */
+	if (handle != 0) parent.invalidateRecord (handle, OS.CMA_NOREPOSITION);
 }
 
 /**
@@ -463,8 +463,9 @@ public void setForeground (Color color) {
  */
 public void setGrayed (boolean grayed) {
 	checkWidget ();
-	if ((parent.style & SWT.CHECK) == 0) return;
+	if ((parent.style & SWT.CHECK) == 0 || this.grayed == grayed) return;
 	this.grayed = grayed;
+	if (handle != 0) parent.invalidateRecord (handle, OS.CMA_NOREPOSITION);
 }
 
 /**
