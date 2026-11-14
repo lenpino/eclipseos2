@@ -231,8 +231,13 @@ public class SWT021_01 extends SWTTestCase {
 		open.setText("&Open");
 		open.addListener(SWT.Help, show);
 		new MenuItem(menu, SWT.PUSH).setText("&Close");
-		log.setLayoutData(new org.eclipse.swt.layout.GridData(org.eclipse.swt.layout.GridData.FILL_HORIZONTAL));
-		shell.setSize(360, 240);
+		/* Wide enough for the longest message */
+		org.eclipse.swt.layout.GridData wide = new org.eclipse.swt.layout.GridData(org.eclipse.swt.layout.GridData.FILL_HORIZONTAL);
+		wide.widthHint = 320;
+		log.setLayoutData(wide);
+		org.eclipse.swt.layout.GridData wideText = new org.eclipse.swt.layout.GridData(org.eclipse.swt.layout.GridData.FILL_HORIZONTAL);
+		text.setLayoutData(wideText);
+		shell.setSize(380, 240);
 	}
 
 	void setTitle(String title) {
