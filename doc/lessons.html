@@ -391,6 +391,12 @@ href="eclipseos2-xxe.css"
       is signed: an id above <code>0x7FFF</code> is compared with
       <code>&amp; 0xFFFF</code>.</li>
 
+      <li>The detail view of the container has child windows for the records
+      and the titles: what the user does there (the buttons of the mouse, a
+      click on a title or a check box) does not reach the window of the table
+      by itself. <code>Display.filterMessage()</code> takes it from the queue
+      and gives it to the table (steps 012 and 023).</li>
+
       <li>The titles of the detail view are a child window
       (<code>CID_LEFTCOLTITLEWND</code>, as wide as the container) that does not
       scroll: it paints the titles from the left of the viewport. A click on it

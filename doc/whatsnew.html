@@ -982,6 +982,15 @@ href="eclipseos2-xxe.css"
       the screen behind; it is painted with the color of the buttons, as on
       Windows (<kbd>SWT024_01</kbd>, 30 checks). Seen on the screen: the
       corner is gray.</li>
+
+      <li>More custom widgets checked (<kbd>SWT023_02</kbd>, 25 checks):
+      <code>ScrolledComposite</code>, <code>ViewForm</code>, <code>CLabel</code>,
+      <code>TableTree</code>, <code>TableEditor</code>, <code>StackLayout</code>
+      and <code>BusyIndicator</code>. Fixed: a table sent no mouse events for
+      its rows (they go to a child window of the container), so a
+      <code>TableTree</code> did not expand with a click.
+      <kbd>SWT011_01</kbd>, <kbd>SWT012_01</kbd>, <kbd>SWT016_01</kbd>,
+      <kbd>SWT023_01</kbd> and <kbd>SWT024_01</kbd> still pass.</li>
     </ul>
   </body>
 </html>

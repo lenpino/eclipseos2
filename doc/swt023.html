@@ -51,6 +51,23 @@ href="eclipseos2-xxe.css"
       a program posts must be as PM sends it, a virtual key and a character
       (8); with the virtual key only, <code>StyledText</code> got no
       character.</li>
+
+      <li>The second test case, <kbd>SWT023_02</kbd> (25 checks):
+      <code>ScrolledComposite</code> (the bars by the size of the content,
+      <code>setOrigin()</code>, scrolling with the bars, hidden bars when the
+      content fits, the expanded content), <code>ViewForm</code> and
+      <code>CLabel</code> (layout, size, the text on the screen on the left and
+      on the right), <code>TableTree</code>, <code>TableEditor</code>,
+      <code>StackLayout</code> and <code>BusyIndicator</code>.</li>
+
+      <li>Found by <code>TableTree</code>: a table sent no mouse events for
+      the clicks on its rows. They go to the window of the records of the
+      container (<code>CID_LEFTDVWND</code>), which is not a window of SWT;
+      <code>TableTree</code> expands on a <code>MouseDown</code> on the plus
+      sign. <code>Display.filterMessage()</code> gives the buttons of that
+      window to the table (<code>Table.recordsMouse()</code>), with the point in
+      the table, as <code>Control</code> does for its own window; the container
+      still gets them. Checked with a click posted to that window.</li>
     </ul>
 
     <h2>Step checklist</h2>
@@ -101,7 +118,15 @@ href="eclipseos2-xxe.css"
 
         <td>Done [lpino]</td>
 
-        <td>A click on a tab selects it. The others (<code>CLabel</code>, <code>TableTree</code>, <code>ViewForm</code>, <code>ScrolledComposite</code>...) are built, not checked.</td>
+        <td>A click on a tab selects it.</td>
+      </tr>
+
+      <tr>
+        <td><code>ScrolledComposite</code>, <code>ViewForm</code>, <code>CLabel</code>, <code>TableTree</code>, <code>TableEditor</code>, <code>StackLayout</code>, <code>BusyIndicator</code></td>
+
+        <td>Done [lpino]</td>
+
+        <td>Checked by <kbd>SWT023_02</kbd>. Seen on the screen: <em>to be confirmed</em>. Not checked: <code>PopupList</code>, <code>TableCursor</code>, <code>TreeEditor</code>, <code>AnimatedProgress</code>.</td>
       </tr>
 
       <tr>
