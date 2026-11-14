@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/css"
+href="eclipseos2-xxe.css"
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"xhtml1-strict.dtd">
+<html>
+  <head>
+    <link href="eclipseos2.css" rel="stylesheet" type="text/css" />
+
+    <title>Eclipse for OS/2 Transitional Project Notes</title>
+  </head>
+
+  <body>
+    <h1>SWT Step 021. The Help event</h1>
+
+    <h2>Objective</h2>
+
+    <p>Send the <code>Help</code> event when the user presses F1, as Windows
+    does: to the control with the focus or, if it has no listener for it, to the
+    first parent that has one, up to its shell; from a menu, to the item that is
+    highlighted or its menu. The test case <kbd>SWT021_01</kbd> posts the key and
+    sends <code>WM_HELP</code> (11 automatic checks); its interactive part has
+    controls, a group and a menu with listeners.</p>
+
+    <h2>Task notes</h2>
+
+    <ul>
+      <li><code>Control</code> took the listeners, but <code>WM_HELP</code> was
+      left out of its window procedure (the Windows code was there, commented)
+      and no event was ever sent.</li>
+
+      <li>PM does not make a <code>WM_HELP</code> of an F1 that a program
+      posts (2026-11-13: it arrives as <code>WM_CHAR</code> with
+      <code>VK_F1</code>, and nothing else); the system accelerator table may do
+      it for a real key. So both are taken: <code>Display.filterMessage()</code>
+      sends the event for <code>WM_CHAR</code> of F1 alone, going down and not
+      repeated (<code>KC_PREVDOWN</code>), after the accelerators of the
+      application, and lets the key go on for the <code>KeyDown</code>;
+      <code>Control.WM_HELP()</code> does it for a <code>WM_HELP</code>. Both
+      call <code>Control.sendHelp()</code>.</li>
+
+      <li><code>WM_HELP</code>: <code>mp1</code> is the command (the id of the
+      menu item) and <code>mp2</code> its source and whether the pointer was
+      used. With <code>CMDSRC_MENU</code> the item is found by its id in the
+      shell; a disabled item has no help.</li>
+    </ul>
+
+    <h2>Step checklist</h2>
+
+    <table>
+      <col width="40%" />
+
+      <col />
+
+      <col width="50%" />
+
+      <thead>
+        <tr>
+          <th>Operation</th>
+
+          <th>Status</th>
+
+          <th>Remarks</th>
+        </tr>
+      </thead>
+
+      <tr>
+        <td><code>Help</code> of a control (F1) and of its parents</td>
+
+        <td>Done [lpino]</td>
+
+        <td>Checked by <kbd>SWT021_01</kbd> with the key posted. A real F1:
+        <em>to be seen</em> on the screen.</td>
+      </tr>
+
+      <tr>
+        <td><code>Help</code> of a menu item and of its menu</td>
+
+        <td>Done [lpino]</td>
+
+        <td>Checked with <code>WM_HELP</code> sent by the test. Whether PM sends
+        it for F1 in an open menu: <em>to be seen</em> on the screen.</td>
+      </tr>
+    </table>
+  </body>
+</html>

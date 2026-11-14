@@ -604,6 +604,17 @@ boolean filterMessage (QMSG qmsg) {
         Control control = findControl (qmsg.hwnd);
         if (control != null) {
             if (translateAccelerator (qmsg, control)) return true;
+            /*
+            * F1 alone, when it goes down: the Help event, as Windows makes WM_HELP of it. PM does
+            * not make a WM_HELP of a key that a program posts (2026-11-13), and may of a real one
+            * (see Control.WM_HELP()). The key goes on, for the KeyDown.
+            */
+            int flags = qmsg.mp1 & 0xFFFF;
+            int modifiers = OS.KC_KEYUP | OS.KC_PREVDOWN | OS.KC_SHIFT | OS.KC_CTRL | OS.KC_ALT;
+            if ((flags & modifiers) == 0 && (flags & OS.KC_VIRTUALKEY) != 0 && ((qmsg.mp2 >> 16) & 0xFFFF) == OS.VK_F1) {
+                Control focus = getFocusControl ();
+                (focus != null ? focus : control).sendHelp ();
+            }
             if (translateMnemonic (qmsg, control)) return true;
             if (translateTraversal (qmsg, control)) return true;
         }

@@ -309,6 +309,10 @@
         <property name="test.step" value="020_01" />
         <antcall target="swt.test" />
     </target>
+     <target name="swt021_01" depends="init,build.prp">
+        <property name="test.step" value="021_01" />
+        <antcall target="swt.test" />
+    </target>
     <!-- creates the default build.prp if nesessary -->
     <target name="build.prp" depends="init" unless="is.build.prp">
         <echo file="${build.prp}">

@@ -3002,7 +3002,7 @@ int windowProc (int msg, int mp1, int mp2) {
         case OS.WM_ERASEBACKGROUND: result = WM_ERASEBACKGROUND (mp1, mp2); break;
 //        case OS.WM_FOCUSCHANGE: result = WM_FOCUSCHANGE (mp1, mp2); break;
         case OS.WM_QUERYDLGCODE: result = WM_QUERYDLGCODE (mp1, mp2); break;
-//        case OS.WM_HELP: result = WM_HELP (wParam, lParam); break;
+        case OS.WM_HELP: result = WM_HELP (mp1, mp2); break;
         case OS.WM_HSCROLL: result = WM_HSCROLL (mp1, mp2); break;
 //        case OS.WM_IME_CHAR: result = WM_IME_CHAR (wParam, lParam); break;
 //        case OS.WM_IME_COMPOSITION: result = WM_IME_COMPOSITION (wParam, lParam); break;
@@ -3258,6 +3258,43 @@ MRESULT WM_QUERYDLGCODE (int mp1, int mp2) {
 //      }
 //      return null;
 //}
+
+/*
+ * WM_HELP: mp1 = (usCmd, 0) and mp2 = (usSource, fPointer). From a menu it is the help of
+ * the item that is highlighted; else the Help of the control with the focus (see sendHelp()).
+ */
+MRESULT WM_HELP (int mp1, int mp2) {
+    Decorations shell = menuShell ();
+    if (!shell.isEnabled ()) return null;
+    if (OS.SHORT1FROMMP (mp2) == OS.CMDSRC_MENU) {
+        MenuItem item = shell.findMenuItem (OS.SHORT1FROMMP (mp1));
+        if (item == null || !item.isEnabled ()) return null;
+        Widget widget = item.hooks (SWT.Help) ? (Widget) item : item.parent.hooks (SWT.Help) ? (Widget) item.parent : null;
+        if (widget == null) return null;
+        widget.postEvent (SWT.Help);
+        return new MRESULT (OS.TRUE);
+    }
+    Control focus = getDisplay ().getFocusControl ();
+    if (focus == null || focus.getShell () != getShell ()) focus = this;
+    return focus.sendHelp () ? new MRESULT (OS.TRUE) : null;
+}
+
+/*
+ * F1: the Help event of the control, or else of the first parent that has listeners for it,
+ * up to its shell (Windows passes WM_HELP on to the parent). True when one was sent.
+ */
+boolean sendHelp () {
+    Control control = this;
+    while (control != null) {
+        if (control.hooks (SWT.Help)) {
+            control.postEvent (SWT.Help);
+            return true;
+        }
+        if (control instanceof Shell) break;
+        control = control.parent;
+    }
+    return false;
+}
 
 MRESULT WM_HSCROLL (int mp1, int mp2) {
       int hwndChild = OS.WinWindowFromID (handle, OS.SHORT1FROMMP (mp1));

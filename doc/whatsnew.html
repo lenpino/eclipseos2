@@ -935,6 +935,13 @@ href="eclipseos2-xxe.css"
       and counts the cells painted again. Seen on the screen after the fix:
       the boxes of the table and of the tree change without selecting and
       without flicker.</li>
+
+      <li><a href="swt021.html">Step 021</a>: the <code>Help</code> event for
+      F1, to the control with the focus or the first parent with a listener,
+      and to the items of a menu. PM does not make a <code>WM_HELP</code> of a
+      posted F1, so the key itself is taken as well as <code>WM_HELP</code>.
+      New test <kbd>SWT021_01</kbd> (11 checks); <kbd>SWT010_01</kbd> still
+      passes.</li>
     </ul>
   </body>
 </html>
