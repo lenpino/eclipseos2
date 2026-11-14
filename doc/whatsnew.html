@@ -926,6 +926,13 @@ href="eclipseos2-xxe.css"
       <kbd>SWT012_01</kbd> (205) find the boxes on the screen and click them;
       the interactive tree and table have check boxes. See <a
       href="diff.html">differences 013 and 014</a>.</li>
+
+      <li>Seen on the screen and fixed: a click on a check box of a table also
+      selected the row (the container selects with
+      <code>WM_BUTTON1CLICK</code>, which now it does not get either), and
+      the whole table flickered (only the row is painted again now). The same
+      for the tree. <kbd>SWT012_01</kbd> (206 checks) sends the whole click
+      and counts the cells painted again.</li>
     </ul>
   </body>
 </html>

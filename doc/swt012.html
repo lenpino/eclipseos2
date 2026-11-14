@@ -152,6 +152,19 @@ href="eclipseos2-xxe.css"
       selection does not change), and the space bar changes the box of the
       record with the cursor. Both send a <code>Selection</code> with
       <code>SWT.CHECK</code>, as on Windows.</li>
+
+      <li>Seen on the screen (2026-11-13): a click on a box also selected the
+      row, and the whole table flickered. The container selects a record with
+      the <code>WM_BUTTON1CLICK</code> that the system sends after the button
+      goes up, not with <code>WM_BUTTON1DOWN</code>: the
+      <code>WM_BUTTON1UP</code> and <code>WM_BUTTON1CLICK</code> of a click on
+      a box are not given to it either (the checks only sent down and up, and
+      did not see it). A change of a box, of the colors or of an image of a
+      cell asked for the refresh of all the records (placing them again): now
+      only the rectangle of the row is painted again
+      (<code>redrawRecord()</code>). The table counts the cells it draws, and
+      <kbd>SWT012_01</kbd> checks that a click on a box paints only its row
+      (2 cells, it was 8).</li>
     </ul>
 
     <p>The behavior that differs from Windows is in <a href="diff.html">difference

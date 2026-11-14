@@ -371,6 +371,11 @@ href="eclipseos2-xxe.css"
       container's own drawing first, then compared pixel by pixel with the
       table's (2026-11-13).</li>
 
+      <li>The container selects a record with <code>WM_BUTTON1CLICK</code>,
+      which the system sends after <code>WM_BUTTON1UP</code>: a click that the
+      program takes for itself (a check box) has to keep all three from it. A
+      check that simulates a click must send the three messages.</li>
+
       <li>The titles of the detail view are a child window
       (<code>CID_LEFTCOLTITLEWND</code>, as wide as the container) that does not
       scroll: it paints the titles from the left of the viewport. A click on it
