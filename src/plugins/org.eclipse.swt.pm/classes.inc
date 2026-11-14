@@ -248,19 +248,73 @@ org\eclipse\swt\dnd\Transfer.java
 org\eclipse\swt\dnd\TransferData.java
 org\eclipse\swt\dnd\ByteArrayTransfer.java
 org\eclipse\swt\dnd\TextTransfer.java
+org\eclipse\swt\dnd\RTFTransfer.java
 
 # SWT Drag and Drop
 
 org\eclipse\swt\dnd\DND.java
 
-# SWT Custom Widgets
+# SWT Printing (#): not ported, what the custom widgets need
 
+org\eclipse\swt\printing\Printer.java
+org\eclipse\swt\printing\PrintDialog.java
+
+# SWT Printing
+
+org\eclipse\swt\printing\PrinterData.java
+
+# SWT emulated bidi (no bidirectional text)
+
+org\eclipse\swt\internal\BidiUtil.java
+
+# SWT Custom Widgets (step 023)
+
+org\eclipse\swt\custom\AnimatedProgress.java
+org\eclipse\swt\custom\BidiSegmentEvent.java
+org\eclipse\swt\custom\BidiSegmentListener.java
+org\eclipse\swt\custom\BusyIndicator.java
+org\eclipse\swt\custom\CCombo.java
+org\eclipse\swt\custom\CLabel.java
+org\eclipse\swt\custom\ControlEditor.java
+org\eclipse\swt\custom\CTabFolder.java
+org\eclipse\swt\custom\CTabFolderAdapter.java
+org\eclipse\swt\custom\CTabFolderEvent.java
+org\eclipse\swt\custom\CTabFolderListener.java
+org\eclipse\swt\custom\CTabItem.java
+org\eclipse\swt\custom\DefaultContent.java
+org\eclipse\swt\custom\DefaultLineStyler.java
+org\eclipse\swt\custom\DisplayRenderer.java
+org\eclipse\swt\custom\ExtendedModifyEvent.java
+org\eclipse\swt\custom\ExtendedModifyListener.java
+org\eclipse\swt\custom\LineBackgroundEvent.java
+org\eclipse\swt\custom\LineBackgroundListener.java
+org\eclipse\swt\custom\LineStyleEvent.java
+org\eclipse\swt\custom\LineStyleListener.java
+org\eclipse\swt\custom\PopupList.java
+org\eclipse\swt\custom\PrintRenderer.java
+org\eclipse\swt\custom\SashForm.java
+org\eclipse\swt\custom\ScrolledComposite.java
+org\eclipse\swt\custom\ST.java
+org\eclipse\swt\custom\StackLayout.java
 org\eclipse\swt\custom\StyledText.java
 org\eclipse\swt\custom\StyledTextBidi.java
 org\eclipse\swt\custom\StyledTextContent.java
+org\eclipse\swt\custom\StyledTextEvent.java
 org\eclipse\swt\custom\StyledTextListener.java
 org\eclipse\swt\custom\StyledTextRenderer.java
-
+org\eclipse\swt\custom\StyleRange.java
+org\eclipse\swt\custom\TableCursor.java
+org\eclipse\swt\custom\TableEditor.java
+org\eclipse\swt\custom\TableTree.java
+org\eclipse\swt\custom\TableTreeEditor.java
+org\eclipse\swt\custom\TableTreeItem.java
+org\eclipse\swt\custom\TextChangedEvent.java
+org\eclipse\swt\custom\TextChangeListener.java
+org\eclipse\swt\custom\TextChangingEvent.java
+org\eclipse\swt\custom\TreeEditor.java
+org\eclipse\swt\custom\VerifyKeyListener.java
+org\eclipse\swt\custom\ViewForm.java
+org\eclipse\swt\custom\WrappedContent.java
 
 # emulated
 org\eclipse\swt\accessibility\Accessible.java

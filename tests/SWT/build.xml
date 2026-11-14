@@ -115,11 +115,13 @@
             <!-- the clipboard only (step 022) -->
             <src path="${plugindir}/Eclipse SWT Drag and Drop/pm/"/>
             <src path="${plugindir.orig}/Eclipse SWT Drag and Drop/common/"/>
-            <!-- src path="${plugindir}/Eclipse SWT Printing/pm/"/ -->
-            <!-- src path="${plugindir}/Eclipse SWT Printing/common/"/ -->
+            <!-- not ported: what the custom widgets need (step 023) -->
+            <src path="${plugindir}/Eclipse SWT Printing/pm/"/>
+            <src path="${plugindir.orig}/Eclipse SWT Printing/common/"/>
+            <src path="${plugindir}/Eclipse SWT/emulated/bidi/"/>
             <!-- src path="${plugindir}/Eclipse SWT Program/pm/"/ -->
             <!-- src path="${plugindir}/Eclipse SWT Program/common/"/ -->
-            <!-- src path="${plugindir}/Eclipse SWT Custom Widgets/common/"/ -->
+            <src path="${plugindir.orig}/Eclipse SWT Custom Widgets/common/"/>
         </javac>
     </target>
 

@@ -58,11 +58,13 @@
             <!-- the clipboard only (step 022) -->
             <src path="${plugindir}/Eclipse SWT Drag and Drop/pm/"/>
             <src path="${plugindir.orig}/Eclipse SWT Drag and Drop/common/"/>
-            <!-- src path="${plugindir}/Eclipse SWT Printing/pm/"/ -->
-            <!-- src path="${plugindir}/Eclipse SWT Printing/common/"/ -->
+            <!-- not ported: what the custom widgets need (step 023) -->
+            <src path="${plugindir}/Eclipse SWT Printing/pm/"/>
+            <src path="${plugindir.orig}/Eclipse SWT Printing/common/"/>
+            <src path="${plugindir}/Eclipse SWT/emulated/bidi/"/>
             <!-- src path="${plugindir}/Eclipse SWT Program/pm/"/ -->
             <!-- src path="${plugindir}/Eclipse SWT Program/common/"/ -->
-            <!-- src path="${plugindir}/Eclipse SWT Custom Widgets/common/"/ -->
+            <src path="${plugindir.orig}/Eclipse SWT Custom Widgets/common/"/>
         </javac>
         <property name="includes" value=""/>
         <property name="excludes" value="**/*.java,**/*.bak,**/library/,**/.nbattrs"/>
@@ -116,11 +118,12 @@
             <!-- fileset dir="${plugindir}/Eclipse SWT AWT/pm/" includes="**/*.java" excludes=""/ -->
             <fileset dir="${plugindir}/Eclipse SWT Drag and Drop/pm/" includes="**/*.java" excludes=""/>
             <fileset dir="${plugindir.orig}/Eclipse SWT Drag and Drop/common/" includes="DND.java" excludes=""/>
-            <!-- fileset dir="${plugindir}/Eclipse SWT Printing/pm/" includes="**/*.java" excludes=""/ -->
-            <!-- fileset dir="${plugindir}/Eclipse SWT Printing/common/" includes="**/*.java" excludes=""/ -->
+            <fileset dir="${plugindir}/Eclipse SWT Printing/pm/" includes="**/*.java" excludes=""/>
+            <fileset dir="${plugindir.orig}/Eclipse SWT Printing/common/" includes="**/*.java" excludes=""/>
+            <fileset dir="${plugindir}/Eclipse SWT/emulated/bidi/" includes="**/*.java" excludes=""/>
             <!-- fileset dir="${plugindir}/Eclipse SWT Program/pm/" includes="**/*.java" excludes=""/ -->
             <!-- fileset dir="${plugindir}/Eclipse SWT Program/common/" includes="**/*.java" excludes=""/ -->
-            <!-- fileset dir="${plugindir}/Eclipse SWT Custom Widgets/common/" includes="**/*.java" excludes=""/ -->
+            <fileset dir="${plugindir.orig}/Eclipse SWT Custom Widgets/common/" includes="**/*.java" excludes=""/>
         </zip>
     </target>
 
