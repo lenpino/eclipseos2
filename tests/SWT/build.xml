@@ -112,8 +112,9 @@
             <!-- possible to implement AWT under OS/2? -->
             <!-- src path="${plugindir}/Eclipse SWT AWT/pm/"/ -->
 
-            <!-- src path="${plugindir}/Eclipse SWT Drag and Drop/pm/"/ -->
-            <!-- src path="${plugindir}/Eclipse SWT Drag and Drop/common/"/ -->
+            <!-- the clipboard only (step 022) -->
+            <src path="${plugindir}/Eclipse SWT Drag and Drop/pm/"/>
+            <src path="${plugindir.orig}/Eclipse SWT Drag and Drop/common/"/>
             <!-- src path="${plugindir}/Eclipse SWT Printing/pm/"/ -->
             <!-- src path="${plugindir}/Eclipse SWT Printing/common/"/ -->
             <!-- src path="${plugindir}/Eclipse SWT Program/pm/"/ -->

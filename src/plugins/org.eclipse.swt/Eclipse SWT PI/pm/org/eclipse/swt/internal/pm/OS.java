@@ -2383,6 +2383,16 @@ public static final int IDP_ICON_WARNING_80             = 3360; // "Warning" - "
    public static final int IBB_MIX_MODE               = 0x0004;
    public static final int IBB_BACK_MIX_MODE           = 0x0008;
 
+   /* How the data of a format is passed (WinSetClipbrdData) */
+   public static final int CFI_OWNERFREE              = 0x0001;
+   public static final int CFI_OWNERDISPLAY           = 0x0002;
+   public static final int CFI_HANDLE                 = 0x0200;
+   public static final int CFI_POINTER                = 0x0400;
+   /* DosAllocSharedMem: memory that can be given to another process, committed, read and write */
+   public static final int OBJ_GIVEABLE               = 0x0200;
+   public static final int PAG_READ                   = 0x0001;
+   public static final int PAG_WRITE                  = 0x0002;
+   public static final int PAG_COMMIT                 = 0x0010;
    /*
       * Standard Clipboard formats
    */
@@ -2843,6 +2853,14 @@ public static final native boolean WinQueryUpdateRect(int hwnd, RECTL prclPrc);
 public static final native boolean WinOpenClipbrd(int hab);
 public static final native boolean WinCloseClipbrd(int hab);
 public static final native int WinQueryClipbrdData(int hab, int fmt);
+public static final native boolean WinSetClipbrdData(int hab, int ulData, int fmt, int rgfFmtInfo);
+public static final native boolean WinEmptyClipbrd(int hab);
+public static final native int WinEnumClipbrdFmts(int hab, int fmt);
+public static final native boolean WinQueryClipbrdFmtInfo(int hab, int fmt, int[] prgfFmtInfo);
+public static final native int DosAllocSharedMem(int[] ppb, int cb, int flag);
+public static final native int DosFreeMem(int pb);
+public static final native int WinAddAtom(int hatomtblAtomTbl, PSZ pszAtomName);
+public static final native int WinQueryAtomName(int hatomtblAtomTbl, int atom, PSZ pszBuffer, int cchBufferMax);
 public static final native int WinUpperChar(int hab, int ulCodepage, int ulCountry, int ulInchar);
 public static final native int WinStartTimer(int hab, int hwnd, int idTimer, int dtTimeout);
 public static final native boolean WinStopTimer(int hab, int hwnd, int ulTimer);

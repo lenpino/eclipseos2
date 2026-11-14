@@ -241,6 +241,18 @@ org\eclipse\swt\accessibility\AccessibleControlListener.java
 org\eclipse\swt\accessibility\AccessibleEvent.java
 org\eclipse\swt\accessibility\AccessibleListener.java
 
+# SWT Drag and Drop (#): the clipboard only
+
+org\eclipse\swt\dnd\Clipboard.java
+org\eclipse\swt\dnd\Transfer.java
+org\eclipse\swt\dnd\TransferData.java
+org\eclipse\swt\dnd\ByteArrayTransfer.java
+org\eclipse\swt\dnd\TextTransfer.java
+
+# SWT Drag and Drop
+
+org\eclipse\swt\dnd\DND.java
+
 # SWT Custom Widgets
 
 org\eclipse\swt\custom\StyledText.java

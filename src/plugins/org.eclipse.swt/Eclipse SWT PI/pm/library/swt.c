@@ -1895,6 +1895,115 @@ JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_WinQueryClipbrdData
     return (jint)WinQueryClipbrdData((HAB)hab, (ULONG)fmt);
 }
 
+JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinSetClipbrdData
+        (JNIEnv *env, jclass that, jint hab, jint ulData, jint fmt, jint rgfFmtInfo)
+{
+    DEBUG_CALL("WinSetClipbrdData\n")
+
+    return (jboolean)WinSetClipbrdData((HAB)hab, (ULONG)ulData, (ULONG)fmt, (ULONG)rgfFmtInfo);
+}
+
+JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinEmptyClipbrd
+        (JNIEnv *env, jclass that, jint hab)
+{
+    DEBUG_CALL("WinEmptyClipbrd\n")
+
+    return (jboolean)WinEmptyClipbrd((HAB)hab);
+}
+
+JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_WinEnumClipbrdFmts
+        (JNIEnv *env, jclass that, jint hab, jint fmt)
+{
+    DEBUG_CALL("WinEnumClipbrdFmts\n")
+
+    return (jint)WinEnumClipbrdFmts((HAB)hab, (ULONG)fmt);
+}
+
+JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinQueryClipbrdFmtInfo
+        (JNIEnv *env, jclass that, jint hab, jint fmt, jintArray prgfFmtInfo)
+{
+    jint *c_prgfFmtInfo = NULL;
+    jboolean rc;
+
+    DEBUG_CALL("WinQueryClipbrdFmtInfo\n")
+
+    if (prgfFmtInfo) c_prgfFmtInfo = (*env)->GetIntArrayElements(env, prgfFmtInfo, NULL);
+
+    rc = (jboolean)WinQueryClipbrdFmtInfo((HAB)hab, (ULONG)fmt, (PULONG)c_prgfFmtInfo);
+
+    if (prgfFmtInfo) (*env)->ReleaseIntArrayElements(env, prgfFmtInfo, c_prgfFmtInfo, 0);
+
+    return rc;
+}
+
+/*
+ * Shared memory without a name (the data of the clipboard must be giveable shared memory):
+ * the address is returned in ppb [0].
+ */
+JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_DosAllocSharedMem
+        (JNIEnv *env, jclass that, jintArray ppb, jint cb, jint flag)
+{
+    jint *c_ppb = NULL;
+    PVOID pb = NULL;
+    jint rc;
+
+    DEBUG_CALL("DosAllocSharedMem\n")
+
+    rc = (jint)DosAllocSharedMem(&pb, NULL, (ULONG)cb, (ULONG)flag);
+
+    if (ppb) {
+        c_ppb = (*env)->GetIntArrayElements(env, ppb, NULL);
+        c_ppb[0] = (jint)pb;
+        (*env)->ReleaseIntArrayElements(env, ppb, c_ppb, 0);
+    }
+
+    return rc;
+}
+
+JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_DosFreeMem
+        (JNIEnv *env, jclass that, jint pb)
+{
+    DEBUG_CALL("DosFreeMem\n")
+
+    return (jint)DosFreeMem((PVOID)pb);
+}
+
+JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_WinAddAtom
+        (JNIEnv *env, jclass that, jint hatomtblAtomTbl, jobject pszAtomName)
+{
+    DECL_GLOB(pGlob)
+    PSZ c_pszAtomName = NULL;
+    jint rc;
+
+    DEBUG_CALL("WinAddAtom\n")
+
+    if (pszAtomName) c_pszAtomName = getPSZBytes(env, pszAtomName);
+
+    rc = (jint)WinAddAtom((HATOMTBL)hatomtblAtomTbl, c_pszAtomName);
+
+    if (pszAtomName) releasePSZBytes(env, pszAtomName, c_pszAtomName);
+
+    return rc;
+}
+
+JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_WinQueryAtomName
+        (JNIEnv *env, jclass that, jint hatomtblAtomTbl, jint atom, jobject pszBuffer, jint cchBufferMax)
+{
+    DECL_GLOB(pGlob)
+    PSZ c_pszBuffer = NULL;
+    jint rc;
+
+    DEBUG_CALL("WinQueryAtomName\n")
+
+    if (pszBuffer) c_pszBuffer = getPSZBytes(env, pszBuffer);
+
+    rc = (jint)WinQueryAtomName((HATOMTBL)hatomtblAtomTbl, (ATOM)atom, c_pszBuffer, (ULONG)cchBufferMax);
+
+    if (pszBuffer) releasePSZBytes(env, pszBuffer, c_pszBuffer);
+
+    return rc;
+}
+
 JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_WinUpperChar
         (JNIEnv *env, jclass that, jint hab, jint ulCodepage, jint ulCountry, jint ulInchar)
 {

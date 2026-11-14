@@ -1036,7 +1036,15 @@ public void removeVerifyListener (VerifyListener listener) {
  */
 public void selectAll () {
 	checkWidget ();
-	OS.WinSendMsg (handle, OS.EM_SETSEL, OS.MPFROM2SHORT((short)0,textLimit), 0);
+	/*
+	* To the end of the text. The limit of the text was used, which is 0 until it is set:
+	* nothing was selected (2026-11-14). A multi line text is an MLE, with its own message.
+	*/
+	if ((style & SWT.MULTI) != 0) {
+		OS.WinSendMsg (handle, OS.MLM_SETSEL, 0, getCharCount ());
+	} else {
+		OS.WinSendMsg (handle, OS.EM_SETSEL, OS.MPFROM2SHORT ((short) 0, (short) getCharCount ()), 0);
+	}
 }
 
 boolean sendKeyEvent (int type, int msg, int mp1, int mp2, Event event) {

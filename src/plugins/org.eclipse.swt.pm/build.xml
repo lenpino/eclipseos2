@@ -55,8 +55,9 @@
             <!-- possible to implement AWT under OS/2? -->
             <!-- src path="${plugindir}/Eclipse SWT AWT/pm/"/ -->
 
-            <!-- src path="${plugindir}/Eclipse SWT Drag and Drop/pm/"/ -->
-            <!-- src path="${plugindir}/Eclipse SWT Drag and Drop/common/"/ -->
+            <!-- the clipboard only (step 022) -->
+            <src path="${plugindir}/Eclipse SWT Drag and Drop/pm/"/>
+            <src path="${plugindir.orig}/Eclipse SWT Drag and Drop/common/"/>
             <!-- src path="${plugindir}/Eclipse SWT Printing/pm/"/ -->
             <!-- src path="${plugindir}/Eclipse SWT Printing/common/"/ -->
             <!-- src path="${plugindir}/Eclipse SWT Program/pm/"/ -->
@@ -76,8 +77,8 @@
             <fileset dir="${plugindir.orig}/Eclipse SWT Accessibility/emulated/" includes="${includes}" excludes="${excludes}"/>
             <fileset dir="${plugindir.orig}/Eclipse SWT Accessibility/common/" includes="${includes}" excludes="${excludes}"/>
             <!-- fileset dir="${plugindir}/Eclipse SWT AWT/pm/" includes="${includes}" excludes="${excludes}"/ -->
-            <!-- fileset dir="${plugindir}/Eclipse SWT Drag and Drop/pm/" includes="${includes}" excludes="${excludes}"/ -->
-            <!-- fileset dir="${plugindir}/Eclipse SWT Drag and Drop/common/" includes="${includes}" excludes="${excludes}"/ -->
+            <fileset dir="${plugindir}/Eclipse SWT Drag and Drop/pm/" includes="${includes}" excludes="${excludes}"/>
+            <fileset dir="${plugindir.orig}/Eclipse SWT Drag and Drop/common/" includes="${includes}" excludes="${excludes}"/>
             <!-- fileset dir="${plugindir}/Eclipse SWT Printing/pm/" includes="${includes}" excludes="${excludes}"/ -->
             <!-- fileset dir="${plugindir}/Eclipse SWT Printing/common/" includes="${includes}" excludes="${excludes}"/ -->
             <!-- fileset dir="${plugindir}/Eclipse SWT Program/pm/" includes="${includes}" excludes="${excludes}"/ -->
@@ -113,8 +114,8 @@
             <fileset dir="${plugindir.orig}/Eclipse SWT Accessibility/emulated/" includes="**/*.java" excludes=""/>
             <fileset dir="${plugindir.orig}/Eclipse SWT Accessibility/common/" includes="**/*.java" excludes=""/>
             <!-- fileset dir="${plugindir}/Eclipse SWT AWT/pm/" includes="**/*.java" excludes=""/ -->
-            <!-- fileset dir="${plugindir}/Eclipse SWT Drag and Drop/pm/" includes="**/*.java" excludes=""/ -->
-            <!-- fileset dir="${plugindir}/Eclipse SWT Drag and Drop/common/" includes="**/*.java" excludes=""/ -->
+            <fileset dir="${plugindir}/Eclipse SWT Drag and Drop/pm/" includes="**/*.java" excludes=""/>
+            <fileset dir="${plugindir.orig}/Eclipse SWT Drag and Drop/common/" includes="DND.java" excludes=""/>
             <!-- fileset dir="${plugindir}/Eclipse SWT Printing/pm/" includes="**/*.java" excludes=""/ -->
             <!-- fileset dir="${plugindir}/Eclipse SWT Printing/common/" includes="**/*.java" excludes=""/ -->
             <!-- fileset dir="${plugindir}/Eclipse SWT Program/pm/" includes="**/*.java" excludes=""/ -->
