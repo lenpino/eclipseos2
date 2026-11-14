@@ -45,12 +45,12 @@ import org.eclipse.swt.events.*;
  * are records of the container, which lives in native memory: they are handled
  * through their addresses (see <code>peek()</code> and <code>poke()</code>),
  * and the texts are allocated apart because the container keeps pointers to
- * them. The container has no check boxes, so <code>SWT.CHECK</code> has no
- * effect. In its tree view the container always has one selected record and
+ * them. In its tree view the container always has one selected record and
  * no more, so the selection is kept by the tree, which draws the texts of the
  * records (owner draw): the record of the container is the cursor. With the
  * keyboard the cursor moves and selects one item (Shift and Ctrl do not extend
- * the selection). See difference 013 in the project notes.
+ * the selection). The check boxes of SWT.CHECK are drawn by the tree before
+ * the text, after the image. See difference 013 in the project notes.
  * </p>
  */
 public class Tree extends Composite {
@@ -67,6 +67,15 @@ public class Tree extends Composite {
 	int cursorHandle;
 	/* Where a range that is selected with Shift starts */
 	TreeItem anchor;
+	/*
+	* SWT.CHECK: the text of a record starts with spaces, so that the container leaves room for
+	* the check box and a gap; the tree draws the box there and the text after it. The width of
+	* a space of the font of the container is not known to the tree (a GC measures another font):
+	* a space of the default font is about 2 pixels (2026-11-13), and there are enough for spaces
+	* of a pixel and a half; the room left is at the end of the text.
+	*/
+	static final String CHECK_PREFIX = "            ";
+	static final int CHECK_GAP = 4;
 	int cnrInfoPtr;
 
 	static final int TreeProc;
@@ -907,6 +916,15 @@ int windowProc (int msg, int mp1, int mp2) {
 		Point point = new Point ((short) (mp1 & 0xFFFF), getHeight () - 1 - (short) (mp1 >> 16));
 		TreeItem item = null, row = null;
 		TreeItem [] visible = visibleItems ();
+		/* A click on a check box changes it, and the container does not get it: the selection stays */
+		if ((style & SWT.CHECK) != 0) {
+			for (int i=0; i<visible.length; i++) {
+				if (checkBounds (visible [i]).contains (point)) {
+					toggleCheck (visible [i]);
+					return 0;
+				}
+			}
+		}
 		for (int i=0; i<visible.length && row == null; i++) {
 			Rectangle bounds = visible [i].getBounds ();
 			if (bounds.y <= point.y && point.y < bounds.y + bounds.height) {
@@ -918,6 +936,15 @@ int windowProc (int msg, int mp1, int mp2) {
 		int result = super.windowProc (msg, mp1, mp2);
 		if (item != null && !isDisposed () && !item.isDisposed ()) clickItem (item, OS.SHORT2FROMMP (mp2));
 		return result;
+	}
+	if (msg == OS.WM_CHAR && (style & SWT.CHECK) != 0) {
+		/* The space bar changes the check box of the item that has the cursor */
+		int flags = mp1 & 0xFFFF;
+		TreeItem item = itemOf (cursorHandle);
+		if ((flags & OS.KC_KEYUP) == 0 && (flags & OS.KC_VIRTUALKEY) != 0 && ((mp2 >> 16) & 0xFFFF) == OS.VK_SPACE && item != null) {
+			toggleCheck (item);
+			return 0;
+		}
 	}
 	int result = super.windowProc (msg, mp1, mp2);
 	/*
@@ -939,6 +966,43 @@ int windowProc (int msg, int mp1, int mp2) {
  * Notifications of the container (WM_CONTROL): mp1 = (id, code) and mp2
  * is a pointer to a structure that depends on the code.
  */
+/* The spaces before the text of a record with SWT.CHECK, or nothing (see the fields) */
+String checkPrefix () {
+	return (style & SWT.CHECK) != 0 ? CHECK_PREFIX : "";
+}
+
+/*
+ * The check box of an item, in the coordinates of the tree: one pixel inside the left of
+ * the rectangle of its text and in its middle, as it is drawn. Empty without SWT.CHECK.
+ */
+Rectangle checkBounds (TreeItem item) {
+	if ((style & SWT.CHECK) == 0) return new Rectangle (0, 0, 0, 0);
+	/* RECTL: xLeft, yBottom, xRight, yTop. QUERYRECORDRECT: cb, pRecord, fRightSplitWindow, fsExtent */
+	int rect = allocate (16), query = allocate (16);
+	poke (query, 16);
+	poke (query + 4, item.handle);
+	poke (query + 12, OS.CMA_TEXT);
+	Rectangle result = new Rectangle (0, 0, 0, 0);
+	if (send (OS.CM_QUERYRECORDRECT, rect, query) != 0) {
+		int left = peek (rect), bottom = peek (rect + 4), top = peek (rect + 12);
+		int height = top - bottom, size = Math.min (Table.CHECK_SIZE, height);
+		int boxBottom = bottom + (height - size) / 2;
+		result = new Rectangle (left + 1, getHeight () - (boxBottom + size), size, size);
+	}
+	OS.free (query);
+	OS.free (rect);
+	return result;
+}
+
+/* The check box of an item changed by the user: a Selection with SWT.CHECK, as on Windows */
+void toggleCheck (TreeItem item) {
+	item.setChecked (!item.checked);
+	Event event = new Event ();
+	event.item = item;
+	event.detail = SWT.CHECK;
+	postEvent (SWT.Selection, event);
+}
+
 /*
  * A click of the user on an item, with the keys that were down: Ctrl adds or removes it,
  * and Shift selects the items between the anchor and it, in a MULTI tree, as on Windows.
@@ -997,7 +1061,20 @@ MRESULT wmDrawChild (int mp1, int mp2) {
 		background = item.background != -1 ? item.background : getBackgroundPixel ();
 	}
 	OS.GpiCreateLogColorTable (struct.hps, 0, OS.LCOLF_RGB, 0, 0, null);
-	OS.WinDrawText (struct.hps, text.length, text, struct.rclItem, foreground, background, OS.DT_LEFT | OS.DT_VCENTER | OS.DT_ERASERECT);
+	if ((style & SWT.CHECK) != 0) {
+		/* The check box in the room of the spaces, in the middle of the text (see checkBounds()), and the text after it */
+		int height = struct.rclItem.yTop - struct.rclItem.yBottom, size = Math.min (Table.CHECK_SIZE, height);
+		OS.WinFillRect (struct.hps, struct.rclItem, background);
+		Table.drawCheck (struct.hps, struct.rclItem.xLeft + 1, struct.rclItem.yBottom + (height - size) / 2, size, item.checked, item.grayed);
+		RECTL rest = new RECTL ();
+		rest.xLeft = struct.rclItem.xLeft + 1 + size + CHECK_GAP;
+		rest.xRight = struct.rclItem.xRight;
+		rest.yBottom = struct.rclItem.yBottom;
+		rest.yTop = struct.rclItem.yTop;
+		OS.WinDrawText (struct.hps, text.length, text, rest, foreground, background, OS.DT_LEFT | OS.DT_VCENTER);
+	} else {
+		OS.WinDrawText (struct.hps, text.length, text, struct.rclItem, foreground, background, OS.DT_LEFT | OS.DT_VCENTER | OS.DT_ERASERECT);
+	}
 	OS.GpiCreateLogColorTable (struct.hps, OS.LCOL_RESET, OS.LCOLF_DEFAULT, 0, 0, null);
 	return new MRESULT (OS.TRUE);
 }

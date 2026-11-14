@@ -33,7 +33,7 @@ import org.eclipse.swt.graphics.*;
  * <p>
  * OS/2 note: an item is a record of the container (<code>handle</code> is its
  * address). The tree draws the text with the colors of the item (the image
- * has no background color). There are no check boxes. See the notes of
+ * has no background color), and the check box before it. See the notes of
  * <code>Tree</code>.
  * </p>
  */
@@ -232,9 +232,6 @@ public Rectangle getBounds () {
  * Returns <code>true</code> if the receiver is checked,
  * and false otherwise.  When the parent does not have
  * the <code>CHECK style, return false.
- * <p>
- * OS/2 note: the container has no check boxes: the state is only kept.
- * </p>
  *
  * @return the checked state of the checkbox
  *
@@ -433,8 +430,10 @@ public void setBackground (Color color) {
  */
 public void setChecked (boolean checked) {
 	checkWidget ();
-	if ((parent.style & SWT.CHECK) == 0) return;
+	if ((parent.style & SWT.CHECK) == 0 || this.checked == checked) return;
 	this.checked = checked;
+	/* The tree draws the check box (see Tree.wmDrawChild()) */
+	if (handle != 0) parent.invalidateRecord (handle, OS.CMA_NOREPOSITION);
 }
 
 /**
@@ -494,8 +493,9 @@ public void setForeground (Color color) {
  */
 public void setGrayed (boolean grayed) {
 	checkWidget ();
-	if ((parent.style & SWT.CHECK) == 0) return;
+	if ((parent.style & SWT.CHECK) == 0 || this.grayed == grayed) return;
 	this.grayed = grayed;
+	if (handle != 0) parent.invalidateRecord (handle, OS.CMA_NOREPOSITION);
 }
 
 /**
@@ -538,7 +538,8 @@ public void setImage (Image image) {
  * apart and freed when it is replaced and when the item goes away.
  */
 void setRecordText (int hRecord, String string) {
-	int ptr = Tree.allocateString (string);
+	/* Room for the check box at the start (see Tree.checkPrefix()) */
+	int ptr = Tree.allocateString (parent.checkPrefix () + string);
 	Tree.poke (hRecord + Tree.REC_PSZICON, ptr);
 	Tree.poke (hRecord + Tree.REC_PSZTEXT, ptr);
 	Tree.poke (hRecord + Tree.REC_PSZNAME, ptr);

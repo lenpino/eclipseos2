@@ -686,6 +686,111 @@ public class SWT011_01 extends SWTTestCase {
 		return pel;
 	}
 
+	/*
+	 * The check boxes of SWT.CHECK, drawn by the tree before the text. The box is found by
+	 * its dark square frame in the pixels; a click on it and the space bar change it and send
+	 * a Selection with SWT.CHECK, without changing the selection.
+	 */
+	void checkChecksOnScreen() {
+		saySubObjective("Check boxes, seen on the screen");
+		Shell window = new Shell(display, SWT.NO_TRIM);
+		window.setBounds(10, 10, 300, 200);
+		window.open();
+		Tree tree = new Tree(window, SWT.MULTI | SWT.CHECK | SWT.BORDER);
+		tree.setBounds(0, 0, 300, 200);
+		TreeItem[] items = new TreeItem[4];
+		for (int i = 0; i < items.length; i++) {
+			items[i] = new TreeItem(tree, SWT.NONE);
+			items[i].setText("Item " + i);
+		}
+		items[3].setImage(image);
+		final int[] events = new int[2];
+		final TreeItem[] last = new TreeItem[1];
+		tree.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				if (e.detail == SWT.CHECK) events[0]++; else events[1]++;
+				last[0] = (TreeItem) e.item;
+			}
+		});
+		items[1].setChecked(true);
+		items[2].setChecked(true);
+		items[2].setGrayed(true);
+		settle(tree);
+		check(items[0].getText().equals("Item 0"), "getText has no room for the box in it");
+		check(events[0] == 0 && events[1] == 0, "setChecked and setGrayed send no event");
+		Rectangle[] boxes = new Rectangle[items.length];
+		for (int i = 0; i < items.length; i++) boxes[i] = box(tree, items[i].getBounds());
+		check(boxes[0] != null && boxes[0].width >= 9, "a check box is drawn in the item: " + boxes[0] + " in " + items[0].getBounds());
+		check(inside(tree, boxes[0]).equals("light"), "an unchecked box is empty: " + inside(tree, boxes[0]));
+		check(inside(tree, boxes[1]).equals("dark light"), "a checked one has the mark: " + inside(tree, boxes[1]));
+		check(inside(tree, boxes[2]).equals("dark gray"), "a grayed one is gray, with the mark: " + inside(tree, boxes[2]));
+		Rectangle icon = items[3].getBounds();
+		check(boxes[3] != null && boxes[3].x > icon.x + 16, "with an image the box is after it: " + boxes[3] + " in " + icon);
+		Rectangle b0 = items[0].getBounds();
+		int text = -1;
+		for (int x = boxes[0].x + boxes[0].width + 1; x < b0.x + b0.width && text == -1; x++) {
+			for (int y = b0.y; y < b0.y + b0.height && text == -1; y++) if (dark(pel(tree, x, y))) text = x;
+		}
+		check(text > boxes[0].x + boxes[0].width + 1, "the text is after the box, with a gap: from " + text + ", box to " + (boxes[0].x + boxes[0].width));
+
+		tree.setSelection(new TreeItem[] {items[3]});
+		settle(tree);
+		mouse(tree, boxes[0].x + boxes[0].width / 2, boxes[0].y + boxes[0].height / 2, 0);
+		settle(tree);
+		check(items[0].getChecked() && events[0] == 1 && last[0] == items[0], "a click on the box checks the item, with a Selection of SWT.CHECK: " + events[0]);
+		check(tree.getSelectionCount() == 1 && tree.getSelection()[0] == items[3] && events[1] == 0, "and the selection does not change");
+		check(inside(tree, boxes[0]).equals("dark light"), "the mark is drawn");
+		mouse(tree, boxes[1].x + boxes[1].width / 2, boxes[1].y + boxes[1].height / 2, 0);
+		settle(tree);
+		check(!items[1].getChecked() && events[0] == 2, "a click on a checked box unchecks it");
+		mouse(tree, text + 3, b0.y + b0.height / 2, 0);
+		settle(tree);
+		check(items[0].getChecked() && events[0] == 2 && tree.getSelection()[0] == items[0], "a click on the text selects and does not change the box");
+
+		/* The space bar, for the item that has the cursor (the one clicked last) */
+		OS.WinSendMsg(tree.handle, OS.WM_CHAR, OS.KC_VIRTUALKEY | OS.KC_CHAR, ' ' | (OS.VK_SPACE << 16));
+		settle(tree);
+		check(!items[0].getChecked() && events[0] == 3 && last[0] == items[0], "the space bar changes the box of the item with the cursor: " + events[0]);
+		window.dispose();
+	}
+
+	/* The square of a dark frame in a rectangle: a column of dark pixels at least 9 high, and a row as long from its top */
+	Rectangle box(Tree tree, Rectangle area) {
+		for (int x = area.x; x < area.x + area.width; x++) {
+			int top = -1, run = 0;
+			for (int y = area.y; y < area.y + area.height; y++) {
+				if (dark(pel(tree, x, y))) {
+					if (run == 0) top = y;
+					run++;
+					if (run >= 9 && (y + 1 == area.y + area.height || !dark(pel(tree, x, y + 1)))) {
+						boolean square = true;
+						for (int i = 0; i < run && square; i++) square = dark(pel(tree, x + i, top));
+						if (square) return new Rectangle(x, top, run, run);
+					}
+				} else {
+					run = 0;
+				}
+			}
+		}
+		return null;
+	}
+
+	/* What is inside the frame of a box: dark (the mark), light (white) and gray pixels */
+	String inside(Tree tree, Rectangle box) {
+		if (box == null) return "no box";
+		boolean isDark = false, light = false, gray = false;
+		for (int y = box.y + 1; y < box.y + box.height - 1; y++) {
+			for (int x = box.x + 1; x < box.x + box.width - 1; x++) {
+				int pel = pel(tree, x, y);
+				int lum = (((pel >> 16) & 0xFF) + ((pel >> 8) & 0xFF) + (pel & 0xFF)) / 3;
+				if (dark(pel)) isDark = true;
+				else if (lum > 240) light = true;
+				else gray = true;
+			}
+		}
+		return ((isDark ? "dark " : "") + (light ? "light " : "") + (gray ? "gray" : "")).trim();
+	}
+
 	void settle(Tree tree) {
 		pump();
 		for (int i = 0; i < 20; i++) display.readAndDispatch();
@@ -743,12 +848,13 @@ public class SWT011_01 extends SWTTestCase {
 		checkDispose();
 		checkImagesAndColors();
 		checkColorsOnScreen();
+		checkChecksOnScreen();
 		checkScrollingOnScreen();
 		say("\n" + checks + " checks passed.\n");
 
-		sayObjective("Interactive: click, Ctrl and Shift click, the arrow keys, double click, Enter, the plus signs (they do not select), the buttons Show the last / Show the first");
+		sayObjective("Interactive: click, Ctrl and Shift click, the arrow keys, double click, Enter, the plus signs (they do not select), the check boxes and the space bar, the buttons Show the last / Show the first");
 		shell.setLayout(null);
-		final Tree tree = new Tree(shell, SWT.MULTI | SWT.BORDER);
+		final Tree tree = new Tree(shell, SWT.MULTI | SWT.CHECK | SWT.BORDER);
 		final Text log = new Text(shell, SWT.BORDER | SWT.MULTI | SWT.READ_ONLY);
 		final Button showLast = new Button(shell, SWT.PUSH), showFirst = new Button(shell, SWT.PUSH);
 		showLast.setText("Show the last");
@@ -800,7 +906,9 @@ public class SWT011_01 extends SWTTestCase {
 		showFirst.addListener(SWT.Selection, show);
 		tree.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				String msg = "Selection: " + ((TreeItem) e.item).getText() + " (" + tree.getSelectionCount() + " selected)";
+				String msg = e.detail == SWT.CHECK
+					? "Check: " + ((TreeItem) e.item).getText() + " is " + (((TreeItem) e.item).getChecked() ? "checked" : "not checked")
+					: "Selection: " + ((TreeItem) e.item).getText() + " (" + tree.getSelectionCount() + " selected)";
 				say(msg);
 				log.setText(msg);
 			}
