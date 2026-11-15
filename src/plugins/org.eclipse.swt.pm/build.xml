@@ -117,7 +117,7 @@
             <fileset dir="${plugindir.orig}/Eclipse SWT Accessibility/common/" includes="**/*.java" excludes=""/>
             <!-- fileset dir="${plugindir}/Eclipse SWT AWT/pm/" includes="**/*.java" excludes=""/ -->
             <fileset dir="${plugindir}/Eclipse SWT Drag and Drop/pm/" includes="**/*.java" excludes=""/>
-            <fileset dir="${plugindir.orig}/Eclipse SWT Drag and Drop/common/" includes="DND.java" excludes=""/>
+            <fileset dir="${plugindir.orig}/Eclipse SWT Drag and Drop/common/" includes="**/*.java" excludes=""/>
             <fileset dir="${plugindir}/Eclipse SWT Printing/pm/" includes="**/*.java" excludes=""/>
             <fileset dir="${plugindir.orig}/Eclipse SWT Printing/common/" includes="**/*.java" excludes=""/>
             <fileset dir="${plugindir}/Eclipse SWT/emulated/bidi/" includes="**/*.java" excludes=""/>

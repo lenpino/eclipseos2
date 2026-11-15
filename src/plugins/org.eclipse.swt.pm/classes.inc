@@ -241,7 +241,7 @@ org\eclipse\swt\accessibility\AccessibleControlListener.java
 org\eclipse\swt\accessibility\AccessibleEvent.java
 org\eclipse\swt\accessibility\AccessibleListener.java
 
-# SWT Drag and Drop (#): the clipboard only
+# SWT Drag and Drop (#): the clipboard, and the API of drag and drop (not ported yet)
 
 org\eclipse\swt\dnd\Clipboard.java
 org\eclipse\swt\dnd\Transfer.java
@@ -249,10 +249,23 @@ org\eclipse\swt\dnd\TransferData.java
 org\eclipse\swt\dnd\ByteArrayTransfer.java
 org\eclipse\swt\dnd\TextTransfer.java
 org\eclipse\swt\dnd\RTFTransfer.java
+org\eclipse\swt\dnd\FileTransfer.java
+org\eclipse\swt\dnd\DragSource.java
+org\eclipse\swt\dnd\DropTarget.java
 
 # SWT Drag and Drop
 
 org\eclipse\swt\dnd\DND.java
+org\eclipse\swt\dnd\DNDEvent.java
+org\eclipse\swt\dnd\DNDListener.java
+org\eclipse\swt\dnd\DragSourceAdapter.java
+org\eclipse\swt\dnd\DragSourceEvent.java
+org\eclipse\swt\dnd\DragSourceListener.java
+org\eclipse\swt\dnd\DragUnderEffect.java
+org\eclipse\swt\dnd\DropTargetAdapter.java
+org\eclipse\swt\dnd\DropTargetEvent.java
+org\eclipse\swt\dnd\DropTargetListener.java
+org\eclipse\swt\dnd\NoDragUnderEffect.java
 
 # SWT Printing (#): not ported, what the custom widgets need
 
