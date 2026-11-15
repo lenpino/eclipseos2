@@ -247,9 +247,9 @@ int callWindowProc (int msg, int mp1, int mp2) {
         }
 }
 
-//protected void checkSubclass () {
-//	if (!isValidSubclass ()) error (SWT.ERROR_INVALID_SUBCLASS);
-//}
+protected void checkSubclass () {
+	if (!isValidSubclass ()) error (SWT.ERROR_INVALID_SUBCLASS);
+}
 
 static int checkStyle (int style) {
 	/*

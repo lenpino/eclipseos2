@@ -1206,4 +1206,54 @@ MRESULT WM_DESTROY (int mp1, int mp2) {
 //	}
 //	return result;
 //}
+
+/**
+ * Returns the receiver's input method editor mode. This
+ * will be the result of bitwise OR'ing together one or
+ * more of the following constants defined in class
+ * <code>SWT</code>:
+ * <code>NONE</code>, <code>ROMAN</code>, <code>DBCS</code>,
+ * <code>PHONETIC</code>, <code>NATIVE</code>, <code>ALPHA</code>.
+ * <p>
+ * OS/2 note: the input method of the system is not controlled: the mode is
+ * always <code>NONE</code>.
+ * </p>
+ *
+ * @return the IME mode
+ *
+ * @exception SWTException <ul>
+ *    <li>ERROR_WIDGET_DISPOSED - if the receiver has been disposed</li>
+ *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
+ * </ul>
+ *
+ * @see SWT
+ */
+public int getImeInputMode () {
+	checkWidget ();
+	return SWT.NONE;
+}
+
+/**
+ * Sets the input method editor mode to the argument which
+ * should be the result of bitwise OR'ing together one or more
+ * of the following constants defined in class <code>SWT</code>:
+ * <code>NONE</code>, <code>ROMAN</code>, <code>DBCS</code>,
+ * <code>PHONETIC</code>, <code>NATIVE</code>, <code>ALPHA</code>.
+ * <p>
+ * OS/2 note: it does nothing (see <code>getImeInputMode()</code>).
+ * </p>
+ *
+ * @param mode the new IME mode
+ *
+ * @exception SWTException <ul>
+ *    <li>ERROR_WIDGET_DISPOSED - if the receiver has been disposed</li>
+ *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
+ * </ul>
+ *
+ * @see SWT
+ */
+public void setImeInputMode (int mode) {
+	checkWidget ();
+}
+
 }

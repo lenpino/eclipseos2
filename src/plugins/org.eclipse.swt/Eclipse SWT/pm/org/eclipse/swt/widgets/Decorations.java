@@ -94,6 +94,8 @@ import org.eclipse.swt.events.*;
 public class Decorations extends Canvas {
 //@@TODO(dmik)    
 	Image image;
+	/* The icon of the frame made from a bitmap given to setImage(), freed with the window */
+	Image icon;
 	Menu menuBar;
 	Menu [] menus;
 	MenuItem [] items;
@@ -549,6 +551,52 @@ public Image getImage () {
 }
 
 /**
+ * Sets the receiver's image to the argument, which may
+ * be null. The image is typically displayed by the window
+ * manager when the instance is marked as iconified, and
+ * may also be displayed somewhere in the trim when the
+ * instance is in normal or maximized states.
+ * <p>
+ * OS/2 note: the image is the icon of the frame (<code>WM_SETICON</code>). A
+ * bitmap is made into an icon with its transparency; an icon is used as it is.
+ * </p>
+ *
+ * @param image the new image (or null)
+ *
+ * @exception IllegalArgumentException <ul>
+ *    <li>ERROR_INVALID_ARGUMENT - if the image has been disposed</li>
+ * </ul>
+ * @exception SWTException <ul>
+ *    <li>ERROR_WIDGET_DISPOSED - if the receiver has been disposed</li>
+ *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
+ * </ul>
+ */
+public void setImage (Image image) {
+	checkWidget ();
+	if (image != null && image.isDisposed ()) error (SWT.ERROR_INVALID_ARGUMENT);
+	Image oldIcon = icon;
+	icon = null;
+	int hIcon = 0;
+	if (image != null) {
+		if (image.type == SWT.ICON) {
+			hIcon = image.handle;
+		} else {
+			try {
+				ImageData data = image.getImageData ();
+				icon = new Image (getDisplay (), data, data.getTransparencyMask ());
+				hIcon = icon.handle;
+			} catch (SWTException e) {
+				/* The window keeps the icon it has */
+			} catch (SWTError e) {
+			}
+		}
+	}
+	this.image = image;
+	OS.WinSendMsg (frameHandle, OS.WM_SETICON, hIcon, 0);
+	if (oldIcon != null) oldIcon.dispose ();
+}
+
+/**
  * Returns <code>true</code> if the receiver is currently
  * maximized, and false otherwise. 
  * <p>
@@ -758,6 +806,8 @@ void releaseWidget () {
 	menus = null;
 
     super.releaseWidget ();
+    if (icon != null) icon.dispose ();
+    icon = null;
     
 //@@TODO (dmik): later    
 //	if (hIcon != 0) OS.DestroyIcon (hIcon);

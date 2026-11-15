@@ -271,7 +271,7 @@ public class OS {
 //    public static final int WM_SETBORDERSIZE =      0x0044;
 //    public static final int WM_TRACKFRAME =         0x0045;
 //    public static final int WM_MINMAXFRAME =        0x0046;
-//    public static final int WM_SETICON =            0x0047;
+    public static final int WM_SETICON =            0x0047;
 //    public static final int WM_QUERYICON =          0x0048;
     public static final int WM_SETACCELTABLE =      0x0049;
     public static final int WM_QUERYACCELTABLE =    0x004a;
