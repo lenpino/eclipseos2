@@ -1058,6 +1058,12 @@ href="eclipseos2-xxe.css"
       icons) and <kbd>SWT027_02</kbd> (11 checks) cover icons made this way;
       all the automatic tests still pass.</li>
 
+      <li>Icons in a tree: the container drew bitmaps opaque and did not draw
+      the icons that JFace makes (with a mask), so the Package Explorer had
+      none. The tree now draws the icon of each item with its transparency,
+      as the image list of Windows. New test <kbd>SWT027_03</kbd> (11 checks,
+      failed before); all the automatic tests still pass.</li>
+
       <li><a href="swt028.html">Step 028</a>: the title of an active view of
       Eclipse began with a green block. <code>fillGradientRectangle</code> with
       two equal colors (both title colors are the same on PM) drew an outline

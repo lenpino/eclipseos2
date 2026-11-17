@@ -1771,6 +1771,55 @@ public int internal_transparent_rgb () {
     return bmi [4 + transparentPixel] & 0xFFFFFF;
 }
 
+/**
+ * Invokes platform specific functionality to draw the image with its transparency at
+ * (x, y) of the presentation space (PM coordinates: the bottom left corner), which must be
+ * in RGB mode: a bitmap with BM_SRCTRANSPARENT and the color of its transparent pixel, an
+ * icon with its AND and XOR masks. What the native controls do, as the image lists of Windows.
+ * <p>
+ * <b>IMPORTANT:</b> This method is <em>not</em> part of the public
+ * API for <code>Image</code>. It is marked public only so that it
+ * can be shared within the packages provided by SWT. It is not
+ * available on all platforms, and should never be called from
+ * application code.
+ * </p>
+ *
+ * @private
+ */
+public void internal_draw (int hps, int x, int y) {
+    Rectangle bounds = getBounds ();
+    if (type == SWT.ICON && maskHandle != 0) {
+        OS.GpiSetColor (hps, (device.hPalette != 0) ? 15 : 0xFFFFFF);
+        OS.GpiSetBackColor (hps, 0);
+        /* AND mask, the icon, XOR mask */
+        OS.GpiWCBitBlt (hps, maskHandle, 4,
+            new int[] {x, y, x + bounds.width - 1, y + bounds.height - 1, 0, bounds.height, bounds.width, bounds.height << 1},
+            OS.ROP_SRCAND, OS.BBO_IGNORE);
+        OS.GpiWCBitBlt (hps, handle, 4,
+            new int[] {x, y, x + bounds.width - 1, y + bounds.height - 1, 0, 0, bounds.width, bounds.height},
+            OS.ROP_SRCINVERT, OS.BBO_IGNORE);
+        OS.GpiWCBitBlt (hps, maskHandle, 4,
+            new int[] {x, y, x + bounds.width - 1, y + bounds.height - 1, 0, 0, bounds.width, bounds.height},
+            OS.ROP_SRCINVERT, OS.BBO_IGNORE);
+        return;
+    }
+    if (type == SWT.ICON) {
+        OS.WinDrawPointer (hps, x, y, handle, OS.DP_NORMAL);
+        return;
+    }
+    int transparent = internal_transparent_rgb ();
+    int oldBackColor = OS.GpiQueryBackColor (hps), oldBackMix = OS.GpiQueryBackMix (hps);
+    if (transparent != -1) {
+        OS.GpiSetBackColor (hps, transparent);
+        OS.GpiSetBackMix (hps, OS.BM_SRCTRANSPARENT);
+    }
+    OS.GpiWCBitBlt (hps, handle, 4,
+        new int[] {x, y, x + bounds.width - 1, y + bounds.height - 1, 0, 0, bounds.width, bounds.height},
+        OS.ROP_SRCCOPY, OS.BBO_IGNORE);
+    OS.GpiSetBackColor (hps, oldBackColor);
+    OS.GpiSetBackMix (hps, oldBackMix);
+}
+
 int new_compatible_GC (GCData data, int compatDC, int width, int height) {
     int hab = org.eclipse.swt.widgets.Display.internal_get_HAB ();
     int memDC = OS.DevOpenDC (

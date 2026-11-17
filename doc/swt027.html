@@ -79,6 +79,22 @@ href="eclipseos2-xxe.css"
       now twelve, of 1, 2, 3, 4 and 5 bits (save, print and back
       added).</li>
 
+      <li>Icons in a tree (<kbd>SWT027_03</kbd>, 11 checks read from the
+      screen, as bitmaps and as icons made with a mask). Windows draws the
+      images of a tree from an image list (<code>Tree.imageIndex</code>), with
+      their mask. The container of PM drew the bitmap of a record opaque (the
+      transparent part showed the color of the transparent entry) and did not
+      draw the icons made with a mask at all: the Package Explorer had no
+      icons. The tree owner draws its items already; it now draws the icon
+      part too (<code>WM_DRAWITEM</code> with <code>CMA_ICON</code>), on the
+      background of the tree, with <code>Image.internal_draw</code>, which
+      draws a bitmap with its transparent color or an icon with its masks.
+      The checks failed before.</li>
+
+      <li>Found with that test, not fixed yet: <code>TreeItem.getBounds</code>
+      starts at the image on PM; on Windows it gives the bounds of the
+      text.</li>
+
       <li>Seen while reading the code, not checked yet:
       <code>Image.setBackground</code> uses the red twice when it makes the
       color of the transparent entry.</li>
@@ -123,7 +139,23 @@ href="eclipseos2-xxe.css"
       </tr>
 
       <tr>
-        <td>Images in native controls: labels (<code>SS_BITMAP</code>), trees and tables (the records of the container)</td>
+        <td>Icons in a tree</td>
+
+        <td>Done [lpino]</td>
+
+        <td>Checked by <kbd>SWT027_03</kbd> on the screen.</td>
+      </tr>
+
+      <tr>
+        <td><code>TreeItem.getBounds</code>: the text only, as on Windows</td>
+
+        <td>Not done</td>
+
+        <td>Starts at the image.</td>
+      </tr>
+
+      <tr>
+        <td>Images in native controls: labels (<code>SS_BITMAP</code>), tables (the records of the container)</td>
 
         <td>Not done</td>
 

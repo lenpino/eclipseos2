@@ -1057,6 +1057,7 @@ void clickItem (TreeItem item, int keys) {
 MRESULT wmDrawChild (int mp1, int mp2) {
 	OWNERITEM struct = new OWNERITEM ();
 	OS.objcpy (struct, mp2);
+	if (struct.idItem == OS.CMA_ICON && struct.hItem != 0) return drawImage (struct);
 	if (struct.idItem != OS.CMA_TEXT || struct.hItem == 0) return null;
 	TreeItem item = itemOf (peek (struct.hItem));
 	if (item == null) return null;
@@ -1083,6 +1084,27 @@ MRESULT wmDrawChild (int mp1, int mp2) {
 		OS.WinDrawText (struct.hps, text.length, text, rest, foreground, background, OS.DT_LEFT | OS.DT_VCENTER);
 	} else {
 		OS.WinDrawText (struct.hps, text.length, text, struct.rclItem, foreground, background, OS.DT_LEFT | OS.DT_VCENTER | OS.DT_ERASERECT);
+	}
+	OS.GpiCreateLogColorTable (struct.hps, OS.LCOL_RESET, OS.LCOLF_DEFAULT, 0, 0, null);
+	return new MRESULT (OS.TRUE);
+}
+
+/*
+ * The image of a record (the icon part of WM_DRAWITEM): Windows draws the images of a tree from
+ * an image list, with their mask; the container drew nothing here (it owner draws the item). The
+ * image is drawn with its transparency, centered in the part, on the background of the tree.
+ */
+MRESULT drawImage (OWNERITEM struct) {
+	TreeItem item = itemOf (peek (struct.hItem));
+	if (item == null) return null;
+	OS.GpiCreateLogColorTable (struct.hps, 0, OS.LCOLF_RGB, 0, 0, null);
+	OS.WinFillRect (struct.hps, struct.rclItem, getBackgroundPixel ());
+	Image image = item.getImage ();
+	if (image != null) {
+		Rectangle bounds = image.getBounds ();
+		int x = struct.rclItem.xLeft + (struct.rclItem.xRight - struct.rclItem.xLeft - bounds.width) / 2;
+		int y = struct.rclItem.yBottom + (struct.rclItem.yTop - struct.rclItem.yBottom - bounds.height) / 2;
+		image.internal_draw (struct.hps, x, y);
 	}
 	OS.GpiCreateLogColorTable (struct.hps, OS.LCOL_RESET, OS.LCOLF_DEFAULT, 0, 0, null);
 	return new MRESULT (OS.TRUE);
