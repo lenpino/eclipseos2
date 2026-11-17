@@ -42,6 +42,21 @@ href="eclipseos2-xxe.css"
       This second check was not seen failing first: the exception stopped the
       test before it.</li>
 
+      <li>The views of Eclipse showed gray, also their titles, and parts came
+      and went when a menu closed over them (2026-11-17). A dump of the windows
+      of PM (<code>-Dswt.watchdog.dump</code>) showed why: the
+      <code>ViewForm</code> of a view is a sibling placed over its
+      <code>CTabFolder</code>, and no control had <code>WS_CLIPSIBLINGS</code>
+      (commented out in <code>Control.widgetStyle</code> since the first
+      version; Windows sets it). On PM a window without it paints over the
+      siblings above it, so each repaint of the folder (at startup, when
+      maximized, when a menu closed) painted gray over the view. Every
+      control has <code>WS_CLIPSIBLINGS</code> now. <code>Composite</code>
+      also set it while painting, but after <code>WinBeginPaint</code>, when
+      the clipping is already made. New test <kbd>SWT026_02</kbd> (7 checks,
+      it read red over the green sibling before the fix); all the automatic
+      tests from <kbd>SWT010_01</kbd> to <kbd>SWT026_01</kbd> still pass.</li>
+
       <li><kbd>SWT013_01</kbd>, <kbd>SWT014_01</kbd>, <kbd>SWT015_01</kbd>,
       <kbd>SWT016_01</kbd>, <kbd>SWT018_01</kbd>, <kbd>SWT020_01</kbd> and
       <kbd>SWT023_02</kbd>, which use labels, still pass.</li>
@@ -75,7 +90,16 @@ href="eclipseos2-xxe.css"
       </tr>
 
       <tr>
-        <td>Repainting after a menu closes, the gradients of the tab titles</td>
+        <td>Siblings clip each other (<code>WS_CLIPSIBLINGS</code>): the views of Eclipse</td>
+
+        <td>Done [lpino]</td>
+
+        <td>Checked by <kbd>SWT026_02</kbd> on the screen. Not yet seen in Eclipse.</td>
+      </tr>
+
+      <tr>
+        <td>The gradients of the view titles, mnemonics in labels and tabs,
+        empty rows in the File menu, tree items painted late</td>
 
         <td>Not done</td>
 

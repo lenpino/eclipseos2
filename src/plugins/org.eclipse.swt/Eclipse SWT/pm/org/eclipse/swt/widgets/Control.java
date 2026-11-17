@@ -2912,10 +2912,11 @@ void updateFont (Font oldFont, Font newFont) {
 //}
 
 int widgetStyle () {
-    /* Force strict clipping by setting WS_CLIPSIBLINGS */
-    //@@TODO (lpino): Remove log
-//    System.out.println("Control::widgetStyle");
-    return OS.WS_VISIBLE;// | OS.WS_CLIPSIBLINGS;
+    /*
+     * Force strict clipping by setting WS_CLIPSIBLINGS, as on Windows. Without it a control
+     * painted over the siblings above it: the CTabFolder of Eclipse over its views (2026-11-17).
+     */
+    return OS.WS_VISIBLE | OS.WS_CLIPSIBLINGS;
 
     /*
     * This code is intentionally commented.  When strict

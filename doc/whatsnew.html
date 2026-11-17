@@ -1029,6 +1029,13 @@ href="eclipseos2-xxe.css"
       <kbd>SWT018_01</kbd>, <kbd>SWT020_01</kbd> and <kbd>SWT023_02</kbd>
       still pass. The user checked <kbd>SWT025_01</kbd> and
       <kbd>SWT009_08</kbd> on the screen.</li>
+
+      <li>The views of Eclipse were gray: no control had
+      <code>WS_CLIPSIBLINGS</code>, so the <code>CTabFolder</code> painted over
+      the <code>ViewForm</code> placed over it as a sibling. Every control has
+      it now, as on Windows. New test <kbd>SWT026_02</kbd> (7 checks, failed
+      before); all the automatic tests still pass. Found with a dump of the
+      windows of PM from the watchdog (<code>-Dswt.watchdog.dump</code>).</li>
     </ul>
   </body>
 </html>
