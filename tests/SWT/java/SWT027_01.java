@@ -24,7 +24,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 /**
- *  Validates the images of Eclipse: GIFs of 2, 4 and 5 bits with a
+ *  Validates the images of Eclipse: GIFs of 1, 2, 3, 4 and 5 bits with a
  *  transparent pixel, taken from the plugins of Eclipse 2.0.1 (the three
  *  versions of a tool icon, etool16, ctool16 and dtool16, and icons of
  *  objects), drawn with GC.drawImage on white and on black.
@@ -46,7 +46,8 @@ public class SWT027_01 extends SWTTestCase {
 
 	static final String DIR = System.getProperty("user.dir") + "/tests/SWT/images/eclipse/";
 	static final String[] FILES = {"new_wiz_e.gif", "new_wiz_c.gif", "new_wiz_d.gif", "fldr_obj.gif",
-		"prj_obj.gif", "package_obj.gif", "jar_obj.gif"};
+		"prj_obj.gif", "package_obj.gif", "jar_obj.gif", "save_edit_e.gif", "save_edit_d.gif", "print_edit_d.gif",
+		"backward_nav_e.gif", "backward_nav_d.gif"};
 
 	int checks, failures;
 
@@ -199,6 +200,11 @@ public class SWT027_01 extends SWTTestCase {
 		}
 		checkImageData(datas, images);
 		checkDrawn(datas, images);
+		saySubObjective("The same as icons made from data and mask, as JFace does");
+		Image[] icons = new Image[FILES.length];
+		for (int i = 0; i < FILES.length; i++) icons[i] = new Image(display, datas[i], datas[i].getTransparencyMask());
+		checkDrawn(datas, icons);
+		for (int i = 0; i < icons.length; i++) icons[i].dispose();
 		checkGray(datas, images);
 		for (int i = 0; i < images.length; i++) images[i].dispose();
 		say("\n" + checks + " checks, " + failures + " failed.\n");

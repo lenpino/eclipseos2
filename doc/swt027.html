@@ -63,6 +63,22 @@ href="eclipseos2-xxe.css"
       the one of the push button was fixed with the test (its first version
       read the white border as the face).</li>
 
+      <li>The tool items of Eclipse still showed black squares: JFace makes
+      their images as icons, <code>new Image (display, data,
+      data.getTransparencyMask ())</code> (seen in a dump of the windows of
+      Eclipse with the image of each button). Windows makes the mask with
+      <code>CreateBitmap (width, height, 1, 1, maskData)</code>: one bit, 0
+      black and 1 white, then inverts it. The port took the header of the
+      color bitmap for the mask, so the two colors of the mask were the first
+      two of the palette of the icon; the icons whose first color is light
+      were black squares, the others were right (and an image of direct
+      colors had no colors for its mask at all). The mask has a header of its
+      own now, with black and white. <kbd>SWT027_01</kbd> draws every icon a
+      second time made this way, and <kbd>SWT027_02</kbd> puts two of them in
+      a tool bar: 8 of those checks failed before. The icons of the tests are
+      now twelve, of 1, 2, 3, 4 and 5 bits (save, print and back
+      added).</li>
+
       <li>Seen while reading the code, not checked yet:
       <code>Image.setBackground</code> uses the red twice when it makes the
       color of the transparent entry.</li>

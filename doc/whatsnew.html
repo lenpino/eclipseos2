@@ -1051,6 +1051,13 @@ href="eclipseos2-xxe.css"
       <code>Button</code> and <code>ToolItem</code>; new test
       <kbd>SWT027_02</kbd> (4 checks); all the automatic tests still pass.</li>
 
+      <li>The icons that JFace makes for the tool items (an image with a mask)
+      were black squares when the first color of their palette was light:
+      the mask took the colors of the image. It has black and white now, as
+      the 1 bit bitmap of Windows. <kbd>SWT027_01</kbd> (72 checks, twelve
+      icons) and <kbd>SWT027_02</kbd> (11 checks) cover icons made this way;
+      all the automatic tests still pass.</li>
+
       <li><a href="swt028.html">Step 028</a>: the title of an active view of
       Eclipse began with a green block. <code>fillGradientRectangle</code> with
       two equal colors (both title colors are the same on PM) drew an outline

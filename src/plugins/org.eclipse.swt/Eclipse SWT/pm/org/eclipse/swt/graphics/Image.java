@@ -1597,11 +1597,20 @@ static int[] init(Device device, Image image, ImageData i) {
     
     int[] result = null;
     if (i.getTransparencyType() == SWT.TRANSPARENCY_MASK) {
-		/* Create the mask */
-		bmi [2] *= 2;
-		bmi [3] = 0x00010001;
-		bmi [8] = 2;
-		int hMask = image.createBitmap (i.width, i.height * 2, 1, 1, maskData, bmi, bitmapPS, 0);
+		/*
+		 * Create the mask. Windows makes it with CreateBitmap (1 bit, no colors: 0 is black, 1
+		 * is white); here it took the header of the color bitmap, so its two colors were the
+		 * first two of the image (2026-11-17: icons with a light first color, made by JFace
+		 * for the tool items, were black squares), and an image of direct colors had none.
+		 */
+		int[] maskBmi = new int [BITMAPINFOHEADER2.int_sizeof + 2];
+		System.arraycopy (bmi, 0, maskBmi, 0, BITMAPINFOHEADER2.int_sizeof);
+		maskBmi [2] = i.height * 2;
+		maskBmi [3] = 0x00010001;
+		maskBmi [8] = 2;
+		maskBmi [BITMAPINFOHEADER2.int_sizeof] = 0x000000;
+		maskBmi [BITMAPINFOHEADER2.int_sizeof + 1] = 0xFFFFFF;
+		int hMask = image.createBitmap (i.width, i.height * 2, 1, 1, maskData, maskBmi, bitmapPS, 0);
 		OS.GpiSetBitmap (bmpPS, hMask);
 		/* invert icon mask to get AND mask */
 		OS.GpiBitBlt (bmpPS, 0, 2, new int[] {0, i.height, i.width, i.height * 2}, OS.ROP_DSTINVERT, 0);

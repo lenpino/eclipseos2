@@ -131,7 +131,7 @@ public class SWT027_02 extends SWTTestCase {
 		Image disabledImage = new Image(display, disabled), folderImage = new Image(display, folder);
 
 		Shell s = new Shell(display, SWT.NO_TRIM);
-		s.setBounds(20, 20, 200, 80);
+		s.setBounds(20, 20, 300, 80);
 		ToolBar bar = new ToolBar(s, SWT.FLAT);
 		ToolItem enabledItem = new ToolItem(bar, SWT.PUSH);
 		enabledItem.setImage(colorImage);
@@ -139,7 +139,32 @@ public class SWT027_02 extends SWTTestCase {
 		disabledItem.setImage(grayImage);
 		disabledItem.setDisabledImage(disabledImage);
 		disabledItem.setEnabled(false);
-		bar.setBounds(0, 0, 200, 30);
+		ImageData saveDisabled = new ImageData(DIR + "save_edit_d.gif"), printDisabled = new ImageData(DIR + "print_edit_d.gif");
+		ImageData saveGray = new ImageData(DIR + "save_edit_e.gif");
+		Image saveDisabledImage = new Image(display, saveDisabled), printDisabledImage = new Image(display, printDisabled);
+		Image saveGrayImage = new Image(display, saveGray);
+		ToolItem saveItem = new ToolItem(bar, SWT.PUSH);
+		saveItem.setImage(saveGrayImage);
+		saveItem.setDisabledImage(saveDisabledImage);
+		saveItem.setEnabled(false);
+		ToolItem printItem = new ToolItem(bar, SWT.PUSH);
+		printItem.setImage(saveGrayImage);
+		printItem.setDisabledImage(printDisabledImage);
+		printItem.setEnabled(false);
+		Image copyImage = new Image(display, saveDisabledImage, SWT.IMAGE_COPY);
+		ToolItem copyItem = new ToolItem(bar, SWT.PUSH);
+		copyItem.setImage(copyImage);
+		Image disableImage = new Image(display, saveGrayImage, SWT.IMAGE_DISABLE);
+		ToolItem disableItem = new ToolItem(bar, SWT.PUSH);
+		disableItem.setImage(disableImage);
+		/* As JFace makes the images of the tool items: an icon from the data and its mask */
+		Image iconImage = new Image(display, saveDisabled, saveDisabled.getTransparencyMask());
+		ToolItem iconItem = new ToolItem(bar, SWT.PUSH);
+		iconItem.setImage(iconImage);
+		Image colorIcon = new Image(display, color, color.getTransparencyMask());
+		ToolItem colorIconItem = new ToolItem(bar, SWT.PUSH);
+		colorIconItem.setImage(colorIcon);
+		bar.setBounds(0, 0, 300, 30);
 		Button push = new Button(s, SWT.PUSH);
 		push.setImage(folderImage);
 		push.setBounds(10, 40, 30, 30);
@@ -152,6 +177,17 @@ public class SWT027_02 extends SWTTestCase {
 		disabledItem.setEnabled(true);
 		pump(s);
 		checkIcon("enabled again it shows its image (etool16)", buttonOf(bar, disabledItem), gray);
+		checkIcon("disabled save (dtool16, 2 bits)", buttonOf(bar, saveItem), saveDisabled);
+		checkIcon("disabled print (dtool16, 1 bit)", buttonOf(bar, printItem), printDisabled);
+		saveItem.setEnabled(true);
+		pump(s);
+		checkIcon("enabled save (etool16, 3 bits)", buttonOf(bar, saveItem), saveGray);
+		checkIcon("a copy (IMAGE_COPY) of an icon", buttonOf(bar, copyItem), saveDisabled);
+		ImageData disableData = disableImage.getImageData();
+		say("  IMAGE_DISABLE: depth " + disableData.depth + ", transparent pixel " + disableData.transparentPixel);
+		checkIcon("the IMAGE_DISABLE version of an icon", buttonOf(bar, disableItem), disableData);
+		checkIcon("an icon made from data and mask, as JFace does (dtool16)", buttonOf(bar, iconItem), saveDisabled);
+		checkIcon("an icon made from data and mask, as JFace does (ctool16)", buttonOf(bar, colorIconItem), color);
 		saySubObjective("Buttons");
 		checkIcon("a push button with an image", push, folder);
 
