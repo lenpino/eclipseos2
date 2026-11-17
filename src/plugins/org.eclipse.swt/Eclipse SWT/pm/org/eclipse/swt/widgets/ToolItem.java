@@ -735,6 +735,7 @@ void updateButton () {
 	if (button == null) return;
 	Image image = getImage ();
 	if (!enabled && disabledImage != null) image = disabledImage;
+	button.disabledImageShown = !enabled && disabledImage != null;
 	if (image != null) {
 		button.setImage (image);
 	} else {

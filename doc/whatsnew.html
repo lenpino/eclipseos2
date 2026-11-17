@@ -1044,6 +1044,12 @@ href="eclipseos2-xxe.css"
       transparent entry a color of its own. New test <kbd>SWT027_01</kbd> (28
       checks with seven icons of Eclipse read from the screen, 8 failed
       before); all the automatic tests still pass.</li>
+
+      <li>Icons in buttons and tool items: the transparent part was black (the
+      button copied the bitmap) and disabled tool items were dithered (a
+      halftone over the disabled image of Eclipse). Fixed in
+      <code>Button</code> and <code>ToolItem</code>; new test
+      <kbd>SWT027_02</kbd> (4 checks); all the automatic tests still pass.</li>
     </ul>
   </body>
 </html>

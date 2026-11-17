@@ -43,6 +43,8 @@ import org.eclipse.swt.events.*;
  */
 
 public class Button extends Control {
+	/* Set by ToolItem: the image is the disabled one, drawn as it is */
+	boolean disabledImageShown;
 
 String text = "";
 Image image;
@@ -1235,12 +1237,21 @@ MRESULT wmDrawChild (int mp1, int mp2) {
                 }
             }
             if (image.type == SWT.BITMAP) {
+                /* The transparent pixel shows the face of the button (it was copied: black) */
+                int transparent = image.internal_transparent_rgb ();
+                int oldBackColor = OS.GpiQueryBackColor (hps), oldBackMix = OS.GpiQueryBackMix (hps);
+                if (transparent != -1) {
+                    OS.GpiSetBackColor (hps, transparent);
+                    OS.GpiSetBackMix (hps, OS.BM_SRCTRANSPARENT);
+                }
                 OS.GpiWCBitBlt (hps, image.handle, 4,
                     new int[] {
                         x, y, x + bounds.width - 1, y + bounds.height - 1,
                         0, 0, bounds.width, bounds.height
                     },
                     OS.ROP_SRCCOPY, OS.BBO_IGNORE);
+                OS.GpiSetBackColor (hps, oldBackColor);
+                OS.GpiSetBackMix (hps, oldBackMix);
             } else if (image.type == SWT.ICON) {
                 int hbmColor = image.handle;
                 int hbmPointer = image.maskHandle;
@@ -1320,7 +1331,8 @@ MRESULT wmDrawChild (int mp1, int mp2) {
             OS.GpiBox (hps, OS.DRO_OUTLINE, pnt, 0, 0);
         }
         
-        if (!enabled && ((style & (SWT.PUSH | SWT.TOGGLE)) != 0 || checkOrRadio)) {
+        /* A tool item that shows its disabled image is not dithered over it */
+        if (!enabled && !disabledImageShown && ((style & (SWT.PUSH | SWT.TOGGLE)) != 0 || checkOrRadio)) {
             OS.GpiSetColor (hps, checkOrRadio ? parentBackground : OS.SYSCLR_BUTTONMIDDLE);
             OS.GpiSetBackMix (hps, OS.BM_LEAVEALONE);
             OS.GpiSetPattern (hps, OS.PATSYM_HALFTONE);

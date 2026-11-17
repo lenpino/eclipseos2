@@ -1726,6 +1726,42 @@ void init(Device device, ImageData i) {
 	init(device, this, i);
 }
 
+/**
+ * Invokes platform specific functionality to get the color (0x00RRGGBB) that stands for the
+ * transparent pixel in the bitmap, -1 when the image has none: what the native controls give
+ * to BM_SRCTRANSPARENT.
+ * <p>
+ * <b>IMPORTANT:</b> This method is <em>not</em> part of the public
+ * API for <code>Image</code>. It is marked public only so that it
+ * can be shared within the packages provided by SWT. It is not
+ * available on all platforms, and should never be called from
+ * application code.
+ * </p>
+ *
+ * @private
+ */
+public int internal_transparent_rgb () {
+    if (transparentPixel == -1 || type != SWT.BITMAP) return -1;
+    BITMAPINFOHEADER2 bm = new BITMAPINFOHEADER2 ();
+    OS.GpiQueryBitmapInfoHeader (handle, bm);
+    int depth = bm.cBitCount * bm.cPlanes;
+    if (depth > 8) {
+        int pixel = transparentPixel;
+        return ((pixel & 0xFF) << 16) | (pixel & 0xFF00) | ((pixel & 0xFF0000) >> 16);
+    }
+    GCData hPSData = new GCData ();
+    int hPS = device.internal_new_GC (hPSData);
+    int bmpPS = new_compatible_GC (null, hPSData.hdc, bm.cx, bm.cy);
+    device.internal_dispose_GC (hPS, hPSData);
+    int[] bmi = new int [4 + (1 << depth)];
+    bmi [0] = 16;
+    bmi [3] = (bm.cBitCount << 16) | bm.cPlanes;
+    OS.GpiSetBitmap (bmpPS, handle);
+    OS.GpiQueryBitmapBits (bmpPS, 0, 0, null, bmi);
+    dispose_compatible_GC (bmpPS, null);
+    return bmi [4 + transparentPixel] & 0xFFFFFF;
+}
+
 int new_compatible_GC (GCData data, int compatDC, int width, int height) {
     int hab = org.eclipse.swt.widgets.Display.internal_get_HAB ();
     int memDC = OS.DevOpenDC (

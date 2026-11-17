@@ -49,6 +49,20 @@ href="eclipseos2-xxe.css"
       changed the entry when drawing could not work: the information was
       already lost in the bitmap.</li>
 
+      <li>Icons in buttons and tool items (<kbd>SWT027_02</kbd>, 4 checks
+      read from the screen). <code>Button</code> copied the bitmap of its
+      image (<code>ROP_SRCCOPY</code>), so the transparent part showed the
+      color of the transparent entry: black once that entry had a color of its
+      own. It draws with <code>BM_SRCTRANSPARENT</code> now, with the color
+      that <code>Image.internal_transparent_rgb</code> reads from the bitmap.
+      And a disabled button was covered with a halftone of its face color,
+      also over the disabled image that Eclipse gives a tool item (the
+      <code>dtool16</code> GIF): the dithered boxes. <code>ToolItem</code>
+      tells its button when it shows its disabled image, and the button then
+      draws it as it is. The three checks of the tool items failed before;
+      the one of the push button was fixed with the test (its first version
+      read the white border as the face).</li>
+
       <li>Seen while reading the code, not checked yet:
       <code>Image.setBackground</code> uses the red twice when it makes the
       color of the transparent entry.</li>
@@ -82,6 +96,14 @@ href="eclipseos2-xxe.css"
         <td>Done [lpino]</td>
 
         <td>Checked by <kbd>SWT027_01</kbd> on the screen.</td>
+      </tr>
+
+      <tr>
+        <td>Icons in buttons and tool items, disabled tool items</td>
+
+        <td>Done [lpino]</td>
+
+        <td>Checked by <kbd>SWT027_02</kbd> on the screen.</td>
       </tr>
 
       <tr>
