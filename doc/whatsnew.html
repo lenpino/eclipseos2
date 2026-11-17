@@ -1018,6 +1018,17 @@ href="eclipseos2-xxe.css"
       <kbd>SWT010_01</kbd>, <kbd>SWT020_01</kbd> and <kbd>SWT021_01</kbd>
       still pass. Seen on the screen: Eclipse starts with the Welcome page and
       its views painted; the unpainted areas were the hang.</li>
+
+      <li><a href="swt026.html">Step 026</a>: no dialog with a title area
+      opened in Eclipse. <code>Label.setImage (null)</code>, which
+      <code>TitleAreaDialog</code> calls when a message has no icon, used the
+      handle of the null image; and <code>setText</code> after an image made
+      the label a group box (<code>SS_BITMAP | SS_TEXT</code>). New test
+      <kbd>SWT026_01</kbd> (8 checks); <kbd>SWT013_01</kbd>,
+      <kbd>SWT014_01</kbd>, <kbd>SWT015_01</kbd>, <kbd>SWT016_01</kbd>,
+      <kbd>SWT018_01</kbd>, <kbd>SWT020_01</kbd> and <kbd>SWT023_02</kbd>
+      still pass. The user checked <kbd>SWT025_01</kbd> and
+      <kbd>SWT009_08</kbd> on the screen.</li>
     </ul>
   </body>
 </html>

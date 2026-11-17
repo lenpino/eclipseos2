@@ -40,6 +40,8 @@ import org.eclipse.swt.events.*;
  * </p>
  */
 public class Label extends Control {
+	/* The type of a static of PM (SS_TEXT, SS_ICON, SS_BITMAP...) is a value in these bits */
+	static final int SS_TYPE = 0x1F;
         String text = "";
 	Image image;
 	int font;
@@ -352,9 +354,11 @@ public boolean setFocus () {
 public void setImage (Image image) {
     checkWidget ();
     if ((style & SWT.SEPARATOR) != 0) return;
-    int hImage = 0, imageBits = 0;
+    /* Without an image the label is a text again (TitleAreaDialog sets a null image) */
+    int hImage = 0, imageBits = OS.SS_TEXT;
     if (image != null) {
             if (image.isDisposed()) error(SWT.ERROR_INVALID_ARGUMENT);
+            hImage = image.handle;
             switch (image.type) {
                     case SWT.BITMAP:
                             imageBits = OS.SS_BITMAP;
@@ -369,12 +373,12 @@ public void setImage (Image image) {
     this.image = image;
     int newBits = OS.WinQueryWindowULong (handle, OS.QWL_STYLE);
     int oldBits = newBits;
-    newBits &= ~(OS.SS_BITMAP | OS.SS_ICON);
+    newBits &= ~SS_TYPE;
     newBits |= imageBits;
     if (newBits != oldBits) {
         OS.WinSetWindowULong (handle, OS.QWL_STYLE, newBits);
     }
-    OS.WinSendMsg(handle, OS.SM_SETHANDLE, image.handle, 0); 
+    if (hImage != 0) OS.WinSendMsg(handle, OS.SM_SETHANDLE, hImage, 0); 
     OS.WinInvalidateRect (handle, null, false);
 }
 
@@ -404,7 +408,8 @@ public void setText (String string) {
         
          int bits = OS.WinQueryWindowULong (handle, OS.QWL_STYLE);
          
-         bits |= OS.SS_TEXT;
+         /* The type is a value, not a bit: SS_BITMAP | SS_TEXT is SS_GROUPBOX */
+         bits = (bits & ~SS_TYPE) | OS.SS_TEXT;
          if ((style & SWT.LEFT) != 0)
              bits |= OS.DT_LEFT;
          if ((style & SWT.CENTER) != 0)

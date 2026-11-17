@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/css"
+href="eclipseos2-xxe.css"
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"xhtml1-strict.dtd">
+<html>
+  <head>
+    <link href="eclipseos2.css" rel="stylesheet" type="text/css" />
+
+    <title>Eclipse for OS/2 Transitional Project Notes</title>
+  </head>
+
+  <body>
+    <h1>SWT Step 026. What the dialogs of Eclipse need</h1>
+
+    <h2>Objective</h2>
+
+    <p>Fix what Eclipse finds when it runs on the port, starting with its
+    dialogs. The test case <kbd>SWT026_01</kbd> (8 automatic checks) checks
+    <code>Label.setImage (null)</code> and a text after an image; its
+    interactive part shows an image and a label whose image was taken
+    away.</p>
+
+    <h2>Task notes</h2>
+
+    <ul>
+      <li>No dialog with a title area opened (2026-11-17): the wizards
+      (<i>New Project</i>) and the external tools logged a
+      <code>NullPointerException</code> in <code>Label.setImage</code>.
+      <code>TitleAreaDialog.showMessage</code> calls <code>setImage
+      (null)</code> on its label when the message has no icon, and the port
+      used the handle of the image without looking whether there was
+      one.</li>
+
+      <li>The type of a static of PM (<code>SS_TEXT</code> 1,
+      <code>SS_ICON</code> 3, <code>SS_BITMAP</code> 4...) is a value, not a
+      bit of its own. <code>setImage (null)</code> now makes the label a text
+      again (<code>SS_TEXT</code>), and <code>setText</code> replaces the type
+      instead of adding <code>SS_TEXT</code> to it: after an image it made
+      <code>SS_BITMAP | SS_TEXT</code>, which is <code>SS_GROUPBOX</code>.
+      This second check was not seen failing first: the exception stopped the
+      test before it.</li>
+
+      <li><kbd>SWT013_01</kbd>, <kbd>SWT014_01</kbd>, <kbd>SWT015_01</kbd>,
+      <kbd>SWT016_01</kbd>, <kbd>SWT018_01</kbd>, <kbd>SWT020_01</kbd> and
+      <kbd>SWT023_02</kbd>, which use labels, still pass.</li>
+    </ul>
+
+    <h2>Step checklist</h2>
+
+    <table>
+      <col width="40%" />
+
+      <col />
+
+      <col width="50%" />
+
+      <thead>
+        <tr>
+          <th>Operation</th>
+
+          <th>Status</th>
+
+          <th>Remarks</th>
+        </tr>
+      </thead>
+
+      <tr>
+        <td><code>Label.setImage (null)</code>, text after an image</td>
+
+        <td>Done [lpino]</td>
+
+        <td>Checked by <kbd>SWT026_01</kbd>. The dialogs of Eclipse not yet seen open.</td>
+      </tr>
+
+      <tr>
+        <td>Repainting after a menu closes, the gradients of the tab titles</td>
+
+        <td>Not done</td>
+
+        <td>Seen by the user in Eclipse (2026-11-17).</td>
+      </tr>
+    </table>
+  </body>
+</html>
