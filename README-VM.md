@@ -114,3 +114,35 @@ variables de entorno `VM_HOST`, `VM_USER`, `VM_PASS`, `VM_SWT_DIR`).
   `-Dswt.dialog.invisible=true` (`DirectoryDialog.open()` no muestra el
   diálogo pero ejecuta su bucle). `-Dswt.test.time=true` en `SWT012_01`
   imprime los milisegundos de cada comprobación.
+- Antes de cualquier ejecución larga, mantener despierto el Mac:
+  `nohup caffeinate -dimsu -t 43200 &` (no evita el reposo con la tapa cerrada).
+  Un Mac dormido congela la VM: la red cae y el reloj de OS/2 se para, y parece
+  un cuelgue del programa (2026-11-16). Ante un "cuelgue", mirar primero
+  `pmset -g log | grep -E "Sleep|Wake"`.
+- Capturas de la pantalla de la VM sin pedirlas:
+  `VBoxManage controlvm OldPC screenshotpng <fichero.png>`.
+- Si `sshd` contesta `Connection closed` y su ventana en la VM dice
+  `Process terminated by SIGPIPE`, se ha caído: hay que arrancarlo de nuevo
+  (`sshd` en esa ventana). Matar también los `expect` locales que queden
+  (`kill -9`).
+- Una IP `169.254.x.x` es la que se pone OS/2 sin DHCP; no se llega a ella
+  desde el Mac. Reiniciar la VM o renovar el DHCP.
+- `start` sin `/C` deja la consola abierta cuando el programa termina: usar
+  `start "titulo" /C /WIN cmd /c "..."`.
+- Eclipse 2.0.1 en la VM (`X:\apps\dev\eclipse`): tras `ant.cmd swt.jar`, copiar
+  `src\plugins\org.eclipse.swt.pm\ws\pm\swt.jar` a
+  `plugins\org.eclipse.swt.pm_2.0.1\ws\pm\` (OS/2 deja copiarlo con Eclipse
+  abierto) y arrancar con
+  `start "Eclipse - consola" /C /WIN cmd /c "x:\java131\jre\bin\java.exe -cp startup.jar org.eclipse.core.launcher.Main -os os2 -ws pm -arch x86 -data x:\apps\dev\eclipse\workspace > ecl.out 2>&1"`.
+  Los errores van a `ecl.out` y a `workspace\.metadata\.log`. Así no hay
+  splash: lo pinta el lanzador nativo `eclipse.exe` (2007), que no se ha probado
+  con el SWT actual (`testLauncher.cmd` lo llama).
+- Para ver dentro de un Eclipse que se cuelga o pinta mal (ver
+  `doc/swt025.html`): `-Dswt.watchdog=5000 -Dswt.watchdog.file=wd.txt`
+  (con `.exit=<ms>` y `-Xrunhprof:cpu=samples,depth=16,file=...` da las pilas
+  del bucle al salir); `-Dswt.watchdog.dump=dump.txt` y crear `dump.txt.go`
+  escribe todas las ventanas de PM con su orden, posición, estilos y widget.
+  `misc/diag/brk.c` da un `javacore` sin teclado, pero este JVM no escribe en
+  él las pilas de los hilos; `jdb` (transporte `dtsock`) tira el JVM al
+  suspender un hilo. `find` no lee ficheros que `java` tiene abiertos; `type`
+  sí.
