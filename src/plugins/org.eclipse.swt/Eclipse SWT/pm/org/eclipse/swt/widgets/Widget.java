@@ -269,6 +269,7 @@ protected void checkSubclass () {
  * </ul>
  */
 protected void checkWidget () {
+    if (Watchdog.ON) Watchdog.check ();
     if (!isValidThread ()) error (SWT.ERROR_THREAD_INVALID_ACCESS);
     if (isDisposed ()) error (SWT.ERROR_WIDGET_DISPOSED);
 }
@@ -791,7 +792,7 @@ public void removeDisposeListener (DisposeListener listener) {
 
 void sendEvent (Event event) {
     if (eventTable == null) return;
-    eventTable.sendEvent (event);
+    tableSendEvent (event);
 }
 
 void sendEvent (int eventType, Event event) {
@@ -803,7 +804,21 @@ void sendEvent (int eventType, Event event) {
     if (event.time == 0) {
         event.time = OS.WinQueryMsgTime (display.hab);
     }
-    eventTable.sendEvent (event);
+    tableSendEvent (event);
+}
+
+/* The listeners get the event; the watchdog (see Watchdog) marks it */
+void tableSendEvent (Event event) {
+    if (!Watchdog.ON) {
+        eventTable.sendEvent (event);
+        return;
+    }
+    Watchdog.push ("event " + event.type + " of " + getClass ().getName ());
+    try {
+        eventTable.sendEvent (event);
+    } finally {
+        Watchdog.pop ();
+    }
 }
 
 void sendEvent (int eventType) {

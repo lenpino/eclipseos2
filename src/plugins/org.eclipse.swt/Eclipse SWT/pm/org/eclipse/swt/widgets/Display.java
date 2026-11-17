@@ -1210,6 +1210,7 @@ public int internal_new_GC (GCData data) {
  */
 protected void init () {
     super.init ();
+    Watchdog.watch ();
 
     //  Parts of code below are intentionally commented.
     //  It seems we don't need tid/pid info in this class under OS/2.
@@ -1406,6 +1407,7 @@ void postEvent (Event event) {
  */
 public boolean readAndDispatch () {
     checkDevice ();
+    if (Watchdog.ON) Watchdog.loop ();
     if (OS.WinPeekMsg (hab, qmsg, 0, 0, 0, OS.PM_REMOVE)) {
 
 //@@TODO (dmik): debug code        
@@ -1416,7 +1418,12 @@ public boolean readAndDispatch () {
 //            "mp2 = "+Integer.toHexString (qmsg.mp2));
             
         if (!filterMessage (qmsg)) {
-            OS.WinDispatchMsg (hab, qmsg);
+            if (Watchdog.ON) Watchdog.push ("dispatch of msg 0x" + Integer.toHexString (qmsg.msg) + " to hwnd 0x" + Integer.toHexString (qmsg.hwnd));
+            try {
+                OS.WinDispatchMsg (hab, qmsg);
+            } finally {
+                if (Watchdog.ON) Watchdog.pop ();
+            }
         }
         runDeferredEvents ();
         return true;
@@ -1901,7 +1908,12 @@ int shiftedKey (int key) {
  */
 public boolean sleep () {
     checkDevice ();
-    return OS.WinWaitMsg (hab, 0, 0);
+    if (Watchdog.ON) Watchdog.waiting (true);
+    try {
+        return OS.WinWaitMsg (hab, 0, 0);
+    } finally {
+        if (Watchdog.ON) Watchdog.waiting (false);
+    }
 }
 
 /**
@@ -2282,7 +2294,13 @@ int windowProc (int hwnd, int msg, int mp1, int mp2) {
 
     Control control = WidgetTable.get (hwnd);
     if (control != null) {
-        return control.windowProc (msg, mp1, mp2);
+        if (!Watchdog.ON) return control.windowProc (msg, mp1, mp2);
+        Watchdog.push ("msg 0x" + Integer.toHexString (msg) + " in " + control.getClass ().getName () + " hwnd 0x" + Integer.toHexString (hwnd));
+        try {
+            return control.windowProc (msg, mp1, mp2);
+        } finally {
+            Watchdog.pop ();
+        }
     }
     
     if (hwnd == hwndShell) {

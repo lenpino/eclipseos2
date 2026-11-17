@@ -1251,6 +1251,7 @@ public void drawString (String string, int x, int y) {
  * </ul>
  */
 public void drawString (String string, int x, int y, boolean isTransparent) {
+	if (org.eclipse.swt.widgets.Watchdog.ON) org.eclipse.swt.widgets.Watchdog.check ();
 	if (handle == 0) SWT.error(SWT.ERROR_GRAPHIC_DISPOSED);
 	if (string == null) SWT.error(SWT.ERROR_NULL_ARGUMENT);
     int length = string.length(); 
@@ -1567,6 +1568,7 @@ public void drawText (String string, int x, int y, boolean isTransparent) {
  * </ul>
  */
 public void drawText (String string, int x, int y, int flags) {
+	if (org.eclipse.swt.widgets.Watchdog.ON) org.eclipse.swt.widgets.Watchdog.check ();
 	if (handle == 0) SWT.error(SWT.ERROR_GRAPHIC_DISPOSED);
 	if (string == null) SWT.error(SWT.ERROR_NULL_ARGUMENT);
     drawTabbedText (string, x, y, flags, false);
@@ -2667,6 +2669,7 @@ public void setXORMode(boolean xor) {
  * </ul>
  */
 public Point stringExtent(String string) {
+	if (org.eclipse.swt.widgets.Watchdog.ON) org.eclipse.swt.widgets.Watchdog.check ();
 	if (handle == 0) SWT.error(SWT.ERROR_GRAPHIC_DISPOSED);
 	if (string == null) SWT.error (SWT.ERROR_NULL_ARGUMENT);
     if (string.length() == 0) {
@@ -2772,6 +2775,7 @@ public Point textExtent(String string) {
  * </ul>
  */
 public Point textExtent(String string, int flags) {
+	if (org.eclipse.swt.widgets.Watchdog.ON) org.eclipse.swt.widgets.Watchdog.check ();
 	if (handle == 0) SWT.error(SWT.ERROR_GRAPHIC_DISPOSED);
 	if (string == null) SWT.error (SWT.ERROR_NULL_ARGUMENT);
     return drawTabbedText (string, 0, 0, flags, true); 

@@ -21,6 +21,7 @@ org\eclipse\swt\graphics\FontData.java
 org\eclipse\swt\graphics\FontMetrics.java
 
 org\eclipse\swt\widgets\Display.java
+org\eclipse\swt\widgets\Watchdog.java
 org\eclipse\swt\widgets\Widget.java
 org\eclipse\swt\widgets\WidgetTable.java
 org\eclipse\swt\widgets\Control.java

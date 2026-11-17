@@ -1,0 +1,8 @@
+/* VAC build file for brk.exe (diagnostic) */
+option link(pmtype, vio), link(linkwithmultithreadlib)
+{
+    target "brk.exe"
+    {
+        source "brk.c"
+    }
+}
