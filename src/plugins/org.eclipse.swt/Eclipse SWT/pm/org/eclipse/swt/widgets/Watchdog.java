@@ -36,6 +36,9 @@ public final class Watchdog extends Thread {
 	public static final boolean ON = LIMIT > 0;
 	static final boolean STOP = ON && Boolean.getBoolean ("swt.watchdog.stop");
 	static final boolean TRACE = ON && Boolean.getBoolean ("swt.watchdog.trace");
+	/* swt.watchdog.dump: a file; creating <file>.go writes the windows of PM into it */
+	static final String DUMP = ON ? System.getProperty ("swt.watchdog.dump") : null;
+	static Display display;
 	/* swt.watchdog.exit: milliseconds of the clock away from the loop before System.exit */
 	static final int EXIT = ON ? Integer.getInteger ("swt.watchdog.exit", 0).intValue () : 0;
 	static final String [] marks = new String [64];
@@ -54,8 +57,9 @@ public final class Watchdog extends Thread {
 	/* Cleared by the collector: the user interface counts collections without the clock */
 	static java.lang.ref.WeakReference sentinel = new java.lang.ref.WeakReference (new Object ());
 
-static void watch () {
+static void watch (Display device) {
 	if (!ON || thread != null) return;
+	display = device;
 	userInterface = Thread.currentThread ();
 	String file = System.getProperty ("swt.watchdog.file");
 	if (file != null) {
@@ -171,6 +175,48 @@ public static void check () {
 	}
 }
 
+/*
+ * Writes the windows of PM of every shell, children in the order of PM (the top one first):
+ * the position and size PM has (relative to the parent, y from the bottom), the styles, and
+ * the widget of SWT with its bounds, for what is not painted or is covered.
+ */
+static void dump () {
+	try {
+		java.io.PrintStream file = new java.io.PrintStream (new java.io.FileOutputStream (DUMP, true), true);
+		file.println ("==== windows of PM, " + new java.util.Date ());
+		Shell [] shells = WidgetTable.shells ();
+		for (int i=0; i<shells.length; i++) {
+			if (!shells [i].isDisposed ()) dumpWindow (file, shells [i].frameHandle, "");
+		}
+		file.close ();
+	} catch (java.io.IOException e) {}
+}
+
+static void dumpWindow (java.io.PrintStream file, int hwnd, String indent) {
+	org.eclipse.swt.internal.pm.SWP swp = new org.eclipse.swt.internal.pm.SWP ();
+	org.eclipse.swt.internal.pm.OS.WinQueryWindowPos (hwnd, swp);
+	int bits = org.eclipse.swt.internal.pm.OS.WinQueryWindowULong (hwnd, org.eclipse.swt.internal.pm.OS.QWL_STYLE);
+	org.eclipse.swt.internal.pm.PSZ name = new org.eclipse.swt.internal.pm.PSZ (64);
+	org.eclipse.swt.internal.pm.OS.WinQueryClassName (hwnd, 64, name);
+	StringBuffer line = new StringBuffer (indent);
+	line.append (Integer.toHexString (hwnd) + " " + name + " at " + swp.x + "," + swp.y + " size " + swp.cx + "x" + swp.cy);
+	line.append ((bits & org.eclipse.swt.internal.pm.OS.WS_VISIBLE) != 0 ? " visible" : " HIDDEN");
+	if ((bits & org.eclipse.swt.internal.pm.OS.WS_CLIPCHILDREN) != 0) line.append (" clipchildren");
+	if ((bits & org.eclipse.swt.internal.pm.OS.WS_CLIPSIBLINGS) != 0) line.append (" clipsiblings");
+	line.append (" style " + Integer.toHexString (bits));
+	Control control = WidgetTable.get (hwnd);
+	if (control != null && !control.isDisposed ()) {
+		line.append (" = " + control.getClass ().getName () + " " + control.getBounds () + (control.getVisible () ? "" : " getVisible false"));
+		line.append (" bg " + control.getBackground ().getRGB ());
+	}
+	file.println (line.toString ());
+	int child = org.eclipse.swt.internal.pm.OS.WinQueryWindow (hwnd, org.eclipse.swt.internal.pm.OS.QW_TOP);
+	while (child != 0) {
+		dumpWindow (file, child, indent + "  ");
+		child = org.eclipse.swt.internal.pm.OS.WinQueryWindow (child, org.eclipse.swt.internal.pm.OS.QW_NEXT);
+	}
+}
+
 /* The threads of Java that are alive, by name */
 static String threads () {
 	ThreadGroup group = Thread.currentThread ().getThreadGroup ();
@@ -190,6 +236,13 @@ public void run () {
 	while (true) {
 		try { Thread.sleep (1000); } catch (InterruptedException e) {}
 		long idle = System.currentTimeMillis () - lastLoop;
+		if (DUMP != null && new java.io.File (DUMP + ".go").delete ()) {
+			display.asyncExec (new Runnable () {
+				public void run () {
+					dump ();
+				}
+			});
+		}
 		if (TRACE) {
 			out.println ("SWT watchdog trace " + new java.util.Date () + ": idle " + idle + " ms" + (waiting ? " in sleep()" : "") + ", " + depth + " marks");
 			int count = Math.min (depth, marks.length);

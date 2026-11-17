@@ -1210,7 +1210,7 @@ public int internal_new_GC (GCData data) {
  */
 protected void init () {
     super.init ();
-    Watchdog.watch ();
+    Watchdog.watch (this);
 
     //  Parts of code below are intentionally commented.
     //  It seems we don't need tid/pid info in this class under OS/2.
