@@ -1732,8 +1732,12 @@ public void fillGradientRectangle(int x, int y, int width, int height, boolean v
 		fromColor = toColor;
 		toColor = t;
 	}
+	/*
+	 * One color: fill, as on Windows (it drew an outline only, and the titles of the views of
+	 * Eclipse, whose two title colors are the same on PM, showed garbage)
+	 */
 	if (fromColor == toColor) {
-        drawRoundRectangle (x, y, width, height, 0, 0);
+		fillRectangle (x, y, width, height);
 		return;
 	}
 	final RGB fromRGB = new RGB ((fromColor >>> 16) & 0xff, (fromColor >>> 8) & 0xff, fromColor & 0xff);

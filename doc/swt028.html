@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/css"
+href="eclipseos2-xxe.css"
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"xhtml1-strict.dtd">
+<html>
+  <head>
+    <link href="eclipseos2.css" rel="stylesheet" type="text/css" />
+
+    <title>Eclipse for OS/2 Transitional Project Notes</title>
+  </head>
+
+  <body>
+    <h1>SWT Step 028. The gradients of the titles</h1>
+
+    <h2>Objective</h2>
+
+    <p>Paint the titles of the views of Eclipse as Windows does. The test case
+    <kbd>SWT028_01</kbd> (4 automatic checks, read from the screen) checks
+    <code>fillGradientRectangle</code> with one color and a
+    <code>CLabel</code> with the gradient of an active view.</p>
+
+    <h2>Task notes</h2>
+
+    <ul>
+      <li>Eclipse paints the title of an active view with a gradient from
+      <code>COLOR_TITLE_BACKGROUND</code> to
+      <code>COLOR_TITLE_BACKGROUND_GRADIENT</code> (0 to 50 percent) and then
+      to <code>COLOR_WIDGET_BACKGROUND</code> (<code>WorkbenchColors</code>).
+      PM has no color for the end of the gradient of a title, so both title
+      colors are <code>SYSCLR_ACTIVETITLE</code>.</li>
+
+      <li><code>GC.fillGradientRectangle</code> with two equal colors drew an
+      outline only (<code>drawRoundRectangle</code>); Windows fills the
+      rectangle. The first half of the title then kept what was in the
+      buffer of the <code>CLabel</code>: green on the screen. It fills now.
+      Its check failed before the fix.</li>
+
+      <li><code>COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT</code> was the color of
+      the text of an inactive title; it is the inactive title color now.</li>
+
+      <li>All the automatic tests from <kbd>SWT010_01</kbd> to
+      <kbd>SWT027_02</kbd> still pass.</li>
+    </ul>
+
+    <h2>Step checklist</h2>
+
+    <table>
+      <col width="40%" />
+
+      <col />
+
+      <col width="50%" />
+
+      <thead>
+        <tr>
+          <th>Operation</th>
+
+          <th>Status</th>
+
+          <th>Remarks</th>
+        </tr>
+      </thead>
+
+      <tr>
+        <td><code>fillGradientRectangle</code> with one color, the titles of the views</td>
+
+        <td>Done [lpino]</td>
+
+        <td>Checked by <kbd>SWT028_01</kbd> on the screen.</td>
+      </tr>
+    </table>
+  </body>
+</html>

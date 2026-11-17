@@ -1151,7 +1151,8 @@ public Color getSystemColor (int id) {
         case SWT.COLOR_TITLE_BACKGROUND_GRADIENT:	pixel = OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_ACTIVETITLE,0);   break;
         case SWT.COLOR_TITLE_INACTIVE_FOREGROUND:       pixel = OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_INACTIVETITLETEXT,0);   break;
         case SWT.COLOR_TITLE_INACTIVE_BACKGROUND:           pixel = OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_INACTIVETITLE,0);   break;
-        case SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT:	pixel = OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_INACTIVETITLETEXT,0);   break;
+        /* PM has no color for the end of the gradient of a title: the title one */
+        case SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT:	pixel = OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_INACTIVETITLE,0);   break;
         default:
             return super.getSystemColor (id);
     }
