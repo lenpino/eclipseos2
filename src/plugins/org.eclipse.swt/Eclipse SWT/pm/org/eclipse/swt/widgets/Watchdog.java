@@ -208,6 +208,13 @@ static void dumpWindow (java.io.PrintStream file, int hwnd, String indent) {
 	if (control != null && !control.isDisposed ()) {
 		line.append (" = " + control.getClass ().getName () + " " + control.getBounds () + (control.getVisible () ? "" : " getVisible false"));
 		line.append (" bg " + control.getBackground ().getRGB ());
+		if (control instanceof Button && ((Button) control).image != null) {
+			org.eclipse.swt.graphics.Image image = ((Button) control).image;
+			org.eclipse.swt.graphics.ImageData data = image.getImageData ();
+			line.append (" image type " + image.type + " depth " + data.depth + " transparentPixel " + data.transparentPixel
+				+ " mask " + (data.maskData != null) + " alpha " + data.alpha + "/" + (data.alphaData != null)
+				+ " transparent rgb " + Integer.toHexString (image.internal_transparent_rgb ()));
+		}
 	}
 	file.println (line.toString ());
 	int child = org.eclipse.swt.internal.pm.OS.WinQueryWindow (hwnd, org.eclipse.swt.internal.pm.OS.QW_TOP);
