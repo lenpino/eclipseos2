@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/css"
+href="eclipseos2-xxe.css"
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"xhtml1-strict.dtd">
+<html>
+  <head>
+    <link href="eclipseos2.css" rel="stylesheet" type="text/css" />
+
+    <title>Eclipse for OS/2 Transitional Project Notes</title>
+  </head>
+
+  <body>
+    <h1>SWT Step 027. The images of Eclipse</h1>
+
+    <h2>Objective</h2>
+
+    <p>Draw the icons of Eclipse as they are: GIFs of 2, 4 and 5 bits with a
+    transparent pixel. The test case <kbd>SWT027_01</kbd> (28 automatic
+    checks) loads seven icons of the plugins of Eclipse 2.0.1 (the three
+    versions of a tool icon, from <code>etool16</code>, <code>ctool16</code>
+    and <code>dtool16</code>, and the icons of a folder, a project, a package
+    and a jar, in <kbd>tests/SWT/images/eclipse</kbd>), draws them with
+    <code>GC.drawImage</code> on white and on black and compares every pixel
+    read from the screen with its <code>ImageData</code>; it also checks
+    <code>getImageData</code> and the <code>IMAGE_GRAY</code> copy.</p>
+
+    <h2>Task notes</h2>
+
+    <ul>
+      <li>Eclipse 2.0 does not make the gray tool icons with
+      <code>IMAGE_GRAY</code>: each tool icon comes in three GIFs (gray,
+      color when the mouse is over it, disabled). The dithered gray boxes of
+      the tool bars were those GIFs drawn wrong.</li>
+
+      <li>The cause: the transparent entry of the palette of most icons is
+      white, and the icon has an opaque white entry too. PM keeps one entry
+      per color in a bitmap, so both became one: the bits read back had no
+      pixel of the transparent index, and <code>drawImage</code>
+      (<code>BM_SRCTRANSPARENT</code>, a transparency by color) left out
+      every white pixel of the icon. On white it did not show; on any other
+      background the opaque white parts were holes. Before the fix 8 of the
+      28 checks failed, all on icons with an opaque white.</li>
+
+      <li>Now <code>Image</code>, when it makes the bitmap, gives the
+      transparent entry a color that no other entry has, if its color is
+      shared. <code>GC</code> is not changed. A fix in <code>GC</code> that
+      changed the entry when drawing could not work: the information was
+      already lost in the bitmap.</li>
+
+      <li>Seen while reading the code, not checked yet:
+      <code>Image.setBackground</code> uses the red twice when it makes the
+      color of the transparent entry.</li>
+
+      <li>All the automatic tests from <kbd>SWT010_01</kbd> to
+      <kbd>SWT026_02</kbd> still pass.</li>
+    </ul>
+
+    <h2>Step checklist</h2>
+
+    <table>
+      <col width="40%" />
+
+      <col />
+
+      <col width="50%" />
+
+      <thead>
+        <tr>
+          <th>Operation</th>
+
+          <th>Status</th>
+
+          <th>Remarks</th>
+        </tr>
+      </thead>
+
+      <tr>
+        <td>GIFs with a transparent pixel drawn with <code>GC.drawImage</code></td>
+
+        <td>Done [lpino]</td>
+
+        <td>Checked by <kbd>SWT027_01</kbd> on the screen.</td>
+      </tr>
+
+      <tr>
+        <td>Images in native controls: labels (<code>SS_BITMAP</code>), trees and tables (the records of the container)</td>
+
+        <td>Not done</td>
+
+        <td>The arrows of the Welcome page on black or green squares, no icons in the Package Explorer (2026-11-17).</td>
+      </tr>
+
+      <tr>
+        <td><code>Image.setBackground</code></td>
+
+        <td>Not done</td>
+
+        <td>Uses the red twice.</td>
+      </tr>
+    </table>
+  </body>
+</html>

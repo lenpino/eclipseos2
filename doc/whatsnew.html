@@ -1036,6 +1036,14 @@ href="eclipseos2-xxe.css"
       it now, as on Windows. New test <kbd>SWT026_02</kbd> (7 checks, failed
       before); all the automatic tests still pass. Found with a dump of the
       windows of PM from the watchdog (<code>-Dswt.watchdog.dump</code>).</li>
+
+      <li><a href="swt027.html">Step 027</a>: the icons of Eclipse lost their
+      opaque white pixels (holes on any background but white; the dithered
+      boxes of the tool bars). PM merged the white transparent entry of the
+      palette with the opaque white one; <code>Image</code> now gives the
+      transparent entry a color of its own. New test <kbd>SWT027_01</kbd> (28
+      checks with seven icons of Eclipse read from the screen, 8 failed
+      before); all the automatic tests still pass.</li>
     </ul>
   </body>
 </html>

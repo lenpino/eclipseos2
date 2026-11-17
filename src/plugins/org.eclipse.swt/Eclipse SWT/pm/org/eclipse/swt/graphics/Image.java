@@ -1529,6 +1529,31 @@ static int[] init(Device device, Image image, ImageData i) {
             bmi[offset] = (rgbs[j].red << 16) | (rgbs[j].green << 8) | rgbs[j].blue;
 	    offset++;
 	}
+	/*
+	 * PM keeps one entry per color in a bitmap: the pixels of the transparent entry and
+	 * those of an opaque entry of the same color (white in the icons of Eclipse) became
+	 * the same, and all were drawn transparent (2026-11-17). The transparent entry gets a
+	 * color that no other entry has.
+	 */
+	int transparent = i.transparentPixel;
+	if (transparent >= 0 && transparent < rgbs.length) {
+	    int first = BITMAPINFOHEADER2.int_sizeof, color = bmi[first + transparent];
+	    for (int candidate = 0x010203; ; candidate += 0x010101) {
+		boolean used = false;
+		for (int j = 0; j < rgbs.length && !used; j++) {
+		    used = j != transparent && bmi[first + j] == candidate;
+		}
+		boolean shared = false;
+		for (int j = 0; j < rgbs.length && !shared; j++) {
+		    shared = j != transparent && bmi[first + j] == color;
+		}
+		if (!shared) break;
+		if (!used) {
+		    bmi[first + transparent] = candidate;
+		    break;
+		}
+	    }
+	}
     }
     
     /*
