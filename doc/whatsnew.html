@@ -1001,5 +1001,23 @@ href="eclipseos2-xxe.css"
       that the frame does not take is still destroyed). <kbd>SWT010_01</kbd>,
       <kbd>SWT021_01</kbd> and <kbd>SWT022_01</kbd> still pass.</li>
     </ul>
+
+    <h3>2026-11-17</h3>
+
+    <h4>[lpino]</h4>
+
+    <ul>
+      <li><a href="swt025.html">Step 025</a>: Eclipse froze at startup.
+      <code>MenuItem.setMenu (null)</code> deleted the item with
+      <code>MM_DELETEITEM</code>, which destroys the window of the submenu,
+      and <code>Menu.getItems</code> then looped for ever on that window when
+      <code>MenuManager</code> disposed a cascade item. Fixed with
+      <code>MM_REMOVEITEM</code>, and <code>getItems</code> and
+      <code>indexOf</code> stop at the count of the items. New test
+      <kbd>SWT025_01</kbd> (22 checks, it failed before the fix);
+      <kbd>SWT010_01</kbd>, <kbd>SWT020_01</kbd> and <kbd>SWT021_01</kbd>
+      still pass. Seen on the screen: Eclipse starts with the Welcome page and
+      its views painted; the unpainted areas were the hang.</li>
+    </ul>
   </body>
 </html>

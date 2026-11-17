@@ -657,13 +657,20 @@ public void setMenu (Menu menu) {
 		menu.cascade = this; 
 		info.afStyle |= OS.MIS_SUBMENU;
 		info.hwndSubMenu = menu.handle;
+	} else {
+		info.afStyle &= ~OS.MIS_SUBMENU;
+		info.hwndSubMenu = 0;
 	}
         
         //Given an id of a menuitem changes it to a MIS_SUBMENU type of item
         //Note: You have to delete and reinsert a menu item if you want to change it from
         
         OS.WinSendMsg (hMenu, OS.MM_QUERYITEMTEXT,  OS.MPFROM2SHORT ((short)idItem, (short)length), buffer);
-        OS.WinSendMsg (hMenu, OS.MM_DELETEITEM,  OS.MPFROM2SHORT ((short)idItem, (short)OS.FALSE), 0);
+        /*
+         * MM_REMOVEITEM, not MM_DELETEITEM: deleting an item destroys the window of its submenu,
+         * which SWT still owns (it may be set again, or disposed later by Menu.releaseWidget)
+         */
+        OS.WinSendMsg (hMenu, OS.MM_REMOVEITEM,  OS.MPFROM2SHORT ((short)idItem, (short)OS.FALSE), 0);
         int rc = OS.WinSendMsg (hMenu, OS.MM_INSERTITEM,  info, buffer);
 //        boolean success = OS.WinSendMsg (hMenu, OS.MM_SETITEM,  OS.MPFROM2SHORT ((short)0, (short)OS.TRUE), info);
         if(rc == OS.MIT_ERROR || rc == OS.MIT_MEMERROR)

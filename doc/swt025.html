@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/css"
+href="eclipseos2-xxe.css"
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"xhtml1-strict.dtd">
+<html>
+  <head>
+    <link href="eclipseos2.css" rel="stylesheet" type="text/css" />
+
+    <title>Eclipse for OS/2 Transitional Project Notes</title>
+  </head>
+
+  <body>
+    <h1>SWT Step 025. Menus: dispose and setMenu (null)</h1>
+
+    <h2>Objective</h2>
+
+    <p>Dispose a menu item with a submenu, and detach a submenu with
+    <code>MenuItem.setMenu (null)</code>, without hanging, as
+    <code>MenuManager</code> of JFace does when Eclipse opens an editor. The
+    test case <kbd>SWT025_01</kbd> (22 automatic checks) asks PM about the
+    windows of the menus; its interactive part is a menu bar with nested
+    submenus, detached and set again.</p>
+
+    <h2>Task notes</h2>
+
+    <ul>
+      <li>Eclipse 2.0.1 froze at startup (2026-11-15 to 2026-11-17): the
+      workbench showed, without the text of the Welcome page and with areas
+      not painted, and the user interface never came back. The unpainted
+      areas were the hang, not a defect of painting.</li>
+
+      <li>The cause: <code>MenuItem.setMenu</code> deleted the item and
+      inserted it again to change it. <code>MM_DELETEITEM</code> destroys the
+      window of the submenu of the item; <code>MM_REMOVEITEM</code> does not.
+      When a submenu is disposed, <code>Menu.releaseChild</code> calls
+      <code>cascade.setMenu (null)</code>, so its window was gone when
+      <code>Menu.releaseWidget</code> called <code>getItems ()</code>, and
+      <code>getItems</code> looped until <code>MM_ITEMIDFROMPOSITION</code>
+      answered <code>MIT_ERROR</code>: a window that is gone answers 0, for
+      ever, while the array of items grew by 4.</li>
+
+      <li>Now <code>setMenu</code> uses <code>MM_REMOVEITEM</code> and, for
+      <code>null</code>, takes <code>MIS_SUBMENU</code> and
+      <code>hwndSubMenu</code> away from the item (they were inserted again
+      with the old submenu). <code>getItems</code> and <code>indexOf</code>
+      stop at <code>MM_QUERYITEMCOUNT</code>, so a menu whose window is gone
+      can no longer hang them.</li>
+
+      <li>How it was found, for the next hang: the guest clock of the VM runs
+      at a fifth of the real speed (VirtualBox gives up catching up), and a
+      busy thread of the user interface starves the other Java threads, so no
+      watchdog based on time or on another thread could report it. The
+      javacore of this JVM (Ctrl+Break) has no stacks of the threads, and
+      suspending a thread from <code>jdb</code> crashes the JVM. The place
+      came from <code>-Xrunhprof:cpu=samples</code>, written at
+      <code>System.exit</code> called by the watchdog: 7 of 33 samples in
+      <code>Menu.getItems</code>, from
+      <code>MenuManager.update</code> in <code>WorkbenchPage.openEditor</code>.
+      <code>DiagMenu</code> then showed PM answering <code>WinIsWindow
+      false</code> and 0 after <code>setMenu (null)</code>.</li>
+
+      <li>Seen on the screen (2026-11-17): Eclipse starts, the Welcome page
+      shows its text, the views (Navigator, Outline, Tasks) and the status bar
+      are painted, and the user interface waits for messages.</li>
+    </ul>
+
+    <h2>Step checklist</h2>
+
+    <table>
+      <col width="40%" />
+
+      <col />
+
+      <col width="50%" />
+
+      <thead>
+        <tr>
+          <th>Operation</th>
+
+          <th>Status</th>
+
+          <th>Remarks</th>
+        </tr>
+      </thead>
+
+      <tr>
+        <td><code>MenuItem.setMenu (null)</code> and replacing a submenu</td>
+
+        <td>Done [lpino]</td>
+
+        <td>Checked by <kbd>SWT025_01</kbd>: the submenu keeps its window and
+        its items, also after the bar is disposed.</td>
+      </tr>
+
+      <tr>
+        <td>Dispose of submenus, cascade items, bars and shells</td>
+
+        <td>Done [lpino]</td>
+
+        <td>Checked by <kbd>SWT025_01</kbd>. Eclipse starts (2026-11-17).</td>
+      </tr>
+
+      <tr>
+        <td><code>Menu.getItems</code>, <code>indexOf</code> on a window that is gone</td>
+
+        <td>Done [lpino]</td>
+
+        <td>Bounded by the count of the items.</td>
+      </tr>
+    </table>
+  </body>
+</html>

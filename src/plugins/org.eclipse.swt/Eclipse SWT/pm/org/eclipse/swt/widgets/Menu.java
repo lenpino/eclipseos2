@@ -459,14 +459,13 @@ public MenuItem [] getItems () {
 	int length = OS.WinSendMsg (handle, OS.MM_QUERYITEMCOUNT,  0, 0);
 	MenuItem [] items = new MenuItem [length];
 	MENUITEM info = new MENUITEM();
-        int idItem = 0;
-//      Revisa si esto es redundante o  no
-	while ((idItem=OS.WinSendMsg (handle, OS.MM_ITEMIDFROMPOSITION,  index, 0)) != OS.MIT_ERROR) {
-		if (index == items.length) {
-			MenuItem [] newItems = new MenuItem [index + 4];
-			System.arraycopy (items, 0, newItems, 0, index);
-			items = newItems;
-		}
+	/*
+	 * Bounded by the count: a window that is gone answers 0 to MM_ITEMIDFROMPOSITION, never
+	 * MIT_ERROR, and the loop never ended (Eclipse hung at startup, 2026-11-17).
+	 */
+	while (index < length) {
+		int idItem = OS.WinSendMsg (handle, OS.MM_ITEMIDFROMPOSITION,  index, 0);
+		if (idItem == OS.MIT_ERROR) break;
                 OS.WinSendMsg (handle, OS.MM_QUERYITEM, OS.MPFROM2SHORT ((short)idItem, (short)OS.TRUE), info);
 		items [index++] = parent.findMenuItem (info.id);
 	}
@@ -612,7 +611,9 @@ public int indexOf (MenuItem item) {
 	int index = 0;
         MENUITEM info = new MENUITEM();
         int idItem = 0;
-	while ((idItem=OS.WinSendMsg (handle, OS.MM_ITEMIDFROMPOSITION,  index, 0)) != OS.MIT_ERROR) {
+	/* Bounded by the count, as in getItems */
+	int length = OS.WinSendMsg (handle, OS.MM_QUERYITEMCOUNT,  0, 0);
+	while (index < length && (idItem=OS.WinSendMsg (handle, OS.MM_ITEMIDFROMPOSITION,  index, 0)) != OS.MIT_ERROR) {
             //@@TODO(lpino) Check if the next call is necesary or we could use the idItem directly
                 OS.WinSendMsg (handle, OS.MM_QUERYITEM, OS.MPFROM2SHORT ((short)idItem, (short)OS.TRUE), info);
 		if (info.id == item.id) return index;
