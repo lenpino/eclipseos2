@@ -2072,7 +2072,8 @@ MRESULT wmDrawChild (int mp1, int mp2) {
 	if (struct.hItem == 0) return null;
 	TableItem item = itemOf (Tree.peek (struct.hItem));
 	int fi = Tree.peek (struct.hItem + 4);
-	if (item == null || fi == 0 || fi == iconField) return null;
+	if (item == null || fi == 0) return null;
+	if (fi == iconField) return drawImageField (struct, item);
 	int index = -1, alignment = OS.DT_LEFT;
 	if (implicit != null && fi == implicit.handle) index = 0;
 	for (int i=0; i<columns.size () && index == -1; i++) {
@@ -2110,7 +2111,7 @@ MRESULT wmDrawChild (int mp1, int mp2) {
 		int x = content.xLeft, y = content.yTop - cellHeight + (cellHeight - size) / 2;
 		drawCheck (struct.hps, x, y, size, item.checked, item.grayed);
 		content.xLeft = x + size + fieldPad (1) / 2;
-	} else if (image != null && image.type == SWT.BITMAP) {
+	} else if (image != null) {
 		Rectangle size = image.getBounds ();
 		/*
 		* The rectangle of the cell can be a pixel higher than the record (without the column of
@@ -2120,13 +2121,36 @@ MRESULT wmDrawChild (int mp1, int mp2) {
 		int width = Math.min (size.width, content.xRight - content.xLeft), height = Math.min (size.height, cellHeight);
 		/* PM coordinates: the bottom of the image, and the top of the bitmap when it is cut */
 		int x = content.xLeft, y = content.yTop - cellHeight + (cellHeight - height) / 2;
-		OS.GpiWCBitBlt (struct.hps, image.handle, 4, new int [] {x, y, x + width - 1, y + height - 1, 0, size.height - height, width, size.height}, OS.ROP_SRCCOPY, OS.BBO_IGNORE);
+		/* With its transparency (bitmap or icon), over the background of the cell; cut to the cell */
+		image.internal_draw (struct.hps, x, y);
 		content.xLeft = x + width + fieldPad (1) / 2;
 	} else if (alignment == OS.DT_LEFT) {
 		/* The container starts a text on the left half the separator further left (1 pixel with the default font, 2 with 14.Helvetica) */
 		content.xLeft -= (fieldPad (1) - fieldPad (0)) / 2;
 	}
 	OS.WinDrawText (struct.hps, text.length, text, content, foreground, background, alignment | OS.DT_VCENTER);
+	OS.GpiCreateLogColorTable (struct.hps, OS.LCOL_RESET, OS.LCOLF_DEFAULT, 0, 0, null);
+	return new MRESULT (OS.TRUE);
+}
+
+/*
+ * The column of the images of the first column (CFA_BITMAPORICON): the container drew bitmaps
+ * opaque and not all icons. The image is drawn with its transparency, centered in the field, on
+ * the background of the item (the highlight when it is selected).
+ */
+MRESULT drawImageField (OWNERITEM struct, TableItem item) {
+	int background = (struct.fsAttribute & OS.CRA_SELECTED) != 0 ? OS.WinQuerySysColor (OS.HWND_DESKTOP, OS.SYSCLR_HILITEBACKGROUND, 0) : (item.background != -1 ? item.background : getBackgroundPixel ());
+	OS.GpiCreateLogColorTable (struct.hps, 0, OS.LCOLF_RGB, 0, 0, null);
+	OS.WinFillRect (struct.hps, struct.rclItem, background);
+	Image image = item.getImage (0);
+	if (image != null) {
+		Rectangle size = image.getBounds ();
+		int cellHeight = Math.min (recordHeight (item.handle), struct.rclItem.yTop - struct.rclItem.yBottom);
+		/* Where the container put it (see imageOffset()), what getImageBounds() answers */
+		int x = struct.rclItem.xLeft + imageOffset (size.width);
+		int y = struct.rclItem.yTop - cellHeight + (cellHeight - size.height) / 2;
+		image.internal_draw (struct.hps, x, y);
+	}
 	OS.GpiCreateLogColorTable (struct.hps, OS.LCOL_RESET, OS.LCOLF_DEFAULT, 0, 0, null);
 	return new MRESULT (OS.TRUE);
 }
