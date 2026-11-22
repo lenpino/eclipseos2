@@ -80,7 +80,8 @@ public class SWT026_01 extends SWTTestCase {
 		check(label.getImage() == null, "getImage is null");
 
 		label.setImage(image);
-		check(label.getImage() == image && (styleOf(label) & OS.SS_BITMAP) != 0, "setImage shows the image (SS_BITMAP)");
+		/* The label paints the image itself (step 029): the static keeps its type, PM would resize an SS_BITMAP or SS_ICON one */
+		check(label.getImage() == image && (styleOf(label) & TYPE) == OS.SS_TEXT, "setImage keeps the image in the label, the static stays SS_TEXT");
 		thrown = false;
 		try {
 			label.setImage(null);

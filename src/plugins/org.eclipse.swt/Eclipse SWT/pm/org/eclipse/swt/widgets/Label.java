@@ -354,31 +354,22 @@ public boolean setFocus () {
 public void setImage (Image image) {
     checkWidget ();
     if ((style & SWT.SEPARATOR) != 0) return;
-    /* Without an image the label is a text again (TitleAreaDialog sets a null image) */
-    int hImage = 0, imageBits = OS.SS_TEXT;
-    if (image != null) {
-            if (image.isDisposed()) error(SWT.ERROR_INVALID_ARGUMENT);
-            hImage = image.handle;
-            switch (image.type) {
-                    case SWT.BITMAP:
-                            imageBits = OS.SS_BITMAP;
-                            break;
-                    case SWT.ICON:
-                            imageBits = OS.SS_ICON;
-                            break;
-                    default:
-                            return;
-            }
-    }
+    if (image != null && image.isDisposed()) error(SWT.ERROR_INVALID_ARGUMENT);
+    if (image != null && image.type != SWT.BITMAP && image.type != SWT.ICON) return;
+    /*
+    * The image is painted by the label (WM_PAINT), the static control is not
+    * given the image: with SS_BITMAP or SS_ICON PM resizes the window to the
+    * size of the bitmap or to the system icon size (32x32), whatever the layout
+    * decides, and the label covered the start of the text next to the arrows
+    * of the Welcome page.  Without an image the label is a text again
+    * (TitleAreaDialog sets a null image).
+    */
     this.image = image;
-    int newBits = OS.WinQueryWindowULong (handle, OS.QWL_STYLE);
-    int oldBits = newBits;
-    newBits &= ~SS_TYPE;
-    newBits |= imageBits;
-    if (newBits != oldBits) {
-        OS.WinSetWindowULong (handle, OS.QWL_STYLE, newBits);
+    if (image != null) {
+        /* As win32, where STM_SETIMAGE replaces the text */
+        text = "";
+        OS.WinSetWindowText (handle, new PSZ (""));
     }
-    if (hImage != 0) OS.WinSendMsg(handle, OS.SM_SETHANDLE, hImage, 0); 
     OS.WinInvalidateRect (handle, null, false);
 }
 
@@ -419,6 +410,8 @@ public void setText (String string) {
          
          OS.WinSetWindowULong (handle, OS.QWL_STYLE, bits);
          
+        /* The text replaces the image (win32: SS_BITMAP and SS_ICON are cleared) */
+        image = null;
         string = patchMnemonics (string);
         text = string;
         /* Use the character encoding for the default locale */
