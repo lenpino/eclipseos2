@@ -2017,7 +2017,7 @@ public void setBackground(Color color) {
     OS.GpiQueryBitmapBits (bmpPS, 0, bm.cy, data, bmi);
 
     if (depth <= 8) {
-        int newTransRGB = (color.getRed() << 16) | (color.getRed() << 8) | color.getBlue();
+        int newTransRGB = (color.getRed() << 16) | (color.getGreen() << 8) | color.getBlue();
         int offset = bmi_cbFix + transparentPixel;
         bmi [offset] = newTransRGB;
     } else {
