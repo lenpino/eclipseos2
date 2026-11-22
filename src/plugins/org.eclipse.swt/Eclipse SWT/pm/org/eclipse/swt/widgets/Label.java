@@ -515,77 +515,35 @@ MRESULT WM_SIZE (int mp1, int mp2) {
 }
 
 MRESULT WM_PAINT (int mp1, int mp2) {
-//	DRAWITEMSTRUCT struct = new DRAWITEMSTRUCT ();
-//	OS.MoveMemory (struct, lParam, DRAWITEMSTRUCT.sizeof);
-//	drawBackground (struct.hDC);
-//	if ((style & SWT.SHADOW_NONE) != 0) return null;
-//	RECT rect = new RECT ();
-//	int lineWidth = OS.GetSystemMetrics (OS.SM_CXBORDER);
-//	int flags = OS.EDGE_ETCHED;
-//	if ((style & SWT.SHADOW_IN) != 0) flags = OS.EDGE_SUNKEN;
-//	if ((style & SWT.HORIZONTAL) != 0) {
-//		int bottom = struct.top + Math.max (lineWidth * 2, (struct.bottom - struct.top) / 2);
-//		OS.SetRect (rect, struct.left, struct.top, struct.right, bottom);
-//		OS.DrawEdge (struct.hDC, rect, flags, OS.BF_BOTTOM);
-//	} else {
-//		int right = struct.left + Math.max (lineWidth * 2, (struct.right - struct.left) / 2);
-//		OS.SetRect (rect, struct.left, struct.top, right, struct.bottom);
-//		OS.DrawEdge (struct.hDC, rect, flags, OS.BF_RIGHT);
-//	}
-	if (this.image == null) return null;
-	if(this.image.getImageData().width != 16 && this.image.getImageData().width != 20) return null;
-
-        // hps is unitialized here, do some initializations
-	if (hps == 0) hps = OS.WinGetPS (handle);
-	
-        OS.GpiSetMix (hps, OS.FM_OVERPAINT);
-        OS.GpiSetBackMix (hps, OS.BM_OVERPAINT);
-        OS.GpiSetPattern (hps, OS.PATSYM_BLANK);
-        int hPalette = getDisplay ().hPalette;
-        if (hPalette == 0)
-            OS.GpiCreateLogColorTable (hps, 0, OS.LCOLF_RGB, 0, 0, null);
-        else
-            OS.GpiSelectPalette (hps, hPalette);
-	
-            Rectangle bounds = image.getBounds();
-            int x = 0;
-            int y = 0;
-	    if (image.type == SWT.ICON) {
-                int hbmColor = image.handle;
-                int hbmPointer = image.maskHandle;
-                if (hbmPointer == 0) {
-                    OS.WinDrawPointer (hps, x, y, hbmColor, OS.DP_NORMAL);
-                } else {
-                    OS.GpiSetColor (hps, (hPalette != 0) ? 15 : 0xFFFFFF);
-                    OS.GpiSetBackColor (hps, 0);
-                    /* draw AND mask */
-                    OS.GpiWCBitBlt (hps, hbmPointer, 4,
-                        new int[] {
-                            x, y, x + bounds.width - 1, y + bounds.height - 1,
-                            0, bounds.height, bounds.width, bounds.height << 1
-                        },
-                        OS.ROP_SRCAND, OS.BBO_IGNORE
-                    );
-                    /* draw icon */
-                    OS.GpiWCBitBlt (hps, hbmColor, 4,
-                        new int[] {
-                            x, y, x + bounds.width - 1, y + bounds.height - 1,
-                            0, 0, bounds.width, bounds.height
-                        },
-                        OS.ROP_SRCINVERT, OS.BBO_IGNORE
-                    );
-                    /* draw XOR mask */
-                    OS.GpiWCBitBlt (hps, hbmPointer, 4,
-                        new int[] {
-                            x, y, x + bounds.width - 1, y + bounds.height - 1,
-                            0, 0, bounds.width, bounds.height
-                        },
-                        OS.ROP_SRCINVERT, OS.BBO_IGNORE
-                    );
-                }
-            }
-	if (this.hps == 0) OS.WinReleasePS (hps);    
-	return null;
+	/* A label with text is painted by the static control */
+	if (image == null || image.isDisposed ()) return null;
+	/*
+	* The static control copies a bitmap opaque, and the transparent
+	* entry of its palette is not the color of the transparent pixel
+	* (the arrows of the Welcome page were black squares).  The label
+	* paints the background of its parent, as win32 does in WM_ERASEBKGND
+	* for SS_BITMAP and SS_ICON, and then the image with its transparency,
+	* centered (SS_CENTERIMAGE).
+	*/
+	int hps = OS.WinGetPS (handle);
+	RECTL rcl = new RECTL ();
+	OS.WinQueryWindowRect (handle, rcl);
+	OS.WinBeginPaint (handle, hps, rcl);
+	int hPalette = getDisplay ().hPalette;
+	if (hPalette == 0) {
+		OS.GpiCreateLogColorTable (hps, 0, OS.LCOLF_RGB, 0, 0, null);
+	}
+	drawBackground (hps, rcl);
+	OS.GpiSetMix (hps, OS.FM_OVERPAINT);
+	OS.GpiSetBackMix (hps, OS.BM_OVERPAINT);
+	OS.GpiSetPattern (hps, OS.PATSYM_BLANK);
+	Rectangle bounds = image.getBounds ();
+	int x = (rcl.xRight - rcl.xLeft - bounds.width) / 2;
+	int y = (rcl.yTop - rcl.yBottom - bounds.height) / 2;
+	image.internal_draw (hps, x, y);
+	OS.WinEndPaint (hps);
+	OS.WinReleasePS (hps);
+	return MRESULT.ZERO;
 }
 
 }
