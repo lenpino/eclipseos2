@@ -30,6 +30,7 @@ import org.eclipse.swt.graphics.*;
  */
 public class ProgressBar extends Control {
         int maxRange = 100;
+        int selection = 0;
         int minRange = 0;
         int position;
 	static final int ProgressBarProc;
@@ -175,11 +176,7 @@ public int getMinimum () {
 */
 public int getSelection () {
 	 checkWidget ();
-         int pixelInfo = OS.WinSendMsg(handle, OS.SLM_QUERYSLIDERINFO, OS.MPFROM2SHORT((short)OS.SMA_SLIDERARMPOSITION, (short)OS.SMA_RANGEVALUE ), 0);
-         int posPixels = OS.SHORT1FROMMP(pixelInfo);
-         int totalPixels = OS.SHORT2FROMMP(pixelInfo) - 1;
-         int pos = ((maxRange*posPixels)/totalPixels);
-         return pos;	
+	return selection;
 }
 
 //void setBackgroundPixel (int pixel) {
@@ -272,10 +269,24 @@ public void setMinimum (int value) {
 public void setSelection (int value) {
 	checkWidget ();
 	if (value < 0) return;
+	if (value > maxRange) value = maxRange;
+	selection = value;
         int pixels = OS.WinSendMsg(handle, OS.SLM_QUERYSLIDERINFO, OS.MPFROM2SHORT((short)OS.SMA_SHAFTDIMENSIONS, (short)OS.SMA_RANGEVALUE ), 0);
 	int totalPixels = OS.SHORT1FROMMP(pixels);
-        int pixelPos = ((value*totalPixels)/maxRange);
-        OS.WinSendMsg(handle, OS.SLM_SETSLIDERINFO, OS.MPFROM2SHORT((short)OS.SMA_SLIDERARMPOSITION, (short)OS.SMA_RANGEVALUE), pixelPos);
+        /* The positions of the arm are 0 to totalPixels - 1: the maximum is the last one (before, it was out of range and the bar did not move) */
+        int pixelPos = maxRange == 0 ? 0 : ((value*totalPixels)/maxRange);
+        if (pixelPos > totalPixels - 1) pixelPos = totalPixels - 1;
+        if (pixelPos < 0) pixelPos = 0;
+        /*
+        * The slider ignores the positions near the end that it does not accept (measured
+        * 2026-11-22: from 298 of 299 it kept the last one accepted, and the bar did not
+        * reach the end): ask for the position back and go down until it is the one set.
+        */
+        for (int i = 0; i < 16 && pixelPos >= 0; i++, pixelPos--) {
+                OS.WinSendMsg(handle, OS.SLM_SETSLIDERINFO, OS.MPFROM2SHORT((short)OS.SMA_SLIDERARMPOSITION, (short)OS.SMA_RANGEVALUE), pixelPos);
+                int got = OS.WinSendMsg(handle, OS.SLM_QUERYSLIDERINFO, OS.MPFROM2SHORT((short)OS.SMA_SLIDERARMPOSITION, (short)OS.SMA_RANGEVALUE), 0);
+                if (OS.SHORT1FROMMP(got) == pixelPos) break;
+        }
 }
 
 public void setSize (int width, int height) {

@@ -43,11 +43,17 @@ public class SWT009_10 extends SWTTestCase {
 			} catch (Throwable th) {
 			}
 			final int index = i;
+			/* the window can be closed by -Dswt.test.autoclose before the loop ends */
+			if (display.isDisposed()) return;
+			try {
 			display.asyncExec(new Runnable() {
 			    public void run() {
-				bar.setSelection(index);
+				if (!bar.isDisposed()) bar.setSelection(index);
 			    }
 			});
+			} catch (Throwable th) {
+			    return;
+			}
 		    }
 		}
 		}.start();

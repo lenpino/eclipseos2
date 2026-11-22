@@ -1256,6 +1256,14 @@ public void setVisible (boolean visible) {
 
     OS.WinShowWindow (frameHandle, visible);
 
+    /*
+    * As Windows (ShowWindow followed by UpdateWindow): the window is
+    * painted now, not when the event loop gets to it. A dialog that is
+    * opened and then left while the thread works (Saving workspace) shows
+    * what is behind it for the parts that were not painted.
+    */
+    if (visible) OS.WinUpdateWindow (frameHandle);
+
     if (!visible) {
         /*
         * It is possible (but unlikely), that application
