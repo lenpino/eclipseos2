@@ -428,6 +428,28 @@ void createHandle () {
 void destroyAcceleratorTable () {
 	if (hAccel != 0 && hAccel != -1) OS.WinDestroyAccelTable (hAccel);
 	hAccel = -1;
+	scheduleAcceleratorTable ();
+}
+
+/*
+* The table is made in the event loop, not by the first key: PM loses the key that goes down
+* while the table is being made and set in the frame (the accelerator of that key never
+* arrives, seen with real keys 2026-11-23), and the menus change many times while a window
+* is built, so it is made once, when they are quiet.
+*/
+boolean accelPending;
+
+void scheduleAcceleratorTable () {
+	if (accelPending || handle == 0 || isDisposed ()) return;
+	final Display display = getDisplay ();
+	if (display == null || display.isDisposed ()) return;
+	accelPending = true;
+	display.asyncExec (new Runnable () {
+		public void run () {
+			accelPending = false;
+			if (!isDisposed () && handle != 0 && hAccel == -1) createAcceleratorTable ();
+		}
+	});
 }
 
 void destroyWidget () {

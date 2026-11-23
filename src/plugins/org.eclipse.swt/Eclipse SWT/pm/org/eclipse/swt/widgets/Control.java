@@ -3082,6 +3082,12 @@ MRESULT WM_CLOSE (int mp1, int mp2) {
 MRESULT WM_COMMAND (int mp1, int mp2) {
     switch (OS.SHORT1FROMMP (mp2)) {
         case OS.CMDSRC_MENU:
+        /*
+        * An accelerator of a menu item is the same command as the item (WinTranslateAccel posts
+        * the cmd of the ACCEL, the id of the item): as on Windows, it selects the item if it is
+        * enabled.
+        */
+        case OS.CMDSRC_ACCELERATOR: {
 //            System.out.println("Control:WM_COMMAND - CMDSRC_MENU");
             Decorations shell = menuShell ();
             if (shell.isEnabled ()) {
@@ -3092,9 +3098,8 @@ MRESULT WM_COMMAND (int mp1, int mp2) {
                     }
             }
             break;
+        }
         //    return null;
-        case OS.CMDSRC_ACCELERATOR:
-            break;
         case OS.CMDSRC_PUSHBUTTON:
             break;
         //@@TODO(lpino)

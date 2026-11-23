@@ -1686,15 +1686,36 @@ JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_WinCreateAccelTable
         (JNIEnv *env, jclass that, jint hab, jobject pacctAccelTable)
 {
     DEBUG_CALL("WinCreateAccelTable\n")
-    jint haccelhAccel;
-    ACCELTABLE c_pacctAccelTable, *c_ppacctAccelTable = NULL;
+    jint haccelhAccel = 0;
 
-    if (pacctAccelTable) c_ppacctAccelTable = getACCELTABLEFields(env, pacctAccelTable, &c_pacctAccelTable, &PGLOB(ACCELTABLEFc));
+    /*
+    * The ACCELTABLE is a header followed by cAccel ACCEL entries (the structure declares one): it is
+    * allocated with the size that the Java array needs. Before, the entries were written after a
+    * one entry ACCELTABLE on the stack, and the fields were set back through a NULL pointer: any
+    * table with accelerators (the menus of Eclipse have 60) ended the process with a trap.
+    */
+    if (pacctAccelTable) {
+        PACCELTABLE c_table;
+        jobjectArray aaccel;
+        jsize length, i;
+        ACCEL c_accel;
 
-    haccelhAccel = (jint)WinCreateAccelTable((HAB)hab, c_ppacctAccelTable);
-
-    if (pacctAccelTable) setACCELTABLEFields(env, pacctAccelTable, c_ppacctAccelTable, &PGLOB(ACCELTABLEFc));
-    printf("WinCreateAccelTable = %d\n", haccelhAccel);
+        if (!PGLOB(ACCELTABLEFc).cached) cacheACCELTABLEFids(env, pacctAccelTable, &PGLOB(ACCELTABLEFc));
+        aaccel = (*env)->GetObjectField(env, pacctAccelTable, PGLOB(ACCELTABLEFc).aaccel);
+        length = aaccel ? (*env)->GetArrayLength(env, aaccel) : 0;
+        c_table = (PACCELTABLE) malloc(sizeof(ACCELTABLE) + (length > 1 ? length - 1 : 0) * sizeof(ACCEL));
+        if (c_table) {
+            c_table->cAccel = (USHORT) length;
+            c_table->codepage = (USHORT) (*env)->GetShortField(env, pacctAccelTable, PGLOB(ACCELTABLEFc).codepage);
+            for (i = 0; i < length; i++) {
+                jobject jaccel = (*env)->GetObjectArrayElement(env, aaccel, i);
+                getACCELFields(env, jaccel, &c_accel, &PGLOB(ACCELFc));
+                c_table->aaccel[i] = c_accel;
+            }
+            haccelhAccel = (jint)WinCreateAccelTable((HAB)hab, c_table);
+            free(c_table);
+        }
+    }
     return haccelhAccel;
 }
 JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinDestroyAccelTable
