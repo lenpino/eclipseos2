@@ -3925,10 +3925,22 @@ MRESULT WM_SIZE (int mp1, int mp2) {
         matrix[7] = OS.SHORT2FROMMP (mp2) - 1;
         OS.GpiSetDefaultViewMatrix (hps, matrix.length, matrix, OS.TRANSFORM_REPLACE);
     }
+    /*
+    * The event is sent from WM_SIZE (the windows that get it from PM) and from
+    * WM_WINDOWPOSCHANGED (the ones that do not): a window that gets both would send it twice
+    * for the same change. One event for each size, as on Windows.
+    */
+    int width = OS.SHORT1FROMMP (mp2), height = OS.SHORT2FROMMP (mp2);
+    if (width == resizeWidth && height == resizeHeight) return null;
+    resizeWidth = width;
+    resizeHeight = height;
     sendEvent (SWT.Resize);
     // widget could be disposed at this point
     return null;
 }
+
+/* The size of the last Resize event (see WM_SIZE) */
+int resizeWidth = -1, resizeHeight = -1;
 
 //@@TODO (dmik): later
 //LRESULT WM_SYSCHAR (int wParam, int lParam) {
