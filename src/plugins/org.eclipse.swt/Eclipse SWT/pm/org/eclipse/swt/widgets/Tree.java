@@ -191,6 +191,9 @@ int query (int hRecord, int flag) {
 	return result == -1 ? 0 : result;
 }
 
+/* The records have to be placed again at the next paint (the size changed) */
+boolean repositionPending;
+
 int firstChild (int hParent) {
 	return hParent == 0 ? query (0, OS.CMA_FIRST) : query (hParent, OS.CMA_FIRSTCHILD);
 }
@@ -955,6 +958,14 @@ int windowProc (int msg, int mp1, int mp2) {
 			return 0;
 		}
 	}
+	/*
+	* The records are placed again before the first paint after a change of size (see below):
+	* the container has not taken the viewport yet when WM_SIZE returns.
+	*/
+	if (msg == OS.WM_PAINT && repositionPending && items != null && handle != 0 && !isDisposed ()) {
+		repositionPending = false;
+		if (firstChild (0) != 0) send (OS.CM_INVALIDATERECORD, 0, OS.MPFROM2SHORT ((short) 0, (short) OS.CMA_REPOSITION));
+	}
 	int result = super.windowProc (msg, mp1, mp2);
 	/*
 	* The container does not place its records again when it changes of
@@ -967,6 +978,7 @@ int windowProc (int msg, int mp1, int mp2) {
 	*/
 	if (msg == OS.WM_SIZE && items != null && handle != 0 && !isDisposed () && firstChild (0) != 0) {
 		send (OS.CM_INVALIDATERECORD, 0, OS.MPFROM2SHORT ((short) 0, (short) OS.CMA_REPOSITION));
+		repositionPending = true;
 	}
 	return result;
 }
