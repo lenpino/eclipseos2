@@ -1457,8 +1457,7 @@ public void showSelection () {
 }
 
 int widgetStyle () {
-	//@@INFO(lpino): LS_NOADJUSTPOS doesn't honor the sizes as are calculated
-	int bits = super.widgetStyle ();// | OS.LS_NOADJUSTPOS;
+	int bits = super.widgetStyle () | OS.LS_NOADJUSTPOS;
 //	if ((style & SWT.SINGLE) != 0) return bits;
 	if ((style & SWT.MULTI) != 0) {
 		if ((style & SWT.SIMPLE) != 0)

@@ -105,11 +105,7 @@ public class SWT039_01 extends SWTTestCase {
 		c.setSize(120, 80);
 		settle();
 		check(resizes == 1, name + ": a change of size is one Resize (" + resizes + ")");
-		/*
-		* A list box of PM does not keep the bounds that it is given (it snaps to whole rows and moves,
-		* {9, 11, 104, 60} for {10, 10, 100, 60}): known, not a Resize problem.
-		*/
-		if (!(c instanceof List)) check(moves == 0, name + ": and no Move (" + moves + ")");
+		check(moves == 0, name + ": and no Move (" + moves + ")");
 		resizes = moves = 0;
 		c.setLocation(30, 40);
 		settle();
