@@ -295,7 +295,12 @@ void createItem (MenuItem item, int index) {
 	boolean success = false;
         
         MENUITEM info = new MENUITEM();
-        info.iPosition = OS.MIT_END;
+        /*
+        * At the position asked for, as InsertMenuItem does on Windows: always at the end made JFace,
+        * which removes the items of a menu and inserts them again between the separators that it
+        * keeps, pile up the separators (empty rows under File > New).
+        */
+        info.iPosition = (short) (index < count ? index : OS.MIT_END);
         info.afStyle = (short)item.widgetStyle();
         info.afAttribute = 0;
         info.id = (short)item.id;
