@@ -332,10 +332,13 @@ public class SWT011_01 extends SWTTestCase {
 		click(tree, items[2], 0);
 		check(selection(tree).equals("2 ") && events[0] == before + 1, "a click on the item that the container still has selected selects it again: " + selection(tree));
 
-		/* The plus sign of the item 4 is left of its icon (measured: from 20 to 7 pixels left of it) */
+		/*
+		* The plus sign of the item 4 is left of its icon (measured: from 20 to 7 pixels left of it). The bounds
+		* are the text, as on Windows: the icon is the 22 pixels before it (16 and a gap).
+		*/
 		Rectangle b4 = items[4].getBounds();
 		before = events[0];
-		mouse(tree, b4.x - 13, b4.y + b4.height / 2, 0);
+		mouse(tree, b4.x - 22 - 13, b4.y + b4.height / 2, 0);
 		settle(tree);
 		/* The container does not expand with these messages (it looks at the real mouse): that is seen by hand */
 		check(selection(tree).equals("2 ") && events[0] == before, "and does not select it: " + selection(tree) + ", events " + (events[0] - before));
@@ -625,7 +628,7 @@ public class SWT011_01 extends SWTTestCase {
 		check(colors(tree, items[5], hilite).equals("white hilite"), "a selected item has the colors of the highlight, not its own (" + counts + ")");
 		Rectangle b0 = items[0].getBounds();
 		int box = 0;
-		for (int x = b0.x - 20; x < b0.x - 7; x++) if (dark(pel(tree, x, b0.y + b0.height / 2))) box++;
+		for (int x = b0.x - 22 - 20; x < b0.x - 22 - 7; x++) if (dark(pel(tree, x, b0.y + b0.height / 2))) box++;
 		check(box >= 2, "the plus sign is still drawn: " + box + " dark pixels across it");
 		items[1].setForeground(null);
 		settle(tree);
@@ -641,7 +644,7 @@ public class SWT011_01 extends SWTTestCase {
 
 	/*
 	 * The colors found in the text of an item, in a fixed order: the text, the background, the image.
-	 * The bounds of an item start with its icon: the text is 22 pixels further (measured, WM_DRAWITEM).
+	 * The bounds of an item are its text, as on Windows; the icon is the 22 pixels before them (16 and a gap, measured, WM_DRAWITEM).
 	 */
 	String colors(Tree tree, TreeItem item, int hilite) {
 		return colors(tree, item, hilite, 22);
@@ -652,7 +655,8 @@ public class SWT011_01 extends SWTTestCase {
 		boolean isDark = false, isRed = false, isWhite = false, isYellow = false, isCyan = false, isGreen = false, isHilite = false;
 		/* The rectangle of the text is lower than the row (13 of 16 pixels): its middle */
 		for (int y = b.y + b.height / 2 - 3; y <= b.y + b.height / 2 + 3; y++) {
-			for (int x = b.x + from; x < b.x + b.width; x++) {
+			/* from 0 is the icon, 22 pixels before the bounds (the text) */
+			for (int x = b.x - 22 + from; x < b.x + b.width; x++) {
 				int pel = pel(tree, x, y);
 				int r = (pel >> 16) & 0xFF, g = (pel >> 8) & 0xFF, bl = pel & 0xFF;
 				if (pel == hilite) isHilite = true;
@@ -727,7 +731,7 @@ public class SWT011_01 extends SWTTestCase {
 		check(inside(tree, boxes[1]).equals("dark light"), "a checked one has the mark: " + inside(tree, boxes[1]));
 		check(inside(tree, boxes[2]).equals("dark gray"), "a grayed one is gray, with the mark: " + inside(tree, boxes[2]));
 		Rectangle icon = items[3].getBounds();
-		check(boxes[3] != null && boxes[3].x > icon.x + 16, "with an image the box is after it: " + boxes[3] + " in " + icon);
+		check(boxes[3] != null && boxes[3].x > icon.x - 22 + 16, "with an image the box is after it: " + boxes[3] + " in " + icon);
 		Rectangle b0 = items[0].getBounds();
 		int text = -1;
 		for (int x = boxes[0].x + boxes[0].width + 1; x < b0.x + b0.width && text == -1; x++) {

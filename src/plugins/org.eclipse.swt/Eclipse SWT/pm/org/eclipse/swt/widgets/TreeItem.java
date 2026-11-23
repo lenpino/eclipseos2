@@ -195,8 +195,10 @@ public Color getBackground () {
 
 /**
  * Returns a rectangle describing the receiver's size and location
- * relative to its parent. The rectangle is empty (all zeros) if the
- * item is not shown because one of its ancestors is collapsed.
+ * relative to its parent. As on Windows (TVM_GETITEMRECT for the text only)
+ * it is the rectangle of the text: the image is to its left. The rectangle
+ * is empty (all zeros) if the item is not shown because one of its
+ * ancestors is collapsed.
  *
  * @return the receiver's bounding rectangle
  *
@@ -208,6 +210,25 @@ public Color getBackground () {
 public Rectangle getBounds () {
 	checkWidget ();
 	/*
+	* The container gives the text a rectangle of 13 pixels in a row of 16: as on Windows
+	* the rectangle is as high as the row, from the text rectangle only its left and width.
+	*/
+	Rectangle text = getBounds (OS.CMA_TEXT);
+	if (text.width == 0 && text.height == 0) return text;
+	Rectangle row = getRowBounds ();
+	return new Rectangle (text.x, row.y, text.width, row.height);
+}
+
+/*
+ * The rectangle of the image and the text together: where a click is on the item.
+ * On Windows a click on the image is on the item as well.
+ */
+Rectangle getRowBounds () {
+	return getBounds (OS.CMA_ICON | OS.CMA_TEXT);
+}
+
+Rectangle getBounds (int parts) {
+	/*
 	* CM_QUERYRECORDRECT: mp1 = RECTL (xLeft, yBottom, xRight, yTop) and
 	* mp2 = QUERYRECORDRECT (cb, pRecord, fRightSplitWindow, fsExtent), in
 	* the coordinates of the container, whose y axis grows upwards.
@@ -216,7 +237,7 @@ public Rectangle getBounds () {
 	int query = Tree.allocate (16);
 	Tree.poke (query, 16);
 	Tree.poke (query + 4, handle);
-	Tree.poke (query + 12, OS.CMA_ICON | OS.CMA_TEXT);
+	Tree.poke (query + 12, parts);
 	Rectangle result = new Rectangle (0, 0, 0, 0);
 	if (parent.send (OS.CM_QUERYRECORDRECT, rect, query) != 0) {
 		int left = Tree.peek (rect), bottom = Tree.peek (rect + 4);

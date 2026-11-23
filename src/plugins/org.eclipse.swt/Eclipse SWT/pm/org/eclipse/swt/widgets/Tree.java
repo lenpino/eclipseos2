@@ -454,7 +454,7 @@ public TreeItem getItem (Point point) {
 	if (point == null) error (SWT.ERROR_NULL_ARGUMENT);
 	TreeItem [] all = visibleItems ();
 	for (int i=0; i<all.length; i++) {
-		if (all [i].getBounds ().contains (point)) return all [i];
+		if (all [i].getRowBounds ().contains (point)) return all [i];
 	}
 	return null;
 }
@@ -938,7 +938,7 @@ int windowProc (int msg, int mp1, int mp2) {
 			}
 		}
 		for (int i=0; i<visible.length && row == null; i++) {
-			Rectangle bounds = visible [i].getBounds ();
+			Rectangle bounds = visible [i].getRowBounds ();
 			if (bounds.y <= point.y && point.y < bounds.y + bounds.height) {
 				row = visible [i];
 				if (bounds.contains (point)) item = row;
