@@ -286,7 +286,8 @@ public void setText (String string) {
 }
 
 int widgetStyle () {
-	return super.widgetStyle () | OS.SS_GROUPBOX | OS.WS_TABSTOP | OS.SS_AUTOSIZE;
+	/* DT_MNEMONIC: the text has '~' before the mnemonic letter (patchMnemonics), drawn underlined and not shown */
+	return super.widgetStyle () | OS.SS_GROUPBOX | OS.WS_TABSTOP | OS.SS_AUTOSIZE | OS.DT_MNEMONIC;
 }
 PSZ windowClass () {
 	return GroupClass;

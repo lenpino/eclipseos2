@@ -437,7 +437,8 @@ void setWrap (boolean wrap) {
 //}
 
 int widgetStyle () {
-	int bits = super.widgetStyle () | OS.SS_TEXT;
+	/* DT_MNEMONIC: the text has '~' before the mnemonic letter (patchMnemonics), drawn underlined and not shown */
+	int bits = super.widgetStyle () | OS.SS_TEXT | OS.DT_MNEMONIC;
 //	if ((style & SWT.SEPARATOR) != 0) return bits | OS.SS_OWNERDRAW;
 	if ((style & SWT.CENTER) != 0) return bits | OS.DT_CENTER | OS.DT_BOTTOM;
 	if ((style & SWT.RIGHT) != 0) return bits | OS.DT_RIGHT;

@@ -246,9 +246,23 @@ public void setText (String string) {
 	if (index == -1) return;
 	super.setText (string);
 	int hwnd = parent.handle;
-         PSZ tabText = new PSZ(string);
-         OS.WinSendMsg (hwnd, OS.BKM_SETTABTEXT, this.parent.itemsID[index], tabText);
-         parent.setTabDimensions(tabText);
+	/* '&' is the mnemonic of Eclipse, '~' the one of OS/2 (as in the other controls); the tab is measured without it */
+	String shown = parent.patchMnemonics (string);
+	/* without the mnemonic prefix: "~~" is a '~', a single '~' is dropped */
+	StringBuffer buffer = new StringBuffer ();
+	for (int i=0; i<shown.length (); i++) {
+		char c = shown.charAt (i);
+		if (c != '~') {
+			buffer.append (c);
+		} else if (i + 1 < shown.length () && shown.charAt (i + 1) == '~') {
+			buffer.append (c);
+			i++;
+		}
+	}
+	String plain = buffer.toString ();
+	PSZ tabText = new PSZ (shown);
+	OS.WinSendMsg (hwnd, OS.BKM_SETTABTEXT, this.parent.itemsID[index], tabText);
+	parent.setTabDimensions (new PSZ (plain));
 }
 
 /**
