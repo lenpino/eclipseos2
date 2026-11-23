@@ -287,6 +287,14 @@ public void setSelection (int value) {
                 int got = OS.WinSendMsg(handle, OS.SLM_QUERYSLIDERINFO, OS.MPFROM2SHORT((short)OS.SMA_SLIDERARMPOSITION, (short)OS.SMA_RANGEVALUE), 0);
                 if (OS.SHORT1FROMMP(got) == pixelPos) break;
         }
+        /*
+        * The slider paints only what changed (the blue) and not its frame: a bar shown
+        * while the thread is busy (JFace shows it when the task begins, and the saving
+        * of the workspace does not dispatch events) had no sunken frame until the next
+        * paint message. Windows draws the whole bar when the position changes.
+        */
+        OS.WinInvalidateRect (handle, null, false);
+        OS.WinUpdateWindow (handle);
 }
 
 public void setSize (int width, int height) {

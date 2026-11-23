@@ -98,6 +98,27 @@ public class SWT033_01 extends SWTTestCase {
 		return sb.toString();
 	}
 
+	int[] snapshot(ProgressBar bar) {
+		Rectangle r = bar.getBounds();
+		int[] px = new int[r.width * r.height];
+		int hps = OS.WinGetScreenPS(OS.HWND_DESKTOP);
+		OS.GpiCreateLogColorTable(hps, 0, OS.LCOLF_RGB, 0, 0, null);
+		int cy = OS.WinQuerySysValue(OS.HWND_DESKTOP, OS.SV_CYSCREEN);
+		for (int y = 0; y < r.height; y++) for (int x = 0; x < r.width; x++) {
+			Point p = bar.toDisplay(new Point(x, y));
+			px[y * r.width + x] = OS.GpiQueryPel(hps, new int[] {p.x, cy - 1 - p.y}) & 0xFFFFFF;
+		}
+		OS.WinReleasePS(hps);
+		return px;
+	}
+
+	/* The pixels where two snapshots differ, with the first one */
+	String diff(ProgressBar bar, int[] a, int[] b) {
+		int w = bar.getBounds().width, n = 0, first = -1;
+		for (int i = 0; i < a.length; i++) if (a[i] != b[i]) { n++; if (first == -1) first = i; }
+		return n == 0 ? null : n + " pixels differ, the first at (" + (first % w) + ", " + (first / w) + "): " + Integer.toHexString(a[first]) + " instead of " + Integer.toHexString(b[first]);
+	}
+
 	void initComponents() {
 		sayObjective("Automatic checks");
 		shell.setLayout(new GridLayout());
@@ -110,6 +131,12 @@ public class SWT033_01 extends SWTTestCase {
 		bar.setLayoutData(gd);
 		bar.setMinimum(0);
 		bar.setMaximum(100);
+		/* A bar that is hidden when the dialog opens and shown later (JFace ProgressIndicator) */
+		final ProgressBar late = new ProgressBar(shell, SWT.HORIZONTAL);
+		GridData gd2 = new GridData(GridData.FILL_HORIZONTAL);
+		gd2.widthHint = 300;
+		late.setLayoutData(gd2);
+		late.setVisible(false);
 		Label sub = new Label(shell, SWT.WRAP);
 		sub.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		Button cancel = new Button(shell, SWT.PUSH);
@@ -142,6 +169,23 @@ public class SWT033_01 extends SWTTestCase {
 		bar.setSelection(0);
 		pump(bar);
 		check(pel(bar, 10, mid) != fill, "at 0% the bar is empty");
+		/* Advancing step by step: what is on the screen has to be what a complete repaint draws (the frame included) */
+		for (int v = 1; v <= 100; v += 1) {
+			bar.setSelection(v);
+			pump(bar);
+			int[] stepped = snapshot(bar);
+			bar.redraw();
+			pump(bar);
+			String d = diff(bar, stepped, snapshot(bar));
+			check(d == null, "at " + v + "% the bar is as a complete repaint draws it" + (d == null ? "" : ": " + d));
+		}
+		/* Shown and moved with no event dispatched (the thread is busy saving): the frame has to be there with the blue */
+		late.setVisible(true);
+		late.setSelection(30);
+		int lmid = late.getBounds().height / 2, lw = late.getBounds().width;
+		int lleft = pel(late, 0, lmid), lright = pel(late, lw - 1, lmid), ltop = pel(late, lw / 2, 0), lfill = pel(late, 10, lmid);
+		say("  late bar: left " + Integer.toHexString(lleft) + ", right " + Integer.toHexString(lright) + ", top " + Integer.toHexString(ltop) + ", fill " + Integer.toHexString(lfill));
+		check(lleft == 0x808080 && lright == 0xFFFFFF && ltop == 0x808080, "a bar shown late has its sunken frame painted at once, not when the events are dispatched");
 		say("\n" + checks + " checks, " + failures + " failed.\n");
 		if (failures > 0) throw new RuntimeException(failures + " checks failed");
 		setTitle(null);
