@@ -359,7 +359,8 @@ void initWindowSystem( int* pArgc, char* argv[], int showSplash )
 
    /* Create a window that has no decorations. */
    fcdata.cb = sizeof(FRAMECDATA);
-   fcdata.flCreateFlags = FCF_TASKLIST;
+   /* No FCF_TASKLIST: the splash is not a window of the user (it stayed in the window list when the JVM could not destroy it) */
+   fcdata.flCreateFlags = 0;
    fcdata.hmodResources = NULLHANDLE;
    fcdata.idResources = 0;
 
@@ -528,6 +529,7 @@ static void splashTimeout(void)
 {
    /* Stop the timer. */
    WinStopTimer( hab, hwndClient, SPLASH_TIMER_ID );
+   WinShowWindow( hwndFrame, FALSE );
 
    WinPostMsg( hwndClient, WM_QUIT, 0, 0 );
 }

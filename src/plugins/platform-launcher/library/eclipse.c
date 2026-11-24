@@ -126,7 +126,7 @@ static int   isRunningExitCode      = 15;
 static int   restartExitCode        = 23;
 
 /* Define the maximum time (in seconds) for the splash window to remain visible. */
-static char*  splashTimeout = "600";   /* 10 minutes */
+static char*  splashTimeout = "30";    /* seconds: on OS/2 the JVM cannot destroy the splash process (it is in another session, error 5), so it brings itself down */
 
 /* Define the required VM arguments (all platforms). */
 #define       startupJarName "startup.jar"
@@ -316,7 +316,7 @@ int main( int argc, char* argv[] )
     /* Get the command to start the Java VM. */
     vmCommand = getVMCommand( argc, argv );
     vmCommandMsg = formatVmCommandMsg( vmCommand );
-    displayMessage( vmCommandMsg );
+    if (debug) displayMessage( vmCommandMsg );
     /* While the Java VM should be restarted */
     exitCode = restartExitCode;
     while (exitCode == restartExitCode)
