@@ -96,6 +96,8 @@ public class Decorations extends Canvas {
 	Image image;
 	/* The icon of the frame made from a bitmap given to setImage(), freed with the window */
 	Image icon;
+	/* The pointer (PM icon) made from the bitmaps of icon, destroyed with it */
+	int hIconPointer;
 	Menu menuBar;
 	Menu [] menus;
 	MenuItem [] items;
@@ -597,7 +599,9 @@ public void setImage (Image image) {
 	checkWidget ();
 	if (image != null && image.isDisposed ()) error (SWT.ERROR_INVALID_ARGUMENT);
 	Image oldIcon = icon;
+	int oldPointer = hIconPointer;
 	icon = null;
+	hIconPointer = 0;
 	int hIcon = 0;
 	if (image != null) {
 		if (image.type == SWT.ICON) {
@@ -606,16 +610,37 @@ public void setImage (Image image) {
 			try {
 				ImageData data = image.getImageData ();
 				icon = new Image (getDisplay (), data, data.getTransparencyMask ());
-				hIcon = icon.handle;
+				hIcon = pointerOf (icon);
 			} catch (SWTException e) {
 				/* The window keeps the icon it has */
 			} catch (SWTError e) {
 			}
 		}
 	}
+	if (hIcon == 0 && image != null && image.type == SWT.ICON) hIcon = pointerOf (image);
 	this.image = image;
 	OS.WinSendMsg (frameHandle, OS.WM_SETICON, hIcon, 0);
+	if (oldPointer != 0) OS.WinDestroyPointer (oldPointer);
 	if (oldIcon != null) oldIcon.dispose ();
+}
+
+/*
+* The pointer for WM_SETICON. An icon of the size of the system icon is a pointer already; any
+* other (the 16x16 of a window) is a pair of bitmaps that SWT draws by itself (Image.maskHandle),
+* and WM_SETICON would get a bitmap handle and show nothing: a pointer is made of them, with
+* the same bitmaps as the mini icon that the system menu of the frame shows.
+*/
+int pointerOf (Image icon) {
+	if (icon.maskHandle == 0) return icon.handle;
+	POINTERINFO info = new POINTERINFO ();
+	info.fPointer = 0;
+	info.hbmColor = icon.handle;
+	info.hbmPointer = icon.maskHandle;
+	info.hbmMiniColor = icon.handle;
+	info.hbmMiniPointer = icon.maskHandle;
+	int hptr = OS.WinCreatePointerIndirect (OS.HWND_DESKTOP, info);
+	if (hptr != 0) hIconPointer = hptr;
+	return hptr;
 }
 
 /**
@@ -828,6 +853,8 @@ void releaseWidget () {
 	menus = null;
 
     super.releaseWidget ();
+    if (hIconPointer != 0) OS.WinDestroyPointer (hIconPointer);
+    hIconPointer = 0;
     if (icon != null) icon.dispose ();
     icon = null;
     
