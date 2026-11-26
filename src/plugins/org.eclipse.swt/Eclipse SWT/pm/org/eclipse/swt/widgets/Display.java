@@ -1230,8 +1230,6 @@ protected void init () {
         pib.pib_ultype = 3;
         OS.objcpy (ppib[0], pib);
     }
-    /*Init Font Engine */
-    OS.Ft2EnableFontEngine(false);
     /* Get the anchor block */
     hab = OS.WinInitialize (0);
     if (hab == 0) error (SWT.ERROR_NO_HANDLES);

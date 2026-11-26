@@ -2867,7 +2867,6 @@ public static final native boolean WinStopTimer(int hab, int hwnd, int ulTimer);
 public static final native int WinBeginEnumWindows(int hwnd);
 public static final native boolean WinEndEnumWindows(int henum);
 public static final native int WinGetNextWindow(int henum);
-public static final native void Ft2EnableFontEngine(boolean fEnable);
 public static final native boolean PrfQueryProfileSize (int hini, PSZ pszApp,
     PSZ pszKey, int[] pulDataLen);
 public static final native int PrfQueryProfileString (int hini, PSZ pszApp,
