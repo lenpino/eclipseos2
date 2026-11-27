@@ -276,11 +276,12 @@ void destroyItem (TabItem item) {
 	}
 	if (index == count) return;
         int selectionIndex = itemsID[index];
-	if (!OS.WinSendMsg (handle, OS.BKM_DELETEPAGE, selectionIndex, (short)OS.BKA_TAB)) {
+	if (!OS.WinSendMsg (handle, OS.BKM_DELETEPAGE, selectionIndex, (short)OS.BKA_SINGLE)) {
 		error (SWT.ERROR_ITEM_NOT_REMOVED);
 	}
-	System.arraycopy (items, index + 1, items, index, --count - index);
-        System.arraycopy (itemsID, index + 1, itemsID, index, --count - index);
+	count--;
+	System.arraycopy (items, index + 1, items, index, count - index);
+        System.arraycopy (itemsID, index + 1, itemsID, index, count - index);
 	items [count] = null;
         itemsID[count] = 0;
 	if (count == 0) {
@@ -506,10 +507,9 @@ boolean mnemonicMatch (char key) {
 }
 
 void releaseWidget () {
-	int count = OS.WinSendMsg (handle, OS.BKM_QUERYPAGECOUNT, 0, OS.BKA_END);
-	for (int i=0; i<count; i++) {
+	for (int i=0; i<items.length; i++) {
 		TabItem item = items [i];
-		if (!item.isDisposed ()) item.releaseWidget ();
+		if (item != null && !item.isDisposed ()) item.releaseWidget ();
 	}
 	items = null;
         itemsID = null;
@@ -617,9 +617,10 @@ void setSelection (int index, boolean notify) {
 }
 boolean hasToolTip () {
 	if (super.hasToolTip ()) return true;
-	int count = OS.WinSendMsg (handle, OS.BKM_QUERYPAGECOUNT, 0, OS.BKA_END);
-	for (int i = 0; i < count; i++) {
-		if (items [i].toolTipText != null) return true;
+	if (items == null) return false;
+	for (int i = 0; i < items.length; i++) {
+		TabItem item = items [i];
+		if (item != null && item.toolTipText != null) return true;
 	}
 	return false;
 }
