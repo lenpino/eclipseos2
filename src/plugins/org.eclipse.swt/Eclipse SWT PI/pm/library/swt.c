@@ -2122,6 +2122,72 @@ JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_PrfQueryProfileString
     return rc;
 }
     
+JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_PrfQueryProfileData
+        (JNIEnv *env, jclass that, jint hini, jobject app, jobject key,
+         jbyteArray data, jintArray length)
+{
+    PSZ application = app ? getPSZBytes(env, app) : NULL;
+    PSZ keyword = key ? getPSZBytes(env, key) : NULL;
+    jbyte *buffer = (*env)->GetByteArrayElements(env, data, NULL);
+    jint *count = (*env)->GetIntArrayElements(env, length, NULL);
+    jboolean result = JNI_FALSE;
+
+    if (application && (!key || keyword) && buffer && count && count[0] >= 0 &&
+        count[0] <= (*env)->GetArrayLength(env, data))
+        result = (jboolean)PrfQueryProfileData((HINI)hini, application, keyword,
+            buffer, (PULONG)count);
+    if (count) (*env)->ReleaseIntArrayElements(env, length, count, 0);
+    if (buffer) (*env)->ReleaseByteArrayElements(env, data, buffer, 0);
+    if (keyword) releasePSZBytes(env, key, keyword);
+    if (application) releasePSZBytes(env, app, application);
+    return result;
+}
+
+JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinQueryObjectPath
+        (JNIEnv *env, jclass that, jint object, jbyteArray path)
+{
+    jbyte *buffer = (*env)->GetByteArrayElements(env, path, NULL);
+    jboolean result = JNI_FALSE;
+    if (buffer) {
+        result = (jboolean)WinQueryObjectPath((HOBJECT)object, (PSZ)buffer,
+            (*env)->GetArrayLength(env, path));
+        (*env)->ReleaseByteArrayElements(env, path, buffer, 0);
+    }
+    return result;
+}
+
+JNIEXPORT jboolean JNICALL Java_org_eclipse_swt_internal_pm_OS_WinOpenDefaultObject
+        (JNIEnv *env, jclass that, jobject path)
+{
+    jboolean result = JNI_FALSE;
+    PSZ name = getPSZBytes(env, path);
+    if (name) {
+        HOBJECT object = WinQueryObject(name);
+        /* OPEN_DEFAULT is 0; the SOM object header is not needed here. */
+        if (object) result = (jboolean)WinOpenObject(object, 0, TRUE);
+        releasePSZBytes(env, path, name);
+    }
+    return result;
+}
+
+JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_WinLoadFileIcon
+        (JNIEnv *env, jclass that, jobject path)
+{
+    HPOINTER icon = NULLHANDLE;
+    PSZ name = getPSZBytes(env, path);
+    if (name) {
+        icon = WinLoadFileIcon(name, TRUE);
+        releasePSZBytes(env, path, name);
+    }
+    return (jint)icon;
+}
+
+JNIEXPORT void JNICALL Java_org_eclipse_swt_internal_pm_OS_WinFreeFileIcon
+        (JNIEnv *env, jclass that, jint pointer)
+{
+    WinFreeFileIcon((HPOINTER)pointer);
+}
+
 /* PM helpers */
 
 JNIEXPORT jint JNICALL Java_org_eclipse_swt_internal_pm_OS_WinCallWindowProc

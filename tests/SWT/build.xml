@@ -119,7 +119,7 @@
             <src path="${plugindir}/Eclipse SWT Printing/pm/"/>
             <src path="${plugindir.orig}/Eclipse SWT Printing/common/"/>
             <src path="${plugindir}/Eclipse SWT/emulated/bidi/"/>
-            <!-- src path="${plugindir}/Eclipse SWT Program/pm/"/ -->
+            <src path="${plugindir}/Eclipse SWT Program/pm/"/>
             <!-- src path="${plugindir}/Eclipse SWT Program/common/"/ -->
             <src path="${plugindir.orig}/Eclipse SWT Custom Widgets/common/"/>
         </javac>

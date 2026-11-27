@@ -330,6 +330,8 @@ org\eclipse\swt\custom\VerifyKeyListener.java
 org\eclipse\swt\custom\ViewForm.java
 org\eclipse\swt\custom\WrappedContent.java
 
+org\eclipse\swt\program\Program.java
+
 # emulated
 org\eclipse\swt\accessibility\Accessible.java
 

@@ -2871,6 +2871,11 @@ public static final native boolean PrfQueryProfileSize (int hini, PSZ pszApp,
     PSZ pszKey, int[] pulDataLen);
 public static final native int PrfQueryProfileString (int hini, PSZ pszApp,
     PSZ pszKey, PSZ pszDefault, byte[] pBuffer, int ulBufferMax);
+public static final native boolean PrfQueryProfileData (int hini, PSZ app, PSZ key, byte[] data, int[] length);
+public static final native boolean WinQueryObjectPath (int object, byte[] path);
+public static final native boolean WinOpenDefaultObject (PSZ path);
+public static final native int WinLoadFileIcon (PSZ path);
+public static final native void WinFreeFileIcon (int pointer);
 
 // PM helpers
 
