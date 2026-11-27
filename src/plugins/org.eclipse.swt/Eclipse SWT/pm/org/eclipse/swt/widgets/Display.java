@@ -143,6 +143,8 @@ public class Display extends Device {
     * or rests on it (see mouseMoved() and checkMouse()).
     */
     Control mouseControl;
+    Control contextClickControl;
+    int contextClickX, contextClickY;
     long mouseTime;
     boolean mouseHovered, mouseChecking;
     static final int HOVER_TIME = 400, MOUSE_CHECK_TIME = 100;
@@ -561,6 +563,14 @@ boolean filterMessage (QMSG qmsg) {
     if (wndProc == Decorations.FrameProc) return false;
     
     int msg = qmsg.msg;
+    if (msg == OS.WM_BUTTON2DOWN || msg == OS.WM_BUTTON2UP) {
+        trackContextClick (hwnd, msg, qmsg.mp1);
+    }
+    if (msg == OS.WM_CONTEXTMENU && WidgetTable.get (hwnd) == null) {
+        // Native child windows, such as a Table's detail view, are not SWT controls.
+        Control control = findControl (hwnd);
+        if (control != null && control.showContextMenu (hwnd, qmsg.mp1, qmsg.mp2)) return true;
+    }
     /* A button or a key takes the tool tip away until the pointer leaves the control */
     if (toolTipControl != null) {
         boolean keyDown = msg == OS.WM_CHAR && (qmsg.mp1 & OS.KC_KEYUP) == 0;
@@ -661,6 +671,42 @@ boolean filterMessage (QMSG qmsg) {
 public Widget findWidget (int handle) {
     checkDevice ();
     return WidgetTable.get (handle);
+}
+
+/*
+ * Win32 generates a context-menu request on button release. PM makes its
+ * native request configurable, so also recognize a right click ourselves.
+ * Work from the queue to include the native children of composite controls.
+ */
+void trackContextClick (int hwnd, int msg, int mp1) {
+    final Control control = findControl (hwnd);
+    final int[] point = {(short) OS.SHORT1FROMMP (mp1), (short) OS.SHORT2FROMMP (mp1)};
+    OS.WinMapWindowPoints (hwnd, OS.HWND_DESKTOP, point, 1);
+    if (msg == OS.WM_BUTTON2DOWN) {
+        contextClickControl = control;
+        contextClickX = point [0];
+        contextClickY = point [1];
+        return;
+    }
+    Control pressed = contextClickControl;
+    contextClickControl = null;
+    if (control == null || pressed == null || pressed.isDisposed ()) return;
+    // PM can deliver the release to an ancestor of the control that was clicked.
+    Control receiver = pressed;
+    while (receiver != null && receiver != control && !(receiver instanceof Shell)) {
+        receiver = receiver.parent;
+    }
+    if (receiver != control) return;
+    int dx = OS.WinQuerySysValue (OS.HWND_DESKTOP, OS.SV_CXMOTIONSTART);
+    int dy = OS.WinQuerySysValue (OS.HWND_DESKTOP, OS.SV_CYMOTIONSTART);
+    if (Math.abs (point [0] - contextClickX) > dx || Math.abs (point [1] - contextClickY) > dy) return;
+    // Let PM and the mouse listeners process the release before showing the menu.
+    final Control target = pressed;
+    asyncExec (new Runnable () {
+        public void run () {
+            if (!target.isDisposed ()) target.showContextMenuAt (point [0], point [1]);
+        }
+    });
 }
 
 Control findControl(int handle) {

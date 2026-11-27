@@ -10,10 +10,20 @@
  */
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.internal.pm.OS;
 import org.eclipse.swt.internal.pm.SWP;
+import org.eclipse.swt.widgets.Canvas;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.swt.widgets.Tree;
+import org.eclipse.swt.widgets.TreeItem;
 
 /**
  *  Checks that a pop up menu is shown by Menu.setVisible(true), which was an
@@ -70,11 +80,79 @@ public class SWT009_15 extends SWTTestCase {
 		check(swp.x >= 0 && swp.x + swp.cx <= screenWidth, "a menu near the right edge stays in the screen: x=" + swp.x);
 		menu.setVisible(false);
 
+		checkContextMenus();
 		say("\nAll checks passed.\n");
 		/* SWTTestCase opens the shell after initComponents(), so close it afterwards */
 		display.asyncExec(new Runnable() {
 			public void run() { shell.dispose(); }
 		});
+	}
+
+	void checkContextMenus() {
+		shell.setBounds(80, 80, 420, 320);
+		Canvas editor = new Canvas(shell, SWT.BORDER);
+		editor.setBounds(10, 10, 180, 80);
+		Tree tree = new Tree(shell, SWT.BORDER);
+		tree.setBounds(10, 100, 180, 120);
+		new TreeItem(tree, SWT.NONE).setText("Project");
+		Table table = new Table(shell, SWT.BORDER);
+		table.setBounds(200, 100, 180, 120);
+		new TableColumn(table, SWT.NONE).setWidth(140);
+		new TableItem(table, SWT.NONE).setText("Row");
+		shell.open();
+		int records = OS.WinWindowFromID(table.handle, OS.CID_LEFTDVWND);
+		check(records != 0, "the table has a native detail window");
+		checkContextMenu(editor, editor.handle, "editor");
+		checkContextMenu(tree, tree.handle, "tree");
+		checkContextMenu(table, records, "table detail window");
+	}
+
+	void checkContextMenu(Control control, int source, String name) {
+		final Menu popup = new Menu(control);
+		final int[] events = {0, 0};
+		popup.addListener(SWT.Show, new Listener() {
+			public void handleEvent(Event e) {
+				events[0]++;
+				new MenuItem(popup, SWT.PUSH).setText("Dynamic choice");
+			}
+		});
+		popup.addListener(SWT.Hide, new Listener() {
+			public void handleEvent(Event e) {
+				events[1]++;
+				for (int i = popup.getItemCount() - 1; i >= 0; i--) popup.getItem(i).dispose();
+			}
+		});
+		control.setMenu(popup);
+		int[] point = {25, 35};
+		OS.WinMapWindowPoints(source, OS.HWND_DESKTOP, point, 1);
+		int position = 25 | (35 << 16);
+		int[] shellPoint = {25, 35};
+		OS.WinMapWindowPoints(source, shell.handle, shellPoint, 1);
+		int shellPosition = OS.MPFROM2SHORT((short) shellPoint[0], (short) shellPoint[1]);
+		for (int i = 1; i <= 4; i++) {
+			if (i != 1) {
+				OS.WinPostMsg(source, OS.WM_BUTTON2DOWN, position, 0);
+				if (i == 4) {
+					/* As observed in Eclipse, PM routes the release to the shell. */
+					OS.WinPostMsg(shell.handle, OS.WM_BUTTON2UP, shellPosition, 0);
+				} else {
+					OS.WinPostMsg(source, OS.WM_BUTTON2UP, position, 0);
+				}
+			}
+			if (i == 1 || i == 3) OS.WinPostMsg(source, OS.WM_CONTEXTMENU, position, 0);
+			while (display.readAndDispatch()) {}
+			check(popup.getVisible() && events[0] == i, name + " opens and populates its context menu");
+			SWP swp = new SWP();
+			check(OS.WinQueryWindowPos(popup.handle, swp) && swp.x == point[0] && swp.y == point[1],
+				name + " opens at the native pointer coordinates");
+			int[] center = {swp.x + swp.cx / 2, swp.y + swp.cy / 2};
+			int hit = OS.WinWindowFromPoint(OS.HWND_DESKTOP, center, true);
+			check(hit == popup.handle, name + " menu is the top window at its on-screen position");
+			popup.setVisible(false);
+			while (display.readAndDispatch()) {}
+			check(!popup.getVisible() && events[1] == i, name + " dismisses its context menu");
+		}
+		popup.dispose();
 	}
 
 	public static void main(String[] args) {

@@ -3120,19 +3120,34 @@ MRESULT WM_COMMAND (int mp1, int mp2) {
 }
 
 MRESULT WM_CONTEXTMENU (int mp1, int mp2) {
-      /*
-      * Because context menus can be shared between controls
-      * and the parent of all menus is the shell, the menu may
-      * have been destroyed but not removed from the control.
-      */
-    //@@TODO(lpino) Validate using the coordinates of the mouse
-//      if (mp2 != handle) return null;
-      if(menu == null) return MRESULT.FALSE;
-      else{
-          short flOptions = OS.PU_HCONSTRAIN | OS.PU_VCONSTRAIN | OS.PU_KEYBOARD | OS.PU_MOUSEBUTTON1;
-          boolean rc = OS.WinPopupMenu(handle, handle, menu.handle, OS.SHORT1FROMMP(mp1), OS.SHORT2FROMMP(mp1), 0, flOptions);
-          return MRESULT.TRUE;
-      }
+    return showContextMenu (handle, mp1, mp2) ? MRESULT.TRUE : null;
+}
+
+boolean showContextMenu (int source, int mp1, int mp2) {
+    // Warp puts the pointer coordinates in mp1 and the keyboard flag in mp2.
+    int[] point;
+    if (OS.SHORT2FROMMP (mp2) == 0) {
+        point = new int[] {(short) OS.SHORT1FROMMP (mp1), (short) OS.SHORT2FROMMP (mp1)};
+    } else {
+        Point size = getSize ();
+        point = new int[] {size.x / 2, size.y / 2};
+        source = handle;
+    }
+    OS.WinMapWindowPoints (source, OS.HWND_DESKTOP, point, 1);
+    return showContextMenuAt (point [0], point [1]);
+}
+
+boolean showContextMenuAt (int x, int y) {
+    Menu popup = null;
+    for (Control control = this; control != null; control = control.parent) {
+        popup = control.menu;
+        if (popup != null && !popup.isDisposed ()) break;
+        popup = null;
+        if (control instanceof Shell) break;
+    }
+    if (popup == null || !isActive ()) return false;
+
+    return popup.getVisible () || popup.showContextAt (x, y);
 }
 
 MRESULT WM_CONTROL (int mp1, int mp2) {
@@ -3898,7 +3913,13 @@ MRESULT WM_SETFOCUS (int mp1, int mp2) {
 }
 
 MRESULT WM_MENUEND (int mp1, int mp2) {
-      return null;
+    Shell shell = getShell ();
+    Menu active = shell.activeMenu;
+    if (active != null && !active.isDisposed () && active.handle == mp2) {
+        shell.activeMenu = active.getParentMenu ();
+        active.sendEvent (SWT.Hide);
+    }
+    return null;
 }
 
 //@@TODO (dmik): later

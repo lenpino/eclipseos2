@@ -868,7 +868,6 @@ public void setVisible (boolean visible) {
 	* the lower left corner. Without a position set with setLocation()
 	* the menu is shown at the pointer.
 	*/
-	int screenWidth = OS.WinQuerySysValue (OS.HWND_DESKTOP, OS.SV_CXSCREEN);
 	int screenHeight = OS.WinQuerySysValue (OS.HWND_DESKTOP, OS.SV_CYSCREEN);
 	int popupX, popupY;
 	if (hasLocation) {
@@ -880,6 +879,19 @@ public void setVisible (boolean visible) {
 		popupX = pnt [0];
 		popupY = pnt [1];
 	}
+	showAt (popupX, popupY);
+}
+
+/* Open the context menu on-screen in one PM call. */
+boolean showContextAt (int x, int y) {
+	short options = OS.PU_HCONSTRAIN | OS.PU_VCONSTRAIN | OS.PU_KEYBOARD | OS.PU_MOUSEBUTTON1;
+	return OS.WinPopupMenu (OS.HWND_DESKTOP, parent.handle, handle, x, y, 0, options);
+}
+
+/* Show at the given desktop coordinates, in PM's coordinate system. */
+void showAt (int popupX, int popupY) {
+	int screenWidth = OS.WinQuerySysValue (OS.HWND_DESKTOP, OS.SV_CXSCREEN);
+	int screenHeight = OS.WinQuerySysValue (OS.HWND_DESKTOP, OS.SV_CYSCREEN);
 	/*
 	* WinPopupMenu() puts the lower left corner of the menu at the given
 	* point, while the location of an SWT menu is its upper left corner,
@@ -889,7 +901,8 @@ public void setVisible (boolean visible) {
 	* lower left one if it does not fit below, and it is kept in the screen.
 	*/
 	short flOptions = (short) (OS.PU_KEYBOARD | OS.PU_MOUSEBUTTON1);
-	OS.WinPopupMenu (OS.HWND_DESKTOP, parent.handle, handle, popupX, -screenHeight, 0, flOptions);
+	if (!OS.WinPopupMenu (OS.HWND_DESKTOP, parent.handle, handle, popupX, -screenHeight, 0, flOptions)) return;
+	if (isDisposed ()) return;
 	SWP swp = new SWP ();
 	if (OS.WinQueryWindowPos (handle, swp) && swp.cy > 0) {
 		int left = Math.max (0, Math.min (popupX, screenWidth - swp.cx));
