@@ -259,6 +259,44 @@ public class SWT010_01 extends SWTTestCase {
 		bar.dispose();
 	}
 
+	void checkFocusAfterModal(final Shell s) {
+		final Text editor = new Text(s, SWT.BORDER | SWT.MULTI);
+		editor.setBounds(0, 40, 300, 100);
+		ToolBar bar = new ToolBar(s, SWT.FLAT);
+		ToolItem run = new ToolItem(bar, SWT.PUSH);
+		Image image = makeImage(0);
+		run.setImage(image);
+		bar.setBounds(0, 0, 300, 32);
+		final int[] hits = {0};
+		final boolean[] editorFocused = {false};
+		run.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				hits[0]++;
+				editorFocused[0] = editor.isFocusControl();
+				Shell progress = new Shell(s, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
+				progress.open();
+				progress.dispose();
+			}
+		});
+		try {
+			s.open();
+			check(editor.forceFocus(), "editor starts with keyboard focus");
+			Button button = buttonOf(bar, run, false);
+			OS.WinSendMsg(button.handle, OS.BM_CLICK, 0, 0);
+			pump();
+			check(hits[0] == 1 && editorFocused[0], "native toolbar click runs once and preserves editor focus before the modal");
+			check(OS.WinSendMsg(button.handle, OS.BM_QUERYHILITE, 0, 0) == 0, "toolbar button is released after the modal");
+			OS.WinSendMsg(editor.handle, OS.WM_BUTTON1DOWN, 8 | (8 << 16), 0);
+			OS.WinSendMsg(editor.handle, OS.WM_BUTTON1UP, 8 | (8 << 16), 0);
+			pump();
+			check(editor.isFocusControl(), "editor accepts keyboard focus again after the modal");
+		} finally {
+			bar.dispose();
+			editor.dispose();
+			image.dispose();
+		}
+	}
+
 	void checkImagesAndControls(Shell s) {
 		saySubObjective("Images and controls in separators");
 		ToolBar bar = new ToolBar(s, SWT.FLAT);
@@ -305,6 +343,7 @@ public class SWT010_01 extends SWTTestCase {
 			checkWrap(probe);
 			checkSelection(probe);
 			checkImagesAndControls(probe);
+			checkFocusAfterModal(probe);
 		} finally {
 			probe.dispose();
 		}

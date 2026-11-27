@@ -171,7 +171,7 @@ void createWidgets () {
 	if ((style & SWT.SEPARATOR) != 0) return;
 	int bits = (parent.getStyle () & SWT.FLAT) != 0 ? SWT.FLAT : 0;
 	bits |= (style & (SWT.CHECK | SWT.RADIO)) != 0 ? SWT.TOGGLE : SWT.PUSH;
-	button = new Button (parent, bits);
+	button = new Button (parent, bits | SWT.NO_FOCUS);
 	button.addSelectionListener (new SelectionAdapter () {
 		public void widgetSelected (SelectionEvent e) {
 			click (false);

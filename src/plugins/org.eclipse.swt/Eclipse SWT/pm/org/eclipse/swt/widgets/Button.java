@@ -753,6 +753,8 @@ public void setText (String string) {
 int widgetStyle () {
 	int bits = super.widgetStyle ();
 	if ((style & SWT.FLAT) != 0) bits |= OS.BS_NOBORDER;
+	// A ToolItem click should leave keyboard focus in the editor.
+	if ((style & SWT.NO_FOCUS) != 0) bits |= OS.BS_NOPOINTERFOCUS;
 	if ((style & SWT.ARROW) != 0) {
         return bits |
             OS.BS_PUSHBUTTON | OS.BS_USERBUTTON |
@@ -865,12 +867,17 @@ MRESULT WM_SETFOCUS (int mp1, int mp2) {
         if ((style & SWT.RADIO) != 0) {
             OS.WinSetWindowULong (handle, OS.QWL_STYLE, bits);
         }
-        if ((style & SWT.PUSH) != 0) {
+        /*
+         * A PM ToolItem is represented by a real Button, unlike the native
+         * Win32 toolbar item.  It must not become the shell's default button
+         * merely because the user clicked it.
+         */
+        if ((style & (SWT.PUSH | SWT.NO_FOCUS)) == SWT.PUSH) {
             menuShell ().setDefaultButton (this, false);
         }
     } else {
         result = super.WM_SETFOCUS (mp1, mp2);
-        if ((style & SWT.PUSH) != 0 && getDefault ()) {
+        if ((style & (SWT.PUSH | SWT.NO_FOCUS)) == SWT.PUSH && getDefault ()) {
             menuShell ().setDefaultButton (null, false);
         }
     }
